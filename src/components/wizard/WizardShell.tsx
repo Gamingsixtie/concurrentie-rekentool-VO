@@ -17,7 +17,7 @@ export default function WizardShell() {
 
   // Scroll to top of wizard on step change
   useEffect(() => {
-    wizardRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    wizardRef.current?.scrollIntoView?.({ behavior: 'instant', block: 'start' });
   }, [currentStep]);
 
   const handleNext = useCallback(async () => {
