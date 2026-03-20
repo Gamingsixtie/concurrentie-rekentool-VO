@@ -1,6 +1,7 @@
 import type { PriceRecord } from '../models/pricing';
 import type { Assumption } from '../models/assumptions';
 import type { SchoolLevel, Scenario } from '../models/school';
+import type { ComparisonResult } from './price-comparison';
 
 export interface SchoolProfile {
   levels: SchoolLevel[];
@@ -16,7 +17,5 @@ export interface CalculationInput {
   assumptions: Assumption[];
 }
 
-/** Placeholder for Phase 2 calculation results */
-export interface CalculationResult {
-  // Will be defined in Phase 2
-}
+/** Phase 2 calculation result - price comparison across providers */
+export type CalculationResult = ComparisonResult;

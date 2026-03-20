@@ -2,10 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateComparison,
   getTotalStudents,
-  type ProviderCost,
-  type ModuleComparison,
-  type ComparisonResult,
-  type ProviderKey,
   PROVIDERS,
   PROVIDER_LABELS,
 } from '../price-comparison';
@@ -170,5 +166,17 @@ describe('formatCurrencyCompact', () => {
 describe('formatNumber', () => {
   it('formats numbers with nl-NL locale (dot as thousands separator)', () => {
     expect(formatNumber(1234567)).toMatch(/1\.234\.567/);
+  });
+});
+
+describe('exports', () => {
+  it('exports PROVIDERS array with all three provider keys', () => {
+    expect(PROVIDERS).toEqual(['cito', 'dia', 'jij']);
+  });
+
+  it('exports PROVIDER_LABELS with Dutch display names', () => {
+    expect(PROVIDER_LABELS.cito).toBe('Cito');
+    expect(PROVIDER_LABELS.dia).toBe('DIA');
+    expect(PROVIDER_LABELS.jij).toBe('JIJ');
   });
 });
