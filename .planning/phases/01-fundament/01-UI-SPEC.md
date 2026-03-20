@@ -48,7 +48,7 @@ Exceptions: Touch target minimum 44px height for all interactive elements (butto
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 16px | 400 (regular) | 1.5 | Paragraph text, module descriptions, form help text, disclaimers |
-| Label | 14px | 600 (semibold) | 1.4 | Form labels, badge text, matrix column/row headers, category headers |
+| Label | 14px | 600 (semibold) | 1.4 | Form labels, badge text, matrix column/row headers, category headers, price badges, license notes |
 | Heading | 20px | 600 (semibold) | 1.3 | Wizard step titles, section headings |
 | Display | 28px | 600 (semibold) | 1.2 | Page title ("Rekentool VO"), wizard main heading |
 
@@ -153,7 +153,7 @@ This subtle marking applies to any assumption field where the user has changed t
 | Card content | Module name in 16px semibold. Description in 14px regular, `#6b7280` text. Toggle on the right side, vertically centered. |
 | Toggle | 44px wide, 24px tall pill toggle. Off: `#d1d5db` track. On: `#003082` track. White 20px circle knob. |
 | Selected state | Card gets 2px `#FF6600` border replacing the 1px gray border. Subtle `#fff7ed` background tint. |
-| Separate license note | For "Cognitieve capaciteitentoets": small 12px italic text below description: "Losse licentie" in `#6b7280`. |
+| Separate license note | For "Cognitieve capaciteitentoets": 14px italic text below description: "Losse licentie" in `#6b7280`. |
 | Differentiator | For modules with a differentiator (Reken-Wiskunde, Nederlands): 14px text in `#003082` below the description, prefixed with a small star or bullet. |
 
 ### Step 4: Scenario kiezen
@@ -208,7 +208,7 @@ This subtle marking applies to any assumption field where the user has changed t
 |----------|---------------|
 | Layout | Inline-flex, pill shape, `border-radius: 9999px` |
 | Padding | 2px vertical, 8px horizontal |
-| Font | 12px, 600 weight |
+| Font | 14px, 600 weight |
 | Colors | Per status table above (Geverifieerd/Handmatig/Verouderd) |
 | Border | 1px, color per status |
 | Tooltip (stale only) | On hover, show tooltip: "Laatst geverifieerd: {datum}. Controleer of deze prijs nog actueel is." Native `title` attribute for Phase 1; custom tooltip in later phases. |
@@ -221,7 +221,7 @@ This subtle marking applies to any assumption field where the user has changed t
 | Default state | Value displayed as regular text with a subtle dashed underline (`1px dashed #d1d5db`) indicating editability |
 | Click/focus | Transforms to a compact input field, 64px width, with the current value selected |
 | Modified state | `#fef3c7` background, 2px left border `#f59e0b`. Reset icon (circular arrow, 16px) appears to the right. |
-| Reset icon | On click, resets value to default. `#6b7280` color, hover `#003082`. Tooltip: "Terugzetten naar standaard ({default value})" |
+| Reset button | `<button>` element with `aria-label="Terugzetten naar standaard ({default value})"`. On click, resets value to default. Icon color: `#6b7280`, hover `#003082`. |
 | Unit label | Displayed to the right of the value in `#6b7280`, 14px. E.g., "per uur", "minuten" |
 
 ### Disclaimer Footer
@@ -230,7 +230,7 @@ This subtle marking applies to any assumption field where the user has changed t
 |----------|---------------|
 | Position | Bottom of wizard content area, below navigation buttons |
 | Text | "Alle getoonde publicatieprijzen zijn bovengrenzen. De werkelijke prijs kan lager zijn." |
-| Style | 12px, `#6b7280`, italic |
+| Style | 14px, `#6b7280`, italic |
 | Visibility | Only shown when at least one price in the current view has `isPublicationPrice: true` |
 
 ---
@@ -268,7 +268,7 @@ All copy is in Dutch, using formal "u" form for the external-facing mode.
 | Badge: manual | "Handmatig" |
 | Badge: stale | "Mogelijk verouderd" |
 | Stale tooltip | "Laatst geverifieerd: {datum}. Controleer of deze prijs nog actueel is." |
-| Reset tooltip | "Terugzetten naar standaard ({waarde})" |
+| Reset button aria-label | "Terugzetten naar standaard ({waarde})" |
 | Separate license label | "Losse licentie" |
 
 Destructive actions in Phase 1: **None.** The wizard preserves data on back-navigation and has no delete/reset-all functionality.
