@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 2 UI-SPEC approved
-last_updated: "2026-03-20T15:08:53.337Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-20T15:34:21.175Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -19,13 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Scholen en accountmanagers kunnen in minuten een onderbouwde, eerlijke vergelijking maken die zowel financieel als in tijdsbesparing concreet maakt waarom het (nieuwe) Cito-platform de beste keuze is.
-**Current focus:** Phase 01 — fundament
+**Current focus:** Phase 02 — prijsvergelijking
 
 ## Current Position
 
-Phase: 01 (fundament) — EXECUTING
-Plan: 3 of 3
-Last completed: 01-02
+Phase: 02 (prijsvergelijking) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -47,6 +46,7 @@ Last completed: 01-02
 - Trend: accelerating
 
 *Updated after each plan completion*
+| Phase 02-01 P01 | 3min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -64,6 +64,9 @@ Recent decisions affecting current work:
 - [01-02]: Optional chaining on scrollIntoView for jsdom test compatibility
 - [01-03]: PriceBadge accepts optional now prop for deterministic test rendering
 - [01-03]: EditableAssumption uses controlled parent pattern (onChange callback, parent owns state)
+- [Phase 02-01]: ProviderCost is null (not zero) when provider does not offer a module
+- [Phase 02-01]: Differences (citoVsDia/citoVsJij) are null when competitor has no modules at all
+- [Phase 02-01]: formatCurrency uses Intl.NumberFormat nl-NL locale for consistent Dutch formatting
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T15:08:53.335Z
-Stopped at: Phase 2 UI-SPEC approved
-Resume file: .planning/phases/02-prijsvergelijking/02-UI-SPEC.md
+Last session: 2026-03-20T15:34:21.173Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None

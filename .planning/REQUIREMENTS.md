@@ -14,9 +14,9 @@
 
 ### Prijsvergelijking (Scenario A)
 
-- [ ] **PRIJS-01**: Gebruiker ziet modulaire prijsvergelijking Cito vs. DIA en JIJ (IEP) op basis van publicatieprijzen
-- [ ] **PRIJS-02**: Gebruiker ziet kosten per leerling per aanbieder per module
-- [ ] **PRIJS-03**: Gebruiker ziet totaaloverzicht per aanbieder (alle geselecteerde modules)
+- [x] **PRIJS-01**: Gebruiker ziet modulaire prijsvergelijking Cito vs. DIA en JIJ (IEP) op basis van publicatieprijzen
+- [x] **PRIJS-02**: Gebruiker ziet kosten per leerling per aanbieder per module
+- [x] **PRIJS-03**: Gebruiker ziet totaaloverzicht per aanbieder (alle geselecteerde modules)
 - [ ] **PRIJS-04**: Gebruiker ziet visuele vergelijking via staafdiagram
 - [ ] **PRIJS-05**: Gebruiker ziet onderscheidend vermogen per module: wat biedt Cito dat de concurrent niet biedt (en omgekeerd)
 - [ ] **PRIJS-06**: Gebruiker kan inputs aanpassen zonder opnieuw te beginnen (reactieve herberekening)
@@ -114,9 +114,9 @@
 | PROF-02 | Phase 1 | Complete |
 | PROF-03 | Phase 1 | Complete |
 | PROF-04 | Phase 1 | Complete |
-| PRIJS-01 | Phase 2 | Pending |
-| PRIJS-02 | Phase 2 | Pending |
-| PRIJS-03 | Phase 2 | Pending |
+| PRIJS-01 | Phase 2 | Complete |
+| PRIJS-02 | Phase 2 | Complete |
+| PRIJS-03 | Phase 2 | Complete |
 | PRIJS-04 | Phase 2 | Pending |
 | PRIJS-05 | Phase 2 | Pending |
 | PRIJS-06 | Phase 2 | Pending |
