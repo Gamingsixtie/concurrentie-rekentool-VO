@@ -110,55 +110,55 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | — | Pending |
-| PROF-02 | — | Pending |
-| PROF-03 | — | Pending |
-| PROF-04 | — | Pending |
-| PRIJS-01 | — | Pending |
-| PRIJS-02 | — | Pending |
-| PRIJS-03 | — | Pending |
-| PRIJS-04 | — | Pending |
-| PRIJS-05 | — | Pending |
-| PRIJS-06 | — | Pending |
-| BCASE-01 | — | Pending |
-| BCASE-02 | — | Pending |
-| BCASE-03 | — | Pending |
-| BCASE-04 | — | Pending |
-| BCASE-05 | — | Pending |
-| BCASE-06 | — | Pending |
-| BCASE-07 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| DATA-04 | — | Pending |
-| DATA-05 | — | Pending |
-| DATA-06 | — | Pending |
-| INPUT-01 | — | Pending |
-| INPUT-02 | — | Pending |
-| INPUT-03 | — | Pending |
-| MODE-01 | — | Pending |
-| MODE-02 | — | Pending |
-| MODE-03 | — | Pending |
-| MODE-04 | — | Pending |
-| MODE-05 | — | Pending |
-| DOELGR-01 | — | Pending |
-| DOELGR-02 | — | Pending |
-| DOELGR-03 | — | Pending |
-| EXPORT-01 | — | Pending |
-| EXPORT-02 | — | Pending |
-| AI-01 | — | Pending |
-| AI-02 | — | Pending |
-| AI-03 | — | Pending |
-| UX-01 | — | Pending |
-| UX-02 | — | Pending |
-| UX-03 | — | Pending |
-| UX-04 | — | Pending |
+| PROF-01 | Phase 1 | Pending |
+| PROF-02 | Phase 1 | Pending |
+| PROF-03 | Phase 1 | Pending |
+| PROF-04 | Phase 1 | Pending |
+| PRIJS-01 | Phase 2 | Pending |
+| PRIJS-02 | Phase 2 | Pending |
+| PRIJS-03 | Phase 2 | Pending |
+| PRIJS-04 | Phase 2 | Pending |
+| PRIJS-05 | Phase 2 | Pending |
+| PRIJS-06 | Phase 2 | Pending |
+| BCASE-01 | Phase 3 | Pending |
+| BCASE-02 | Phase 3 | Pending |
+| BCASE-03 | Phase 3 | Pending |
+| BCASE-04 | Phase 3 | Pending |
+| BCASE-05 | Phase 3 | Pending |
+| BCASE-06 | Phase 3 | Pending |
+| BCASE-07 | Phase 3 | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 2 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DATA-06 | Phase 1 | Pending |
+| INPUT-01 | Phase 2 | Pending |
+| INPUT-02 | Phase 5 | Pending |
+| INPUT-03 | Phase 5 | Pending |
+| MODE-01 | Phase 2 | Pending |
+| MODE-02 | Phase 4 | Pending |
+| MODE-03 | Phase 4 | Pending |
+| MODE-04 | Phase 4 | Pending |
+| MODE-05 | Phase 4 | Pending |
+| DOELGR-01 | Phase 4 | Pending |
+| DOELGR-02 | Phase 4 | Pending |
+| DOELGR-03 | Phase 4 | Pending |
+| EXPORT-01 | Phase 4 | Pending |
+| EXPORT-02 | Phase 4 | Pending |
+| AI-01 | Phase 5 | Pending |
+| AI-02 | Phase 5 | Pending |
+| AI-03 | Phase 5 | Pending |
+| UX-01 | Phase 5 | Pending |
+| UX-02 | Phase 5 | Pending |
+| UX-03 | Phase 1 | Pending |
+| UX-04 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 43 total
-- Mapped to phases: 0
-- Unmapped: 43 ⚠️
+- Mapped to phases: 43
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after initial definition*
+*Last updated: 2026-03-20 after roadmap creation*
