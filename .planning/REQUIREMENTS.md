@@ -17,9 +17,9 @@
 - [x] **PRIJS-01**: Gebruiker ziet modulaire prijsvergelijking Cito vs. DIA en JIJ (IEP) op basis van publicatieprijzen
 - [x] **PRIJS-02**: Gebruiker ziet kosten per leerling per aanbieder per module
 - [x] **PRIJS-03**: Gebruiker ziet totaaloverzicht per aanbieder (alle geselecteerde modules)
-- [ ] **PRIJS-04**: Gebruiker ziet visuele vergelijking via staafdiagram
+- [x] **PRIJS-04**: Gebruiker ziet visuele vergelijking via staafdiagram
 - [ ] **PRIJS-05**: Gebruiker ziet onderscheidend vermogen per module: wat biedt Cito dat de concurrent niet biedt (en omgekeerd)
-- [ ] **PRIJS-06**: Gebruiker kan inputs aanpassen zonder opnieuw te beginnen (reactieve herberekening)
+- [x] **PRIJS-06**: Gebruiker kan inputs aanpassen zonder opnieuw te beginnen (reactieve herberekening)
 
 ### Business Case (Scenario B)
 
@@ -48,7 +48,7 @@
 
 ### Modi
 
-- [ ] **MODE-01**: Externe modus: objectieve, neutrale vergelijking op basis van publicatieprijzen, formeel "u"-vorm
+- [x] **MODE-01**: Externe modus: objectieve, neutrale vergelijking op basis van publicatieprijzen, formeel "u"-vorm
 - [ ] **MODE-02**: Interne modus: sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
 - [ ] **MODE-03**: Interne modus: gevoeligheidsanalyse die automatisch 10%/20% kortingsscenario's doorrekent
 - [ ] **MODE-04**: Interne modus: marktgemiddelde per modulecombinatie (zit Cito boven of onder het gemiddelde)
@@ -117,9 +117,9 @@
 | PRIJS-01 | Phase 2 | Complete |
 | PRIJS-02 | Phase 2 | Complete |
 | PRIJS-03 | Phase 2 | Complete |
-| PRIJS-04 | Phase 2 | Pending |
+| PRIJS-04 | Phase 2 | Complete |
 | PRIJS-05 | Phase 2 | Pending |
-| PRIJS-06 | Phase 2 | Pending |
+| PRIJS-06 | Phase 2 | Complete |
 | BCASE-01 | Phase 3 | Pending |
 | BCASE-02 | Phase 3 | Pending |
 | BCASE-03 | Phase 3 | Pending |
@@ -136,7 +136,7 @@
 | INPUT-01 | Phase 2 | Pending |
 | INPUT-02 | Phase 5 | Pending |
 | INPUT-03 | Phase 5 | Pending |
-| MODE-01 | Phase 2 | Pending |
+| MODE-01 | Phase 2 | Complete |
 | MODE-02 | Phase 4 | Pending |
 | MODE-03 | Phase 4 | Pending |
 | MODE-04 | Phase 4 | Pending |

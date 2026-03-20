@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-20T15:34:21.175Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-20T15:39:19.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 ## Current Position
 
 Phase: 02 (prijsvergelijking) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Plan: 2 of 3
 
 *Updated after each plan completion*
 | Phase 02-01 P01 | 3min | 1 tasks | 6 files |
+| Phase 02-02 P02 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Phase 02-01]: ProviderCost is null (not zero) when provider does not offer a module
 - [Phase 02-01]: Differences (citoVsDia/citoVsJij) are null when competitor has no modules at all
 - [Phase 02-01]: formatCurrency uses Intl.NumberFormat nl-NL locale for consistent Dutch formatting
+- [Phase 02-02]: Draft/applied override separation: draftOverrides accumulate user edits, recalculate() moves them to appliedOverrides
+- [Phase 02-02]: Recharts ResponsiveContainer renders 0-width in jsdom; chart tests verify container presence rather than SVG content
 
 ### Pending Todos
 
@@ -80,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T15:34:21.173Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-20T15:39:19Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
