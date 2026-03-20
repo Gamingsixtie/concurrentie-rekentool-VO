@@ -47,11 +47,12 @@ Plans:
   3. Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
   4. Gebruiker kan prijzen handmatig invoeren of overschrijven, en de vergelijking herberekent reactief zonder opnieuw te beginnen
   5. Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd), inclusief gevallen waar de concurrent goedkoper is
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Rekenmotor: pure calculateComparison functie, uitgebreide prijsdata, differentiator-data en nl-NL formatting (TDD)
+- [ ] 02-02-PLAN.md — Zustand store met draft/applied override-scheiding, Recharts staafdiagram en BusinessCaseCTA
+- [ ] 02-03-PLAN.md — ComparisonTable, ModuleDetailPanel met prijsoverschrijving, PriceComparisonPage en wizard-routing
 
 ### Phase 3: Business Case
 **Goal**: De gebruiker kan de complete business case voor de overstap van het huidige naar het nieuwe Cito-platform doorrekenen, met financieel verschil, tijdswinst in uren en euro's, en meerjarenprojectie
@@ -109,7 +110,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Fundament | 0/3 | Planning complete | - |
-| 2. Prijsvergelijking | 0/? | Not started | - |
+| 2. Prijsvergelijking | 0/3 | Planning complete | - |
 | 3. Business Case | 0/? | Not started | - |
 | 4. Interne Modus & Doelgroepen | 0/? | Not started | - |
 | 5. AI & Polish | 0/? | Not started | - |
