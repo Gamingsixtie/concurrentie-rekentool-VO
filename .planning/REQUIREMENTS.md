@@ -33,12 +33,12 @@
 
 ### Data & Transparantie
 
-- [ ] **DATA-01**: Elke prijs toont bronvermelding (publicatielijst / handmatig ingevoerd / AI-opgezocht)
-- [ ] **DATA-02**: Elke prijs toont verificatiedatum met visuele indicator (groen/oranje/rood op basis van ouderdom)
-- [ ] **DATA-03**: Prijzen ouder dan 6 maanden krijgen automatische waarschuwing "mogelijk verouderd"
+- [x] **DATA-01**: Elke prijs toont bronvermelding (publicatielijst / handmatig ingevoerd / AI-opgezocht)
+- [x] **DATA-02**: Elke prijs toont verificatiedatum met visuele indicator (groen/oranje/rood op basis van ouderdom)
+- [x] **DATA-03**: Prijzen ouder dan 6 maanden krijgen automatische waarschuwing "mogelijk verouderd"
 - [ ] **DATA-04**: Gebruiker kan berekeningsdetails uitklappen per module (toon formule en inputs)
-- [ ] **DATA-05**: Alle aannames zijn zichtbaar en aanpasbaar (uurtarief, tijdsschattingen, etc.)
-- [ ] **DATA-06**: Publicatieprijs wordt expliciet aangeduid als bovengrens ("werkelijke prijs kan lager zijn")
+- [x] **DATA-05**: Alle aannames zijn zichtbaar en aanpasbaar (uurtarief, tijdsschattingen, etc.)
+- [x] **DATA-06**: Publicatieprijs wordt expliciet aangeduid als bovengrens ("werkelijke prijs kan lager zijn")
 
 ### Prijsinvoer
 
@@ -75,8 +75,8 @@
 
 - [ ] **UX-01**: Tool is bruikbaar op tablet tijdens schoolbezoek (responsief, touch-friendly)
 - [ ] **UX-02**: Invoervelden tonen guidance en defaults (tooltips, "typische waarde" hints)
-- [ ] **UX-03**: Volledig Nederlandstalige interface
-- [ ] **UX-04**: Cito-huisstijl: Primary #003082, Accent #FF6600, Background #F8F9FA
+- [x] **UX-03**: Volledig Nederlandstalige interface
+- [x] **UX-04**: Cito-huisstijl: Primary #003082, Accent #FF6600, Background #F8F9FA
 
 ## v2 Requirements
 
@@ -127,12 +127,12 @@
 | BCASE-05 | Phase 3 | Pending |
 | BCASE-06 | Phase 3 | Pending |
 | BCASE-07 | Phase 3 | Pending |
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
 | DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| DATA-06 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Complete |
+| DATA-06 | Phase 1 | Complete |
 | INPUT-01 | Phase 2 | Pending |
 | INPUT-02 | Phase 5 | Pending |
 | INPUT-03 | Phase 5 | Pending |
@@ -151,8 +151,8 @@
 | AI-03 | Phase 5 | Pending |
 | UX-01 | Phase 5 | Pending |
 | UX-02 | Phase 5 | Pending |
-| UX-03 | Phase 1 | Pending |
-| UX-04 | Phase 1 | Pending |
+| UX-03 | Phase 1 | Complete |
+| UX-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 43 total

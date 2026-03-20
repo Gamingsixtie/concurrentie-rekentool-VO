@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-20T13:11:37.221Z"
-last_activity: 2026-03-20 -- Roadmap created
+status: executing
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-20T13:52:32Z"
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -21,35 +19,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Scholen en accountmanagers kunnen in minuten een onderbouwde, eerlijke vergelijking maken die zowel financieel als in tijdsbesparing concreet maakt waarom het (nieuwe) Cito-platform de beste keuze is.
-**Current focus:** Phase 1: Fundament
+**Current focus:** Phase 01 — fundament
 
 ## Current Position
 
-Phase: 1 of 5 (Fundament)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-20 -- Roadmap created
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 01 (fundament) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 6min
+- Total execution time: 0.1 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-fundament | 1/3 | 6min | 6min |
 
 **Recent Trend:**
 
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 01-01 (6min)
+- Trend: starting
 
 *Updated after each plan completion*
 
@@ -63,6 +57,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Stack is React 19 + TypeScript + Vite 8 + Tailwind CSS 4 + Recharts 3 (per research)
 - [Roadmap]: Calculation engine as pure TypeScript functions, separate from React UI
 - [Roadmap]: Internal/external mode via separate URL path, not CSS toggle
+- [01-01]: Zod v4 uses 'message' param instead of 'required_error' for z.enum error customization
+- [01-01]: getPriceStalenessLabel accepts optional 'now' parameter for deterministic testing
 
 ### Pending Todos
 
@@ -76,6 +72,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T13:11:37.219Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-fundament/01-CONTEXT.md
+Last session: 2026-03-20T13:52:32Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: .planning/phases/01-fundament/01-02-PLAN.md
