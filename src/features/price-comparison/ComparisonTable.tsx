@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
-import { PROVIDERS, PROVIDER_LABELS } from '../../engine/price-comparison';
+import { PROVIDERS } from '../../engine/price-comparison';
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';

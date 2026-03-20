@@ -9,7 +9,11 @@ import WizardStep4 from '../../features/school-profile/components/WizardStep4.ts
 
 const TOTAL_STEPS = 4;
 
-export default function WizardShell() {
+interface WizardShellProps {
+  onComplete?: () => void;
+}
+
+export default function WizardShell({ onComplete }: WizardShellProps) {
   const { currentStep, setCurrentStep } = useSchoolProfileStore();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const stepRef = useRef<WizardStepRef>(null);
@@ -33,9 +37,11 @@ export default function WizardShell() {
 
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep(currentStep + 1);
+    } else {
+      // Last step: "Bekijk resultaten" completed
+      onComplete?.();
     }
-    // If last step, "Bekijk resultaten" - Phase 2 will handle this
-  }, [currentStep, setCurrentStep]);
+  }, [currentStep, setCurrentStep, onComplete]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
