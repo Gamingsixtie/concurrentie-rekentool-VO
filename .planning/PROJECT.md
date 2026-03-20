@@ -12,7 +12,13 @@ Scholen en accountmanagers kunnen in minuten een onderbouwde, eerlijke vergelijk
 
 ### Validated
 
-(None yet — ship to validate)
+**Phase 1: Fundament** (validated 2026-03-20):
+- [x] Schoolprofiel-invoer: schooltype, leerlingaantallen per leerjaar/niveau, modules selecteren
+- [x] Cito-huisstijl: Primary #003082, Accent #FF6600, Background #F8F9FA als Tailwind tokens
+- [x] Nederlandse interface met correcte labels en navigatie
+- [x] Datastructuren: school levels, pricing model, assumptions, modules
+- [x] 4-staps wizard met voortgangsbalk en formuliervalidatie
+- [x] Reusable UI-componenten: PriceBadge, EditableAssumption, DisclaimerFooter
 
 ### Active
 
@@ -90,7 +96,7 @@ Het nieuwe Cito-platform bespaart scholen concreet tijd op:
 
 - **Taal**: Volledig Nederlands, formeel "u"-vorm in externe modus
 - **Huisstijl**: Cito Primary #003082, Accent #FF6600, Background #F8F9FA
-- **Tech stack**: Nader te bepalen
+- **Tech stack**: Vite 8 + React 19 + TypeScript + Tailwind CSS 4 + Zustand + Zod v4 + Vitest
 - **Responsiviteit**: Nader te bepalen (bruikbaar op tablet tijdens schoolbezoek is wenselijk)
 - **Toegankelijkheid**: Nader te bepalen
 - **Concurrenten bij launch**: DIA en JIJ (IEP)
@@ -104,7 +110,7 @@ Het nieuwe Cito-platform bespaart scholen concreet tijd op:
 | Elke prijs heeft houdbaarheidsdatum | Geen verouderde data zonder waarschuwing | — Pending |
 | Scenario A en B als scope v1 | Focus op de twee meest urgente use cases, C is combinatie die later kan | — Pending |
 | Drie wegen voor prijsinvoer | Documenten, handmatig, AI-agent — flexibiliteit voor verschillende situaties | — Pending |
-| Tech stack open houden | Nog niet vastpinnen, later bepalen op basis van requirements | — Pending |
+| Tech stack: Vite 8 + React 19 + Tailwind 4 + Zustand + Zod v4 | Moderne stack, snelle builds, type-safe state management | Decided Phase 1 |
 
 ---
-*Last updated: 2026-03-20 after initialization*
+*Last updated: 2026-03-20 after Phase 1 completion*
