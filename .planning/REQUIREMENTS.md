@@ -7,10 +7,10 @@
 
 ### Schoolprofiel
 
-- [ ] **PROF-01**: Gebruiker kan schooltype selecteren (welke niveaus: vmbo-b, vmbo-k, vmbo-gt, havo, vwo)
-- [ ] **PROF-02**: Gebruiker kan leerlingaantal invoeren per leerjaar en per niveau
-- [ ] **PROF-03**: Gebruiker kan relevante modules selecteren (LVS Rekenen, LVS Taal, Engels, Capaciteitentest, Sociaal-emotioneel, etc.)
-- [ ] **PROF-04**: Gebruiker kan scenario kiezen: A (Cito vs. concurrentie) of B (huidig → nieuw Cito-platform)
+- [x] **PROF-01**: Gebruiker kan schooltype selecteren (welke niveaus: vmbo-b, vmbo-k, vmbo-gt, havo, vwo)
+- [x] **PROF-02**: Gebruiker kan leerlingaantal invoeren per leerjaar en per niveau
+- [x] **PROF-03**: Gebruiker kan relevante modules selecteren (LVS Rekenen, LVS Taal, Engels, Capaciteitentest, Sociaal-emotioneel, etc.)
+- [x] **PROF-04**: Gebruiker kan scenario kiezen: A (Cito vs. concurrentie) of B (huidig → nieuw Cito-platform)
 
 ### Prijsvergelijking (Scenario A)
 
@@ -110,10 +110,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | Phase 1 | Pending |
-| PROF-02 | Phase 1 | Pending |
-| PROF-03 | Phase 1 | Pending |
-| PROF-04 | Phase 1 | Pending |
+| PROF-01 | Phase 1 | Complete |
+| PROF-02 | Phase 1 | Complete |
+| PROF-03 | Phase 1 | Complete |
+| PROF-04 | Phase 1 | Complete |
 | PRIJS-01 | Phase 2 | Pending |
 | PRIJS-02 | Phase 2 | Pending |
 | PRIJS-03 | Phase 2 | Pending |

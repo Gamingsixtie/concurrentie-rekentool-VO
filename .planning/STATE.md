@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-03-20T13:58:12.933Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-20T14:00:31Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -25,6 +25,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 Phase: 01 (fundament) — EXECUTING
 Plan: 3 of 3
+Last completed: 01-02
 
 ## Performance Metrics
 
@@ -42,7 +43,7 @@ Plan: 3 of 3
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (6min), 01-03 (2min)
+- Last 5 plans: 01-01 (6min), 01-02 (4min), 01-03 (2min)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -59,6 +60,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Internal/external mode via separate URL path, not CSS toggle
 - [01-01]: Zod v4 uses 'message' param instead of 'required_error' for z.enum error customization
 - [01-01]: getPriceStalenessLabel accepts optional 'now' parameter for deterministic testing
+- [01-02]: forwardRef + useImperativeHandle pattern for wizard step form submission from parent WizardShell
+- [01-02]: Optional chaining on scrollIntoView for jsdom test compatibility
 - [01-03]: PriceBadge accepts optional now prop for deterministic test rendering
 - [01-03]: EditableAssumption uses controlled parent pattern (onChange callback, parent owns state)
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T13:57:21Z
-Stopped at: Completed 01-03-PLAN.md
-Resume file: .planning/phases/01-fundament/01-02-PLAN.md
+Last session: 2026-03-20T14:00:31Z
+Stopped at: Completed 01-02-PLAN.md
+Resume file: .planning/phases/01-fundament/01-03-PLAN.md
