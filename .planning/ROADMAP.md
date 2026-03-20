@@ -30,11 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Prijsdata bevat bronvermelding, verificatiedatum en ouderdomsindicator per record; prijzen ouder dan 6 maanden tonen automatisch een waarschuwing
   4. De interface is volledig Nederlandstalig en toont Cito-huisstijl (Primary #003082, Accent #FF6600, Background #F8F9FA)
   5. Alle aannames in het datamodel zijn zichtbaar en aanpasbaar (uurtarief, tijdsschattingen, etc.)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Project scaffold, Tailwind CSS 4 theming, TypeScript data models, zustand store en zod schemas
+- [ ] 01-02-PLAN.md — 4-staps wizard UI met voortgangsbalk, navigatie en alle stap-componenten
+- [ ] 01-03-PLAN.md — Reusable UI-componenten: PriceBadge, EditableAssumption, DisclaimerFooter
 
 ### Phase 2: Prijsvergelijking
 **Goal**: De gebruiker ziet een eerlijke, transparante modulaire prijsvergelijking tussen Cito, DIA en JIJ op basis van publicatieprijzen, inclusief visuele weergave en onderscheidend vermogen
@@ -107,7 +108,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Fundament | 0/? | Not started | - |
+| 1. Fundament | 0/3 | Planning complete | - |
 | 2. Prijsvergelijking | 0/? | Not started | - |
 | 3. Business Case | 0/? | Not started | - |
 | 4. Interne Modus & Doelgroepen | 0/? | Not started | - |
