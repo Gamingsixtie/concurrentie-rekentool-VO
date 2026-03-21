@@ -89,12 +89,13 @@ Plans:
   2. Gebruiker kan contactpersonen (naam, rol, DMU-positie) en gespreksnotities (datum, contactpersoon, kernpunten) per school beheren
   3. Gebruiker kan pipeline-status instellen (prospect t/m at-risk) en ziet een doorzoekbaar schooloverzicht gesorteerd op laatst gebruikt met status-badges
   4. Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en worden niet verward met publicatieprijzen
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
-- [ ] 07-03: TBD
+- [ ] 07-01-PLAN.md — CRM-lite data layer: types, Dexie v2 schema migratie, CRUD operaties, Zod schemas en timeline utility
+- [ ] 07-02-PLAN.md — Profiel-UI: tab-routing, ProfileHeader, TabNavigation, DashboardTab, ComparisonTab, ProductsTab en pipeline-management
+- [ ] 07-03-PLAN.md — ContactsTab met CRUD en DMU-mapping, ConversationsTab met tijdlijn, tags, zoekfunctie en kanban-actielijst
+- [ ] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
 
 ### Phase 8: AI Intake & Prijsbeheer
 **Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die automatisch wordt gestructureerd in schooldata, en kan prijzen beheren via handmatige invoer of AI-documentextractie
@@ -176,7 +177,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
-| 7. School Intelligence | v2.0 | 0/3 | Not started | - |
+| 7. School Intelligence | v2.0 | 0/4 | Planning complete | - |
 | 8. AI Intake & Prijsbeheer | v2.0 | 0/3 | Not started | - |
 | 9. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
 | 10. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
