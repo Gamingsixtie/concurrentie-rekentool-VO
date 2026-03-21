@@ -1,164 +1,165 @@
-# Requirements: Rekentool VO
+# Requirements: Rekentool VO v2.0 — Sales Intelligence Platform
 
-**Defined:** 2026-03-20
-**Core Value:** Scholen en accountmanagers kunnen in minuten een onderbouwde, eerlijke vergelijking maken die zowel financieel als in tijdsbesparing concreet maakt waarom het (nieuwe) Cito-platform de beste keuze is.
+**Defined:** 2026-03-21
+**Core Value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
 
-## v1 Requirements
+## v2.0 Requirements
 
-### Schoolprofiel
+### Data & Architectuur
 
-- [x] **PROF-01**: Gebruiker kan schooltype selecteren (welke niveaus: vmbo-b, vmbo-k, vmbo-gt, havo, vwo)
-- [x] **PROF-02**: Gebruiker kan leerlingaantal invoeren per leerjaar en per niveau
-- [x] **PROF-03**: Gebruiker kan relevante modules selecteren (LVS Rekenen, LVS Taal, Engels, Capaciteitentest, Sociaal-emotioneel, etc.)
-- [x] **PROF-04**: Gebruiker kan scenario kiezen: A (Cito vs. concurrentie) of B (huidig → nieuw Cito-platform)
+- [ ] **ARCH-01**: Gebruiker kan meerdere schoolprofielen aanmaken, openen en verwijderen — elk met eigen wizard-data, prijsoverschrijvingen en gesprekshistorie
+- [ ] **ARCH-02**: Bestaande v1 localStorage-data wordt automatisch gemigreerd naar v2-structuur zonder dataverlies
+- [ ] **ARCH-03**: Applicatie gebruikt IndexedDB (Dexie) voor schooldata-persistentie met ondersteuning voor 50+ schoolprofielen
+- [ ] **ARCH-04**: Navigatie ondersteunt browser-back-button, deep linking naar specifieke school/view, en URL-state
+- [ ] **ARCH-05**: Applicatie werkt offline op tablet na eerste laden (service worker cacht assets en data)
 
-### Prijsvergelijking (Scenario A)
+### School Intelligence
 
-- [x] **PRIJS-01**: Gebruiker ziet modulaire prijsvergelijking Cito vs. DIA en JIJ (IEP) op basis van publicatieprijzen
-- [x] **PRIJS-02**: Gebruiker ziet kosten per leerling per aanbieder per module
-- [x] **PRIJS-03**: Gebruiker ziet totaaloverzicht per aanbieder (alle geselecteerde modules)
-- [x] **PRIJS-04**: Gebruiker ziet visuele vergelijking via staafdiagram
-- [ ] **PRIJS-05**: Gebruiker ziet onderscheidend vermogen per module: wat biedt Cito dat de concurrent niet biedt (en omgekeerd)
-- [x] **PRIJS-06**: Gebruiker kan inputs aanpassen zonder opnieuw te beginnen (reactieve herberekening)
+- [ ] **SCHOOL-01**: Gebruiker kan schoolprofiel aanmaken met basisgegevens (naam, type, leerlingaantallen, regio)
+- [ ] **SCHOOL-02**: Gebruiker kan per school het huidige productgebruik vastleggen (welke modules van welke aanbieder, met prijzen en bronvermelding)
+- [ ] **SCHOOL-03**: Gebruiker kan contactpersonen per school vastleggen met naam, rol en DMU-positie (coordinator, MT, finance)
+- [ ] **SCHOOL-04**: Gebruiker kan gespreksnotities per school toevoegen met datum, contactpersoon en kernpunten
+- [ ] **SCHOOL-05**: Gebruiker kan pipeline-status per school instellen (prospect, contact, offerte, besluit, klant, at-risk)
+- [ ] **SCHOOL-06**: Gebruiker ziet schooloverzicht met zoekfunctie, gesorteerd op laatst gebruikt, met pipeline-status badge
+- [ ] **SCHOOL-07**: Systeem detecteert upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
 
-### Business Case (Scenario B)
+### AI Intake
 
-- [ ] **BCASE-01**: Gebruiker ziet financieel verschil huidig Cito-platform vs. nieuw Cito-platform per module en totaal
-- [ ] **BCASE-02**: Gebruiker kan tijdswinst per taak invoeren of standaardprofiel kiezen (klein/middelgroot/groot VO)
-- [ ] **BCASE-03**: Tijdswinst-calculator toont concrete uren bespaard per taak: rechten verlenen, toetsen resetten, inloggen, planning, leerling-/docentkoppeling
-- [ ] **BCASE-04**: Gebruiker kan uurtarief instellen (default €50/uur) voor uren-naar-euro's conversie
-- [ ] **BCASE-05**: Gebruiker ziet totale waarde overstap: financieel verschil + waarde tijdsbesparing gecombineerd
-- [ ] **BCASE-06**: Gebruiker ziet meerjarenprojectie over 1, 3 en 5 jaar met cumulatieve besparing
-- [ ] **BCASE-07**: Gebruiker ziet terugverdientijd (break-even punt) visueel weergegeven
+- [ ] **INTAKE-01**: Gebruiker kan tijdens een telefoongesprek vrije tekst invoeren die real-time (streaming) wordt gestructureerd in schooldata, prijzen en actiepunten
+- [ ] **INTAKE-02**: AI extraheert modulegebruik, aanbieders, prijzen en contactpersonen uit vrije tekst met fuzzy matching op modulenamen
+- [ ] **INTAKE-03**: Geextraheerde data wordt getoond op een bevestigingsscherm waar de gebruiker kan corrigeren voordat het wordt opgeslagen
+- [ ] **INTAKE-04**: Prijzen worden semantisch gevalideerd tegen bekende ranges (per provider/module) — afwijkingen worden gemarkeerd als "ongebruikelijk, controleer"
+- [ ] **INTAKE-05**: AI intake voegt toe aan een bestaand schoolprofiel (append) — overschrijft niet eerder vastgelegde data
 
-### Data & Transparantie
+### Prijsvergelijking
 
-- [x] **DATA-01**: Elke prijs toont bronvermelding (publicatielijst / handmatig ingevoerd / AI-opgezocht)
-- [x] **DATA-02**: Elke prijs toont verificatiedatum met visuele indicator (groen/oranje/rood op basis van ouderdom)
-- [x] **DATA-03**: Prijzen ouder dan 6 maanden krijgen automatische waarschuwing "mogelijk verouderd"
-- [ ] **DATA-04**: Gebruiker kan berekeningsdetails uitklappen per module (toon formule en inputs)
-- [x] **DATA-05**: Alle aannames zijn zichtbaar en aanpasbaar (uurtarief, tijdsschattingen, etc.)
-- [x] **DATA-06**: Publicatieprijs wordt expliciet aangeduid als bovengrens ("werkelijke prijs kan lager zijn")
+- [ ] **PRIJS-01**: Gebruiker ziet per geselecteerde module de kosten per leerling en totaalkosten per aanbieder (Cito, DIA, JIJ) naast elkaar
+- [ ] **PRIJS-02**: Gebruiker ziet een visuele vergelijking (staafdiagram) van totaalkosten per aanbieder
+- [ ] **PRIJS-03**: Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
+- [ ] **PRIJS-04**: Gebruiker kan prijzen handmatig overschrijven met bronvermelding, en de vergelijking herberekent reactief
+- [ ] **PRIJS-05**: Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) — onderscheidend vermogen
+- [ ] **PRIJS-06**: Engine berekent correcte DIA-pakketprijzen: als school 3+ DIA-modules afneemt wordt automatisch het voordeligste pakket berekend
+- [ ] **PRIJS-07**: Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en niet verward met publicatieprijzen
+- [ ] **PRIJS-08**: Hybride scenario: engine berekent per module apart waar school wisselt van aanbieder en toont besparingen per module
 
-### Prijsinvoer
+### Gevoeligheidsanalyse
 
-- [ ] **INPUT-01**: Gebruiker kan prijzen handmatig invoeren of overschrijven
-- [ ] **INPUT-02**: Gebruiker kan prijsdocumenten uploaden (PDF/Excel prijslijsten) voor automatische extractie
-- [ ] **INPUT-03**: Gebruiker kan AI-agent inzetten om prijzen op te zoeken
+- [ ] **GEVOEL-01**: Gebruiker kan in interne modus automatische gevoeligheidsanalyse zien: wat als DIA/JIJ 10% of 20% korting geeft
+- [ ] **GEVOEL-02**: Gevoeligheidsanalyse toont per kortingsscenario het effect op totaalverschil en per-module verschil
+- [ ] **GEVOEL-03**: Gebruiker ziet bij welk kortingspercentage de concurrent goedkoper wordt dan Cito (break-even korting)
 
-### Modi
+### Waarde & Tijdwinst
 
-- [x] **MODE-01**: Externe modus: objectieve, neutrale vergelijking op basis van publicatieprijzen, formeel "u"-vorm
-- [ ] **MODE-02**: Interne modus: sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
-- [ ] **MODE-03**: Interne modus: gevoeligheidsanalyse die automatisch 10%/20% kortingsscenario's doorrekent
-- [ ] **MODE-04**: Interne modus: marktgemiddelde per modulecombinatie (zit Cito boven of onder het gemiddelde)
-- [ ] **MODE-05**: Interne modus: mogelijkheid om bekende werkelijke concurrentprijzen in te voeren
+- [ ] **WAARDE-01**: Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames
+- [ ] **WAARDE-02**: Gebruiker kan uurtarief instellen en ziet tijdsbesparing omgerekend naar euro's per jaar
+- [ ] **WAARDE-03**: Gebruiker ziet de totale waarde van de overstap: financieel verschil + tijdsbesparing in euro's
+- [ ] **WAARDE-04**: Gebruiker ziet meerjarenprojectie over 1, 3 en 5 jaar met cumulatieve besparing en break-even punt
 
-### Doelgroep-perspectieven
+### Migratie (Huidig → Nieuw Platform)
 
-- [ ] **DOELGR-01**: Coördinator/docent-perspectief: nadruk op tijdswinst in concrete dagelijkse taken
-- [ ] **DOELGR-02**: Directie-perspectief: overzicht en onderbouwing voor besluitvorming
-- [ ] **DOELGR-03**: Finance/budget-perspectief: euro's, meerjarenprojectie, jaarlijkse budgetimpact
+- [ ] **MIGR-01**: Gebruiker ziet financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal
+- [ ] **MIGR-02**: Migratie-engine verwerkt het gewijzigde prijsmodel van het nieuwe Cito-platform correct
+- [ ] **MIGR-03**: Gebruiker ziet gecombineerde business case: prijsverschil + tijdwinst + meerjarenprojectie
 
-### Export
+### DMU-Export
 
-- [ ] **EXPORT-01**: Gebruiker kan resultaat printen (alle secties uitgevouwen, print-geoptimaliseerde layout)
-- [ ] **EXPORT-02**: Gebruiker kan samenvatting kopiëren naar clipboard
+- [ ] **EXPORT-01**: Gebruiker kan een PDF-rapport genereren afgestemd op de coordinator (focus: tijdwinst, dagelijks gebruik)
+- [ ] **EXPORT-02**: Gebruiker kan een PDF-rapport genereren afgestemd op MT/directie (focus: overzicht, onderbouwing, strategische waarde)
+- [ ] **EXPORT-03**: Gebruiker kan een PDF-rapport genereren afgestemd op finance (focus: euro's, meerjarenprojectie, terugverdientijd)
+- [ ] **EXPORT-04**: PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl, bronvermelding en disclaimer
+- [ ] **EXPORT-05**: Gebruiker kan vergelijking kopiëren naar clipboard als geformatteerde samenvatting
 
-### AI-ondersteuning
+### Prijsbeheer
 
-- [ ] **AI-01**: AI valideert invoer: signaleert onrealistische prijzen, ontbrekende modules, en inconsistenties (bijv. "bij DIA zit module X inbegrepen bij Y")
-- [ ] **AI-02**: AI genereert onderscheidend vermogen per module op basis van productinformatie (wat biedt Cito dat concurrent niet biedt, en omgekeerd)
-- [ ] **AI-03**: AI schrijft samenvatting van de vergelijking in begrijpelijke taal, afgestemd op doelgroep (coördinator/directie/finance)
+- [ ] **PRIJSMGT-01**: Gebruiker kan prijzen handmatig invoeren of bijwerken met bron, verificatiedatum en vertrouwensniveau
+- [ ] **PRIJSMGT-02**: Prijzen ouder dan 6 maanden worden automatisch gemarkeerd als "mogelijk verouderd"
+- [ ] **PRIJSMGT-03**: Gebruiker kan prijsdocumenten uploaden (PDF) voor AI-gestuurde prijsextractie
+- [ ] **PRIJSMGT-04**: Geextraheerde prijzen worden getoond ter goedkeuring — nooit automatisch doorgevoerd
 
-### UX & Interactie
+### Modus & Weergave
 
-- [ ] **UX-01**: Tool is bruikbaar op tablet tijdens schoolbezoek (responsief, touch-friendly)
-- [ ] **UX-02**: Invoervelden tonen guidance en defaults (tooltips, "typische waarde" hints)
-- [x] **UX-03**: Volledig Nederlandstalige interface
-- [x] **UX-04**: Cito-huisstijl: Primary #003082, Accent #FF6600, Background #F8F9FA
+- [ ] **MODE-01**: Alle UI-tekst in formeel Nederlands (u-vorm)
+- [ ] **MODE-02**: Interne modus toont sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
+- [ ] **MODE-03**: Applicatie is bruikbaar op tablet (touch-friendly, responsief)
 
-## v2 Requirements
+## v2.x Requirements (Deferred)
 
-### Scenario C
+### Toekomstige uitbreidingen
 
-- **SCENAR-01**: Concurrentie → nieuw Cito-platform: combinatie van scenario A en B in één overzicht
-
-### Geavanceerde data
-
-- **ADVDATA-01**: Prijsverificatie-workflow voor intern databeheer
-- **ADVDATA-02**: Automatische staleness-monitoring dashboard
-
-### Uitgebreide export
-
-- **EXPPLUS-01**: Export naar PDF met Cito-branding
-- **EXPPLUS-02**: Opslaan en delen van vergelijkingen via link
+- **FUTURE-01**: AI-agent die zelfstandig concurrentprijzen opzoekt via web
+- **FUTURE-02**: Scenario C engine (concurrentie → nieuw Cito-platform) als aparte flow
+- **FUTURE-03**: Volledige tekst-zoekfunctie over alle gespreksnotities
+- **FUTURE-04**: School data export/import voor overdracht tussen collega's
+- **FUTURE-05**: Negotiation preparation card (pre-call cheat sheet)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Gebruikersaccounts / opgeslagen vergelijkingen | Stateless tool; geen GDPR-complexiteit, geen onderhoudslast |
-| Real-time prijsscraping concurrenten | Juridisch twijfelachtig, technisch fragiel, valse nauwkeurigheid |
-| Contract-/offertefunctionaliteit | Ander product, andere complexiteit — tool informeert, sluit niet |
-| Korting-calculator voor Cito's eigen pricing | Zou interne prijsstrategie blootleggen |
-| Feature-voor-feature productmatrix | Onderhoudsnachtmerrie; onderscheidend vermogen in proza is effectiever |
-| Meertaligheid | Nederlands-only markt |
-| Complexe interactieve datavisualisaties | Doelgroep wil simpele antwoorden, geen analyst-dashboards |
+| CRM-integratie (Salesforce/HubSpot) | Externe dependency, auth complexity, privacy. Schoolprofielen leven lokaal |
+| Real-time voice transcriptie | AVG/GDPR vereist toestemming, technisch complex, privacy-risico |
+| Automatische email-verzending | Accountmanager moet controle houden over relatie en timing |
+| Gebruikersaccounts met login | Geen backend, geen auth — tool draait lokaal per device |
+| Uitputtende feature-matrix concurrenten | Onderhoudsnachtmerrie, verschuift gesprek van behoefte naar checkboxes |
+| Dynamische korting-suggesties | Prijsautoriteit bij sales management, niet bij de tool |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROF-01 | Phase 1 | Complete |
-| PROF-02 | Phase 1 | Complete |
-| PROF-03 | Phase 1 | Complete |
-| PROF-04 | Phase 1 | Complete |
-| PRIJS-01 | Phase 2 | Complete |
-| PRIJS-02 | Phase 2 | Complete |
-| PRIJS-03 | Phase 2 | Complete |
-| PRIJS-04 | Phase 2 | Complete |
-| PRIJS-05 | Phase 2 | Pending |
-| PRIJS-06 | Phase 2 | Complete |
-| BCASE-01 | Phase 3 | Pending |
-| BCASE-02 | Phase 3 | Pending |
-| BCASE-03 | Phase 3 | Pending |
-| BCASE-04 | Phase 3 | Pending |
-| BCASE-05 | Phase 3 | Pending |
-| BCASE-06 | Phase 3 | Pending |
-| BCASE-07 | Phase 3 | Pending |
-| DATA-01 | Phase 1 | Complete |
-| DATA-02 | Phase 1 | Complete |
-| DATA-03 | Phase 1 | Complete |
-| DATA-04 | Phase 2 | Pending |
-| DATA-05 | Phase 1 | Complete |
-| DATA-06 | Phase 1 | Complete |
-| INPUT-01 | Phase 2 | Pending |
-| INPUT-02 | Phase 5 | Pending |
-| INPUT-03 | Phase 5 | Pending |
-| MODE-01 | Phase 2 | Complete |
-| MODE-02 | Phase 4 | Pending |
-| MODE-03 | Phase 4 | Pending |
-| MODE-04 | Phase 4 | Pending |
-| MODE-05 | Phase 4 | Pending |
-| DOELGR-01 | Phase 4 | Pending |
-| DOELGR-02 | Phase 4 | Pending |
-| DOELGR-03 | Phase 4 | Pending |
-| EXPORT-01 | Phase 4 | Pending |
-| EXPORT-02 | Phase 4 | Pending |
-| AI-01 | Phase 5 | Pending |
-| AI-02 | Phase 5 | Pending |
-| AI-03 | Phase 5 | Pending |
-| UX-01 | Phase 5 | Pending |
-| UX-02 | Phase 5 | Pending |
-| UX-03 | Phase 1 | Complete |
-| UX-04 | Phase 1 | Complete |
+| ARCH-01 | TBD | Pending |
+| ARCH-02 | TBD | Pending |
+| ARCH-03 | TBD | Pending |
+| ARCH-04 | TBD | Pending |
+| ARCH-05 | TBD | Pending |
+| SCHOOL-01 | TBD | Pending |
+| SCHOOL-02 | TBD | Pending |
+| SCHOOL-03 | TBD | Pending |
+| SCHOOL-04 | TBD | Pending |
+| SCHOOL-05 | TBD | Pending |
+| SCHOOL-06 | TBD | Pending |
+| SCHOOL-07 | TBD | Pending |
+| INTAKE-01 | TBD | Pending |
+| INTAKE-02 | TBD | Pending |
+| INTAKE-03 | TBD | Pending |
+| INTAKE-04 | TBD | Pending |
+| INTAKE-05 | TBD | Pending |
+| PRIJS-01 | TBD | Pending |
+| PRIJS-02 | TBD | Pending |
+| PRIJS-03 | TBD | Pending |
+| PRIJS-04 | TBD | Pending |
+| PRIJS-05 | TBD | Pending |
+| PRIJS-06 | TBD | Pending |
+| PRIJS-07 | TBD | Pending |
+| PRIJS-08 | TBD | Pending |
+| GEVOEL-01 | TBD | Pending |
+| GEVOEL-02 | TBD | Pending |
+| GEVOEL-03 | TBD | Pending |
+| WAARDE-01 | TBD | Pending |
+| WAARDE-02 | TBD | Pending |
+| WAARDE-03 | TBD | Pending |
+| WAARDE-04 | TBD | Pending |
+| MIGR-01 | TBD | Pending |
+| MIGR-02 | TBD | Pending |
+| MIGR-03 | TBD | Pending |
+| EXPORT-01 | TBD | Pending |
+| EXPORT-02 | TBD | Pending |
+| EXPORT-03 | TBD | Pending |
+| EXPORT-04 | TBD | Pending |
+| EXPORT-05 | TBD | Pending |
+| PRIJSMGT-01 | TBD | Pending |
+| PRIJSMGT-02 | TBD | Pending |
+| PRIJSMGT-03 | TBD | Pending |
+| PRIJSMGT-04 | TBD | Pending |
+| MODE-01 | TBD | Pending |
+| MODE-02 | TBD | Pending |
+| MODE-03 | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 43 total
-- Mapped to phases: 43
-- Unmapped: 0
+- v2.0 requirements: 43 total
+- Mapped to phases: 0
+- Unmapped: 43
 
 ---
-*Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after roadmap creation*
+*Requirements defined: 2026-03-21*
+*Last updated: 2026-03-21 after initial definition*
