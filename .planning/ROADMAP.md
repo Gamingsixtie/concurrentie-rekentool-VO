@@ -73,12 +73,12 @@ Plans:
   2. Bestaande v1-data (wizard inputs, prijsoverschrijvingen) is automatisch beschikbaar als schoolprofiel in de v2-interface zonder handmatige actie
   3. Gebruiker kan via browser-back-button terug navigeren naar vorige view en via URL direct naar een specifieke school/view gaan
   4. Alle UI-tekst is in formeel Nederlands (u-vorm) en de interface is bruikbaar op tablet met touch
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — Dexie database, SchoolRecord types, CRUD operations, slug utility en v1 localStorage migratie (TDD)
+- [ ] 06-02-PLAN.md — TanStack Router setup met code-based routing, route guards en smart redirect
+- [ ] 06-03-PLAN.md — Store refactoring, SchoolLayout, school overview UI, migration wizard, wizard naamveld en App.tsx rewrite
 
 ### Phase 7: School Intelligence
 **Goal**: Accountmanager heeft per school een compleet profiel met contactpersonen, productgebruik, gesprekshistorie en pipeline-status — en kan snel de juiste school vinden
@@ -175,7 +175,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 3. Business Case | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
-| 6. Multi-School Data Layer | v2.0 | 0/3 | Not started | - |
+| 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
 | 7. School Intelligence | v2.0 | 0/3 | Not started | - |
 | 8. AI Intake & Prijsbeheer | v2.0 | 0/3 | Not started | - |
 | 9. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
