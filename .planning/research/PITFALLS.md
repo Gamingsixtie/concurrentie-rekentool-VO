@@ -1,295 +1,270 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Pricing comparison & ROI calculator tool (Dutch VO education market)
-**Researched:** 2026-03-20
-
----
+**Domain:** Adding sales intelligence features to an existing educational pricing comparison SPA
+**Researched:** 2026-03-21
+**Confidence:** HIGH (based on codebase analysis + domain patterns)
 
 ## Critical Pitfalls
 
-Mistakes that destroy credibility or require fundamental rework.
+### Pitfall 1: Single-School Store Assumption Baked Into Everything
 
-### Pitfall 1: The "Obviously Biased Calculator" Problem
+**What goes wrong:**
+The current `useSchoolProfileStore` persists one flat profile under a single localStorage key (`rekentool-school-profile`). The `usePriceComparisonStore` calls `useSchoolProfileStore.getState()` directly to read "the school." Every engine function assumes there is exactly one school context. Moving to multi-school profiles means the entire data flow — stores, engines, UI — assumes a singleton school that does not exist anymore.
 
-**What goes wrong:** The tool is built by Cito, comparing Cito against competitors. If at any point a school administrator feels the comparison is rigged — even slightly — the entire tool becomes worthless. Forrester Research reports that 65% of B2B buyers already find vendor-provided ROI calculations "overly optimistic and lacking in real-world applicability." A comparison tool that always makes its own product look best is dismissed on sight.
+**Why it happens:**
+v1 was correctly scoped to one school at a time. The temptation is to "just add a school selector that swaps the active profile" without realizing that both stores, the `initialize()` method, the `recalculate()` method, and all three engines read from the same global singleton. Swapping the profile store does not automatically invalidate cached comparison results, draft overrides, or migration settings in the other store.
 
-**Why it happens:** Subtle bias creeps in through: cherry-picked comparison criteria where Cito excels, hiding or downplaying areas where competitors are stronger, using optimistic Cito pricing vs. list-price competitors, time savings estimates that feel inflated, and internal/external mode leaking (a school sees sales-oriented framing).
+**How to avoid:**
+- Introduce a `schoolId` concept as the primary key. Every piece of state that is school-specific (profile, comparison results, overrides, migration settings) must be keyed by `schoolId`.
+- Do NOT store multiple schools in a single Zustand store with a `currentSchoolId` selector. Instead, use a school-indexed structure: `Record<string, SchoolProfile>` for profiles and `Record<string, PriceComparisonState>` for results.
+- When switching schools, the comparison store must fully reinitialize — not just recalculate with stale overrides from the previous school.
+- Move from localStorage (5MB limit, no indexing) to IndexedDB for multi-school data. localStorage will hit size limits with 10+ school profiles containing conversation history.
+- Keep the engines pure: pass `schoolProfile` as an argument (they already do this implicitly through `selectedModules` + `studentCounts`). Do NOT make engines aware of the store.
 
-**Consequences:** Schools share the tool result with colleagues. One skeptic examines it, finds a single biased element, and the tool's credibility is permanently destroyed — not just for that school but within their network. In the tight-knit Dutch VO world, reputation damage spreads fast.
+**Warning signs:**
+- Any code that calls `useSchoolProfileStore.getState()` without a schoolId parameter
+- Draft/applied overrides that persist after switching to a different school
+- Comparison results from school A appearing briefly when loading school B
 
-**Prevention:**
-- The external mode MUST show areas where competitors score equally or better. If DIA has a cheaper module, show it prominently, not hidden.
-- Every calculation must be expandable to show its full logic. No black boxes.
-- Use publication prices as stated "bovengrens" (upper bound) consistently — for ALL parties including Cito.
-- The "onderscheidend vermogen" (differentiating capabilities) section must be bidirectional: what Cito offers that others don't AND what others offer that Cito doesn't.
-- Have someone from outside the sales team review the external mode for bias before launch.
-
-**Detection (warning signs):** If during development nobody can point to a scenario where a competitor "wins" on a specific module's price, the tool is biased. If every default setting favors Cito, the tool is biased.
-
-**Phase relevance:** Must be a design principle from Phase 1. Cannot be bolted on later.
-
----
-
-### Pitfall 2: Stale Pricing Data Presented as Current
-
-**What goes wrong:** Competitor pricing changes (new school year, new product versions, restructured offerings). The tool shows prices from 6+ months ago without adequate warning, or worse, with a "geverifieerd" (verified) badge that is technically outdated. A school checks the actual DIA or JIJ price list and finds a discrepancy. Instant credibility loss.
-
-**Why it happens:** Nobody owns the update cycle. There is no forcing function to re-verify prices. The initial data entry is done carefully, but maintenance falls off. "Possibly outdated" warnings exist in the spec but get implemented as subtle footnotes instead of prominent alerts.
-
-**Consequences:** A single wrong price invalidates the entire comparison in the school's eyes. "If they got this price wrong, what else is wrong?" The tool becomes a liability instead of a sales asset.
-
-**Prevention:**
-- Every price record needs: source URL/document, date verified, verified-by person, and a hard expiration date (6 months max, as specified in PROJECT.md).
-- After expiration, the price should NOT be shown normally. It should require explicit acknowledgment: "This price was last verified on [date]. It may have changed. Show anyway?"
-- Build the staleness check into the UI prominently — not a tiny footnote but a visible status badge per price cell (green/yellow/red traffic light).
-- Set a calendar reminder workflow: at the start of each school year (August) ALL competitor prices must be re-verified, as this is when pricing typically changes.
-- The AI-agent price lookup feature (if built) should include a "last checked" timestamp.
-
-**Detection:** If the admin panel has no "prices expiring soon" dashboard, maintenance will be forgotten. If there is no process document for who updates prices and when, it will not happen.
-
-**Phase relevance:** Data model design (Phase 1) must include staleness metadata. The staleness UI must be in the first functional build. The maintenance workflow must be documented before launch.
+**Phase to address:**
+Phase 1 (Data Layer Refactor). This must be the FIRST thing built in v2. Everything else depends on it.
 
 ---
 
-### Pitfall 3: Apples-to-Oranges Module Comparison
+### Pitfall 2: AI Intake Extraction Trusting LLM Output Without Validation
 
-**What goes wrong:** Cito, DIA, and JIJ (IEP) do not structure their products identically. One vendor bundles features that another sells separately. Module names differ. Scope differs. A "LVS Rekenen" from Cito may include normering and rapportage that DIA charges separately for. Forcing these into the same row of a comparison table creates a misleading comparison — in either direction.
+**What goes wrong:**
+The current `extractIntakeFromNotes()` returns `IntakeExtraction` via `messages.parse()` with a Zod schema. But Zod only validates structure, not semantics. The LLM might return `studentCountsPerLevel: { "havo": 2000 }` for a small school, or map "DIA spelling" to `moduleId: "nederlands"` when it should be `taalverzorging`, or return a `pricePerStudent` of `520` (euros instead of cents, or total instead of per-student). The wizard then pre-fills with confidently wrong data.
 
-**Why it happens:** The desire for a clean, simple comparison table overrides the messy reality of different product structures. Product managers map competitors' products to Cito's structure because that is the frame of reference they know.
+**Why it happens:**
+Structured output gives a false sense of safety. The schema validates types but not business rules. Developers test with clean notes and miss the messy reality: consultants write shorthand, mix Dutch and English, mention prices as totals ("kost ons 4000 euro per jaar"), and use informal product names.
 
-**Consequences:** Two failure modes: (1) Cito looks artificially cheap because bundled features are compared to unbundled competitor prices, and the school discovers this, destroying trust. (2) Cito looks artificially expensive because the comparison doesn't account for features included in Cito's bundle that the competitor charges extra for.
+**How to avoid:**
+- Add a semantic validation layer AFTER the Zod parse: student counts within reasonable ranges (50-3000 per level), prices within known ranges per provider (EUR 1-50 per student), module IDs only from the catalog.
+- Surface the `unsureAbout` array prominently — it is already in the schema but the UI must make these warnings impossible to miss. Use an amber banner, not a footnote.
+- NEVER auto-submit intake results to the wizard. Always show a confirmation screen where the consultant reviews and corrects extracted data before it flows into calculations.
+- Add price sanity checks: if extracted `pricePerStudent` is >10x or <0.1x the known publication price for that provider/module, flag it as "seems unusual — please verify."
+- For the v1 mistake of DIA prices being 35% overestimated: build automatic cross-referencing against known price ranges per provider. If AI extracts a DIA price of EUR 5.20 when the known range is EUR 3.00-4.00, flag it.
 
-**Prevention:**
-- Design the comparison at the MODULE level, not the package level (already in PROJECT.md — good decision, enforce it rigorously).
-- Each module comparison must have a "what's included" expandable section showing exactly what each vendor includes at that price point.
-- Where products don't map 1:1, show this explicitly: "DIA biedt dit niet als apart product aan" or "Bij JIJ is dit onderdeel van [bundel X]."
-- Never force a comparison where one doesn't exist. Empty cells with "Niet beschikbaar" or "Anders gestructureerd" are more honest and more credible than forced equivalences.
-- Consider a "vergelijkbaarheidsindicator" (comparability indicator) per row: high (same scope), medium (similar but differences noted), low (fundamentally different structure).
+**Warning signs:**
+- No confirmation screen between AI extraction and wizard pre-fill
+- No range validation on extracted prices
+- Test suite only uses well-formatted input notes
 
-**Detection:** If the product mapping spreadsheet has no "notes" or "differences" column, the comparison is oversimplified. If every competitor module maps cleanly to a Cito module, someone is forcing the mapping.
-
-**Phase relevance:** Data modeling (Phase 1) must support partial comparisons and scope notes. UI design must handle "not directly comparable" states gracefully.
-
----
-
-### Pitfall 4: Time Savings Claims That Feel Made Up
-
-**What goes wrong:** The time savings calculator (Scenario B) claims "you save 120 hours per year" but the school administrator cannot connect that number to their lived experience. The assumptions are hidden or unrealistic. A rector who has never personally reset a toets thinks "120 hours? That seems like a lot" and dismisses the entire business case.
-
-**Why it happens:** Time savings are estimated by Cito product managers who know the theoretical difference but not the actual frequency of each task at different school sizes. Estimates use best-case scenarios. The math multiplies small per-task savings by high frequencies to produce impressive-looking totals that feel disconnected from reality.
-
-**Consequences:** The time savings number is THE key differentiator for the platform migration business case (Scenario B). If it lacks credibility, the entire migration argument collapses. Gartner data shows 77% of B2B buyers rate their purchase experience as "extremely complex or difficult" — and unreliable ROI projections are a key factor.
-
-**Prevention:**
-- Every time savings claim must be decomposable: show the formula. "5 docenten x 3 minuten per reset x 40 resets per jaar = 10 uur per jaar." Let the user SEE and ADJUST every input.
-- Make all assumptions editable. School size, number of teachers, frequency of each task — all should be sliders or input fields with sensible defaults.
-- Use conservative defaults, not optimistic ones. If the real savings are impressive, conservative defaults will still look good. If you need optimistic defaults to make the case, the case is weak.
-- Provide the methodology: "This estimate is based on [source]. Average task times were measured by [method]."
-- Let the user input their own current task times. "How long does it currently take you to reset a toets?" This personalizes the result and makes them co-authors of the calculation.
-- Show ranges, not single numbers: "Between 80 and 150 hours per year depending on school size and usage patterns."
-
-**Detection:** If the time savings demo always produces an impressive number regardless of school size input, the model is biased. If the defaults cannot be changed, the tool lacks credibility.
-
-**Phase relevance:** The time savings model and its transparency must be designed in Phase 1. Each assumption should be a named, documented, adjustable parameter.
+**Phase to address:**
+Phase 2 (AI Intake). The validation layer must be built alongside the extraction, not after.
 
 ---
 
-### Pitfall 5: Internal Mode Leaking into External Presentations
+### Pitfall 3: Browser-Side PDF Generation That Breaks on Real Content
 
-**What goes wrong:** An accountmanager uses the tool in internal mode (with sales signals, korting gevoeligheidsanalyse, marktgemiddelden) during a school visit and accidentally shows or shares internal-mode output. Or worse, internal mode content appears in a printed/exported document handed to a school. The school sees "sales signals" or "suggest upsell opportunity" and trust evaporates.
+**What goes wrong:**
+Client-side PDF generation (html2canvas + jsPDF, or html2pdf.js, or @react-pdf/renderer) works in demos with simple content but fails on: Recharts SVG charts (render as blank), Tailwind CSS custom properties (not resolved by html2canvas), dynamic content that overflows pages, Dutch special characters (IJ ligature, diacritics in names), right-to-left currency formatting (EUR symbol placement), and large tables that need intelligent page breaks.
 
-**Why it happens:** The two modes share the same URL/app. Mode switching is a toggle that is easy to forget. Print/export does not check which mode is active. Screenshots or shared links carry mode state.
+**Why it happens:**
+PDF generation is tested with a single hardcoded comparison. Real school reports have variable content length (1-6 modules, 1-3 providers with data, variable conversation history). The "it works on my screen" problem is acute because PDF rendering depends on browser, screen resolution, font loading state, and exact content dimensions.
 
-**Consequences:** Catastrophic credibility loss. The school sees behind the curtain and realizes they are being "managed" by a sales tool, not informed by a neutral comparison. This is worse than having no tool at all.
+**How to avoid:**
+- Use `@react-pdf/renderer` for DMU exports — it generates PDF natively without DOM-to-canvas conversion. This avoids all html2canvas problems. The tradeoff is that you must rebuild the layout in React-PDF components, not reuse your web components.
+- For charts in PDF: pre-render Recharts to SVG strings, then embed via `<Svg>` in React-PDF. Do NOT screenshot canvas elements.
+- Define fixed page templates per DMU role (coordinator gets 2-page summary, MT gets 1-page executive overview, finance gets detailed 4-page breakdown). Fixed templates are vastly more reliable than dynamic-length documents.
+- Test PDF generation with: zero modules selected, all 6 modules selected, a school with only VMBO (4 years), a school with all 5 levels (max data), modules where competitors have no price (null cells), and stale price warnings visible.
+- Dutch number formatting in PDF: `Intl.NumberFormat('nl-NL')` works in the browser but React-PDF runs in a different context. Pre-format all numbers as strings before passing to PDF components.
 
-**Prevention:**
-- Internal mode should require explicit authentication or an access code. It should never be a simple toggle in the UI.
-- Print/export from internal mode must have a VISIBLE watermark: "INTERN - NIET VOOR EXTERNE VERSPREIDING" (Internal - not for external distribution).
-- The URL should differ between modes (e.g., `/vergelijking` vs. `/intern/vergelijking`) so a shared link cannot accidentally expose internal mode.
-- Internal-only data (sales signals, gevoeligheidsanalyse) should be visually distinct — different background color, different section — so it is unmistakable even in screenshots.
-- Add a confirmation step before printing in internal mode: "This output contains internal data. Switch to external mode for a school-ready version?"
-- Consider: if the tool is stateless (no accounts), mode separation via URL path + simple access code is the minimum viable approach.
+**Warning signs:**
+- PDF generation code uses html2canvas or html2pdf.js
+- Charts appear as blank rectangles in generated PDFs
+- No test with maximum-length content (all modules, all levels, all providers)
+- PDF tests only run manually, not in CI
 
-**Detection:** If during testing you can get from external mode to internal mode in fewer than 2 deliberate actions, the barrier is too low. If a print from internal mode looks identical to external mode except for extra sections, someone will miss the difference.
-
-**Phase relevance:** Architecture decision in Phase 1. URL structure and mode separation must be designed early. Cannot be retrofitted without breaking bookmarks and workflows.
-
----
-
-## Moderate Pitfalls
-
-### Pitfall 6: The Hourly Rate Assumption Trap
-
-**What goes wrong:** Converting time savings to euros requires an hourly rate. The default hourly rate is either too high (looks like inflated savings) or too low (undersells the value). Schools challenge the number because teacher salaries are public knowledge in Dutch education, and the hourly rate for a docent vs. a coördinator vs. a conrector varies significantly.
-
-**Prevention:**
-- Use the CAO VO (Collectieve Arbeidsovereenkomst Voortgezet Onderwijs) salary scales as the basis — these are public and verifiable.
-- Default to a mid-range schaal (e.g., LB schaal 10) and make it adjustable.
-- Show the source: "Based on CAO VO 2025-2026, schaal [X], trede [Y], including werkgeverslasten."
-- Include employer costs (werkgeverslasten, approximately 30-40% on top of gross salary) because the school's actual cost per hour is higher than gross salary. But label this explicitly.
-- Let the user override with their own hourly rate.
-
-**Phase relevance:** Phase 2 (Scenario B implementation). The rate model should be researched and sourced before building.
+**Phase to address:**
+Phase 4 (DMU Exports). But the architectural decision (React-PDF vs. html2canvas) must be made in Phase 1 because it affects component design.
 
 ---
 
-### Pitfall 7: Print/Export That Looks Broken
+### Pitfall 4: Price Versioning Without a Migration Strategy for Existing localStorage Data
 
-**What goes wrong:** The tool looks great on screen but prints terribly. Charts get cut in half across pages. Interactive elements (accordions, tooltips) disappear, leaving gaps. The bar chart comparing prices renders as a blank rectangle. The school administrator prints the comparison to bring to a management team meeting and the printout is unusable.
+**What goes wrong:**
+v1 stores prices and overrides in localStorage under `rekentool-price-comparison`. v2 adds price versioning, staleness tracking, school-keyed data, and conversation history. The first time a v2 build loads, it reads the v1 localStorage shape, fails to parse it (different schema), and either crashes or silently resets all saved data. Accountmanagers who had carefully entered price overrides lose everything.
 
-**Prevention:**
-- Design the print layout as a first-class deliverable, not an afterthought. Many comparison tools fail here because print CSS is added last.
-- Charts must have a static/image fallback for print. Canvas-based charts (Chart.js, D3) do not print reliably without explicit print handling.
-- All expandable/collapsible sections must auto-expand in print mode. The spec already says "alle secties uitgevouwen" — enforce this with `@media print` CSS.
-- Use `page-break-inside: avoid` on comparison table rows and chart containers.
-- Use `@page` rules for margins, not `body` margins.
-- Tables need `<thead>` with headers that repeat across pages.
-- Test printing in Chrome, Edge, and Firefox. Print rendering differs significantly.
-- Consider offering a "generate PDF" button that produces a server-rendered PDF rather than relying on browser print, for consistency.
+**Why it happens:**
+Zustand's `persist` middleware has a `version` field and `migrate` function, but developers either forget to implement migration or test it only with empty state. The v1 stores have no version number set (defaults to 0). Adding a version without a proper `migrate` function for version 0 -> 1 causes silent data loss.
 
-**Detection:** If nobody has printed the tool output during development, it is broken. Print testing must be part of the QA checklist for every feature.
+**How to avoid:**
+- Before any store schema changes, add explicit `version: 1` to the current v1 persist config and a `migrate` function that handles version 0 (no version field) -> version 1 (current shape, explicitly typed).
+- For the v2 schema changes, increment to `version: 2` with a proper migration function that transforms v1 shape to v2 shape: wrap the single profile in a `schools` record, add `schoolId` keys, preserve overrides under the correct school.
+- Test migration with actual v1 localStorage snapshots. Export a real v1 state blob, put it in a test fixture, and verify the migration produces valid v2 state.
+- For IndexedDB migration (if moving from localStorage): read from localStorage on first load, write to IndexedDB, then clear the localStorage keys. Include a "migration complete" flag to avoid re-running.
+- Never use `persist({ ... })` without an explicit `version` number. The implicit version 0 makes future migrations ambiguous.
 
-**Phase relevance:** Print CSS must be developed alongside each visual component, not as a separate phase. Every component ticket should include "prints correctly" as an acceptance criterion.
+**Warning signs:**
+- Zustand persist configs without explicit `version` fields
+- No migration test fixtures from v1 state
+- Store tests only use freshly created state, never deserialized state
 
----
-
-### Pitfall 8: Overwhelming Non-Technical Users
-
-**What goes wrong:** The tool presents too many options upfront. Module selection, school size, number of teachers per vakgroep, hourly rates, depreciation periods, discount scenarios — school administrators are not financial analysts. They came for a quick comparison and got a spreadsheet.
-
-**Prevention:**
-- Progressive disclosure: start with 2-3 essential inputs (school size, which modules they use) and show a result immediately. Advanced options are secondary.
-- Provide smart defaults for everything. The user should be able to get a meaningful result with minimal input.
-- The three audience perspectives (coördinator, directie, finance) from the spec should function as preset views that filter complexity, not as additional options on top of everything else.
-- Use plain Dutch, not financial jargon. "Wat kost het per leerling per jaar" not "TCO per capita per annum."
-- Limit the initial comparison to 2 vendors (Cito vs. one competitor) rather than showing all three side by side, which creates a dense table.
-
-**Detection:** Time the "first meaningful result" during usability testing. If it takes more than 60 seconds to get a comparison on screen, the tool is too complex. If a test user asks "what do I do first?", the flow is unclear.
-
-**Phase relevance:** UX design in Phase 1. The interaction flow is more important than the feature set.
+**Phase to address:**
+Phase 1 (Data Layer Refactor). Must be the first change to the stores, before any schema changes.
 
 ---
 
-### Pitfall 9: Meerjarenprojectie (Multi-Year Projection) Without Caveats
+### Pitfall 5: Routing Explosion Without Navigation State Management
 
-**What goes wrong:** Showing 3-year and 5-year cost projections implies price stability that does not exist. Prices change, contracts get renegotiated, new products launch. A 5-year projection based on today's prices is fiction presented as forecast.
+**What goes wrong:**
+v1 uses `useState<View>` in App.tsx with 5 views. v2 adds school list, school detail, intake per school, export preview, price management, and conversation history — potentially 10+ views. The `useState` approach has no URL state (no back button, no deep linking, no browser history), and the flat union type becomes unwieldy. Worse, some views need context (which school? which module detail? which export format?) that is not captured in the view type.
 
-**Prevention:**
-- Label projections clearly: "Projectie op basis van huidige prijzen. Werkelijke kosten kunnen afwijken."
-- Show projections as ranges, not exact numbers. Use bands or shading to indicate increasing uncertainty over time.
-- Include an inflation/price-increase assumption that the user can adjust (default: 0% — conservative, but adjustable).
-- Do NOT present the 5-year number as the headline figure. Lead with year 1 (most reliable) and let users expand to multi-year.
-- For Scenario B (migration), show the "terugverdientijd" (payback period) as a range, not a single date.
+**Why it happens:**
+v1's `useState<View>` was appropriate for a wizard + results flow. Developers add new views to the union type one at a time without noticing the pattern breaking down. By view 8, the App.tsx becomes a 200-line switch statement with implicit dependencies on store state to determine "which sub-view am I actually on?"
 
-**Phase relevance:** Phase 2, Scenario B build. The projection model must be designed with uncertainty visualization built in.
+**How to avoid:**
+- Introduce a lightweight client-side router. For an SPA that does not need SEO, TanStack Router or even a simple hash-based router suffices. Do NOT add React Router's full complexity if you do not need SSR or data loading.
+- Use URL state for school context: `#/schools/:schoolId/comparison`, `#/schools/:schoolId/export/mt`. This gives back-button support, deep linking, and makes the current context explicit.
+- Keep the flat view approach ONLY if v2 stays under 7 views. If it exceeds 7, the lack of URL state becomes a UX problem (accountmanagers cannot bookmark a specific school's comparison).
+- Do NOT introduce the router mid-development. Decide in Phase 1 and implement before building new views. Retrofitting routing into existing view components requires touching every navigation call.
 
----
+**Warning signs:**
+- App.tsx view union type exceeds 7 entries
+- Views that need parameters (schoolId, exportType) passed via store state instead of URL
+- Users complaining that the back button does not work
+- Test scenarios that require a specific sequence of view transitions to reach a state
 
-### Pitfall 10: Ignoring the "Wat als de concurrent korting geeft?" Question
-
-**What goes wrong:** The external mode comparison uses publication prices. But every school knows that vendors offer discounts, especially for larger orders or multi-year contracts. If the tool only shows list prices, the school says: "But DIA offered us 15% off, so your comparison is irrelevant."
-
-**Prevention:**
-- This is already partially addressed in the spec (internal mode has gevoeligheidsanalyse with 10%/20% korting scenarios). But even the EXTERNAL mode should acknowledge this reality.
-- In external mode, add a note: "Deze vergelijking is gebaseerd op publicatieprijzen. Neem contact op met uw leverancier voor eventuele kortingen." This is honest and positions the tool as a starting point, not the final word.
-- Consider allowing schools to input their own actual prices (or quoted prices) in external mode. This makes the tool genuinely useful rather than theoretical.
-- In internal mode, the sensitivity analysis should show at what discount percentage the competitor becomes cheaper per module — this is the "pain threshold" the accountmanager needs to know.
-
-**Phase relevance:** External mode acknowledgment in Phase 1. Sensitivity analysis in Phase 2 (internal mode).
+**Phase to address:**
+Phase 1 (Architecture). The routing decision must be made before any new views are built.
 
 ---
 
-## Minor Pitfalls
+### Pitfall 6: Anthropic API Key Exposed in Browser Bundle
 
-### Pitfall 11: Copy-to-Clipboard Produces Ugly Plain Text
+**What goes wrong:**
+The current `ai-intake.ts` uses `VITE_ANTHROPIC_API_KEY` with `dangerouslyAllowBrowser: true`. This is acceptable for an internal-only Cito tool with limited distribution. But v2 expands usage (more accountmanagers, potentially shared links, school-facing exports). The API key is in the JavaScript bundle. Anyone with browser DevTools can extract it and use it for their own purposes, running up Cito's bill.
 
-**What goes wrong:** The "kopieer samenvatting" feature copies raw text that loses all formatting when pasted into email or Word. Tables become garbled. Numbers misalign.
+**Why it happens:**
+v1 was a prototype/internal tool. The `dangerouslyAllowBrowser` flag is explicitly named as a warning but was accepted as a conscious tradeoff. As the tool grows in users and features (more AI calls for intake, potentially AI-assisted price lookups), the risk surface grows.
 
-**Prevention:**
-- Copy both plain text AND HTML to clipboard (using the Clipboard API's `text/html` MIME type). This way, pasting into email or Word preserves table formatting.
-- Design the summary text specifically for paste contexts: short, scannable, with clear headers.
-- Test pasting into Outlook (dominant in Dutch education) specifically.
+**How to avoid:**
+- For v2 with a limited user base (< 20 accountmanagers): the current approach is acceptable IF the API key has spending limits set in the Anthropic dashboard and usage is monitored.
+- For broader distribution: add a thin proxy endpoint (Cloudflare Worker, Vercel Edge Function, or Netlify Function) that holds the API key server-side and forwards requests. The SPA calls the proxy, not Anthropic directly.
+- At minimum: set a monthly spending cap on the Anthropic API key, enable usage alerts, and rotate the key quarterly.
+- Do NOT add more AI features (price lookups, report generation) with the browser-exposed key pattern. Each new AI feature multiplies the abuse surface.
 
-**Phase relevance:** Export features phase. Small effort, high impact if done right.
+**Warning signs:**
+- Multiple `VITE_*` environment variables containing API keys
+- No spending limits on the Anthropic dashboard
+- AI features that make many calls per user session (e.g., real-time price lookup for every module change)
 
----
-
-### Pitfall 12: Forgetting Mobile/Tablet Use During School Visits
-
-**What goes wrong:** Accountmanagers visit schools with an iPad or laptop. The comparison table with 3+ columns becomes unreadable on a tablet in portrait mode. Touch targets for interactive elements are too small.
-
-**Prevention:**
-- Test on iPad (Safari) as a primary device, not an afterthought.
-- On narrow screens, consider switching from side-by-side comparison to a "card" view where each vendor is a swipeable card.
-- Ensure touch targets are minimum 44x44px (Apple HIG standard).
-
-**Phase relevance:** Responsive design decisions in Phase 1 architecture. The layout approach must accommodate tablet from the start.
+**Phase to address:**
+Phase 2 (AI Intake hardening). Decide the proxy vs. browser-key tradeoff explicitly based on expected user count.
 
 ---
 
-### Pitfall 13: No Audit Trail for Price Changes
+## Technical Debt Patterns
 
-**What goes wrong:** An accountmanager manually updates a competitor's price. There is no record of what the previous price was, who changed it, or why. Months later, a discrepancy is discovered and nobody knows whether it was a legitimate update or a mistake.
+Shortcuts that seem reasonable but create long-term problems.
 
-**Prevention:**
-- Even in a stateless tool, the price data store (JSON, database, CMS) must keep a version history.
-- Every price change should record: old value, new value, changed by, date, source/reason.
-- This is not user-facing but essential for internal governance.
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Keep `useState<View>` for routing | No new dependency, fast to add views | No URL state, no back button, no deep linking, App.tsx becomes unmanageable | Only if v2 stays at < 7 total views |
+| Store all schools in localStorage | No IndexedDB learning curve | 5MB limit hit with ~15 schools including conversation history, no structured queries | MVP with < 10 schools per user |
+| Use html2canvas for PDF | Reuse existing web components in PDF | Blank charts, font issues, page break failures, inconsistent across browsers | Never for production DMU exports |
+| Hardcode 3 providers in engine | Simple comparison logic | Adding a 4th provider (e.g., Diataal, RTTI) requires changes across engine + data + UI + tests | Acceptable until a 4th provider is confirmed |
+| Browser-exposed API key | No backend needed | Key extractable, no usage control per user, abuse risk | < 20 known internal users with spending cap |
+| Single Zustand store for all school data | Simple architecture | Cannot handle multi-school without major refactor | Only for v1 single-school scope |
 
-**Phase relevance:** Data layer design in Phase 1. The price data model must include history from the start; retrofitting versioning is painful.
+## Integration Gotchas
 
----
+Common mistakes when connecting new v2 features to the existing v1 codebase.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| AI intake -> Wizard pre-fill | Directly calling `setLevels()`, `setStudentCounts()`, `setSelectedModules()` from intake results, triggering multiple re-renders and intermediate invalid states | Batch all store updates in a single `applyIntakeResult(extraction)` action that validates, transforms, and sets all fields atomically |
+| Multi-school -> Comparison store | Adding a `currentSchoolId` to the existing store and using `if (schoolId === currentSchoolId)` guards everywhere | Restructure stores to be school-indexed from the start: `schools: Record<schoolId, SchoolProfile>`, `comparisons: Record<schoolId, ComparisonState>` |
+| Price versioning -> Existing overrides | Adding `version` fields to `PriceRecord` but not updating `mergeOverrides()` to check whether an override applies to the current price version | Overrides must reference the price version they were created against. When the base price changes, stale overrides should be flagged, not silently applied |
+| New views -> Existing App.tsx | Adding `if (view === 'school-list') return <SchoolList />` blocks to the growing conditional chain | Extract routing to a dedicated component/router before adding new views |
+| IndexedDB -> Zustand persist | Using `zustand/persist` with a custom `getStorage()` that wraps IndexedDB in synchronous localStorage API | Use `zustand/persist` with the `createJSONStorage()` helper and an async storage adapter (e.g., idb-keyval). The persist middleware supports async storage natively |
+| DMU exports -> Comparison data | Reading from `usePriceComparisonStore` inside PDF components, which run outside React's rendering context | Pre-compute all export data as a plain object before entering the PDF generation pipeline. PDF components receive data as props, never read from stores |
+
+## Performance Traps
+
+Patterns that work at small scale but fail as usage grows.
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Recalculating all 3 engines on every store change | Sluggish UI after entering student counts, visible delay before charts update | Debounce recalculation (300ms), only recalculate the active engine (comparison OR current-vs-proposed OR migration, not all three) | > 20 modules or complex override sets |
+| Loading all school profiles into memory on startup | Slow initial load, high memory usage on tablets | Load school list (id + name only) initially, load full profile on selection | > 30 saved school profiles |
+| Re-rendering entire comparison table when one override changes | Jank when editing prices in the comparison view | Memoize `ModuleComparison` rows, use `React.memo` with custom comparator that checks only that row's data | > 10 modules displayed simultaneously |
+| Conversation history stored as full text in store state | Store serialization becomes slow, localStorage writes take > 100ms | Store conversation summaries in the store, full transcripts in IndexedDB separately | > 50 conversations per school |
+| PDF generation blocking the main thread | UI freezes for 2-5 seconds during export | Use Web Worker for PDF generation, or at minimum use `requestIdleCallback` to break work into chunks | PDFs with charts + tables exceeding 4 pages |
+
+## Security Mistakes
+
+Domain-specific security issues for this tool.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Storing competitor pricing intelligence in localStorage without encryption | A school using the same computer could inspect localStorage and see Cito's competitive intelligence, pricing strategies, and notes about their school | For internal-only mode: acceptable risk with clear training. For any school-facing deployment: encrypt sensitive fields or use session storage that clears on close |
+| API key in VITE_ environment variable visible in source maps | Source maps in production expose the full API key string | Disable source maps in production build (`build.sourcemap: false` in vite.config), or move to proxy pattern |
+| AI intake processing school-identifiable data through external API | Student counts, provider usage, and pricing data for specific schools flows through Anthropic's API | Acceptable for Cito (Anthropic does not train on API data). Document in privacy assessment. If regulations change, the proxy pattern allows adding anonymization |
+| No rate limiting on AI intake calls | A bug or misuse could generate hundreds of API calls, exhausting the budget | Implement client-side rate limiting: max 1 call per 10 seconds, max 20 calls per session. Check `Retry-After` headers from Anthropic API |
+
+## UX Pitfalls
+
+Common user experience mistakes when adding intelligence features to an existing simple tool.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| AI intake as the primary/default entry point | Accountmanagers who prefer manual entry feel forced into AI flow. Not everyone has messy notes — some want to fill the form directly | Keep wizard as default. AI intake as an explicit alternative ("Begin met gespreksnotities" button, already correctly positioned in v1) |
+| School list as a complex management interface | Accountmanagers are not CRM power users. A school list with filters, sorting, tags, and bulk operations overwhelms | Simple chronological list with search. Last-used school at top. Add/remove only. No tags, no categories, no bulk operations in v2 |
+| Export format selection with too many options | "PDF, Excel, Word, HTML, email, clipboard" — decision fatigue | Three DMU-targeted presets only: "Voor coordinator", "Voor MT", "Voor finance". Format is PDF, always. Content varies by audience |
+| Showing AI confidence scores to end users | "85% confidence" means nothing to an accountmanager. They either trust the extraction or they don't | Show the extracted data for review. Highlight fields the AI was unsure about (from `unsureAbout` array). No numeric scores |
+| Price update notifications interrupting workflow | "3 prices are stale" modal on every app open | Show staleness in-context (badge on affected prices). Dedicated "Prijsbeheer" view for bulk updates. Never interrupt the comparison workflow |
 
 ## "Looks Done But Isn't" Checklist
 
-| Feature | Looks Done When... | Actually Done When... |
-|---------|-------------------|----------------------|
-| Module comparison | Table shows prices side by side | Scope differences are documented per row, "not comparable" states are handled, expandable detail shows what is included |
-| Time savings calculator | Shows a total hours saved number | Every assumption is visible, editable, sourced, and the range/uncertainty is shown |
-| Print output | Ctrl+P produces something | Charts render, tables don't split, all sections expand, headers repeat, it fits A4, margins are correct, internal mode is watermarked |
-| External mode | No sales signals visible | Internal mode is architecturally separated (different URL/auth), print cannot leak internal data, links cannot accidentally share internal mode |
-| Price freshness | Dates are stored in the database | Expired prices trigger prominent visual warnings, there is a maintenance workflow, someone is assigned to update, reminder system works |
-| Meerjarenprojectie | Numbers for 1, 3, 5 years appear | Uncertainty increases visually over time, assumptions are labeled, inflation is adjustable, caveats are prominent |
-| Clipboard copy | Text appears in clipboard | HTML formatting is preserved in Outlook/Word paste, tables are readable, summary is scannable |
-| Sensitivity analysis | 10%/20% discount scenarios calculate | Break-even point is shown ("competitor becomes cheaper at X% discount"), ranges are visualized, methodology is transparent |
+Things that appear complete but are missing critical pieces.
 
----
+- [ ] **Multi-school profiles:** Profile switching works -- verify that comparison results, overrides, and migration settings are correctly scoped to each school and do not leak between profiles
+- [ ] **AI intake:** Extraction returns structured data -- verify that semantic validation catches out-of-range prices, impossible student counts, and mismatched module/provider combinations
+- [ ] **Store migration:** v2 store loads correctly -- verify with actual v1 localStorage data (export a real v1 state, load in v2, confirm no data loss)
+- [ ] **PDF export:** PDF generates for coordinator view -- verify with MT and finance views too, with max-length content (all modules, all levels), and on a tablet
+- [ ] **Price versioning:** Prices have version numbers -- verify that overrides created against version N are flagged when the base price updates to version N+1
+- [ ] **IndexedDB persistence:** Data saves to IndexedDB -- verify behavior when IndexedDB is unavailable (private browsing on some browsers), when storage quota is exceeded, and when two tabs access simultaneously
+- [ ] **Dutch formatting:** Currency shows EUR symbol -- verify that `Intl.NumberFormat('nl-NL')` is used consistently in PDF output, clipboard copy, and print CSS, not just in React components
+- [ ] **Conversation history:** Notes are saved per school -- verify that search across schools works, that long conversations do not slow down the UI, and that history persists across browser sessions
+- [ ] **Routing:** New views are navigable -- verify that the browser back button works, that refreshing the page returns to the same view, and that deep links to a specific school's comparison work
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention, how to recover.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Store data corruption from failed migration | MEDIUM | Implement a "Reset lokale data" button that clears all stores with confirmation. Export current data to JSON before reset. Provide import function to restore from backup |
+| API key leaked/abused | LOW | Rotate key immediately in Anthropic dashboard. Update `.env.local` for all users. Implement proxy to prevent future exposure |
+| PDF generation producing broken output | MEDIUM | Fall back to browser print (`window.print()`) with print CSS as emergency alternative. Fix PDF template offline |
+| Multi-school data leak (wrong school's data shown) | HIGH | Add schoolId assertion checks in all engine calls. If mismatch detected, force re-initialization. Add integration test that switches schools and verifies isolation |
+| AI intake producing confidently wrong data | LOW | The confirmation screen is the recovery mechanism. If it was skipped and wrong data entered the wizard, the wizard allows manual correction at each step |
 
 ## Pitfall-to-Phase Mapping
 
-| Phase Topic | Likely Pitfall | Mitigation | Priority |
-|-------------|---------------|------------|----------|
-| Data model design | #2 Stale prices, #3 Apples-to-oranges, #13 No audit trail | Build staleness metadata, scope-notes fields, and version history into the data model from day one | CRITICAL |
-| Architecture / mode separation | #5 Internal mode leaking | Separate URL paths, auth gate for internal mode, print watermarking | CRITICAL |
-| UX / interaction design | #1 Bias perception, #8 Overwhelming users | Progressive disclosure, bidirectional differentiators, conservative defaults | CRITICAL |
-| Scenario A (price comparison) | #3 Apples-to-oranges, #10 Discount reality | Comparability indicators, scope detail, discount acknowledgment in external mode | HIGH |
-| Scenario B (migration business case) | #4 Time savings credibility, #6 Hourly rate, #9 Multi-year caveats | Editable assumptions, CAO VO sourced rates, uncertainty ranges | HIGH |
-| Visual components (charts/tables) | #7 Print broken, #12 Tablet | Print CSS per component, chart print fallbacks, responsive card layouts | MEDIUM |
-| Export features | #7 Print, #11 Clipboard | Dedicated print stylesheet, HTML clipboard, Outlook testing | MEDIUM |
-| Maintenance / operations | #2 Stale prices, #13 Audit trail | Update workflow documentation, calendar reminders, expiration dashboard | HIGH |
+How roadmap phases should address these pitfalls.
 
----
-
-## Phase-Specific Warnings
-
-| Phase | Warning | Action Required |
-|-------|---------|-----------------|
-| Phase 1 (Foundation) | If the data model does not include price metadata (source, date, expiry, verifier) and module scope notes, every subsequent phase will produce misleading output | Design the data model for transparency first, features second |
-| Phase 1 (Foundation) | If internal/external mode separation is a CSS toggle rather than an architectural boundary, it WILL leak | Implement as separate routes with access control |
-| Phase 2 (Scenario B) | If time savings defaults are not sourced from actual measurement or customer research, the calculator will not survive scrutiny | Invest in measuring actual task times before building the calculator |
-| Launch | If no competitor price audit has been done in the 30 days before launch, the tool will launch with stale data | Schedule a pre-launch price verification sprint |
-| Post-Launch | If no one is assigned to quarterly price updates, the tool will decay within 6 months | Assign ownership and set calendar reminders before launch, not after |
-
----
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| #1 Single-school store assumption | Phase 1 (Data Layer) | Integration test: create school A, add overrides, switch to school B, verify A's overrides are not visible, switch back to A, verify overrides are preserved |
+| #2 AI intake trusting LLM output | Phase 2 (AI Intake) | Unit tests with adversarial inputs: prices as totals, ambiguous module names, incomplete notes, mixed languages. Verify validation catches all |
+| #3 Browser PDF generation failures | Phase 1 (Architecture decision) + Phase 4 (Implementation) | Visual regression tests comparing generated PDF against golden snapshots for each DMU template with min/max content |
+| #4 localStorage migration | Phase 1 (Data Layer, first task) | Migration test with exported v1 state fixture. CI test that deserializes v1 state, runs migration, validates v2 schema |
+| #5 Routing explosion | Phase 1 (Architecture) | After adding 3rd new view: verify back button works through full navigation sequence, verify URL reflects current state, verify refresh preserves view |
+| #6 API key exposure | Phase 2 (AI Intake) | Verify production build has no source maps. Verify API key spending limit is set. Document proxy migration path for future scaling |
 
 ## Sources
 
-- [Ecosystems.io: ROI Calculators: A Burned-Out Tool in B2B Sales](https://www.ecosystems.io/blog/roi-calculators-a-burned-out-tool-in-b2b-sales) — Forrester/Gartner data on buyer skepticism of vendor ROI tools
-- [EU Commission: Key Principles for Comparison Tools](https://commission.europa.eu/system/files/2017-06/key_principles_for_comparison_tools_en.pdf) — EU regulatory framework for fair comparison methodology
-- [ROI Selling: 5 Steps to Better Labor Savings Estimation](https://roi-selling.com/blog/5-easy-steps-to-better-estimating-labor-savings-in-your-business-case/) — Best practices for credible time/labor savings claims
-- [CustomJS: Common HTML-to-PDF Issues](https://www.customjs.space/blog/html-to-pdf-issues/) — Print/export technical pitfalls and solutions
-- [Prisync: Price Comparison Errors](https://prisync.com/blog/price-comparison-errors/) — Common mistakes in pricing comparison tools
-- [Elastic Path: 20 Tips for Product Comparison Tools](https://www.elasticpath.com/blog/20-tips-for-product-comparison-tools) — UX and fairness best practices
-- [Pulse-IQ: Advanced ROI Calculator Tools](https://pulse-iq.com/advanced-roi-calculator-tools-boost-sales/) — Building credibility in ROI calculators
-- [Inside Higher Ed: How to Avoid Ed-Tech Sales Mistakes](https://www.insidehighered.com/digital-learning/blogs/default/how-avoid-ed-tech-sales-mistakes) — Dual audience challenges in education sales
-- [Selling to Schools: K-12 Sales Strategy - 10 Deadly Sins](https://sellingtoschools.com/education-management/k-12-sales-strategy-ten-deadly-sins-must-avoid/) — Education market sales pitfalls
+- Codebase analysis: `src/features/school-profile/store.ts`, `src/features/price-comparison/store.ts`, `src/lib/ai-intake.ts`, `src/App.tsx` — direct inspection of v1 architecture
+- Zustand persist middleware documentation — migration and versioning patterns
+- Known v1 issues from PROJECT.md: DIA prices 35% overestimated, module mapping too simplistic, JIJ estimates unreliable
+- React-PDF documentation — client-side PDF generation patterns and limitations
+- IndexedDB browser storage limits and async access patterns
+- Anthropic API documentation — `dangerouslyAllowBrowser` usage constraints and rate limiting
+
+---
+*Pitfalls research for: Rekentool VO v2 Sales Intelligence Platform*
+*Researched: 2026-03-21*

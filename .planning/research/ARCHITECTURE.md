@@ -1,403 +1,781 @@
-# Architecture Patterns
+# Architecture Research: v2.0 Sales Intelligence Integration
 
-**Domain:** Interactive pricing comparison & ROI calculator (Dutch education market)
-**Researched:** 2026-03-20
+**Domain:** Sales intelligence features integrating into existing React price comparison SPA
+**Researched:** 2026-03-21
+**Confidence:** HIGH (based on direct codebase analysis, not external research)
 
-## System Overview
+## Current Architecture Snapshot
 
-The Rekentool is a **stateless, client-side single-page application** with embedded pricing data, no backend. It takes user inputs (school size, selected modules, scenario), runs calculations, and renders comparison views with charts and print export. There are two user modes (internal/external) and three scenarios (A, B, future C).
-
-The architecture follows a **layered separation** with four clear boundaries:
+The v1.0 app is a stateless, client-side SPA with this shape:
 
 ```
-[Data Layer] --> [Calculation Engine] --> [State / Scenario Manager] --> [UI Layer] --> [Export Layer]
+┌─────────────────────────────────────────────────────────────────┐
+│                         UI Layer                                │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │ Wizard   │  │ Intake   │  │ Compare  │  │ Migration│       │
+│  │ (5 steps)│  │ Panel    │  │ Pages    │  │ Page     │       │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘       │
+├───────┴──────────────┴──────────────┴──────────────┴────────────┤
+│                      View Router (useState in App.tsx)           │
+├─────────────────────────────────────────────────────────────────┤
+│                      State Layer (Zustand + persist)            │
+│  ┌───────────────────────┐  ┌────────────────────────────┐     │
+│  │ useSchoolProfileStore │  │ usePriceComparisonStore    │     │
+│  │ wizard inputs, levels,│  │ results, overrides,        │     │
+│  │ modules, moduleSetups │  │ migration settings         │     │
+│  └───────────┬───────────┘  └──────────┬─────────────────┘     │
+├──────────────┴──────────────────────────┴───────────────────────┤
+│                      Engine Layer (pure functions)               │
+│  ┌──────────────┐  ┌────────────────┐  ┌──────────────┐        │
+│  │ price-       │  │ current-vs-    │  │ migration.ts │        │
+│  │ comparison.ts│  │ proposed.ts    │  │              │        │
+│  └──────────────┘  └────────────────┘  └──────────────┘        │
+├─────────────────────────────────────────────────────────────────┤
+│                      Data Layer (static imports)                │
+│  ┌──────────┐  ┌──────────┐  ┌────────────┐  ┌──────────┐     │
+│  │ default- │  │ cito-    │  │ jij-license│  │ differ-  │     │
+│  │ prices.ts│  │ migration│  │ -tiers.ts  │  │ entiators│     │
+│  └──────────┘  └──────────┘  └────────────┘  └──────────┘     │
+├─────────────────────────────────────────────────────────────────┤
+│                      External: Anthropic API (intake only)      │
+│  ┌────────────────────────────────────────┐                     │
+│  │ Claude Haiku 4.5 — structured output   │                     │
+│  └────────────────────────────────────────┘                     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-All data is embedded at build time. No API calls. No authentication. No persistence.
+### What Currently Exists (Inventory)
 
-## Component Boundaries
+| Layer | Component | File(s) | Status |
+|-------|-----------|---------|--------|
+| **Router** | View state | `App.tsx` — `useState<View>` | Working, 5 views |
+| **Store** | School profile | `features/school-profile/store.ts` | Working, persist to `rekentool-school-profile` |
+| **Store** | Price comparison | `features/price-comparison/store.ts` | Working, persist to `rekentool-price-comparison` |
+| **Engine** | Market comparison | `engine/price-comparison.ts` | Pure, tested |
+| **Engine** | Current vs proposed | `engine/current-vs-proposed.ts` | Pure, tested |
+| **Engine** | Migration | `engine/migration.ts` | Pure, tested |
+| **Data** | Prices | `data/default-prices.ts` | 15 PriceRecord entries, static |
+| **Data** | Modules | `models/modules.ts` | 6 modules, 2 categories |
+| **AI** | Intake extraction | `lib/ai-intake.ts` | Single-shot extraction |
+| **UI** | Wizard | 5 steps + shell | Working |
+| **UI** | Intake panel | `features/intake/IntakePanel.tsx` | Working, basic |
+| **UI** | Comparison pages | 3 page components | Working |
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| **Data Layer** | Static pricing data, product catalogs, time-savings parameters, competitor info | Calculation Engine (read-only) |
-| **Calculation Engine** | Pure functions: price comparisons, time savings, multi-year projections | State Manager (receives inputs, returns results) |
-| **State Manager** | User inputs, selected scenario, active mode, current configuration | All UI components, Calculation Engine |
-| **Scenario Manager** | Scenario A/B/C definitions, which inputs apply to which scenario | State Manager, UI Layer |
-| **Mode Controller** | Internal vs. external mode toggle, controls feature visibility | All UI components |
-| **Input Components** | School parameters, module selection, hourly rate, custom prices | State Manager |
-| **Display Components** | Results tables, comparison views, per-audience summaries | State Manager (read), Calculation Engine (derived) |
-| **Chart Components** | Bar charts for price comparison, multi-year projections | Display Components (receives computed data) |
-| **Export Layer** | Print stylesheet, clipboard copy | Display Components (reads rendered output) |
+### Key Architectural Properties
 
-## Recommended Project Structure
+1. **Single-school assumption.** Both stores hold data for exactly one school. There is no school ID, no list, no switching.
+2. **Static prices.** `DEFAULT_PRICES` is a build-time constant. The override system (`draftOverrides` / `appliedOverrides`) patches at runtime but does not persist separately from the calculation store.
+3. **View routing is flat.** `useState<View>` in `App.tsx` — no URL routing, no history, no nested views.
+4. **Cross-store coupling.** `usePriceComparisonStore` reads from `useSchoolProfileStore` via `getState()` — a deliberate choice to avoid stale closures, but it creates an implicit dependency.
+5. **AI intake is fire-and-forget.** One text input, one API call, one structured output. No conversation history, no iterative refinement.
+
+---
+
+## v2.0 Integration Architecture
+
+### Target Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      View Layer                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │SchoolList│ │SchoolDtl │ │Wizard    │ │Compare   │          │
+│  │  (NEW)   │ │  (NEW)   │ │(exists)  │ │(exists)  │          │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘          │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │Intake    │ │Export    │ │Price     │ │Migration │          │
+│  │Enhanced  │ │Preview   │ │Admin     │ │(exists)  │          │
+│  │(MODIFY)  │ │  (NEW)   │ │  (NEW)   │ │          │          │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘          │
+├───────┴──────────────┴──────────┴──────────────┴────────────────┤
+│               Router (upgrade to state machine or TanStack)     │
+├─────────────────────────────────────────────────────────────────┤
+│                      State Layer                                 │
+│  ┌─────────────┐ ┌──────────────┐ ┌──────────────┐            │
+│  │useSchoolDB  │ │usePriceComp  │ │useExport     │            │
+│  │  (NEW)      │ │  (MODIFY)    │ │Store (NEW)   │            │
+│  │multi-school │ │school-scoped │ │DMU config    │            │
+│  │persistence  │ │calculations  │ │render state  │            │
+│  └──────┬──────┘ └──────┬───────┘ └──────┬───────┘            │
+│  ┌─────────────┐ ┌──────────────┐                              │
+│  │useSchool    │ │usePriceData  │                              │
+│  │Profile      │ │Store (NEW)   │                              │
+│  │(MODIFY)     │ │mutable prices│                              │
+│  │+schoolId    │ │+verification │                              │
+│  └──────┬──────┘ └──────┬───────┘                              │
+├─────────┴───────────────┴───────────────────────────────────────┤
+│                      Engine Layer (pure functions — KEEP)        │
+│  ┌──────────────┐  ┌────────────────┐  ┌──────────────┐        │
+│  │ price-       │  │ current-vs-    │  │ migration.ts │        │
+│  │ comparison.ts│  │ proposed.ts    │  │              │        │
+│  └──────────────┘  └────────────────┘  └──────────────┘        │
+│  ┌──────────────┐  ┌────────────────┐                           │
+│  │ export-      │  │ intake-        │                           │
+│  │ renderer.ts  │  │ pipeline.ts    │                           │
+│  │ (NEW)        │  │ (NEW)          │                           │
+│  └──────────────┘  └────────────────┘                           │
+├─────────────────────────────────────────────────────────────────┤
+│                      Data Layer                                  │
+│  ┌──────────┐  ┌──────────┐  ┌────────────┐                    │
+│  │ default- │  │ school   │  │ price      │                    │
+│  │ prices.ts│  │ profiles │  │ updates    │                    │
+│  │ (static) │  │ (indexed │  │ (indexed   │                    │
+│  │          │  │  DB/NEW) │  │  DB/NEW)   │                    │
+│  └──────────┘  └──────────┘  └────────────┘                    │
+├─────────────────────────────────────────────────────────────────┤
+│                      External Services                           │
+│  ┌────────────────┐  ┌──────────────────┐                       │
+│  │ Claude Haiku   │  │ Browser print /  │                       │
+│  │ 4.5 (enhanced) │  │ html2canvas+     │                       │
+│  │                │  │ jsPDF            │                       │
+│  └────────────────┘  └──────────────────┘                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Integration Points: What Changes, What Stays, What's New
+
+### 1. Multi-School Persistence (BIGGEST architectural change)
+
+**Current state:** One school in `useSchoolProfileStore` + localStorage. Opening a new school overwrites the old one.
+
+**Required change:** The app needs to manage multiple school profiles with independent calculation results.
+
+**Recommended approach: IndexedDB via Dexie.js**
+
+localStorage is a poor fit for structured multi-record data. Dexie.js wraps IndexedDB with a clean, typed API that works well with Zustand.
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Dexie Database: "rekentool-db"                      │
+│                                                      │
+│ schools                                              │
+│   id: string (uuid)                                  │
+│   name: string                                       │
+│   createdAt: Date                                    │
+│   updatedAt: Date                                    │
+│   profile: SchoolProfile (levels, counts, modules)   │
+│   moduleSetups: ModuleCurrentSetup[]                 │
+│   scenario: Scenario                                 │
+│   notes: string[]                                    │
+│   tags: string[]                                     │
+│                                                      │
+│ priceOverrides                                       │
+│   id: string                                         │
+│   schoolId: string (index)                           │
+│   moduleId: string                                   │
+│   provider: string                                   │
+│   amount: number                                     │
+│   source: 'intake' | 'manual' | 'document'          │
+│   verifiedAt: Date                                   │
+│                                                      │
+│ conversations                                        │
+│   id: string                                         │
+│   schoolId: string (index)                           │
+│   rawNotes: string                                   │
+│   extraction: IntakeExtraction                       │
+│   createdAt: Date                                    │
+│                                                      │
+│ priceUpdates (global, not per-school)                │
+│   id: string                                         │
+│   moduleId: string                                   │
+│   provider: string                                   │
+│   amount: number                                     │
+│   source: PriceSource                                │
+│   sourceLabel: string                                │
+│   verifiedAt: Date                                   │
+│   status: 'pending' | 'verified' | 'rejected'       │
+└─────────────────────────────────────────────────────┘
+```
+
+**Impact on existing stores:**
+
+| Store | Change | Details |
+|-------|--------|---------|
+| `useSchoolProfileStore` | MODIFY | Add `schoolId` field. Load/save via Dexie instead of Zustand persist. Keep Zustand for in-memory reactive state, but sync to/from DB on school switch. |
+| `usePriceComparisonStore` | MODIFY | Make `initialize()` and `recalculate()` school-aware. Results become per-school (cached in DB). |
+| `useSchoolDBStore` (NEW) | CREATE | Manages school list: CRUD, search, current active school ID. Thin Zustand store that orchestrates Dexie reads/writes. |
+| `usePriceDataStore` (NEW) | CREATE | Global mutable price database. Starts from `DEFAULT_PRICES`, augmented by price updates. Replaces the static import in `usePriceComparisonStore.initialize()`. |
+| `useExportStore` (NEW) | CREATE | DMU target, export format, render state for export preview. |
+
+**Migration from v1:** On first load, check if `rekentool-school-profile` exists in localStorage. If so, create one school record in Dexie and clear localStorage. One-time, transparent.
+
+### 2. Enhanced AI Intake (MODIFY existing)
+
+**Current state:** `lib/ai-intake.ts` does a single extraction: notes in, structured `IntakeExtraction` out. No conversation history, no price capture, no deal context.
+
+**What changes:**
+
+The extraction schema needs to expand, and the intake flow needs to support iterative refinement (add more notes, re-extract, merge).
+
+```typescript
+// Enhanced extraction schema additions
+const EnhancedIntakeSchema = IntakeExtractionSchema.extend({
+  // Price intelligence captured from conversation
+  pricesMentioned: z.array(z.object({
+    moduleId: z.enum(MODULE_IDS).nullable(),
+    provider: z.string(),
+    amount: z.number(),
+    unit: z.enum(['per-student', 'total-year', 'unknown']),
+    confidence: z.enum(['explicit', 'inferred']),
+    context: z.string(), // "school betaalt nu..."
+  })),
+
+  // Deal context
+  dealContext: z.object({
+    currentContractEnd: z.string().nullable(),
+    decisionTimeline: z.string().nullable(),
+    keyStakeholders: z.array(z.string()),
+    objections: z.array(z.string()),
+    positiveSignals: z.array(z.string()),
+  }).nullable(),
+
+  // Conversation metadata
+  conversationType: z.enum(['phone', 'meeting', 'email', 'other']),
+});
+```
+
+**Integration with multi-school:**
+- Intake creates or updates a school profile, not just fills the wizard
+- Each intake becomes a `conversations` record linked to schoolId
+- Price mentions flow into `priceOverrides` with source='intake'
+
+**Files affected:**
+- `lib/ai-intake.ts` — Expand schema, add multi-turn context
+- `features/intake/IntakePanel.tsx` — School selector, conversation history sidebar, richer preview
+- System prompt in `ai-intake.ts` — Expand to capture prices and deal context
+
+**Files NOT affected:**
+- Engine files — They receive prices as input, do not care about source
+- Wizard steps — Continue to work as-is for manual input
+
+### 3. DMU-Targeted Export (NEW feature)
+
+**Current state:** No export functionality exists. Results are screen-only.
+
+**Architecture for export:**
+
+```
+[User selects DMU target] → [ExportStore] → [ExportRenderer engine]
+                                                     │
+                            ┌────────────────────────┤
+                            ↓                        ↓
+                    [Screen preview]          [PDF generation]
+                    (React component)         (html2canvas + jsPDF
+                                               OR @react-pdf/renderer)
+```
+
+**Three DMU perspectives on the same data:**
+
+| DMU | Content Focus | Visual Focus |
+|-----|---------------|--------------|
+| Coordinator | Module-level detail, feature comparison, remediering | Detailed tables, differentiators |
+| MT (Rector) | Executive summary, total costs, strategic value | Summary cards, one-page overview |
+| Finance | Per-student costs, multi-year projection, ROI | Cost tables, trend charts, disclaimers |
+
+**Recommended approach: @react-pdf/renderer**
+
+Use `@react-pdf/renderer` because:
+- React components define the PDF layout (matches existing skill set)
+- Works client-side (no backend needed)
+- Supports Cito brand colors, custom fonts
+- Better control over print layout than html2canvas screenshots
+
+**New files:**
 
 ```
 src/
-  data/
-    pricing/
-      cito-current.ts        # Current Cito platform prices per module
-      cito-new.ts             # New Cito platform prices per module
-      competitors/
-        dia.ts                # DIA prices per module
-        jij-iep.ts            # JIJ (IEP) prices per module
-    modules.ts                # Module definitions (LVS Rekenen, Taal, etc.)
-    time-savings.ts           # Task definitions with time estimates (old vs new)
-    price-metadata.ts         # Verification status, dates, staleness rules
-
+  features/export/
+    ExportPreviewPage.tsx      # Screen preview of what will be exported
+    DMUSelector.tsx            # Pick target audience
+    store.ts                   # Export configuration state
+    templates/
+      coordinator.tsx          # PDF template: coordinator perspective
+      mt.tsx                   # PDF template: MT perspective
+      finance.tsx              # PDF template: finance perspective
+    components/
+      PDFHeader.tsx            # Reusable Cito-branded header
+      CostSummaryTable.tsx     # Shared cost table for PDF
+      DisclaimerBlock.tsx      # Price source disclaimers
   engine/
-    price-comparison.ts       # Scenario A: Cito vs competitor per module
-    migration-calculator.ts   # Scenario B: old vs new platform costs
-    time-savings-calculator.ts # Scenario B: hours saved per task
-    time-value-calculator.ts  # Hours * hourly rate = euro value
-    multi-year-projection.ts  # 1, 3, 5 year projections
-    sensitivity.ts            # Internal mode: 10%/20% discount scenarios
-    types.ts                  # Shared types for all engine functions
-
-  state/
-    app-context.tsx           # React Context for app-wide state
-    use-school-config.ts      # Hook: school size, selected modules
-    use-scenario.ts           # Hook: active scenario (A/B)
-    use-mode.ts               # Hook: internal/external mode
-    use-calculation.ts        # Hook: runs engine, memoizes results
-
-  components/
-    layout/
-      AppShell.tsx            # Top-level layout, mode indicator
-      ScenarioTabs.tsx        # A / B scenario switcher
-      ModeToggle.tsx          # Internal / external toggle (hidden in external builds)
-
-    inputs/
-      SchoolSizeInput.tsx     # Number of students
-      ModuleSelector.tsx      # Checkboxes for modules
-      HourlyRateInput.tsx     # Configurable hourly rate (scenario B)
-      CustomPriceInput.tsx    # Manual price override (internal mode)
-
-    results/
-      PriceComparisonTable.tsx    # Scenario A: side-by-side module prices
-      MigrationSummary.tsx        # Scenario B: cost difference overview
-      TimeSavingsBreakdown.tsx    # Scenario B: per-task time savings
-      TimeSavingsValue.tsx        # Scenario B: time savings in euros
-      MultiYearProjection.tsx     # Scenario B: 1/3/5 year view
-      SensitivityAnalysis.tsx     # Internal: what-if discount scenarios
-      PriceStatusBadge.tsx        # Verified / manual / stale indicator
-
-    charts/
-      ComparisonBarChart.tsx      # Cito vs competitor bar chart
-      ProjectionLineChart.tsx     # Multi-year cost projection
-
-    export/
-      PrintView.tsx               # Print-optimized layout (all sections expanded)
-      CopyToClipboard.tsx         # Summary text to clipboard
-
-    audience/
-      CoordinatorView.tsx         # Time savings focus
-      DirectionView.tsx           # Decision summary focus
-      FinanceView.tsx             # Euro + multi-year focus
-
-  styles/
-    print.css                 # @media print styles
-    theme.ts                  # Cito brand colors, typography
-
-  App.tsx
-  main.tsx
+    export-renderer.ts         # Pure function: data → export-ready structure
 ```
+
+**Data flow:** Engine results (already calculated) → `export-renderer.ts` transforms for DMU perspective → React PDF component renders → Download or print.
+
+### 4. Price Intelligence Pipeline (NEW feature)
+
+**Current state:** Prices are hardcoded in `data/default-prices.ts`. The override system in `usePriceComparisonStore` is per-session (persisted, but not a proper price database).
+
+**What changes:**
+
+Prices become a mutable data layer that can be updated from three sources:
+
+```
+┌────────────────┐  ┌────────────────┐  ┌────────────────┐
+│ AI Intake      │  │ Document       │  │ Manual         │
+│ (conversation) │  │ (price list    │  │ (admin UI)     │
+│                │  │  upload/paste) │  │                │
+└───────┬────────┘  └───────┬────────┘  └───────┬────────┘
+        │                   │                   │
+        ↓                   ↓                   ↓
+┌─────────────────────────────────────────────────────────┐
+│              Price Update Queue                          │
+│  status: pending | verified | rejected                  │
+│  Each update has: source, amount, confidence, date      │
+└────────────────────────┬────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│              Verification Workflow                        │
+│  Auto-verify: publication prices from known sources     │
+│  Manual verify: AI-extracted or document-parsed prices  │
+│  Consultant reviews pending → verify or reject          │
+└────────────────────────┬────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│              Active Price Database (Dexie)               │
+│  Engines read from this instead of DEFAULT_PRICES       │
+│  DEFAULT_PRICES remains as fallback / seed data         │
+└─────────────────────────────────────────────────────────┘
+```
+
+**New files:**
+
+```
+src/
+  features/price-admin/
+    PriceAdminPage.tsx         # View/edit all prices, see staleness
+    PriceUpdateQueue.tsx       # Review pending price updates
+    store.ts                   # usePriceDataStore
+  lib/
+    price-pipeline.ts          # Parse price documents, create update records
+```
+
+**Key design decision:** `DEFAULT_PRICES` stays as the seed/fallback. The `usePriceDataStore` loads defaults, then overlays any verified updates from IndexedDB. This means the engines do not change — they still receive `PriceRecord[]` as input. The store layer handles the merge.
+
+### 5. View Management (MODIFY App.tsx)
+
+**Current state:** `useState<View>` with 5 views. No URL routing, no back button support, no nested views.
+
+**Problem:** v2.0 needs ~10 views. `useState` becomes unwieldy, and lack of URL routing means users cannot bookmark or share school profiles.
+
+**Recommended approach: Keep it simple — expand the state machine, do NOT add a router library.**
+
+Rationale:
+- This is an internal tool, not a public website. URLs are not user-facing.
+- No SEO needed.
+- Adding React Router or TanStack Router for an internal tool adds complexity without proportional value.
+- A well-structured state machine (or just a larger union type) handles this fine.
+
+```typescript
+type View =
+  // Existing
+  | 'wizard'
+  | 'intake'
+  | 'comparison'
+  | 'current-vs-proposed'
+  | 'migration'
+  // New
+  | 'school-list'        // Dashboard: all schools
+  | 'school-detail'      // Single school overview (history, notes, last calc)
+  | 'export-preview'     // DMU export configuration + preview
+  | 'price-admin'        // Global price management
+  ;
+```
+
+**Navigation structure:**
+
+```
+school-list ──→ school-detail ──→ wizard ──→ comparison / current-vs-proposed / migration
+                     │                              │
+                     │                              ↓
+                     ├──→ intake ──────────────→ wizard (pre-filled)
+                     │
+                     └──→ export-preview ──→ (download PDF)
+
+price-admin (accessible from any view via nav)
+```
+
+**Impact on App.tsx:**
+- Replace inline `if (view === '...')` chain with a `switch` or view map
+- Add a navigation context or simple `viewHistory` stack for back-button behavior
+- Add a persistent top nav bar with school name + quick actions
+
+```typescript
+// Simple navigation stack for back behavior
+const [viewStack, setViewStack] = useState<View[]>(['school-list']);
+const currentView = viewStack[viewStack.length - 1];
+
+const navigate = (view: View) => setViewStack(prev => [...prev, view]);
+const goBack = () => setViewStack(prev => prev.length > 1 ? prev.slice(0, -1) : prev);
+```
+
+---
+
+## Recommended Project Structure (v2.0)
+
+```
+src/
+├── app/
+│   ├── App.tsx                    # Root component + view router (MODIFY)
+│   ├── Navigation.tsx             # Top nav bar with school context (NEW)
+│   └── ViewRouter.tsx             # Switch on view state (NEW, extracted from App.tsx)
+│
+├── components/
+│   ├── ui/                        # Existing: PriceBadge, EditableAssumption, etc.
+│   └── wizard/                    # Existing: WizardShell, ProgressBar, etc.
+│
+├── data/
+│   ├── default-prices.ts          # Static seed prices (KEEP, read-only)
+│   ├── default-assumptions.ts     # KEEP
+│   ├── differentiators.ts         # KEEP
+│   ├── cito-migration-prices.ts   # KEEP
+│   ├── jij-license-tiers.ts       # KEEP
+│   └── school-profiles.ts         # KEEP (presets)
+│
+├── db/
+│   ├── schema.ts                  # Dexie database definition (NEW)
+│   ├── migrations.ts              # DB version migrations (NEW)
+│   └── seed.ts                    # Migrate from localStorage (NEW)
+│
+├── engine/
+│   ├── price-comparison.ts        # KEEP UNTOUCHED
+│   ├── current-vs-proposed.ts     # KEEP UNTOUCHED
+│   ├── migration.ts               # KEEP UNTOUCHED
+│   ├── types.ts                   # KEEP, extend if needed
+│   ├── index.ts                   # KEEP
+│   └── export-renderer.ts         # NEW: transform calc results for DMU export
+│
+├── features/
+│   ├── school-profile/
+│   │   ├── store.ts               # MODIFY: add schoolId awareness
+│   │   ├── types.ts               # MODIFY: add school identity fields
+│   │   ├── schemas/               # KEEP
+│   │   └── components/            # KEEP
+│   │
+│   ├── school-list/               # NEW
+│   │   ├── SchoolListPage.tsx     # School dashboard
+│   │   ├── SchoolCard.tsx         # Individual school summary
+│   │   └── SchoolSearch.tsx       # Filter/search schools
+│   │
+│   ├── school-detail/             # NEW
+│   │   ├── SchoolDetailPage.tsx   # Single school overview
+│   │   ├── ConversationHistory.tsx # Past intake conversations
+│   │   └── SchoolActions.tsx      # Quick actions (new calc, export, etc.)
+│   │
+│   ├── intake/
+│   │   ├── IntakePanel.tsx        # MODIFY: multi-turn, school-linked
+│   │   └── ConversationCard.tsx   # NEW: display past conversation
+│   │
+│   ├── price-comparison/
+│   │   ├── store.ts               # MODIFY: school-scoped, reads from PriceDataStore
+│   │   └── [pages + components]   # KEEP
+│   │
+│   ├── price-admin/               # NEW
+│   │   ├── PriceAdminPage.tsx     # Global price management
+│   │   ├── PriceUpdateQueue.tsx   # Pending updates review
+│   │   └── store.ts               # usePriceDataStore
+│   │
+│   └── export/                    # NEW
+│       ├── ExportPreviewPage.tsx   # Preview + download
+│       ├── DMUSelector.tsx         # Pick audience
+│       ├── store.ts               # Export config state
+│       └── templates/
+│           ├── coordinator.tsx     # PDF layout: coordinator
+│           ├── mt.tsx              # PDF layout: MT
+│           └── finance.tsx         # PDF layout: finance
+│
+├── lib/
+│   ├── ai-intake.ts               # MODIFY: expanded schema + context
+│   ├── price-pipeline.ts          # NEW: document parsing for prices
+│   ├── date-utils.ts              # KEEP
+│   └── format.ts                  # KEEP
+│
+├── models/
+│   ├── school.ts                  # MODIFY: add SchoolRecord type
+│   ├── pricing.ts                 # MODIFY: add PriceUpdate type
+│   ├── modules.ts                 # KEEP
+│   ├── assumptions.ts             # KEEP
+│   ├── migration.ts               # KEEP
+│   └── conversation.ts            # NEW: conversation/intake record type
+│
+└── main.tsx                       # MODIFY: initialize Dexie DB on startup
+```
+
+---
 
 ## Architectural Patterns
 
-### Pattern 1: Pure Calculation Engine (no React, no side effects)
+### Pattern 1: DB-Backed Zustand (for multi-school persistence)
 
-The calculation engine is the heart of the tool and MUST be pure TypeScript functions with zero React dependencies. This enables unit testing without component rendering, reuse across scenarios, and predictable outputs.
+**What:** Zustand stores remain the reactive in-memory layer, but sync to/from Dexie for persistence. The store does not use `persist` middleware for data that lives in Dexie.
 
-**What:** All pricing math, time savings, projections live in `engine/` as pure functions.
-**When:** Always. Every calculation goes through the engine, never inline in components.
+**When to use:** Any data that spans multiple school records or needs to survive beyond a single session.
 
-```typescript
-// engine/price-comparison.ts
-interface ModuleComparison {
-  moduleId: string;
-  moduleName: string;
-  citoPrice: number;
-  competitorPrice: number | null;
-  difference: number | null;
-  citoPerStudent: number;
-  competitorPerStudent: number | null;
-}
-
-export function compareModulePrices(
-  selectedModules: string[],
-  studentCount: number,
-  competitor: CompetitorId,
-  priceOverrides?: Map<string, number>  // internal mode
-): ModuleComparison[] {
-  // Pure function: data in, results out
-}
-```
+**Trade-offs:** More complexity than pure Zustand persist, but necessary for multi-record data. localStorage persist is fine for UI preferences (e.g., last active view, sidebar collapsed).
 
 ```typescript
-// engine/time-savings-calculator.ts
-export function calculateTimeSavings(
-  tasks: TimeSavingsTask[],
-  schoolConfig: SchoolConfig
-): TimeSavingsResult {
-  // Pure: task definitions + school size = hours saved
+// Pattern: Zustand store that syncs with Dexie
+interface SchoolDBState {
+  schools: SchoolRecord[];
+  activeSchoolId: string | null;
+  isLoading: boolean;
+
+  loadSchools: () => Promise<void>;
+  setActiveSchool: (id: string) => Promise<void>;
+  createSchool: (name: string) => Promise<string>;
+  updateSchool: (id: string, data: Partial<SchoolRecord>) => Promise<void>;
+  deleteSchool: (id: string) => Promise<void>;
 }
 
-export function timeSavingsToEuros(
-  savings: TimeSavingsResult,
-  hourlyRate: number
-): number {
-  // Pure: hours * rate
-}
-```
+export const useSchoolDBStore = create<SchoolDBState>()((set, get) => ({
+  schools: [],
+  activeSchoolId: null,
+  isLoading: true,
 
-### Pattern 2: Mode as Context, Not Conditionals Everywhere
-
-**What:** A single React Context provides the current mode. Components that differ between modes use a mode-aware wrapper, not scattered if-statements.
-
-**When:** Any component that behaves differently in internal vs. external mode.
-
-```typescript
-// state/use-mode.ts
-type AppMode = 'internal' | 'external';
-
-const ModeContext = createContext<AppMode>('external');
-
-export function useMode(): AppMode {
-  return useContext(ModeContext);
-}
-
-// Usage pattern: mode-aware component
-export function useIsInternal(): boolean {
-  return useMode() === 'internal';
-}
-```
-
-```typescript
-// components/results/SensitivityAnalysis.tsx
-export function SensitivityAnalysis({ results }: Props) {
-  const isInternal = useIsInternal();
-  if (!isInternal) return null;  // Simply not rendered in external mode
-
-  return <div>...</div>;
-}
-```
-
-**Key principle:** External mode is the DEFAULT. Internal mode ADDS features. Never build internal-first and strip things out -- build external-first and layer internal features on top. This prevents accidental data leakage.
-
-### Pattern 3: Scenario as State Machine
-
-**What:** Each scenario (A, B, future C) is a distinct configuration that defines which inputs are needed, which engine functions run, and which result components render.
-
-**When:** Switching between scenarios, determining what to show.
-
-```typescript
-// state/use-scenario.ts
-interface ScenarioConfig {
-  id: 'A' | 'B';
-  label: string;
-  requiredInputs: InputType[];
-  engineFunctions: EngineFunction[];
-  resultComponents: ComponentType[];
-}
-
-const SCENARIOS: Record<string, ScenarioConfig> = {
-  A: {
-    id: 'A',
-    label: 'Cito vs. concurrentie',
-    requiredInputs: ['schoolSize', 'moduleSelection', 'competitor'],
-    engineFunctions: ['compareModulePrices'],
-    resultComponents: [PriceComparisonTable, ComparisonBarChart],
+  loadSchools: async () => {
+    const schools = await db.schools.toArray();
+    set({ schools, isLoading: false });
   },
-  B: {
-    id: 'B',
-    label: 'Overstap nieuw platform',
-    requiredInputs: ['schoolSize', 'moduleSelection', 'hourlyRate'],
-    engineFunctions: ['migrationCost', 'timeSavings', 'multiYearProjection'],
-    resultComponents: [MigrationSummary, TimeSavingsBreakdown, MultiYearProjection],
+
+  setActiveSchool: async (id) => {
+    const school = await db.schools.get(id);
+    if (!school) return;
+
+    // Hydrate the school profile store with this school's data
+    const profileStore = useSchoolProfileStore.getState();
+    profileStore.hydrateFromRecord(school);
+
+    set({ activeSchoolId: id });
   },
-};
+  // ...
+}));
 ```
 
-This makes adding Scenario C later straightforward: define its config, wire the inputs, done.
+### Pattern 2: Engine Isolation (preserve existing contract)
 
-### Pattern 4: Data with Metadata
+**What:** The three existing engines remain pure functions. New features feed them data differently, but never modify their signatures.
 
-**What:** Every price point carries metadata: source, verification status, last verified date.
+**When to use:** Always. This is the most important architectural invariant.
 
-**When:** All pricing data, always.
+**Trade-offs:** May require adapter/transformer functions between new data shapes and engine inputs. Worth it for testability and safety.
 
 ```typescript
-// data/price-metadata.ts
-interface PricedItem {
-  moduleId: string;
-  pricePerStudent: number;
-  source: 'publication' | 'manual' | 'ai-extracted';
-  verificationStatus: 'verified' | 'manual' | 'possibly-outdated' | 'unknown';
-  lastVerified: string;  // ISO date
-  stalenessThresholdDays: number;  // default 180
-}
+// The engine contract stays the same:
+calculateComparison(selectedModules, studentCounts, prices) → ComparisonResult
 
-export function isPriceStale(item: PricedItem): boolean {
-  const daysSinceVerified = differenceInDays(new Date(), new Date(item.lastVerified));
-  return daysSinceVerified > item.stalenessThresholdDays;
-}
+// What changes is WHERE prices come from:
+// v1: static import DEFAULT_PRICES
+// v2: usePriceDataStore merges DEFAULT_PRICES + verified updates + school overrides
 ```
 
-### Pattern 5: Audience-Driven Result Views
+### Pattern 3: Feature Folders with Lazy Loading
 
-**What:** The same calculated data is presented differently per audience (coordinator, direction, finance). These are NOT separate calculations -- they are different projections of the same result set.
+**What:** Each new feature (school-list, export, price-admin) is a self-contained folder. Use `React.lazy()` for pages that are not on the initial render path.
 
-**When:** Displaying results in Scenario B.
+**When to use:** For all new page-level components. Keeps the initial bundle small.
 
 ```typescript
-// The calculation runs once:
-const results = useCalculationResults();
-
-// Each audience view selects and emphasizes different parts:
-<CoordinatorView results={results} />   // Emphasizes: hours saved per task
-<DirectionView results={results} />     // Emphasizes: summary, recommendation
-<FinanceView results={results} />       // Emphasizes: euros, multi-year
+// In ViewRouter.tsx
+const SchoolListPage = lazy(() => import('./features/school-list/SchoolListPage'));
+const ExportPreviewPage = lazy(() => import('./features/export/ExportPreviewPage'));
+const PriceAdminPage = lazy(() => import('./features/price-admin/PriceAdminPage'));
 ```
 
-## Data Flow
+---
 
-### Input to Output Flow
+## Data Flow Changes
 
-```
-User enters school size (e.g., 800 students)
-  |
-User selects modules (e.g., LVS Rekenen, Capaciteitentest)
-  |
-User picks scenario (A or B)
-  |
-  v
-State Manager aggregates: { studentCount, modules[], scenario, mode, hourlyRate? }
-  |
-  v
-Calculation Engine (pure functions):
-  Scenario A: compareModulePrices(modules, studentCount, competitor)
-  Scenario B: migrationCost(...) + timeSavings(...) + multiYear(...)
-  |
-  v
-Computed results stored in state (memoized via useMemo)
-  |
-  v
-Result components render from computed results
-  |
-  v
-Chart components receive same computed results, render visualizations
-  |
-  v
-Export: print triggers @media print CSS (all sections expanded, charts rendered)
-        clipboard copies pre-formatted text summary
-```
-
-### Mode Flow
+### v1 Data Flow (current)
 
 ```
-Mode toggle (URL param or hidden toggle)
-  |
-  v
-ModeContext provides 'internal' | 'external' to all components
-  |
-  v
-Internal-only components: conditionally rendered (SensitivityAnalysis, CustomPriceInput, SalesSignals)
-External components: always rendered
-  |
-  v
-Calculation engine receives priceOverrides only in internal mode
-  |
-  v
-Internal mode adds: discount scenarios, market averages, manual price entry
-External mode shows: publication prices only, neutral language
+Wizard inputs → useSchoolProfileStore → usePriceComparisonStore.initialize()
+                                              │
+                                              ↓
+                                        calculateComparison(
+                                          selectedModules,
+                                          studentCounts,
+                                          DEFAULT_PRICES  ← static
+                                        )
+                                              │
+                                              ↓
+                                        ComparisonResult → UI
 ```
 
-### Print/Export Flow
+### v2 Data Flow (target)
 
 ```
-User clicks "Print" or "Afdrukken"
-  |
-  v
-PrintView component: renders ALL sections in expanded state
-  |
-  v
-@media print CSS:
-  - Hides: navigation, mode toggle, input controls
-  - Shows: all result sections, expanded calculations, charts
-  - Adjusts: page breaks, Cito branding header/footer
-  |
-  v
-Browser native print dialog (save as PDF or print)
-
-User clicks "Kopieer samenvatting"
-  |
-  v
-Generate plain-text summary from calculation results
-  |
-  v
-navigator.clipboard.writeText(summary)
+School selected from list
+    │
+    ↓
+useSchoolDBStore.setActiveSchool(id)
+    │
+    ├──→ useSchoolProfileStore.hydrateFromRecord(school)
+    │
+    ├──→ usePriceDataStore.getSchoolPrices(schoolId)
+    │       merges: DEFAULT_PRICES + global verified updates + school-specific overrides
+    │
+    └──→ usePriceComparisonStore.initialize()
+              │
+              ↓
+         calculateComparison(
+           selectedModules,
+           studentCounts,
+           mergedPrices  ← dynamic per school
+         )
+              │
+              ↓
+         ComparisonResult
+              │
+              ├──→ Comparison UI (existing)
+              │
+              └──→ export-renderer.ts → DMU template → PDF
 ```
+
+### AI Intake Data Flow (enhanced)
+
+```
+Consultant types notes
+    │
+    ↓
+extractIntakeFromNotes(notes, previousConversations?)  ← enhanced
+    │
+    ↓
+EnhancedIntakeExtraction
+    │
+    ├──→ Create/update school profile in Dexie
+    │
+    ├──→ Save conversation record in Dexie
+    │
+    ├──→ Create price update records (status: 'pending')
+    │       for any prices mentioned in conversation
+    │
+    └──→ Hydrate wizard for review/correction
+```
+
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Calculations in Components
-**What:** Putting price math directly in React components.
-**Why bad:** Untestable, duplicated, breaks when component refactors. Makes it impossible to share logic between Scenario A, B, and future C.
-**Instead:** All math in `engine/` as pure functions. Components only render results.
+### Anti-Pattern 1: Putting Dexie in Zustand Persist
 
-### Anti-Pattern 2: Internal Mode as a Separate App
-**What:** Building two separate codebases or entry points for internal vs. external.
-**Why bad:** Feature drift, double maintenance, bugs fixed in one but not the other.
-**Instead:** Single codebase, mode as context. Internal features are additive layers on top of the external base.
+**What people do:** Use Zustand persist middleware to write school data to localStorage, then also use Dexie for the same data.
 
-### Anti-Pattern 3: Hardcoded Competitor Data in Components
-**What:** Scattering competitor names, prices, module mappings throughout JSX.
-**Why bad:** Adding a new competitor (or updating prices) requires touching dozens of files.
-**Instead:** All competitor data in `data/pricing/competitors/`. Components are competitor-agnostic, driven by data structures.
+**Why it's wrong:** Two sources of truth. localStorage and IndexedDB can get out of sync. localStorage has a 5-10MB limit that breaks with many schools.
 
-### Anti-Pattern 4: Generating PDF Server-Side
-**What:** Adding a backend just for PDF generation.
-**Why bad:** Violates the stateless, no-backend constraint. Adds infrastructure for a single feature.
-**Instead:** Use `@media print` CSS for print-optimized output. Browser's "Save as PDF" is the PDF export. Use `react-to-print` if programmatic trigger is needed.
+**Do this instead:** Use Dexie as the single persistence layer for school data. Zustand stores are in-memory only (no `persist` for school-related data). On app load, Dexie hydrates Zustand. On save, Zustand writes to Dexie. Keep Zustand `persist` only for UI preferences (sidebar state, last view).
 
-### Anti-Pattern 5: Premature Audience Fragmentation
-**What:** Building completely separate page flows for coordinator, director, and finance from day one.
-**Why bad:** Over-engineering. The data is the same, only emphasis differs.
-**Instead:** Build one results view first. Add audience-specific emphasis (tabs or accordion sections) once the calculation engine and core UI are stable.
+### Anti-Pattern 2: Making Engines Stateful
 
-## Suggested Build Order
+**What people do:** Pass store references or school IDs into engine functions so they can look up their own data.
 
-Based on dependencies between components:
+**Why it's wrong:** Breaks the pure function guarantee. Makes engines untestable without mocking stores.
 
-| Order | Component | Depends On | Rationale |
-|-------|-----------|------------|-----------|
-| 1 | **Data Layer** | Nothing | Foundation. Define TypeScript types for modules, prices, metadata. Populate with real Cito and competitor prices. Everything else reads from this. |
-| 2 | **Calculation Engine** | Data Layer | Pure functions, fully unit-testable without any UI. Validates that the business logic is correct before any visual work. |
-| 3 | **State Management** | Engine types | React Context + hooks. Wire up school config, scenario selection, mode toggle. |
-| 4 | **Input Components** | State Management | School size, module selector, scenario tabs. The "left side" of the tool. |
-| 5 | **Scenario A Results** | Engine + State | Price comparison table + bar chart. First visible output. Most straightforward scenario. |
-| 6 | **Scenario B Results** | Engine + State | Migration costs + time savings. More complex, benefits from patterns established in step 5. |
-| 7 | **Mode Layer** | State + Results | Internal/external toggle. Layer internal-only features (sensitivity, overrides) on top of working external mode. |
-| 8 | **Audience Views** | Results components | Different emphasis of same data. Only makes sense once results are stable. |
-| 9 | **Export** | All display components | Print CSS + clipboard. Last because it depends on all visual output being finalized. |
+**Do this instead:** Always resolve data in the store layer, then pass plain data to engines. The engine never knows about Zustand, Dexie, or school IDs.
 
-**Key dependency insight:** Steps 1-2 (Data + Engine) carry zero UI risk. They can be built, tested, and validated against real pricing data before any React code is written. This de-risks the most critical part of the tool: correctness of calculations.
+### Anti-Pattern 3: Premature URL Routing
 
-## Scalability Considerations
+**What people do:** Add React Router because "more views = need a router."
 
-| Concern | Current (2 competitors) | Future (5+ competitors) | Mitigation |
-|---------|------------------------|-------------------------|------------|
-| Data structure | Static TS files per competitor | Same pattern, more files | Competitor data follows interface; adding one = adding one file |
-| Module mapping | Manual cross-reference | Needs mapping table | Build module equivalence mapping from day one |
-| Scenario C | Not built | Combination of A+B | Scenario config pattern makes this additive, not invasive |
-| Price staleness | Manual tracking | Still manual, more to track | Metadata with `lastVerified` dates flags stale data automatically |
-| Print layout | Single page | Multi-page with breaks | CSS `page-break-before` on section boundaries from the start |
+**Why it's wrong:** For an internal tool with no SEO, no deep linking requirements, and no server-side rendering, a router adds configuration overhead, history management complexity, and a dependency — all for features nobody needs.
+
+**Do this instead:** Expand the `View` union type and use a simple navigation stack. If deep linking becomes needed later (unlikely for internal tool), add a router at that point.
+
+### Anti-Pattern 4: One Giant Store
+
+**What people do:** Merge all school data, prices, export config, and UI state into one mega-store.
+
+**Why it's wrong:** Every component re-renders on any state change. Slows down the app and makes debugging painful.
+
+**Do this instead:** Keep stores focused. School DB, school profile, price comparison, price data, and export are separate stores. They communicate via `getState()` (already established pattern).
+
+---
+
+## Integration Points
+
+### External Services
+
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| Anthropic API (Claude Haiku 4.5) | Direct SDK call from browser | Already works. Expand prompts for enhanced intake. Keep `dangerouslyAllowBrowser: true` (internal tool). |
+| Browser Print API | `window.print()` with `@media print` CSS | Baseline export — free, zero dependencies. Good for quick prints. |
+| @react-pdf/renderer | Client-side PDF generation | For branded DMU exports. Adds ~200KB to bundle. Lazy-load the export feature. |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| SchoolDB store <-> SchoolProfile store | `getState()` hydration on school switch | SchoolDB is the source of truth. SchoolProfile is the working copy. |
+| PriceData store <-> PriceComparison store | PriceData provides merged prices to PriceComparison | Replaces the static `DEFAULT_PRICES` import |
+| Intake <-> SchoolDB | Intake creates/updates school records | Conversation records linked by schoolId |
+| Export <-> Engine results | Export renderer reads ComparisonResult | No new engine required — just data transformation |
+
+---
+
+## Build Order (dependency-driven)
+
+The features have clear dependencies. Build in this order:
+
+```
+Phase 1: Multi-school persistence (foundation for everything else)
+   │  - Dexie schema + migrations
+   │  - useSchoolDBStore
+   │  - Modify useSchoolProfileStore (add schoolId, remove persist for school data)
+   │  - SchoolListPage + SchoolDetailPage
+   │  - localStorage migration
+   │  - Modify App.tsx view management
+   │
+Phase 2: Enhanced AI intake (depends on multi-school)
+   │  - Expand IntakeExtractionSchema
+   │  - Update system prompt
+   │  - Link intake to school records
+   │  - Conversation history storage + display
+   │
+Phase 3: Price intelligence pipeline (depends on multi-school)
+   │  - usePriceDataStore
+   │  - Modify usePriceComparisonStore to read from PriceDataStore
+   │  - PriceAdminPage + verification workflow
+   │  - Connect intake price mentions to price pipeline
+   │
+Phase 4: DMU-targeted exports (depends on phases 1-3 for full data)
+      - Export templates (coordinator, MT, finance)
+      - ExportPreviewPage
+      - PDF generation with @react-pdf/renderer
+      - useExportStore
+```
+
+**Why this order:**
+1. Multi-school persistence is the foundation — intake, prices, and exports all need school identity.
+2. Enhanced intake is high daily-use value and exercises the multi-school system.
+3. Price pipeline builds on the intake price capture and the multi-school data layer.
+4. Export comes last because it needs all the data to be in place (school context, prices, calculations) to produce meaningful DMU documents.
+
+---
+
+## Scaling Considerations
+
+| Concern | At 10 schools | At 100 schools | At 1000 schools |
+|---------|---------------|----------------|-----------------|
+| IndexedDB size | Negligible (~1KB/school) | ~100KB total | ~1MB total, still fine |
+| School list render | No optimization needed | No optimization needed | Virtualize list (react-window) |
+| Price data | Tiny — 6 modules x 3 providers | Same | Same — price data does not scale with schools |
+| PDF generation | Fast, <1s | Same (per-school) | Same |
+| AI API calls | Rate limits unlikely | Rate limits unlikely | Monitor API costs |
+
+This tool will never have 1000 schools per consultant. The realistic maximum is 50-100. Scaling is not a concern.
+
+---
 
 ## Sources
 
-- [Martin Fowler - Modularizing React Applications](https://martinfowler.com/articles/modularizing-react-apps.html) - Layered architecture patterns
-- [React State Management in 2025](https://www.developerway.com/posts/react-state-management-2025) - Context + hooks for medium-complexity apps
-- [react-to-print on npm](https://www.npmjs.com/package/react-to-print) - Client-side print trigger library
-- [html2pdf.js](https://ekoopmans.github.io/html2pdf.js/) - Fallback for programmatic PDF if needed
-- [React Feature Flags pattern](https://github.com/sergiodxa/flagged) - Mode toggling via context
-- [GeeksforGeeks - React Architecture Patterns](https://www.geeksforgeeks.org/reactjs/react-architecture-pattern-and-best-practices/) - Container/presentation separation
+- Direct codebase analysis of all files in `src/` (2026-03-21)
+- Zustand documentation — persist middleware, `getState()` pattern
+- Dexie.js — IndexedDB wrapper for structured client-side persistence (used by many offline-first React apps)
+- @react-pdf/renderer — client-side React-based PDF generation
+- Project context from `.planning/PROJECT.md`
+- Existing architecture research from `.planning/research/ARCHITECTURE.md` (2026-03-20)
+
+---
+*Architecture research for: Rekentool VO v2.0 Sales Intelligence Integration*
+*Researched: 2026-03-21*

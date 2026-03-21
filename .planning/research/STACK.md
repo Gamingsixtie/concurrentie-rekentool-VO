@@ -1,261 +1,252 @@
-# Technology Stack
+# Stack Research — v2.0 Sales Intelligence Additions
 
-**Project:** Rekentool VO -- Prijsvergelijking & Overstap Business Case
-**Researched:** 2026-03-20
-**Overall confidence:** HIGH
+**Domain:** Sales intelligence platform (AI intake, school persistence, DMU exports, price updates)
+**Researched:** 2026-03-21
+**Confidence:** HIGH (core libraries verified via npm/official docs)
 
-## Decision: React over Svelte
+> This document covers ONLY new stack additions for v2.0. The v1.0 stack (React 19, TypeScript, Vite 8, Tailwind CSS 4, Zustand, Zod v4, Vitest, Recharts 3, Anthropic SDK, react-hook-form) is validated and unchanged.
 
-This project should use **React** because:
+## Existing Stack Reference
 
-1. **Charting ecosystem is mature**: Recharts is React-native, composable, and renders SVG (critical for print). Svelte's charting options (LayerChart, Svend3r) are newer and less battle-tested.
-2. **Print/export story is solved**: `react-to-print` (833K weekly downloads) handles the browser print workflow. Svelte has no equivalent.
-3. **Cito is a corporate environment**: React developers are easier to find and onboard in the Netherlands. Svelte talent is scarce.
-4. **The app is a single-page tool, not a web app**: No routing, no SSR, no complex state -- React's heavier runtime (~40KB) is irrelevant for a tool loaded once per session.
-5. **TypeScript support is first-class**: React + TypeScript is the most documented combination in the ecosystem.
+Already validated in v1.0 -- listed for integration context only:
 
-Svelte would deliver a smaller bundle and arguably cleaner code, but the charting/print ecosystem gap and hiring considerations outweigh those benefits for this project.
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React | ^19.2.4 | UI framework |
+| TypeScript | ~5.9.3 | Type safety |
+| Vite | ^8.0.1 | Build tooling |
+| Tailwind CSS | ^4.2.2 | Styling |
+| Zustand | ^5.0.12 | State management (with persist middleware -> localStorage) |
+| Zod | ^4.3.6 | Schema validation |
+| Vitest | ^4.1.0 | Testing |
+| Recharts | ^3.8.0 | Charts |
+| @anthropic-ai/sdk | ^0.80.0 | AI integration (Claude Haiku 4.5) |
+| react-hook-form | ^7.71.2 | Form management |
+| @hookform/resolvers | ^5.2.2 | Zod-to-RHF bridge |
 
-## Recommended Stack
+## New Stack Additions
 
-### Core Framework
+### 1. School Data Persistence -- Dexie.js
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| React | 19.2.x | UI framework | Largest ecosystem, best charting/print library support, corporate-friendly hiring pool | HIGH |
-| TypeScript | 5.x | Type safety | Pricing calculations need type safety; prevents bugs in financial logic | HIGH |
-| Vite | 8.0.x | Build tool | 10-30x faster builds with Rolldown engine; trivial static deployment; `vite build` produces a `dist/` folder ready for any web server | HIGH |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| dexie | ^4.3.0 | IndexedDB wrapper for school profiles, conversations, deals, price snapshots | Best-in-class IndexedDB abstraction. TypeScript-first, reactive queries via `useLiveQuery`, handles schema migrations, 922K+ weekly downloads. Current Zustand+localStorage is fine for session state but inadequate for relational school data (profiles linked to conversations linked to deals). Dexie gives structured querying without a server. |
+| dexie-react-hooks | ^4.2.0 | Reactive React hooks for Dexie queries | `useLiveQuery` auto-rerenders components when IndexedDB data changes -- same reactivity pattern as Zustand but for persistent data. No manual subscription wiring. |
 
-### Styling
+**Why Dexie over alternatives:**
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Tailwind CSS | 4.2.x | Utility-first CSS | Built-in `print:` variant for print stylesheets; responsive utilities for tablet; fast prototyping; Cito brand colors defined once as CSS variables | HIGH |
+| Alternative | Why Not |
+|-------------|---------|
+| Raw IndexedDB | API is notoriously painful -- callback-heavy, no migrations, no TypeScript support. Dexie wraps it cleanly. |
+| localStorage (current) | Flat key-value store, ~5MB limit. School profiles with conversation history and price snapshots need structured queries ("all conversations for school X sorted by date"). IndexedDB has no practical size limit. |
+| RxDB | Overkill. Adds observables, replication protocols, complex setup. This is a single-user local tool -- no sync needed. |
+| sql.js (SQLite in WASM) | ~1MB WASM runtime, no native React hooks, manual persistence to IndexedDB anyway. Dexie is lighter and more idiomatic for browser-first apps. |
 
-**Print strategy:** Use Tailwind's `print:hidden` / `print:block` modifiers to control what appears in print output. Add a small `print.css` for page breaks and margins. No PDF generation library needed -- browser `window.print()` via `react-to-print` produces professional output when print CSS is done right.
+**Integration with Zustand:** Keep Zustand for ephemeral UI state (current wizard step, active view, draft overrides, streaming conversation state). Use Dexie for persistent domain data (school profiles, conversation logs, price snapshots, deals). Components read persistent data via `useLiveQuery`; store actions write to Dexie via `db.schools.put()`.
 
-### Charting / Visualization
+**Schema migration story:** Dexie handles IndexedDB version upgrades declaratively. When the data model changes, increment the version number and Dexie migrates existing data. Critical for a tool that accumulates school intelligence over time.
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Recharts | 3.8.x | Bar charts, comparison visuals | React-native (composable components); renders SVG (prints cleanly, unlike Canvas-based Chart.js); small datasets (<100 data points) so performance is not a concern; built-in responsive container | HIGH |
+### 2. AI Conversation Streaming -- No New Dependency
 
-**Why not Chart.js:** Chart.js renders to `<canvas>`, which produces blurry output when printed and requires separate image export handling. Recharts renders `<svg>`, which prints at native resolution and scales perfectly. For a print-heavy sales tool, this is decisive.
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @anthropic-ai/sdk | ^0.80.0 (existing) | Streaming conversation + structured extraction | Already installed. The SDK's `client.messages.stream()` method provides real-time token streaming with event handlers (`on('text')`, `on('message')`). No new dependency needed. |
 
-### Print / Export
+**What changes from v1.0 to v2.0:**
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| react-to-print | 3.3.x | Browser print dialog | 833K weekly downloads; handles print lifecycle (expand sections, wait for render, trigger print); no server needed | HIGH |
-| Native Clipboard API | -- | Copy summary to clipboard | `navigator.clipboard.writeText()` is supported in all modern browsers; no library needed | HIGH |
+The current `ai-intake.ts` uses `messages.parse()` -- a single request/response for structured extraction. For real-time conversation intake during phone calls, the pattern shifts:
 
-**Why not jsPDF / html2pdf.js:** These add 150KB+ to the bundle and produce inferior output compared to browser-native printing with proper CSS. The PROJECT.md specifies "printbare output" and "print-geoptimaliseerde CSS" -- this is exactly what `@media print` CSS rules deliver. PDF generation would be over-engineering.
+1. **Streaming responses** via `client.messages.stream()` -- shows AI analysis appearing in real-time as the consultant types notes. Uses the same `dangerouslyAllowBrowser: true` pattern already in place.
+2. **Multi-turn conversation** -- maintain message history in Zustand (array of `{role, content}` pairs). Each new consultant note appends to history, Claude responds with updated analysis.
+3. **Structured extraction at end** -- when consultant finishes the call, one final `messages.parse()` call with the full conversation to extract the structured `IntakeExtraction` result (same Zod schema, already built).
+4. **Persist to Dexie** -- completed conversations saved to `conversations` table linked to school profile.
 
-### State Management
+**Why NOT Vercel AI SDK (`ai` package):** Adds 200KB+ multi-provider abstraction layer for multi-provider support we do not need. This tool exclusively uses Claude Haiku 4.5. The `@anthropic-ai/sdk` already handles streaming, structured output, and conversation history natively. Adding `ai` would mean two abstraction layers over the same API.
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| React useState/useReducer | (built-in) | Component state | The app is stateless (no persistence). All state is user input + derived calculations. React's built-in hooks are sufficient; adding Redux or Zustand would be over-engineering | HIGH |
+### 3. DMU-Targeted Document Export -- @react-pdf/renderer
 
-**Pattern:** Use `useReducer` for the calculation engine (school config -> derived pricing state). Use `useState` for UI state (which sections are expanded, which mode is active). No external state library.
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @react-pdf/renderer | ^4.3.2 | PDF generation from React components | React-native JSX syntax for PDF creation. Supports Flexbox layout, custom fonts, images, and styled components. Compatible with React 19 since v4.1.0. 860K+ weekly downloads, actively maintained. Generates PDFs entirely client-side. |
 
-### Data Layer
+**Why @react-pdf/renderer for DMU exports:**
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Embedded JSON/TypeScript modules | -- | Pricing data, product catalog, time savings data | No backend. All data is embedded at build time as typed TypeScript objects. Easy to update by editing source files and rebuilding | HIGH |
+- **React-native approach:** Define PDF documents using JSX (`<Document>`, `<Page>`, `<View>`, `<Text>`) with a styling API similar to React Native's StyleSheet. Cito branding (#003082, #FF6600) maps directly to style objects.
+- **DMU-targeted templates:** Each DMU persona (coordinator, MT, finance) gets a different React component tree that renders to PDF. Same calculation data, different presentation -- pure React composition.
+- **Client-side only:** No backend PDF service. Generated in the browser via `pdf().toBlob()` and offered as download.
+- **Cito branding:** Custom fonts via `Font.register()`. Colors, margins, headers fully controllable per persona template.
 
-**Structure:**
-```
-src/data/
-  products.ts       # Product catalog (modules, features per provider)
-  pricing.ts        # Pricing tables (Cito, DIA, JIJ)
-  timeSavings.ts    # Time savings per task (minutes old vs new)
-  config.ts         # Defaults (hourly rate, school size presets)
-```
+**Why this is a v1.0 stack decision REVERSAL:**
 
-### Supporting Libraries
+The v1.0 STACK.md recommended against PDF libraries ("jsPDF/html2pdf.js adds 150KB+ for inferior output") and recommended `react-to-print` + print CSS instead. That was correct for v1.0's scope (printing the screen). v2.0 changes the requirement fundamentally:
 
-| Library | Version | Purpose | When to Use | Confidence |
-|---------|---------|---------|-------------|------------|
-| clsx | 2.x | Conditional class names | Combining Tailwind classes conditionally (e.g., mode-dependent styling) | HIGH |
-| @headlessui/react | 2.x | Accessible UI primitives | Dropdowns, toggles, disclosure (expand/collapse) components -- unstyled, Tailwind-compatible | MEDIUM |
+- DMU exports need **distinct documents per persona** -- the coordinator sees feature comparisons, finance sees multi-year projections, MT sees an executive summary. These are not screen captures; they are tailored documents.
+- `react-to-print` mirrors screen content. It cannot produce three different documents from the same data.
+- `@react-pdf/renderer` produces purpose-built PDFs with controlled layout, pagination, headers/footers, and branding per document type.
 
-### Development Tools
+**Print CSS still useful:** For simple "print this screen" (comparison results, migration business case), keep Tailwind's `print:` variant. No library needed for that. `@react-pdf/renderer` handles the complex DMU documents.
 
-| Tool | Version | Purpose | Why | Confidence |
-|------|---------|---------|-----|------------|
-| ESLint | 9.x | Code quality | Catches bugs in calculation logic before they ship | HIGH |
-| Prettier | 3.x | Code formatting | Consistent formatting across contributors | HIGH |
-| Vitest | 3.x | Unit testing | Vite-native test runner; critical for testing pricing calculations and time savings formulas | HIGH |
+| Use Case | Solution |
+|----------|----------|
+| Print current comparison view | Tailwind `print:` variant + `window.print()` |
+| DMU export: Coordinator rapport | `@react-pdf/renderer` with coordinator template |
+| DMU export: MT business case | `@react-pdf/renderer` with MT template |
+| DMU export: Finance meerjarenprojectie | `@react-pdf/renderer` with finance template |
 
-## What NOT to Use
+### 4. Auto-Price-Update Pipeline -- No New Dependencies
 
-| Technology | Why Not |
-|------------|---------|
-| Next.js / Remix / SvelteKit | No SSR, no routing, no API routes needed. This is a single-page static tool. A full framework adds complexity for zero benefit. |
-| Redux / Zustand / Jotai | Over-engineering. The app has no shared state across distant components. `useReducer` handles the calculation engine pattern perfectly. |
-| Chart.js / react-chartjs-2 | Canvas-based rendering produces blurry prints. SVG (Recharts) is mandatory for a print-focused sales tool. |
-| jsPDF / html2pdf.js / pdfmake | 150KB+ bundle bloat for inferior output. Browser `window.print()` with proper print CSS is superior. |
-| Material UI / Ant Design / Chakra UI | Heavy component libraries (300KB+) that fight Cito's brand identity. Tailwind + headlessUI gives full control over Cito styling. |
-| i18next / react-intl | The tool is Dutch-only. Hardcoded Dutch strings in components. No internationalization needed. |
-| D3.js (directly) | Powerful but imperative and verbose. Recharts wraps D3 in React components -- use the wrapper. |
-| Firebase / Supabase / any backend | The tool is explicitly stateless. No user accounts, no saved comparisons. All data is embedded. |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @anthropic-ai/sdk | ^0.80.0 (existing) | Document parsing via Claude for price extraction | Claude Haiku 4.5 extracts structured price data from pasted text (price lists, emails, web content). Same SDK, same `messages.parse()` pattern with a price-extraction Zod schema. |
+| Zod | ^4.3.6 (existing) | Schema validation for extracted prices | Define `PriceUpdateSchema` with source attribution and expiry dates. Already the project's validation standard. |
 
-## Alternatives Considered
+**The pipeline is logic, not libraries:**
 
-| Category | Recommended | Alternative | Why Not Alternative |
-|----------|-------------|-------------|---------------------|
-| Framework | React 19 | Svelte 5 | Weaker charting/print ecosystem; smaller hiring pool in NL corporate |
-| Framework | React 19 | Vue 3 | Similar capability but React's Recharts + react-to-print combination is stronger than Vue equivalents |
-| Build tool | Vite 8 | Webpack 5 | Vite is 5-30x faster; simpler config; industry standard for new projects |
-| Charts | Recharts | Nivo | Nivo is excellent but heavier; Recharts is simpler for bar charts and comparison visuals |
-| Charts | Recharts | Apache ECharts | Overkill for simple bar charts; imperative API doesn't fit React patterns |
-| Styling | Tailwind CSS 4 | CSS Modules | Tailwind's `print:` variant and responsive utilities save significant development time |
-| Styling | Tailwind CSS 4 | Styled Components | Runtime CSS-in-JS is being phased out; Tailwind is zero-runtime |
-| Print | react-to-print + CSS | Puppeteer/Playwright PDF | Requires a server. This tool must work fully client-side |
+1. **Manual entry** -- React form with react-hook-form + Zod validation (existing pattern)
+2. **Document paste** -- Consultant pastes price list text, Claude extracts structured prices via `messages.parse()` with a `PriceExtractionSchema`
+3. **Persist** -- Validated prices saved to Dexie `priceSnapshots` table with source, date, expiry
+4. **Agent-based lookup** -- Future phase (v2.x). Would use Claude with `tool_use` to navigate public price pages. Requires backend/proxy for web fetching -- flagged as out-of-scope for initial v2.0.
 
-## Stack Patterns
+**Why no PDF parsing library:** Consultants paste text from price documents, not upload PDFs. Text extraction via Claude is simpler, more accurate for Dutch price tables, and uses zero additional dependencies. If PDF upload is needed later, add `pdf.js` then.
 
-### Pattern: Calculation Engine as Pure Functions
+## Supporting Libraries
 
-```typescript
-// src/engine/pricing.ts
-export function calculateModuleCost(
-  provider: Provider,
-  module: Module,
-  studentCount: number
-): PricingResult {
-  // Pure function: input -> output, no side effects
-  // Easy to test with Vitest
-}
+| Library | Version | Purpose | When to Add |
+|---------|---------|---------|-------------|
+| date-fns | ^4.1.0 | Date formatting/manipulation | Only if `src/lib/date-utils.ts` is insufficient for conversation timestamps and price expiry calculations. Evaluate first -- likely not needed. |
 
-// src/engine/timeSavings.ts
-export function calculateTimeSavings(
-  tasks: TaskSelection[],
-  schoolConfig: SchoolConfig
-): TimeSavingsResult {
-  // Hours saved per year, converted to euros at configurable hourly rate
-}
-```
-
-**Why:** Separating calculation logic from UI makes it testable, debuggable, and auditable. Pricing calculations must be correct -- pure functions with unit tests guarantee this.
-
-### Pattern: Print-Ready Layout
-
-```tsx
-// Component uses Tailwind print variants
-<div className="print:break-before-page">
-  <section className="print:block hidden"> {/* Print header with Cito logo */} </section>
-  <InteractiveControls className="print:hidden" /> {/* Hide controls in print */}
-  <ResultsTable className="print:text-sm" /> {/* Smaller text in print */}
-</div>
-```
-
-### Pattern: Embedded Data with Type Safety
-
-```typescript
-// src/data/pricing.ts
-export const pricing: Record<Provider, Record<Module, PriceEntry>> = {
-  cito: {
-    lvsRekenen: {
-      pricePerStudent: 4.50,
-      verified: true,
-      verifiedDate: '2026-01-15',
-      source: 'Cito prijslijst 2026',
-    },
-    // ...
-  },
-  dia: { /* ... */ },
-  jij: { /* ... */ },
-} as const;
-```
-
-## Version Compatibility Matrix
-
-| Package | Min Version | Tested With | Notes |
-|---------|-------------|-------------|-------|
-| Node.js | 20.x | 22.x | Vite 8 requires Node 20+ |
-| React | 19.0.0 | 19.2.4 | Stable, no RC features needed |
-| Vite | 8.0.0 | 8.0.1 | Rolldown bundler (stable) |
-| Tailwind CSS | 4.0.0 | 4.2.1 | v4 uses CSS-first config (no tailwind.config.js) |
-| Recharts | 3.0.0 | 3.8.0 | v3 has breaking changes from v2; use v3 docs |
-| TypeScript | 5.5 | 5.8.x | React 19 types require TS 5.5+ |
-| react-to-print | 3.0.0 | 3.3.0 | v3 uses hooks API (useReactToPrint) |
+**Note:** The project has `src/lib/date-utils.ts` already. For price expiry warnings ("verlopen over 14 dagen") and conversation timestamps, native `Intl.DateTimeFormat` with `nl-NL` locale plus simple arithmetic may suffice. Only add `date-fns` if relative date formatting or complex date math becomes a real need.
 
 ## Installation
 
 ```bash
-# Create project
-npm create vite@latest rekentool-vo -- --template react-ts
-cd rekentool-vo
-
-# Core dependencies
-npm install recharts react-to-print clsx @headlessui/react
-
-# Tailwind CSS v4 (new CSS-first approach)
-npm install tailwindcss @tailwindcss/vite
-
-# Dev dependencies
-npm install -D vitest @testing-library/react @testing-library/jest-dom
-npm install -D eslint prettier eslint-config-prettier
+# New production dependencies for v2.0
+npm install dexie@^4.3.0 dexie-react-hooks@^4.2.0 @react-pdf/renderer@^4.3.2
 ```
 
-### Vite Config
+No new dev dependencies required. Total: 3 new packages.
 
-```typescript
-// vite.config.ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
+## What NOT to Add
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  build: {
-    outDir: 'dist',
-  },
-});
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Vercel AI SDK (`ai`) | 200KB+ multi-provider abstraction. We only use Claude. The `@anthropic-ai/sdk` handles streaming, structured output, and conversation history natively. | `@anthropic-ai/sdk` directly |
+| TanStack Query | No REST API to cache. This is local-first. Dexie's `useLiveQuery` provides reactive data for IndexedDB. | Dexie `useLiveQuery` |
+| jsPDF | Manual coordinate-based layout. Unmaintainable for branded reports with tables and Dutch text. | `@react-pdf/renderer` |
+| react-to-print (for DMU) | Only mirrors screen content. DMU exports need distinct per-persona layouts that differ from the screen. | `@react-pdf/renderer` for documents; Tailwind `print:` for screen printing |
+| pdf-parse / pdf.js (input) | Over-engineering. Consultants paste text, not upload PDFs. Claude handles extraction. | `messages.parse()` with Zod schema |
+| RxDB | Reactive database with sync/replication/conflict resolution. Massive overhead for single-user local tool. | Dexie.js |
+| sql.js / wa-sqlite | ~1MB WASM runtime, no React hooks, manual IndexedDB persistence. | Dexie.js |
+| Redux / MobX | Zustand is already validated and working. Adding another state library creates confusion. | Zustand (existing) |
+| i18next | Dutch-only app for Dutch consultants at Dutch schools. Zero value from i18n. | Hardcoded Dutch strings |
+| Firebase / Supabase | No backend needed. This is a local-first tool with no user accounts. | Dexie.js for persistence |
+| date-fns (premature) | Do not add preemptively. Evaluate `src/lib/date-utils.ts` first. | Existing date utils + Intl API |
+
+## Stack Patterns by Feature
+
+### AI Conversation Intake
+
+```
+Zustand store: conversation messages[], isStreaming, currentAnalysis
+  |
+  v
+client.messages.stream() -> real-time UI update via on('text')
+  |
+  v
+Consultant ends call -> messages.parse() with IntakeExtractionSchema
+  |
+  v
+Dexie: conversations.add({ schoolId, messages, extraction, date })
 ```
 
-### Tailwind CSS v4 Config (CSS-first)
+- Zustand holds ephemeral conversation state (streaming flag, message buffer)
+- Anthropic SDK streams responses for real-time feel
+- Final structured extraction uses existing `IntakeExtractionSchema`
+- Completed conversations persist to Dexie linked to school profile
 
-```css
-/* src/app.css */
-@import "tailwindcss";
+### School Intelligence
 
-@theme {
-  --color-cito-primary: #003082;
-  --color-cito-accent: #FF6600;
-  --color-cito-bg: #F8F9FA;
-}
+```
+Dexie tables: schools, conversations, deals, priceSnapshots
+  |
+  v
+useLiveQuery(() => db.schools.where('name').startsWith(query))
+  |
+  v
+React components auto-rerender on data changes
 ```
 
-## Deployment
+- Dexie for all persistent relational data
+- `useLiveQuery` for reactive UI (school list, conversation history, deal timeline)
+- Zustand for ephemeral state (currently selected school, unsaved edits)
 
-Static files only. `npm run build` produces a `dist/` folder. Deploy to:
-- Any web server (Apache, Nginx, IIS)
-- Azure Static Web Apps (if Cito uses Azure)
-- Netlify / Vercel (free tier sufficient)
-- Even a SharePoint document library or internal file share
+### DMU Export
 
-No server runtime needed. No environment variables. No API keys.
+```
+Calculation engines (existing pure functions)
+  |
+  v
+DMU template component (coordinator / MT / finance)
+  |
+  v
+@react-pdf/renderer -> pdf().toBlob() -> download
+```
 
-## Tablet Considerations
+- One `@react-pdf/renderer` component per DMU persona
+- Shared data from existing calculation engines
+- Cito branding via `Font.register()` and style constants
+- `pdf().toBlob()` for download trigger
 
-- Tailwind's responsive breakpoints (`md:`, `lg:`) handle tablet layouts
-- Touch targets: minimum 44x44px for all interactive elements (Tailwind: `min-h-11 min-w-11`)
-- Recharts `<ResponsiveContainer>` automatically resizes charts
-- Test on iPad Safari and Chrome Android -- both support `window.print()`
+### Auto Price Updates
+
+```
+Text paste -> Claude messages.parse() with PriceExtractionSchema
+  |
+  v
+Zod validation -> confirmed by consultant
+  |
+  v
+Dexie: priceSnapshots.add({ provider, module, price, source, expiry })
+  |
+  v
+Engines read latest prices from Dexie on next calculation
+```
+
+- No new libraries -- existing SDK + Zod + new Dexie table
+- Every price has source attribution and expiry date
+- Warning system when prices near expiry (pure date arithmetic)
+
+## Version Compatibility
+
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| @react-pdf/renderer@^4.3.2 | React 19 | Confirmed compatible since v4.1.0 |
+| dexie@^4.3.0 | Any framework | Framework-agnostic core library |
+| dexie-react-hooks@^4.2.0 | React 16.8+ (hooks API) | Uses React hooks internally |
+| @anthropic-ai/sdk@^0.80.0 | Browser via `dangerouslyAllowBrowser` | Already validated in v1.0 |
+
+## Dependency Impact
+
+| Metric | Before (v1.0) | After (v2.0) | Delta |
+|--------|---------------|--------------|-------|
+| Production deps | 7 packages | 10 packages | +3 |
+| Estimated new bundle | -- | ~180KB (react-pdf) + ~45KB (dexie) | ~225KB |
+| New paradigms | -- | IndexedDB persistence, PDF generation, streaming AI | 3 |
+| Backend required | No | No | No change |
+
+The app remains a pure client-side SPA. No backend, no server, no database server. All new capabilities run entirely in the browser.
 
 ## Sources
 
-- [React 19.2 release blog](https://react.dev/blog/2025/10/01/react-19-2) -- React versions confirmed
-- [Vite 8.0 announcement](https://vite.dev/blog/announcing-vite8) -- Rolldown bundler, version confirmed
-- [Recharts npm](https://www.npmjs.com/package/recharts) -- v3.8.0 confirmed
-- [react-to-print npm](https://www.npmjs.com/package/react-to-print) -- v3.3.0, 833K weekly downloads
-- [Tailwind CSS v4 release](https://tailwindcss.com/blog/tailwindcss-v4) -- CSS-first config approach
-- [Chart.js npm](https://www.npmjs.com/package/chart.js) -- v4.5.1, canvas-based (not recommended)
-- [Svelte npm](https://www.npmjs.com/package/svelte) -- v5.54.0, considered but not recommended
-- [Best React Chart Libraries 2025 (LogRocket)](https://blog.logrocket.com/best-react-chart-libraries-2025/) -- Recharts vs Chart.js comparison
-- [Tailwind print styles](https://www.jacobparis.com/content/css-print-styles) -- print: variant usage
-- [Best Chart Libraries for Svelte 2026 (Weavelinx)](https://weavelinx.com/best-chart-libraries-for-svelte-projects-in-2026/) -- Svelte charting ecosystem assessment
+- [@react-pdf/renderer npm](https://www.npmjs.com/package/@react-pdf/renderer) -- version 4.3.2, React 19 compatibility confirmed (HIGH confidence)
+- [react-pdf.org/compatibility](https://react-pdf.org/compatibility) -- React 19 support since v4.1.0 (HIGH confidence)
+- [Dexie.js npm](https://www.npmjs.com/package/dexie) -- version 4.3.0, 922K weekly downloads (HIGH confidence)
+- [Dexie React hooks docs](https://dexie.org/docs/libs/dexie-react-hooks) -- useLiveQuery API, version 4.2.0 (HIGH confidence)
+- [Anthropic streaming docs](https://docs.anthropic.com/en/api/messages-streaming) -- messages.stream() API (HIGH confidence)
+- [Anthropic structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) -- output_config.format with Zod (HIGH confidence)
+- [Anthropic SDK GitHub](https://github.com/anthropics/anthropic-sdk-typescript) -- dangerouslyAllowBrowser, streaming examples (HIGH confidence)
+- [react-to-print npm](https://www.npmjs.com/package/react-to-print) -- v3.3.0, considered for screen printing only (HIGH confidence)
+
+---
+*Stack research for: Rekentool VO v2.0 Sales Intelligence additions*
+*Researched: 2026-03-21*
