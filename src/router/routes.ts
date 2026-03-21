@@ -11,6 +11,7 @@ import WizardPage from '@/components/routing/WizardPage';
 import { PriceComparisonPage } from '@/features/price-comparison/PriceComparisonPage';
 import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProposedPage';
 import { MigrationPage } from '@/features/price-comparison/MigrationPage';
+import SchoolOverviewPage from '@/features/school-overview/SchoolOverviewPage';
 
 // Root layout
 export const rootRoute = createRootRoute({
@@ -36,10 +37,11 @@ export const indexRoute = createRoute({
   },
 });
 
-// School overview — lazy loaded to avoid circular imports
+// School overview
 export const scholenRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/scholen',
+  component: SchoolOverviewPage,
 });
 
 // School layout (parent for all school-specific routes)
