@@ -92,7 +92,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — CRM-lite data layer: types, Dexie v2 schema migratie, CRUD operaties, Zod schemas en timeline utility
+- [x] 07-01-PLAN.md — CRM-lite data layer: types, Dexie v2 schema migratie, CRUD operaties, Zod schemas en timeline utility
 - [ ] 07-02-PLAN.md — Profiel-UI: tab-routing, ProfileHeader, TabNavigation, DashboardTab, ComparisonTab, ProductsTab en pipeline-management
 - [ ] 07-03-PLAN.md — ContactsTab met CRUD en DMU-mapping, ConversationsTab met tijdlijn, tags, zoekfunctie en kanban-actielijst
 - [ ] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
@@ -177,7 +177,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
-| 7. School Intelligence | v2.0 | 0/4 | Planning complete | - |
+| 7. School Intelligence | v2.0 | 1/4 | In Progress|  |
 | 8. AI Intake & Prijsbeheer | v2.0 | 0/3 | Not started | - |
 | 9. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
 | 10. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |

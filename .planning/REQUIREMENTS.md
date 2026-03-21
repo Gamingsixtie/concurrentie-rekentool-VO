@@ -15,11 +15,11 @@
 
 ### School Intelligence
 
-- [ ] **SCHOOL-01**: Gebruiker kan schoolprofiel aanmaken met basisgegevens (naam, type, leerlingaantallen, regio)
-- [ ] **SCHOOL-02**: Gebruiker kan per school het huidige productgebruik vastleggen (welke modules van welke aanbieder, met prijzen en bronvermelding)
-- [ ] **SCHOOL-03**: Gebruiker kan contactpersonen per school vastleggen met naam, rol en DMU-positie (coordinator, MT, finance)
-- [ ] **SCHOOL-04**: Gebruiker kan gespreksnotities per school toevoegen met datum, contactpersoon en kernpunten
-- [ ] **SCHOOL-05**: Gebruiker kan pipeline-status per school instellen (prospect, contact, offerte, besluit, klant, at-risk)
+- [x] **SCHOOL-01**: Gebruiker kan schoolprofiel aanmaken met basisgegevens (naam, type, leerlingaantallen, regio)
+- [x] **SCHOOL-02**: Gebruiker kan per school het huidige productgebruik vastleggen (welke modules van welke aanbieder, met prijzen en bronvermelding)
+- [x] **SCHOOL-03**: Gebruiker kan contactpersonen per school vastleggen met naam, rol en DMU-positie (coordinator, MT, finance)
+- [x] **SCHOOL-04**: Gebruiker kan gespreksnotities per school toevoegen met datum, contactpersoon en kernpunten
+- [x] **SCHOOL-05**: Gebruiker kan pipeline-status per school instellen (prospect, contact, offerte, besluit, klant, at-risk)
 - [ ] **SCHOOL-06**: Gebruiker ziet schooloverzicht met zoekfunctie, gesorteerd op laatst gebruikt, met pipeline-status badge
 - [ ] **SCHOOL-07**: Systeem detecteert upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
 
@@ -39,7 +39,7 @@
 - [ ] **PRIJS-04**: Gebruiker kan prijzen handmatig overschrijven met bronvermelding, en de vergelijking herberekent reactief
 - [ ] **PRIJS-05**: Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) — onderscheidend vermogen
 - [ ] **PRIJS-06**: Engine berekent correcte DIA-pakketprijzen: als school 3+ DIA-modules afneemt wordt automatisch het voordeligste pakket berekend
-- [ ] **PRIJS-07**: Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en niet verward met publicatieprijzen
+- [x] **PRIJS-07**: Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en niet verward met publicatieprijzen
 - [ ] **PRIJS-08**: Hybride scenario: engine berekent per module apart waar school wisselt van aanbieder en toont besparingen per module
 
 ### Gevoeligheidsanalyse
@@ -112,11 +112,11 @@
 | ARCH-03 | Phase 6 | Pending |
 | ARCH-04 | Phase 6 | Pending |
 | ARCH-05 | Phase 11 | Pending |
-| SCHOOL-01 | Phase 7 | Pending |
-| SCHOOL-02 | Phase 7 | Pending |
-| SCHOOL-03 | Phase 7 | Pending |
-| SCHOOL-04 | Phase 7 | Pending |
-| SCHOOL-05 | Phase 7 | Pending |
+| SCHOOL-01 | Phase 7 | Complete |
+| SCHOOL-02 | Phase 7 | Complete |
+| SCHOOL-03 | Phase 7 | Complete |
+| SCHOOL-04 | Phase 7 | Complete |
+| SCHOOL-05 | Phase 7 | Complete |
 | SCHOOL-06 | Phase 7 | Pending |
 | SCHOOL-07 | Phase 10 | Pending |
 | INTAKE-01 | Phase 8 | Pending |
@@ -130,7 +130,7 @@
 | PRIJS-04 | Phase 9 | Pending |
 | PRIJS-05 | Phase 9 | Pending |
 | PRIJS-06 | Phase 9 | Pending |
-| PRIJS-07 | Phase 7 | Pending |
+| PRIJS-07 | Phase 7 | Complete |
 | PRIJS-08 | Phase 9 | Pending |
 | GEVOEL-01 | Phase 9 | Pending |
 | GEVOEL-02 | Phase 9 | Pending |
