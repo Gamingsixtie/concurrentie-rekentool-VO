@@ -4,7 +4,7 @@ interface ProgressBarProps {
   onStepClick: (step: number) => void;
 }
 
-const STEP_LABELS = ['Niveaus', 'Leerlingen', 'Modules', 'Scenario'];
+const STEP_LABELS = ['School', 'Leerlingen', 'Modules', 'Situatie', 'Doel'];
 
 export default function ProgressBar({ currentStep, completedSteps, onStepClick }: ProgressBarProps) {
   return (

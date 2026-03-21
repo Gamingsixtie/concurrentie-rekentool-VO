@@ -1,19 +1,20 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { useSchoolProfileStore } from '../../features/school-profile/store.ts';
-import ProgressBar from './ProgressBar.tsx';
-import NavigationButtons from './NavigationButtons.tsx';
-import WizardStep1, { type WizardStepRef } from '../../features/school-profile/components/WizardStep1.tsx';
-import WizardStep2 from '../../features/school-profile/components/WizardStep2.tsx';
-import WizardStep3 from '../../features/school-profile/components/WizardStep3.tsx';
-import WizardStep4 from '../../features/school-profile/components/WizardStep4.tsx';
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { useSchoolProfileStore } from '../../features/school-profile/store';
+import { updateSchoolData } from '@/db/operations';
+import ProgressBar from './ProgressBar';
+import NavigationButtons from './NavigationButtons';
+import WizardStep1, { type WizardStepRef } from '../../features/school-profile/components/WizardStep1';
+import WizardStep2 from '../../features/school-profile/components/WizardStep2';
+import WizardStep3 from '../../features/school-profile/components/WizardStep3';
+import WizardStep4 from '../../features/school-profile/components/WizardStep4';
+import WizardStep5 from '../../features/school-profile/components/WizardStep5';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
-interface WizardShellProps {
-  onComplete?: () => void;
-}
-
-export default function WizardShell({ onComplete }: WizardShellProps) {
+export default function WizardShell() {
+  const { slug } = useParams({ from: '/scholen/$slug/wizard/$step' });
+  const navigate = useNavigate();
   const { currentStep, setCurrentStep } = useSchoolProfileStore();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const stepRef = useRef<WizardStepRef>(null);
@@ -31,31 +32,75 @@ export default function WizardShell({ onComplete }: WizardShellProps) {
     if (!isValid) return;
 
     // Mark current step as completed
-    setCompletedSteps((prev) =>
-      prev.includes(currentStep) ? prev : [...prev, currentStep],
-    );
+    const newCompletedSteps = completedSteps.includes(currentStep)
+      ? completedSteps
+      : [...completedSteps, currentStep];
+    setCompletedSteps(newCompletedSteps);
+
+    // Auto-save to Dexie
+    const state = useSchoolProfileStore.getState();
+    if (state.activeSchoolId) {
+      await updateSchoolData(state.activeSchoolId, {
+        levels: state.levels,
+        studentCounts: state.studentCounts,
+        selectedModules: state.selectedModules,
+        moduleSetups: state.moduleSetups,
+        scenario: state.scenario,
+        name: state.schoolName,
+        completedSteps: [...new Set([...newCompletedSteps, currentStep])],
+        isComplete: currentStep === TOTAL_STEPS - 1,
+      });
+    }
 
     if (currentStep < TOTAL_STEPS - 1) {
-      setCurrentStep(currentStep + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      navigate({
+        to: '/scholen/$slug/wizard/$step',
+        params: { slug, step: String(nextStep + 1) },
+      });
     } else {
-      // Last step: "Bekijk resultaten" completed
-      onComplete?.();
+      // Last step: navigate to appropriate result view
+      const { scenario, moduleSetups } = useSchoolProfileStore.getState();
+      if (scenario === 'A') {
+        const hasCurrentSituation = moduleSetups.some((s) => s.currentProvider !== 'geen');
+        navigate({
+          to: hasCurrentSituation
+            ? '/scholen/$slug/huidig-vs-cito'
+            : '/scholen/$slug/vergelijking',
+          params: { slug },
+        });
+      } else if (scenario === 'B') {
+        navigate({
+          to: '/scholen/$slug/migratie',
+          params: { slug },
+        });
+      }
     }
-  }, [currentStep, setCurrentStep, onComplete]);
+  }, [currentStep, setCurrentStep, completedSteps, navigate, slug]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      const prevStep = currentStep - 1;
+      setCurrentStep(prevStep);
+      navigate({
+        to: '/scholen/$slug/wizard/$step',
+        params: { slug, step: String(prevStep + 1) },
+      });
     }
-  }, [currentStep, setCurrentStep]);
+  }, [currentStep, setCurrentStep, navigate, slug]);
 
   const handleStepClick = useCallback(
     (step: number) => {
       if (completedSteps.includes(step)) {
         setCurrentStep(step);
+        navigate({
+          to: '/scholen/$slug/wizard/$step',
+          params: { slug, step: String(step + 1) },
+        });
       }
     },
-    [completedSteps, setCurrentStep],
+    [completedSteps, setCurrentStep, navigate, slug],
   );
 
   const renderStep = () => {
@@ -68,6 +113,8 @@ export default function WizardShell({ onComplete }: WizardShellProps) {
         return <WizardStep3 ref={stepRef} />;
       case 3:
         return <WizardStep4 ref={stepRef} />;
+      case 4:
+        return <WizardStep5 ref={stepRef} />;
       default:
         return null;
     }

@@ -1,9 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { schoolTypeSchema, type SchoolTypeData } from '../schemas/step1-schema.ts';
-import { SCHOOL_LEVELS, SCHOOL_LEVEL_LABELS } from '../../../models/school.ts';
-import { useSchoolProfileStore } from '../store.ts';
-import StepContainer from '../../../components/wizard/StepContainer.tsx';
+import { schoolTypeSchema, type SchoolTypeData } from '../schemas/step1-schema';
+import { SCHOOL_LEVELS, SCHOOL_LEVEL_LABELS } from '../../../models/school';
+import { useSchoolProfileStore } from '../store';
+import { updateSchoolData } from '@/db/operations';
+import { uniqueSlug } from '@/lib/slugify';
+import StepContainer from '../../../components/wizard/StepContainer';
 import { useImperativeHandle, forwardRef } from 'react';
 
 export interface WizardStepRef {
@@ -11,7 +13,7 @@ export interface WizardStepRef {
 }
 
 const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) {
-  const { levels, setLevels } = useSchoolProfileStore();
+  const { levels, schoolName, activeSchoolId, setLevels, setSchoolName } = useSchoolProfileStore();
 
   const {
     register,
@@ -20,6 +22,7 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
   } = useForm<SchoolTypeData>({
     resolver: zodResolver(schoolTypeSchema),
     defaultValues: {
+      schoolName: schoolName,
       levels: levels,
     },
   });
@@ -28,8 +31,19 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
     submit: () =>
       new Promise<boolean>((resolve) => {
         handleSubmit(
-          (data) => {
+          async (data) => {
             setLevels(data.levels);
+            setSchoolName(data.schoolName);
+
+            // Update slug and name in Dexie if school name changed
+            if (activeSchoolId && data.schoolName !== schoolName) {
+              const newSlug = await uniqueSlug(data.schoolName, activeSchoolId);
+              await updateSchoolData(activeSchoolId, {
+                slug: newSlug,
+                name: data.schoolName,
+              });
+            }
+
             resolve(true);
           },
           () => {
@@ -40,7 +54,34 @@ const WizardStep1 = forwardRef<WizardStepRef>(function WizardStep1(_props, ref) 
   }));
 
   return (
-    <StepContainer title="Welke niveaus biedt uw school aan?">
+    <StepContainer title="Schoolgegevens en niveaus">
+      {/* School name field */}
+      <div className="mb-6">
+        <label htmlFor="schoolName" className="block text-sm font-semibold text-neutral-700 mb-1.5">
+          Schoolnaam
+        </label>
+        <input
+          id="schoolName"
+          type="text"
+          placeholder="Bijv. Montessori College Oost"
+          {...register('schoolName')}
+          className={`
+            w-full h-[44px] px-4 text-base border rounded-lg
+            focus:outline-none focus:ring-2 focus:ring-cito-primary/20 focus:border-cito-primary
+            ${errors.schoolName ? 'border-red-400' : 'border-neutral-200'}
+          `}
+        />
+        {errors.schoolName && (
+          <p className="mt-1 text-[14px] text-red-600" role="alert">
+            {errors.schoolName.message}
+          </p>
+        )}
+      </div>
+
+      {/* Level checkboxes */}
+      <label className="block text-sm font-semibold text-neutral-700 mb-1.5">
+        Welke niveaus biedt uw school aan?
+      </label>
       <div className="space-y-0">
         {SCHOOL_LEVELS.map((level) => (
           <label

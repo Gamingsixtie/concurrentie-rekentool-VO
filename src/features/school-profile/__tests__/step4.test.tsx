@@ -1,68 +1,69 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
 import WizardStep4 from '../components/WizardStep4.tsx';
 import { useSchoolProfileStore } from '../store.ts';
 import { createRef } from 'react';
 import type { WizardStepRef } from '../components/WizardStep1.tsx';
 
-describe('WizardStep4 - Scenario selectie', () => {
+describe('WizardStep4 - Huidige situatie', () => {
   beforeEach(() => {
     useSchoolProfileStore.getState().reset();
   });
 
-  it('renders both scenario cards with correct titles', () => {
+  it('renders "Geen modules geselecteerd" when no modules selected', () => {
     const ref = createRef<WizardStepRef>();
     render(<WizardStep4 ref={ref} />);
 
-    expect(screen.getByText('Cito vs. concurrentie')).toBeInTheDocument();
-    expect(screen.getByText('Huidig naar nieuw Cito-platform')).toBeInTheDocument();
+    expect(screen.getByText('Geen modules geselecteerd. Ga terug naar stap 3.')).toBeInTheDocument();
   });
 
-  it('renders scenario descriptions', () => {
-    const ref = createRef<WizardStepRef>();
-    render(<WizardStep4 ref={ref} />);
-
-    expect(screen.getByText(/Vergelijk de kosten van Cito met DIA en JIJ/)).toBeInTheDocument();
-    expect(screen.getByText(/Bereken de business case voor de overstap/)).toBeInTheDocument();
-  });
-
-  it('clicking a scenario card selects it (visual indicator changes)', async () => {
-    const user = userEvent.setup();
-    const ref = createRef<WizardStepRef>();
-    render(<WizardStep4 ref={ref} />);
-
-    const scenarioACard = screen.getByText('Cito vs. concurrentie').closest('button')!;
-    expect(scenarioACard.className).toContain('border-neutral-200');
-
-    await user.click(scenarioACard);
-
-    expect(scenarioACard.className).toContain('border-cito-primary');
-  });
-
-  it('submitting without selection shows error', async () => {
-    const ref = createRef<WizardStepRef>();
-    render(<WizardStep4 ref={ref} />);
-
-    const result = await ref.current!.submit();
-    expect(result).toBe(false);
-
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
+  it('renders a row for each selected module', () => {
+    useSchoolProfileStore.setState({
+      selectedModules: ['rekenwiskunde', 'nederlands'],
+      moduleSetups: [
+        { moduleId: 'rekenwiskunde', currentProvider: 'geen', pricePerStudent: null },
+        { moduleId: 'nederlands', currentProvider: 'geen', pricePerStudent: null },
+      ],
     });
-  });
 
-  it('selected scenario is persisted to store on submit', async () => {
-    const user = userEvent.setup();
     const ref = createRef<WizardStepRef>();
     render(<WizardStep4 ref={ref} />);
 
-    await user.click(screen.getByText('Cito vs. concurrentie').closest('button')!);
+    expect(screen.getByText('Reken-Wiskunde')).toBeInTheDocument();
+    expect(screen.getByText('Nederlands')).toBeInTheDocument();
+  });
+
+  it('shows dropdown for each module with provider options', () => {
+    useSchoolProfileStore.setState({
+      selectedModules: ['rekenwiskunde'],
+      moduleSetups: [
+        { moduleId: 'rekenwiskunde', currentProvider: 'geen', pricePerStudent: null },
+      ],
+    });
+
+    const ref = createRef<WizardStepRef>();
+    render(<WizardStep4 ref={ref} />);
+
+    // Should have a select element (provider dropdown)
+    const select = screen.getByRole('combobox');
+    expect(select).toBeInTheDocument();
+  });
+
+  it('submit succeeds and saves setups to store', async () => {
+    useSchoolProfileStore.setState({
+      selectedModules: ['rekenwiskunde'],
+      moduleSetups: [
+        { moduleId: 'rekenwiskunde', currentProvider: 'dia', pricePerStudent: 5.2 },
+      ],
+    });
+
+    const ref = createRef<WizardStepRef>();
+    render(<WizardStep4 ref={ref} />);
 
     const result = await ref.current!.submit();
     expect(result).toBe(true);
 
     const state = useSchoolProfileStore.getState();
-    expect(state.scenario).toBe('A');
+    expect(state.moduleSetups[0].moduleId).toBe('rekenwiskunde');
   });
 });

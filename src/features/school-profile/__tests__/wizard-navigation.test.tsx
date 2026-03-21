@@ -1,48 +1,101 @@
+import 'fake-indexeddb/auto';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach } from 'vitest';
-import WizardShell from '../../../components/wizard/WizardShell.tsx';
-import { useSchoolProfileStore } from '../store.ts';
+import { createMemoryHistory, createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router';
+import WizardShell from '../../../components/wizard/WizardShell';
+import { useSchoolProfileStore } from '../store';
+import { db } from '@/db/database';
+
+// Create a minimal router that provides the params WizardShell expects
+function renderWithRouter(stepNum = '1') {
+  const rootRoute = createRootRoute();
+  const schoolRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/scholen/$slug',
+  });
+  const wizardRoute = createRoute({
+    getParentRoute: () => schoolRoute,
+    path: '/wizard/$step',
+    component: WizardShell,
+  });
+  const routeTree = rootRoute.addChildren([
+    schoolRoute.addChildren([wizardRoute]),
+  ]);
+
+  const memoryHistory = createMemoryHistory({
+    initialEntries: [`/scholen/test-school/wizard/${stepNum}`],
+  });
+
+  const router = createRouter({ routeTree, history: memoryHistory });
+  return render(<RouterProvider router={router} />);
+}
 
 describe('Wizard Navigation', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     useSchoolProfileStore.getState().reset();
+    await db.schools.clear();
+    // Seed a test school so the store has an activeSchoolId
+    await db.schools.add({
+      slug: 'test-school',
+      name: 'Test School',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isComplete: false,
+      completedSteps: [],
+      levels: [],
+      studentCounts: {},
+      selectedModules: [],
+      moduleSetups: [],
+      scenario: null,
+      appliedOverrides: [],
+      migrationHourlyRate: 50,
+      migrationTimeSavingOverrides: {},
+    });
   });
 
-  it('progress bar shows 4 steps with correct labels', () => {
-    render(<WizardShell />);
+  it('progress bar shows 5 steps with correct labels', async () => {
+    renderWithRouter();
 
-    expect(screen.getByText('Niveaus')).toBeInTheDocument();
+    expect(await screen.findByText('School')).toBeInTheDocument();
     expect(screen.getByText('Leerlingen')).toBeInTheDocument();
     expect(screen.getByText('Modules')).toBeInTheDocument();
-    expect(screen.getByText('Scenario')).toBeInTheDocument();
+    expect(screen.getByText('Situatie')).toBeInTheDocument();
+    expect(screen.getByText('Doel')).toBeInTheDocument();
   });
 
-  it('"Vorige stap" button is hidden on step 1', () => {
-    render(<WizardShell />);
+  it('"Vorige stap" button is hidden on step 1', async () => {
+    renderWithRouter();
+
+    // Wait for render
+    await screen.findByText('School');
 
     expect(screen.queryByText('Vorige stap')).not.toBeInTheDocument();
   });
 
-  it('"Volgende stap" button is present', () => {
-    render(<WizardShell />);
+  it('"Volgende stap" button is present', async () => {
+    renderWithRouter();
 
-    expect(screen.getByText('Volgende stap')).toBeInTheDocument();
+    expect(await screen.findByText('Volgende stap')).toBeInTheDocument();
   });
 
   it('clicking "Volgende stap" without selection does not navigate (step 1 validation)', async () => {
     const user = userEvent.setup();
-    render(<WizardShell />);
+    renderWithRouter();
 
-    await user.click(screen.getByText('Volgende stap'));
+    await user.click(await screen.findByText('Volgende stap'));
 
     // Should still be on step 1
-    expect(screen.getByText('Welke niveaus biedt uw school aan?')).toBeInTheDocument();
+    expect(screen.getByText('Schoolgegevens en niveaus')).toBeInTheDocument();
   });
 
   it('navigating forward then back preserves previously entered data', async () => {
     const user = userEvent.setup();
-    render(<WizardShell />);
+    renderWithRouter();
+
+    // Fill school name
+    const nameInput = await screen.findByLabelText('Schoolnaam');
+    await user.type(nameInput, 'Test School');
 
     // Step 1: select HAVO
     const havoCheckbox = screen.getByRole('checkbox', { name: /HAVO/i });
@@ -52,13 +105,13 @@ describe('Wizard Navigation', () => {
     await user.click(screen.getByText('Volgende stap'));
 
     // Should be on step 2
-    expect(screen.getByText('Hoeveel leerlingen per leerjaar?')).toBeInTheDocument();
+    expect(await screen.findByText('Hoeveel leerlingen per leerjaar?')).toBeInTheDocument();
 
     // Navigate back
     await user.click(screen.getByText('Vorige stap'));
 
-    // Should be back on step 1 with HAVO still checked
-    expect(screen.getByText('Welke niveaus biedt uw school aan?')).toBeInTheDocument();
+    // Should be back on step 1
+    expect(await screen.findByText('Schoolgegevens en niveaus')).toBeInTheDocument();
     // Data is preserved in the store
     const state = useSchoolProfileStore.getState();
     expect(state.levels).toContain('havo');
@@ -66,41 +119,48 @@ describe('Wizard Navigation', () => {
 
   it('clicking a future step in the progress bar does NOT navigate', async () => {
     const user = userEvent.setup();
-    render(<WizardShell />);
+    renderWithRouter();
+
+    // Wait for initial render
+    await screen.findByText('Volgende stap');
 
     // Try clicking step 3 (Modules) which is a future step
     const modulesButton = screen.getByLabelText(/Stap 3: Modules/);
     await user.click(modulesButton);
 
     // Should still be on step 1
-    expect(screen.getByText('Welke niveaus biedt uw school aan?')).toBeInTheDocument();
+    expect(screen.getByText('Schoolgegevens en niveaus')).toBeInTheDocument();
   });
 
   it('clicking a completed step in the progress bar navigates back', async () => {
     const user = userEvent.setup();
-    render(<WizardShell />);
+    renderWithRouter();
+
+    // Fill school name
+    const nameInput = await screen.findByLabelText('Schoolnaam');
+    await user.type(nameInput, 'Test School');
 
     // Complete step 1: select HAVO and navigate forward
     await user.click(screen.getByRole('checkbox', { name: /HAVO/i }));
     await user.click(screen.getByText('Volgende stap'));
 
     // Should be on step 2
-    expect(screen.getByText('Hoeveel leerlingen per leerjaar?')).toBeInTheDocument();
+    expect(await screen.findByText('Hoeveel leerlingen per leerjaar?')).toBeInTheDocument();
 
     // Click completed step 1 in progress bar
-    const step1Button = screen.getByLabelText(/Stap 1: Niveaus.*voltooid/);
+    const step1Button = screen.getByLabelText(/Stap 1: School.*voltooid/);
     await user.click(step1Button);
 
     // Should navigate back to step 1
-    expect(screen.getByText('Welke niveaus biedt uw school aan?')).toBeInTheDocument();
+    expect(await screen.findByText('Schoolgegevens en niveaus')).toBeInTheDocument();
   });
 
-  it('shows "Bekijk resultaten" on the last step instead of "Volgende stap"', () => {
-    // Set store to step 4 (index 3)
-    useSchoolProfileStore.setState({ currentStep: 3 });
-    render(<WizardShell />);
+  it('shows "Bekijk resultaten" on the last step instead of "Volgende stap"', async () => {
+    // Set store to step 5 (index 4)
+    useSchoolProfileStore.setState({ currentStep: 4 });
+    renderWithRouter('5');
 
-    expect(screen.getByText('Bekijk resultaten')).toBeInTheDocument();
+    expect(await screen.findByText('Bekijk resultaten')).toBeInTheDocument();
     expect(screen.queryByText('Volgende stap')).not.toBeInTheDocument();
   });
 });

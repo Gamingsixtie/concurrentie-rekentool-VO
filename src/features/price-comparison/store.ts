@@ -4,6 +4,7 @@ import type { ComparisonResult } from '../../engine/price-comparison';
 import type { PriceRecord } from '../../models/pricing';
 import { DEFAULT_PRICES } from '../../data/default-prices';
 import { useSchoolProfileStore } from '../school-profile/store';
+import type { SchoolRecord } from '@/db/types';
 
 export interface PriceOverride {
   moduleId: string;
@@ -17,11 +18,18 @@ interface PriceComparisonState {
   appliedOverrides: PriceOverride[];
   hasPendingChanges: boolean;
 
+  // Migration (Scenario B)
+  migrationHourlyRate: number;
+  migrationTimeSavingOverrides: Record<string, number>;
+
   initialize: () => void;
   setDraftOverride: (override: PriceOverride) => void;
   resetOverride: (moduleId: string, provider: string) => void;
   resetAllOverrides: () => void;
   recalculate: () => void;
+  hydrate: (record: SchoolRecord) => void;
+  setMigrationHourlyRate: (rate: number) => void;
+  setMigrationTimeSavingOverride: (taskId: string, hours: number) => void;
 }
 
 /**
@@ -52,12 +60,14 @@ function mergeOverrides(
   });
 }
 
-export const usePriceComparisonStore = create<PriceComparisonState>(
+export const usePriceComparisonStore = create<PriceComparisonState>()(
   (set, get) => ({
     result: null,
     draftOverrides: [],
     appliedOverrides: [],
     hasPendingChanges: false,
+    migrationHourlyRate: 50,
+    migrationTimeSavingOverrides: {},
 
     initialize: () => {
       const { selectedModules, studentCounts } =
@@ -128,5 +138,27 @@ export const usePriceComparisonStore = create<PriceComparisonState>(
         hasPendingChanges: false,
       });
     },
+
+    hydrate: (record: SchoolRecord) => {
+      set({
+        appliedOverrides: record.appliedOverrides,
+        migrationHourlyRate: record.migrationHourlyRate,
+        migrationTimeSavingOverrides: record.migrationTimeSavingOverrides,
+        draftOverrides: [],
+        hasPendingChanges: false,
+      });
+      // Recalculate after hydrating to get fresh result
+      get().initialize();
+    },
+
+    setMigrationHourlyRate: (rate) => set({ migrationHourlyRate: rate }),
+
+    setMigrationTimeSavingOverride: (taskId, hours) =>
+      set((state) => ({
+        migrationTimeSavingOverrides: {
+          ...state.migrationTimeSavingOverrides,
+          [taskId]: hours,
+        },
+      })),
   }),
 );

@@ -6,6 +6,11 @@ import {
 } from '@tanstack/react-router';
 import { db } from '@/db/database';
 import { checkSchoolExists } from './guards';
+import SchoolLayout from '@/components/routing/SchoolLayout';
+import WizardPage from '@/components/routing/WizardPage';
+import { PriceComparisonPage } from '@/features/price-comparison/PriceComparisonPage';
+import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProposedPage';
+import { MigrationPage } from '@/features/price-comparison/MigrationPage';
 
 // Root layout
 export const rootRoute = createRootRoute({
@@ -31,7 +36,7 @@ export const indexRoute = createRoute({
   },
 });
 
-// School overview
+// School overview — lazy loaded to avoid circular imports
 export const scholenRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/scholen',
@@ -51,30 +56,35 @@ export const schoolRoute = createRoute({
     }
     return { school };
   },
+  component: SchoolLayout,
 });
 
 // Wizard step
 export const wizardStepRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/wizard/$step',
+  component: WizardPage,
 });
 
 // Price comparison
 export const vergelijkingRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/vergelijking',
+  component: () => PriceComparisonPage({}),
 });
 
 // Current vs proposed
 export const huidigVsCitoRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/huidig-vs-cito',
+  component: () => CurrentVsProposedPage({}),
 });
 
 // Migration
 export const migratieRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/migratie',
+  component: () => MigrationPage({}),
 });
 
 export const routeTree = rootRoute.addChildren([
