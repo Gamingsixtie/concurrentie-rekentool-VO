@@ -93,7 +93,7 @@ Plans:
 
 Plans:
 - [x] 07-01-PLAN.md — CRM-lite data layer: types, Dexie v2 schema migratie, CRUD operaties, Zod schemas en timeline utility
-- [ ] 07-02-PLAN.md — Profiel-UI: tab-routing, ProfileHeader, TabNavigation, DashboardTab, ComparisonTab, ProductsTab en pipeline-management
+- [x] 07-02-PLAN.md — Profiel-UI: tab-routing, ProfileHeader, TabNavigation, DashboardTab, ComparisonTab, ProductsTab en pipeline-management
 - [x] 07-03-PLAN.md — ContactsTab met CRUD en DMU-mapping, ConversationsTab met tijdlijn, tags, zoekfunctie en kanban-actielijst
 - [ ] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
 
