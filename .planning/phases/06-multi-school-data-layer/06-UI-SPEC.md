@@ -48,7 +48,7 @@ Exceptions: Touch targets minimum 44px height (MODE-03 tablet requirement). Appl
 | Role | Size | Weight | Line Height | Usage in Phase 6 |
 |------|------|--------|-------------|-------------------|
 | Body | 16px | 400 (regular) | 1.5 | Card body text, form labels, search input text |
-| Label | 14px | 500 (medium) | 1.4 | Secondary info on cards (leerlingaantal, modules), metadata, timestamps |
+| Label | 14px | 400 (regular) | 1.4 | Secondary info on cards (leerlingaantal, modules), metadata, timestamps |
 | Heading | 20px | 600 (semibold) | 1.2 | School name on card, section headings, dialog title |
 | Display | 28px | 600 (semibold) | 1.2 | Page title "Schooloverzicht", migration wizard title |
 
@@ -129,7 +129,7 @@ Specifications:
 - Card hover state: `shadow-md` transition, border color shifts to `neutral-400`
 - Card focus state: 2px `cito-primary` outline (keyboard accessibility)
 - Card is fully clickable (entire card is a link to `/scholen/{slug}/wizard/1`)
-- Incomplete profile: amber badge top-right reading "Niet voltooid" in 14px medium weight
+- Incomplete profile: amber badge top-right reading "Niet voltooid" in 14px regular weight
 - School name: truncate with ellipsis at 1 line
 - Module list: truncate with ellipsis at 1 line, show count if overflow (e.g., "Cito LVS +3 modules")
 - Metadata (schooltype, leerlingen): 14px, `neutral-500`, displayed as key-value pairs in a 2-column mini grid
@@ -262,7 +262,7 @@ Specifications:
 |  Weet u zeker dat u "[schoolnaam]" wilt verwijderen?     |
 |  Dit kan niet ongedaan worden gemaakt.                   |
 |                                                          |
-|           [Annuleren]     [Verwijderen]                  |
+|           [Annuleren]     [Profiel verwijderen]          |
 |                                                          |
 +----------------------------------------------------------+
 ```
@@ -273,7 +273,7 @@ Specifications:
 - Title "Schoolprofiel verwijderen": Heading size (20px semibold), `neutral-900`
 - Body text: Body size (16px regular), `neutral-700`. School name in quotes and bold.
 - "Annuleren" button: ghost style, `neutral-700` text, 44px height
-- "Verwijderen" button: `bg-red-600 text-white`, 44px height -- destructive red, not accent orange
+- "Profiel verwijderen" button: `bg-red-600 text-white`, 44px height -- destructive red, not accent orange
 - Button row: right-aligned, 16px gap between buttons
 
 ---
@@ -283,7 +283,7 @@ Specifications:
 Badge displayed on school cards when the wizard was not completed through all steps.
 
 - Badge text: "Niet voltooid"
-- Badge style: `bg-amber-100 text-amber-700 border border-amber-300`, 14px medium weight, 4px vertical padding, 8px horizontal padding, 4px border-radius
+- Badge style: `bg-amber-100 text-amber-700 border border-amber-300`, 14px regular weight, 4px vertical padding, 8px horizontal padding, 4px border-radius
 - Position: top-right corner of school card, 8px from top and right edges
 - The badge is purely informational -- clicking the card still opens the wizard where the user left off
 
@@ -369,7 +369,7 @@ All copy is in formeel Nederlands (u-vorm) per MODE-01.
 | Migration error CTA | "Opnieuw beginnen" |
 | Delete heading | "Schoolprofiel verwijderen" |
 | Delete body | "Weet u zeker dat u \"[schoolnaam]\" wilt verwijderen? Dit kan niet ongedaan worden gemaakt." |
-| Delete confirm | "Verwijderen" |
+| Delete confirm | "Profiel verwijderen" |
 | Delete cancel | "Annuleren" |
 | Incomplete badge | "Niet voltooid" |
 | Not found redirect | "Dit schoolprofiel bestaat niet meer." |
