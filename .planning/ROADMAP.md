@@ -1,116 +1,183 @@
 # Roadmap: Rekentool VO
 
-## Overview
+## Milestones
 
-Van lege repository naar een werkende prijsvergelijkings- en business-case-tool voor het VO in vijf fasen. We beginnen met het datamodel en de rekenmotor (de kern die alles aandrijft), bouwen daarop Scenario A (prijsvergelijking Cito vs. concurrentie) als eerste zichtbare output, voegen Scenario B (migratieberekening met tijdswinst) toe, schakelen interne modus en doelgroep-perspectieven in, en sluiten af met AI-ondersteuning en tablet-optimalisatie.
+- ✅ **v1.0 Fundament** - Phases 1-5 (shipped 2026-03-20)
+- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-11 (in progress)
 
 ## Phases
 
+<details>
+<summary>✅ v1.0 Fundament (Phases 1-5) - SHIPPED 2026-03-20</summary>
+
+### Phase 1: Fundament
+**Goal**: Schoolprofiel-invoer, datastructuren, Cito-huisstijl en app-skelet
+**Requirements**: PROF-01, PROF-02, PROF-03, PROF-04, DATA-01, DATA-02, DATA-03, DATA-05, DATA-06, UX-03, UX-04
+**Plans**: 3 plans
+
+Plans:
+- [x] 01-01-PLAN.md — Project scaffold, Tailwind CSS 4 theming, TypeScript data models, zustand store en zod schemas
+- [x] 01-02-PLAN.md — 4-staps wizard UI met voortgangsbalk, navigatie en alle stap-componenten
+- [x] 01-03-PLAN.md — Reusable UI-componenten: PriceBadge, EditableAssumption, DisclaimerFooter
+
+### Phase 2: Prijsvergelijking
+**Goal**: Modulaire Cito vs. DIA vs. JIJ vergelijking met staafdiagram en transparante bronvermelding
+**Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, DATA-04, INPUT-01, MODE-01
+**Plans**: 3 plans
+
+Plans:
+- [x] 02-01-PLAN.md — Rekenmotor: pure calculateComparison functie, uitgebreide prijsdata, differentiator-data en nl-NL formatting (TDD)
+- [x] 02-02-PLAN.md — Zustand store met draft/applied override-scheiding, Recharts staafdiagram en BusinessCaseCTA
+- [x] 02-03-PLAN.md — ComparisonTable, ModuleDetailPanel met prijsoverschrijving, PriceComparisonPage en wizard-routing
+
+### Phase 3: Business Case
+**Goal**: Migratie huidig → nieuw Cito-platform met financieel verschil, tijdswinst en meerjarenprojectie
+**Requirements**: BCASE-01, BCASE-02, BCASE-03, BCASE-04, BCASE-05, BCASE-06, BCASE-07
+**Plans**: 2 plans
+
+### Phase 4: Interne Modus & Doelgroepen
+**Goal**: Sales-signalen, gevoeligheidsanalyse, doelgroep-perspectieven, print en clipboard-export
+**Requirements**: MODE-02, MODE-03, MODE-04, MODE-05, DOELGR-01, DOELGR-02, DOELGR-03, EXPORT-01, EXPORT-02
+**Plans**: 2 plans
+
+### Phase 5: AI & Polish
+**Goal**: AI-validatie, prijsinvoer en tablet-optimalisatie
+**Requirements**: INPUT-02, INPUT-03, AI-01, AI-02, AI-03, UX-01, UX-02
+**Plans**: 2 plans
+
+</details>
+
+### 🚧 v2.0 Sales Intelligence Platform (In Progress)
+
+**Milestone Goal:** Van statische prijsvergelijker naar dynamisch sales intelligence platform met multi-school persistentie, AI-intake, schoolprofielen, waarde-engine en DMU-exports.
+
 **Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- Integer phases (6, 7, 8...): Planned milestone work
+- Decimal phases (7.1, 7.2): Urgent insertions (marked with INSERTED)
 
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [ ] **Phase 1: Fundament** - Datamodel, rekenmotor, schoolprofiel-invoer en app-skelet met Cito-huisstijl
-- [ ] **Phase 2: Prijsvergelijking** - Scenario A: modulaire Cito vs. DIA vs. JIJ vergelijking met staafdiagram en transparante bronvermelding
-- [ ] **Phase 3: Business Case** - Scenario B: financieel verschil, tijdswinst-calculator, meerjarenprojectie en terugverdientijd
-- [ ] **Phase 4: Interne Modus & Doelgroepen** - Sales-signalen, gevoeligheidsanalyse, doelgroep-perspectieven, print en clipboard-export
-- [ ] **Phase 5: AI & Polish** - AI-validatie en -generatie, geavanceerde prijsinvoer (upload/AI-lookup) en tablet-optimalisatie
+- [ ] **Phase 6: Multi-School Data Layer** - IndexedDB persistentie, v1 migratie, navigatie-scaffolding en basisweergave
+- [ ] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
+- [ ] **Phase 8: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking en prijsinvoer/-beheer met validatie
+- [ ] **Phase 9: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse
+- [ ] **Phase 10: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
+- [ ] **Phase 11: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 
 ## Phase Details
 
-### Phase 1: Fundament
-**Goal**: De gebruiker kan een schoolprofiel invoeren en de applicatie toont de Cito-huisstijl, Nederlandse interface en correct opgezette datastructuren -- klaar om er berekeningen op los te laten
-**Depends on**: Nothing (first phase)
-**Requirements**: PROF-01, PROF-02, PROF-03, PROF-04, DATA-01, DATA-02, DATA-03, DATA-05, DATA-06, UX-03, UX-04
+### Phase 6: Multi-School Data Layer
+**Goal**: Applicatie ondersteunt meerdere schoolprofielen met persistente opslag, bestaande v1-data behouden, en navigatie met browser-history
+**Depends on**: v1.0 (Phase 5)
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, MODE-01, MODE-03
 **Success Criteria** (what must be TRUE):
-  1. Gebruiker kan schooltype (vmbo-b/k/gt, havo, vwo), leerlingaantallen per leerjaar/niveau en relevante modules selecteren
-  2. Gebruiker kan kiezen tussen Scenario A en Scenario B
-  3. Prijsdata bevat bronvermelding, verificatiedatum en ouderdomsindicator per record; prijzen ouder dan 6 maanden tonen automatisch een waarschuwing
-  4. De interface is volledig Nederlandstalig en toont Cito-huisstijl (Primary #003082, Accent #FF6600, Background #F8F9FA)
-  5. Alle aannames in het datamodel zijn zichtbaar en aanpasbaar (uurtarief, tijdsschattingen, etc.)
-**Plans**: 3 plans
-
-Plans:
-- [ ] 01-01-PLAN.md — Project scaffold, Tailwind CSS 4 theming, TypeScript data models, zustand store en zod schemas
-- [ ] 01-02-PLAN.md — 4-staps wizard UI met voortgangsbalk, navigatie en alle stap-componenten
-- [ ] 01-03-PLAN.md — Reusable UI-componenten: PriceBadge, EditableAssumption, DisclaimerFooter
-
-### Phase 2: Prijsvergelijking
-**Goal**: De gebruiker ziet een eerlijke, transparante modulaire prijsvergelijking tussen Cito, DIA en JIJ op basis van publicatieprijzen, inclusief visuele weergave en onderscheidend vermogen
-**Depends on**: Phase 1
-**Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, DATA-04, INPUT-01, MODE-01
-**Success Criteria** (what must be TRUE):
-  1. Gebruiker ziet per geselecteerde module de kosten per leerling en totaalkosten per aanbieder (Cito, DIA, JIJ) naast elkaar
-  2. Gebruiker ziet een staafdiagram dat de totaalkosten per aanbieder visueel vergelijkt
-  3. Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
-  4. Gebruiker kan prijzen handmatig invoeren of overschrijven, en de vergelijking herberekent reactief zonder opnieuw te beginnen
-  5. Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd), inclusief gevallen waar de concurrent goedkoper is
-**Plans**: 3 plans
-
-Plans:
-- [ ] 02-01-PLAN.md — Rekenmotor: pure calculateComparison functie, uitgebreide prijsdata, differentiator-data en nl-NL formatting (TDD)
-- [ ] 02-02-PLAN.md — Zustand store met draft/applied override-scheiding, Recharts staafdiagram en BusinessCaseCTA
-- [ ] 02-03-PLAN.md — ComparisonTable, ModuleDetailPanel met prijsoverschrijving, PriceComparisonPage en wizard-routing
-
-### Phase 3: Business Case
-**Goal**: De gebruiker kan de complete business case voor de overstap van het huidige naar het nieuwe Cito-platform doorrekenen, met financieel verschil, tijdswinst in uren en euro's, en meerjarenprojectie
-**Depends on**: Phase 2
-**Requirements**: BCASE-01, BCASE-02, BCASE-03, BCASE-04, BCASE-05, BCASE-06, BCASE-07
-**Success Criteria** (what must be TRUE):
-  1. Gebruiker ziet het financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal
-  2. Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard, met bewerkbare aannames en standaardprofielen (klein/middelgroot/groot VO)
-  3. Gebruiker kan uurtarief instellen en ziet de tijdsbesparing omgerekend naar euro's
-  4. Gebruiker ziet de totale waarde van de overstap (financieel verschil + tijdsbesparing) en een meerjarenprojectie over 1, 3 en 5 jaar met cumulatieve besparing
-  5. Gebruiker ziet het break-even punt (terugverdientijd) visueel weergegeven
+  1. Gebruiker kan een nieuw schoolprofiel aanmaken, opslaan, heropenen en verwijderen — data blijft bewaard na browser-herstart
+  2. Bestaande v1-data (wizard inputs, prijsoverschrijvingen) is automatisch beschikbaar als schoolprofiel in de v2-interface zonder handmatige actie
+  3. Gebruiker kan via browser-back-button terug navigeren naar vorige view en via URL direct naar een specifieke school/view gaan
+  4. Alle UI-tekst is in formeel Nederlands (u-vorm) en de interface is bruikbaar op tablet met touch
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 06-01: TBD
+- [ ] 06-02: TBD
+- [ ] 06-03: TBD
 
-### Phase 4: Interne Modus & Doelgroepen
-**Goal**: Accountmanagers kunnen de tool in interne modus gebruiken met sales-signalen en gevoeligheidsanalyse, en resultaten presenteren vanuit het perspectief van de juiste doelgroep, met print- en clipboard-export
-**Depends on**: Phase 3
-**Requirements**: MODE-02, MODE-03, MODE-04, MODE-05, DOELGR-01, DOELGR-02, DOELGR-03, EXPORT-01, EXPORT-02
+### Phase 7: School Intelligence
+**Goal**: Accountmanager heeft per school een compleet profiel met contactpersonen, productgebruik, gesprekshistorie en pipeline-status — en kan snel de juiste school vinden
+**Depends on**: Phase 6
+**Requirements**: SCHOOL-01, SCHOOL-02, SCHOOL-03, SCHOOL-04, SCHOOL-05, SCHOOL-06, PRIJS-07
 **Success Criteria** (what must be TRUE):
-  1. Accountmanager kan interne modus activeren (apart URL-pad met toegangspoort) en ziet sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
-  2. Interne modus toont automatisch gevoeligheidsanalyse met 10%/20% kortingsscenario's en marktgemiddelde per modulecombinatie
-  3. Gebruiker kan perspectief kiezen (coordinator/docent, directie, finance) en ziet resultaten met de juiste nadruk (tijdswinst, overzicht, of euro's)
-  4. Gebruiker kan het resultaat printen met alle secties uitgevouwen in print-geoptimaliseerde layout
-  5. Gebruiker kan een samenvatting kopieren naar clipboard
+  1. Gebruiker kan een school aanmaken met basisgegevens en per school vastleggen welke modules van welke aanbieder worden gebruikt, inclusief prijzen en bron
+  2. Gebruiker kan contactpersonen (naam, rol, DMU-positie) en gespreksnotities (datum, contactpersoon, kernpunten) per school beheren
+  3. Gebruiker kan pipeline-status instellen (prospect t/m at-risk) en ziet een doorzoekbaar schooloverzicht gesorteerd op laatst gebruikt met status-badges
+  4. Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en worden niet verward met publicatieprijzen
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 07-01: TBD
+- [ ] 07-02: TBD
+- [ ] 07-03: TBD
 
-### Phase 5: AI & Polish
-**Goal**: AI ondersteunt de gebruiker bij validatie, inhoudsgeneratie en prijsinvoer, en de tool werkt uitstekend op tablet tijdens schoolbezoek
-**Depends on**: Phase 4
-**Requirements**: INPUT-02, INPUT-03, AI-01, AI-02, AI-03, UX-01, UX-02
+### Phase 8: AI Intake & Prijsbeheer
+**Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die automatisch wordt gestructureerd in schooldata, en kan prijzen beheren via handmatige invoer of AI-documentextractie
+**Depends on**: Phase 7
+**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05, PRIJSMGT-01, PRIJSMGT-02, PRIJSMGT-03, PRIJSMGT-04
 **Success Criteria** (what must be TRUE):
-  1. AI signaleert onrealistische prijzen, ontbrekende modules en inconsistenties bij invoer
-  2. AI genereert onderscheidend vermogen per module en schrijft een samenvatting afgestemd op de gekozen doelgroep
-  3. Gebruiker kan prijsdocumenten uploaden (PDF/Excel) voor automatische prijsextractie
-  4. Gebruiker kan AI-agent inzetten om prijzen op te zoeken
-  5. De tool is bruikbaar op tablet tijdens schoolbezoek: responsief, touch-friendly, met guidance en defaults bij invoervelden
+  1. Gebruiker kan tijdens een gesprek vrije tekst invoeren die real-time (streaming) wordt gestructureerd — modules, aanbieders, prijzen en contactpersonen worden herkend met fuzzy matching
+  2. Geextraheerde data verschijnt op een bevestigingsscherm waar de gebruiker kan corrigeren voordat het wordt opgeslagen — prijzen buiten bekende ranges worden gemarkeerd als ongebruikelijk
+  3. AI intake voegt toe aan een bestaand schoolprofiel zonder eerdere data te overschrijven
+  4. Gebruiker kan prijzen handmatig invoeren/bijwerken met bron en verificatiedatum, en prijzen ouder dan 6 maanden worden automatisch als "mogelijk verouderd" gemarkeerd
+  5. Gebruiker kan een prijsdocument (PDF) uploaden en de AI extraheert prijzen die ter goedkeuring worden getoond — nooit automatisch doorgevoerd
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
+- [ ] 08-03: TBD
+
+### Phase 9: Prijsvergelijking & Gevoeligheid
+**Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
+**Depends on**: Phase 7 (schoolprofielen), Phase 8 (prijsdata)
+**Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, PRIJS-08, GEVOEL-01, GEVOEL-02, GEVOEL-03, MODE-02
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker ziet per module de kosten per leerling en totaalkosten per aanbieder naast elkaar, met visueel staafdiagram en uitklapbare berekeningsdetails
+  2. Gebruiker kan prijzen handmatig overschrijven met bronvermelding en de vergelijking herberekent reactief — DIA-pakketprijzen worden automatisch correct berekend bij 3+ modules
+  3. Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) als onderscheidend vermogen
+  4. Hybride scenario berekent per module apart de besparingen waar een school van aanbieder wisselt
+  5. In interne modus ziet de gebruiker gevoeligheidsanalyse met 10%/20% kortingsscenario's, het effect per module, en het break-even kortingspercentage — plus sales-signalen per module
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+- [ ] 09-02: TBD
+- [ ] 09-03: TBD
+
+### Phase 10: Waarde-engine & Migratie
+**Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
+**Depends on**: Phase 9 (prijsvergelijking)
+**Requirements**: WAARDE-01, WAARDE-02, WAARDE-03, WAARDE-04, MIGR-01, MIGR-02, MIGR-03, SCHOOL-07
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames, en kan een uurtarief instellen om tijdsbesparing in euro's te zien
+  2. Gebruiker ziet de totale waarde van de overstap: financieel verschil plus tijdsbesparing in euro's, met meerjarenprojectie over 1, 3 en 5 jaar inclusief cumulatieve besparing en break-even punt
+  3. Gebruiker ziet het financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal, met een gecombineerde businesscase (prijsverschil + tijdwinst + meerjarenprojectie)
+  4. Systeem detecteert automatisch upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+- [ ] 10-02: TBD
+- [ ] 10-03: TBD
+
+### Phase 11: DMU-Export & Offline
+**Goal**: Accountmanager kan na elk gesprek direct een op de DMU afgestemd PDF-rapport genereren en de applicatie werkt offline op tablet
+**Depends on**: Phase 10 (waarde-engine, migratie), Phase 9 (prijsvergelijking)
+**Requirements**: EXPORT-01, EXPORT-02, EXPORT-03, EXPORT-04, EXPORT-05, ARCH-05
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan een PDF-rapport genereren per DMU-rol: coordinator (tijdwinst, dagelijks gebruik), MT (overzicht, onderbouwing, strategische waarde), finance (euro's, meerjarenprojectie, terugverdientijd)
+  2. PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl (Primary #003082, Accent #FF6600), bronvermelding en disclaimer
+  3. Gebruiker kan de vergelijking kopiëren naar clipboard als geformatteerde samenvatting
+  4. Applicatie werkt offline op tablet na eerste laden — service worker cacht assets en data
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: TBD
+- [ ] 11-02: TBD
+- [ ] 11-03: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
+(Decimal phases, if inserted, execute between their surrounding integers)
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Fundament | 0/3 | Planning complete | - |
-| 2. Prijsvergelijking | 0/3 | Planning complete | - |
-| 3. Business Case | 0/? | Not started | - |
-| 4. Interne Modus & Doelgroepen | 0/? | Not started | - |
-| 5. AI & Polish | 0/? | Not started | - |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Fundament | v1.0 | 3/3 | Complete | 2026-03-20 |
+| 2. Prijsvergelijking | v1.0 | 3/3 | Complete | 2026-03-20 |
+| 3. Business Case | v1.0 | 2/2 | Complete | 2026-03-20 |
+| 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
+| 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
+| 6. Multi-School Data Layer | v2.0 | 0/3 | Not started | - |
+| 7. School Intelligence | v2.0 | 0/3 | Not started | - |
+| 8. AI Intake & Prijsbeheer | v2.0 | 0/3 | Not started | - |
+| 9. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
+| 10. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
+| 11. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |

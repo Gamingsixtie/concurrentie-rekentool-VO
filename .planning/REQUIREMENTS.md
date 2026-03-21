@@ -107,59 +107,59 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | TBD | Pending |
-| ARCH-02 | TBD | Pending |
-| ARCH-03 | TBD | Pending |
-| ARCH-04 | TBD | Pending |
-| ARCH-05 | TBD | Pending |
-| SCHOOL-01 | TBD | Pending |
-| SCHOOL-02 | TBD | Pending |
-| SCHOOL-03 | TBD | Pending |
-| SCHOOL-04 | TBD | Pending |
-| SCHOOL-05 | TBD | Pending |
-| SCHOOL-06 | TBD | Pending |
-| SCHOOL-07 | TBD | Pending |
-| INTAKE-01 | TBD | Pending |
-| INTAKE-02 | TBD | Pending |
-| INTAKE-03 | TBD | Pending |
-| INTAKE-04 | TBD | Pending |
-| INTAKE-05 | TBD | Pending |
-| PRIJS-01 | TBD | Pending |
-| PRIJS-02 | TBD | Pending |
-| PRIJS-03 | TBD | Pending |
-| PRIJS-04 | TBD | Pending |
-| PRIJS-05 | TBD | Pending |
-| PRIJS-06 | TBD | Pending |
-| PRIJS-07 | TBD | Pending |
-| PRIJS-08 | TBD | Pending |
-| GEVOEL-01 | TBD | Pending |
-| GEVOEL-02 | TBD | Pending |
-| GEVOEL-03 | TBD | Pending |
-| WAARDE-01 | TBD | Pending |
-| WAARDE-02 | TBD | Pending |
-| WAARDE-03 | TBD | Pending |
-| WAARDE-04 | TBD | Pending |
-| MIGR-01 | TBD | Pending |
-| MIGR-02 | TBD | Pending |
-| MIGR-03 | TBD | Pending |
-| EXPORT-01 | TBD | Pending |
-| EXPORT-02 | TBD | Pending |
-| EXPORT-03 | TBD | Pending |
-| EXPORT-04 | TBD | Pending |
-| EXPORT-05 | TBD | Pending |
-| PRIJSMGT-01 | TBD | Pending |
-| PRIJSMGT-02 | TBD | Pending |
-| PRIJSMGT-03 | TBD | Pending |
-| PRIJSMGT-04 | TBD | Pending |
-| MODE-01 | TBD | Pending |
-| MODE-02 | TBD | Pending |
-| MODE-03 | TBD | Pending |
+| ARCH-01 | Phase 6 | Pending |
+| ARCH-02 | Phase 6 | Pending |
+| ARCH-03 | Phase 6 | Pending |
+| ARCH-04 | Phase 6 | Pending |
+| ARCH-05 | Phase 11 | Pending |
+| SCHOOL-01 | Phase 7 | Pending |
+| SCHOOL-02 | Phase 7 | Pending |
+| SCHOOL-03 | Phase 7 | Pending |
+| SCHOOL-04 | Phase 7 | Pending |
+| SCHOOL-05 | Phase 7 | Pending |
+| SCHOOL-06 | Phase 7 | Pending |
+| SCHOOL-07 | Phase 10 | Pending |
+| INTAKE-01 | Phase 8 | Pending |
+| INTAKE-02 | Phase 8 | Pending |
+| INTAKE-03 | Phase 8 | Pending |
+| INTAKE-04 | Phase 8 | Pending |
+| INTAKE-05 | Phase 8 | Pending |
+| PRIJS-01 | Phase 9 | Pending |
+| PRIJS-02 | Phase 9 | Pending |
+| PRIJS-03 | Phase 9 | Pending |
+| PRIJS-04 | Phase 9 | Pending |
+| PRIJS-05 | Phase 9 | Pending |
+| PRIJS-06 | Phase 9 | Pending |
+| PRIJS-07 | Phase 7 | Pending |
+| PRIJS-08 | Phase 9 | Pending |
+| GEVOEL-01 | Phase 9 | Pending |
+| GEVOEL-02 | Phase 9 | Pending |
+| GEVOEL-03 | Phase 9 | Pending |
+| WAARDE-01 | Phase 10 | Pending |
+| WAARDE-02 | Phase 10 | Pending |
+| WAARDE-03 | Phase 10 | Pending |
+| WAARDE-04 | Phase 10 | Pending |
+| MIGR-01 | Phase 10 | Pending |
+| MIGR-02 | Phase 10 | Pending |
+| MIGR-03 | Phase 10 | Pending |
+| EXPORT-01 | Phase 11 | Pending |
+| EXPORT-02 | Phase 11 | Pending |
+| EXPORT-03 | Phase 11 | Pending |
+| EXPORT-04 | Phase 11 | Pending |
+| EXPORT-05 | Phase 11 | Pending |
+| PRIJSMGT-01 | Phase 8 | Pending |
+| PRIJSMGT-02 | Phase 8 | Pending |
+| PRIJSMGT-03 | Phase 8 | Pending |
+| PRIJSMGT-04 | Phase 8 | Pending |
+| MODE-01 | Phase 6 | Pending |
+| MODE-02 | Phase 9 | Pending |
+| MODE-03 | Phase 6 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 43 total
-- Mapped to phases: 0
-- Unmapped: 43
+- v2.0 requirements: 47 total
+- Mapped to phases: 47
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after initial definition*
+*Last updated: 2026-03-21 after roadmap creation — all requirements mapped to phases*
