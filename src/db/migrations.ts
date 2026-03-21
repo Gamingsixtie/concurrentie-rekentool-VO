@@ -97,6 +97,20 @@ export async function migrateV1ToSchool(name: string): Promise<SchoolRecord> {
     appliedOverrides: priceData?.appliedOverrides ?? [],
     migrationHourlyRate: priceData?.migrationHourlyRate ?? 50,
     migrationTimeSavingOverrides: priceData?.migrationTimeSavingOverrides ?? {},
+    // CRM-lite defaults
+    contacts: [],
+    conversations: [],
+    actions: [],
+    systemEvents: [{
+      id: crypto.randomUUID(),
+      timestamp: now.toISOString(),
+      eventType: 'school_created',
+      description: 'School gemigreerd vanuit v1',
+    }],
+    pipelineStatus: 'prospect',
+    region: '',
+    tags: [],
+    viewPreference: 'compact',
   };
 
   const id = await db.schools.add(record as SchoolRecord);

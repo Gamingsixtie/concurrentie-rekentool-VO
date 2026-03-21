@@ -43,6 +43,14 @@ describe('Router guards', () => {
         appliedOverrides: [],
         migrationHourlyRate: 50,
         migrationTimeSavingOverrides: {},
+        contacts: [],
+        conversations: [],
+        actions: [],
+        systemEvents: [],
+        pipelineStatus: 'prospect',
+        region: '',
+        tags: [],
+        viewPreference: 'compact',
       });
 
       const result = await checkSchoolExists('montessori-college');

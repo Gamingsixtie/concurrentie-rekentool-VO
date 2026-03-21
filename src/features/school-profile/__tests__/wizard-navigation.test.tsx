@@ -51,6 +51,14 @@ describe('Wizard Navigation', () => {
       appliedOverrides: [],
       migrationHourlyRate: 50,
       migrationTimeSavingOverrides: {},
+      contacts: [],
+      conversations: [],
+      actions: [],
+      systemEvents: [],
+      pipelineStatus: 'prospect',
+      region: '',
+      tags: [],
+      viewPreference: 'compact',
     });
   });
 

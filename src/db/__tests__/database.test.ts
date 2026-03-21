@@ -33,6 +33,14 @@ describe('RekenToolDB', () => {
       appliedOverrides: [],
       migrationHourlyRate: 50,
       migrationTimeSavingOverrides: {},
+      contacts: [],
+      conversations: [],
+      actions: [],
+      systemEvents: [],
+      pipelineStatus: 'prospect',
+      region: '',
+      tags: [],
+      viewPreference: 'compact',
     });
     const record = await db.schools.get(id);
     expect(record).toBeDefined();

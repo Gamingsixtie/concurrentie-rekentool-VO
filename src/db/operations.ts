@@ -20,6 +20,20 @@ export async function createSchool(name: string): Promise<SchoolRecord> {
     appliedOverrides: [],
     migrationHourlyRate: 50,
     migrationTimeSavingOverrides: {},
+    // CRM-lite defaults
+    contacts: [],
+    conversations: [],
+    actions: [],
+    systemEvents: [{
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      eventType: 'school_created',
+      description: 'School aangemaakt',
+    }],
+    pipelineStatus: 'prospect',
+    region: '',
+    tags: [],
+    viewPreference: 'compact',
   };
   const id = await db.schools.add(record as SchoolRecord);
   return { ...record, id } as SchoolRecord;
