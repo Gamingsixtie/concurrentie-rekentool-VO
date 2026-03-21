@@ -15,7 +15,7 @@ import SchoolOverviewPage from '@/features/school-overview/SchoolOverviewPage';
 
 // Root layout
 export const rootRoute = createRootRoute({
-  component: () => Outlet({}),
+  component: Outlet,
 });
 
 // Index route — smart redirect based on school count
@@ -72,21 +72,21 @@ export const wizardStepRoute = createRoute({
 export const vergelijkingRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/vergelijking',
-  component: () => PriceComparisonPage({}),
+  component: PriceComparisonPage,
 });
 
 // Current vs proposed
 export const huidigVsCitoRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/huidig-vs-cito',
-  component: () => CurrentVsProposedPage({}),
+  component: CurrentVsProposedPage,
 });
 
 // Migration
 export const migratieRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/migratie',
-  component: () => MigrationPage({}),
+  component: MigrationPage,
 });
 
 export const routeTree = rootRoute.addChildren([
