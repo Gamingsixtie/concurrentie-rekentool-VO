@@ -3,10 +3,12 @@ import type { SchoolRecord } from '@/db/types';
 import { SCHOOL_LEVEL_LABELS } from '@/models/school';
 import type { SchoolLevel } from '@/models/school';
 import IncompleteIndicator from '@/components/ui/IncompleteIndicator';
+import PipelineBadge from '@/components/ui/PipelineBadge';
 
 interface SchoolCardProps {
   school: SchoolRecord;
   onDelete: (school: SchoolRecord) => void;
+  mode: 'compact' | 'extended';
 }
 
 const dateFormatter = new Intl.DateTimeFormat('nl-NL', {
@@ -27,22 +29,51 @@ function totalStudents(studentCounts: SchoolRecord['studentCounts']): number {
   return total;
 }
 
-export default function SchoolCard({ school, onDelete }: SchoolCardProps) {
+export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) {
   const levelLabels = school.levels
     .map((l) => SCHOOL_LEVEL_LABELS[l as SchoolLevel] || l)
     .join('/');
   const studentCount = totalStudents(school.studentCounts);
-  const moduleText = school.selectedModules.length > 0
-    ? school.selectedModules.length === 1
+
+  // Module summary for extended mode
+  const moduleCount = school.selectedModules.length;
+  const moduleText = moduleCount > 0
+    ? moduleCount === 1
       ? '1 module'
-      : `${school.selectedModules.length} modules`
+      : `${moduleCount} modules`
     : 'Geen modules';
+
+  // Count modules by DIA provider
+  const diaModules = school.moduleSetups?.filter(m => m.currentProvider === 'dia').length ?? 0;
+  const moduleSummary = diaModules > 0
+    ? `${moduleText}, ${diaModules} bij DIA`
+    : moduleText;
+
+  // Primary contact for extended mode
+  const primaryContact = school.contacts?.find(c => c.isPrimary);
+  const primaryContactText = primaryContact
+    ? `Contact: ${primaryContact.name}`
+    : 'Geen primair contact';
+
+  // Latest conversation date
+  const latestConversation = school.conversations?.length
+    ? school.conversations.reduce((latest, conv) =>
+        new Date(conv.date) > new Date(latest.date) ? conv : latest,
+      )
+    : null;
+
+  // Next action (first todo)
+  const nextAction = school.actions?.find(a => a.status === 'todo');
+
+  const isCompact = mode === 'compact';
 
   return (
     <Link
-      to="/scholen/$slug/wizard/$step"
-      params={{ slug: school.slug, step: '1' }}
-      className="block bg-white border border-neutral-200 rounded-lg p-6 min-h-[160px] hover:shadow-md hover:border-neutral-400 transition-all duration-150 focus:outline-2 focus:outline-cito-primary focus:outline-offset-2 relative group"
+      to="/scholen/$slug"
+      params={{ slug: school.slug }}
+      className={`block bg-white border border-neutral-200 rounded-lg hover:shadow-md hover:border-neutral-400 transition-all duration-150 focus:outline-2 focus:outline-cito-primary focus:outline-offset-2 relative group ${
+        isCompact ? 'p-4 min-h-[80px]' : 'p-6 min-h-[160px]'
+      }`}
     >
       {/* Delete button */}
       <button
@@ -60,39 +91,64 @@ export default function SchoolCard({ school, onDelete }: SchoolCardProps) {
         </svg>
       </button>
 
-      {/* School name + incomplete badge */}
-      <div className="flex items-start gap-2 mb-3 pr-8">
-        <h3 className="text-xl font-semibold text-cito-primary truncate">
+      {/* School name + pipeline badge + incomplete indicator */}
+      <div className="flex items-center gap-2 mb-2 pr-8">
+        <h3 className={`font-semibold text-cito-primary truncate ${isCompact ? 'text-lg' : 'text-xl'}`}>
           {school.name}
         </h3>
+        <PipelineBadge status={school.pipelineStatus} size="sm" />
         {!school.isComplete && <IncompleteIndicator />}
       </div>
 
-      {/* Metadata */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[14px] text-neutral-500 mb-3">
-        {levelLabels && (
-          <div>
-            <span className="text-neutral-700">Schooltype:</span>{' '}
-            {levelLabels}
-          </div>
-        )}
-        {studentCount > 0 && (
-          <div>
-            <span className="text-neutral-700">Leerlingen:</span>{' '}
-            {studentCount.toLocaleString('nl-NL')}
-          </div>
-        )}
-      </div>
-
-      {/* Modules */}
-      <div className="text-[14px] text-neutral-500 mb-3 truncate">
-        {moduleText}
-      </div>
-
-      {/* Last edited */}
+      {/* Last edited - shown in both modes */}
       <div className="text-sm text-neutral-400">
         Laatst bewerkt: {dateFormatter.format(school.updatedAt)}
       </div>
+
+      {/* Extended mode: extra details */}
+      {!isCompact && (
+        <div className="mt-3 space-y-1">
+          {/* Level labels + student count */}
+          <div className="grid grid-cols-2 gap-x-4 text-[14px] text-neutral-500">
+            {levelLabels && (
+              <div>
+                <span className="text-neutral-700">Schooltype:</span>{' '}
+                {levelLabels}
+              </div>
+            )}
+            {studentCount > 0 && (
+              <div>
+                <span className="text-neutral-700">Leerlingen:</span>{' '}
+                {studentCount.toLocaleString('nl-NL')}
+              </div>
+            )}
+          </div>
+
+          {/* Primary contact */}
+          <div className="text-[14px] text-neutral-500">
+            {primaryContactText}
+          </div>
+
+          {/* Modules summary */}
+          <div className="text-[14px] text-neutral-500 truncate">
+            {moduleSummary}
+          </div>
+
+          {/* Latest conversation date */}
+          {latestConversation && (
+            <div className="text-[14px] text-neutral-400">
+              Laatste gesprek: {dateFormatter.format(new Date(latestConversation.date))}
+            </div>
+          )}
+
+          {/* Next action */}
+          {nextAction && (
+            <div className="text-[14px] text-neutral-400 truncate">
+              Volgende actie: {nextAction.title}
+            </div>
+          )}
+        </div>
+      )}
     </Link>
   );
 }

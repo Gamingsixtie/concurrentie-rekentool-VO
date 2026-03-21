@@ -83,6 +83,7 @@ export default function SchoolOverviewPage() {
                 key={school.id}
                 school={school}
                 onDelete={setDeleteTarget}
+                mode="extended"
               />
             ))}
           </div>
