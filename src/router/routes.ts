@@ -8,10 +8,14 @@ import { db } from '@/db/database';
 import { checkSchoolExists } from './guards';
 import SchoolLayout from '@/components/routing/SchoolLayout';
 import WizardPage from '@/components/routing/WizardPage';
-import { PriceComparisonPage } from '@/features/price-comparison/PriceComparisonPage';
 import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProposedPage';
 import { MigrationPage } from '@/features/price-comparison/MigrationPage';
 import SchoolOverviewPage from '@/features/school-overview/SchoolOverviewPage';
+import DashboardTab from '@/features/school-profile/tabs/DashboardTab';
+import ComparisonTab from '@/features/school-profile/tabs/ComparisonTab';
+import ProductsTab from '@/features/school-profile/tabs/ProductsTab';
+import ContactsTab from '@/features/school-profile/tabs/ContactsTab';
+import ConversationsTab from '@/features/school-profile/tabs/ConversationsTab';
 
 // Root layout
 export const rootRoute = createRootRoute({
@@ -28,8 +32,8 @@ export const indexRoute = createRoute({
       const first = await db.schools.toCollection().first();
       if (first) {
         throw redirect({
-          to: '/scholen/$slug/wizard/$step',
-          params: { slug: first.slug, step: '1' },
+          to: '/scholen/$slug',
+          params: { slug: first.slug },
         });
       }
     }
@@ -61,6 +65,13 @@ export const schoolRoute = createRoute({
   component: SchoolLayout,
 });
 
+// Dashboard (index route for school profile)
+export const schoolDashboardRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/',
+  component: DashboardTab,
+});
+
 // Wizard step
 export const wizardStepRoute = createRoute({
   getParentRoute: () => schoolRoute,
@@ -68,11 +79,11 @@ export const wizardStepRoute = createRoute({
   component: WizardPage,
 });
 
-// Price comparison
+// Price comparison (also accessible as tab via ComparisonTab)
 export const vergelijkingRoute = createRoute({
   getParentRoute: () => schoolRoute,
   path: '/vergelijking',
-  component: PriceComparisonPage,
+  component: ComparisonTab,
 });
 
 // Current vs proposed
@@ -89,13 +100,38 @@ export const migratieRoute = createRoute({
   component: MigrationPage,
 });
 
+// Products tab
+export const schoolProductsRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/producten',
+  component: ProductsTab,
+});
+
+// Contacts tab
+export const schoolContactsRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/contacten',
+  component: ContactsTab,
+});
+
+// Conversations tab
+export const schoolConversationsRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/gesprekken',
+  component: ConversationsTab,
+});
+
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   scholenRoute,
   schoolRoute.addChildren([
+    schoolDashboardRoute,
     wizardStepRoute,
     vergelijkingRoute,
     huidigVsCitoRoute,
     migratieRoute,
+    schoolProductsRoute,
+    schoolContactsRoute,
+    schoolConversationsRoute,
   ]),
 ]);

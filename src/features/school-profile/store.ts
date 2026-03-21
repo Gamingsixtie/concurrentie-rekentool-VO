@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import type { SchoolLevel, Scenario, ModuleCurrentSetup } from '../../models/school';
+import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus } from '../../models/school';
 import { SCHOOL_SIZE_PRESETS } from '../../data/school-profiles';
-import type { SchoolRecord } from '@/db/types';
+import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo } from '@/db/types';
 
 interface SchoolProfileState {
   // Multi-school identity
@@ -33,6 +33,17 @@ interface SchoolProfileState {
   currentStep: number;
   setCurrentStep: (step: number) => void;
 
+  // CRM-lite fields
+  pipelineStatus: PipelineStatus;
+  contacts: Contact[];
+  conversations: Conversation[];
+  actions: ActionItem[];
+  systemEvents: SystemEvent[];
+  region: string;
+  tags: string[];
+  viewPreference: 'compact' | 'extended';
+  lostDealInfo?: LostDealInfo;
+
   // Utilities
   applyPreset: (presetId: 'klein' | 'midden' | 'groot') => void;
   hydrate: (record: SchoolRecord) => void;
@@ -49,6 +60,16 @@ const initialState = {
   moduleSetups: [] as ModuleCurrentSetup[],
   scenario: null as Scenario | null,
   currentStep: 0,
+  // CRM-lite defaults
+  pipelineStatus: 'prospect' as PipelineStatus,
+  contacts: [] as Contact[],
+  conversations: [] as Conversation[],
+  actions: [] as ActionItem[],
+  systemEvents: [] as SystemEvent[],
+  region: '',
+  tags: [] as string[],
+  viewPreference: 'compact' as const,
+  lostDealInfo: undefined as LostDealInfo | undefined,
 };
 
 export const useSchoolProfileStore = create<SchoolProfileState>()(
@@ -103,6 +124,16 @@ export const useSchoolProfileStore = create<SchoolProfileState>()(
       currentStep: record.completedSteps.length > 0
         ? Math.min(Math.max(...record.completedSteps) + 1, 4)
         : 0,
+      // CRM-lite fields
+      pipelineStatus: record.pipelineStatus ?? 'prospect',
+      contacts: record.contacts ?? [],
+      conversations: record.conversations ?? [],
+      actions: record.actions ?? [],
+      systemEvents: record.systemEvents ?? [],
+      region: record.region ?? '',
+      tags: record.tags ?? [],
+      viewPreference: record.viewPreference ?? 'compact',
+      lostDealInfo: record.lostDealInfo,
     }),
 
     clear: () => set(initialState),

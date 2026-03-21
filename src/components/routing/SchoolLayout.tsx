@@ -1,13 +1,20 @@
 import { useEffect } from 'react';
-import { Outlet, useParams, useNavigate } from '@tanstack/react-router';
+import { Outlet, useParams, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
+import ProfileHeader from '@/features/school-profile/components/ProfileHeader';
+import TabNavigation from '@/features/school-profile/components/TabNavigation';
 
 export default function SchoolLayout() {
   const { slug } = useParams({ from: '/scholen/$slug' });
   const navigate = useNavigate();
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
+
+  // Detect if we're on a wizard path — hide tabs on wizard
+  const isWizardPath = currentPath.includes('/wizard/');
 
   const school = useLiveQuery(
     () => db.schools.where('slug').equals(slug).first(),
@@ -42,6 +49,8 @@ export default function SchoolLayout() {
 
   return (
     <div className="min-h-screen bg-cito-bg">
+      {!isWizardPath && <ProfileHeader />}
+      {!isWizardPath && <TabNavigation />}
       <Outlet />
     </div>
   );
