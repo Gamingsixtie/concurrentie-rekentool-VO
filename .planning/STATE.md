@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-03-22T21:09:15.581Z"
+stopped_at: Completed 09-04-PLAN.md
+last_updated: "2026-03-22T21:15:31.986Z"
 progress:
   total_phases: 8
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -72,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 09]: Reset-to-publication deactivates all school prices via direct Supabase update in PriceManager
 - [Phase 09]: DiffView maintains mutable extraction copy for inline editing before confirm
 - [Phase 09]: Confirm uses Supabase mutations (operations.ts), not Zustand store for data persistence
+- [Phase 09]: Inline getAuthHeaders in document-parser.ts to avoid circular import with ai-intake.ts
+- [Phase 09]: Return empty array (not error) when Claude cannot extract prices from document text
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T21:09:15.578Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-03-22T21:15:31.984Z
+Stopped at: Completed 09-04-PLAN.md
 Resume file: None

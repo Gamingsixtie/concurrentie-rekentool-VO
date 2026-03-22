@@ -136,7 +136,7 @@ Plans:
 - [x] 09-01-PLAN.md — Shared foundation: extended extraction schema, price deviation logic, useSchoolPrices hook, PriceBadge extension en serverless v2 prompt
 - [x] 09-02-PLAN.md — AI intake flow: IntakeModeToggle, StreamingExtraction, DiffView components (met bewerkbare velden), ConversationForm AI-modus en append-only save
 - [x] 09-03-PLAN.md — Prijsbeheer UI: PriceManager, PriceEditModal, PriceHistoryList, ProductsTab uitbreiding met prijsgeschiedenis en actieve selectie
-- [ ] 09-04-PLAN.md — Document upload: documents bucket, serverless document parser (PDF/Excel/Word/CSV), DocumentDropzone, DocumentExtractionPreview en ProductsTab integratie
+- [x] 09-04-PLAN.md — Document upload: documents bucket, serverless document parser (PDF/Excel/Word/CSV), DocumentDropzone, DocumentExtractionPreview en ProductsTab integratie
 
 ### Phase 10: Prijsvergelijking & Gevoeligheid
 **Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica en JIJ-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
