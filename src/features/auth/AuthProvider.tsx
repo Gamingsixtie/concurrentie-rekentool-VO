@@ -144,11 +144,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         newSession?.user
       ) {
         try {
-          const profile = await fetchUserProfile(newSession.user.id);
+          _dbg('Auth: fetching profile (SIGNED_IN)...');
+          const profile = await Promise.race([
+            fetchUserProfile(newSession.user.id),
+            new Promise<null>((r) => setTimeout(() => r(null), 3000)),
+          ]);
+          _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
           setUserProfile(profile);
         } catch {
-          // Keep existing profile
+          _dbg('Auth: profile fetch failed (SIGNED_IN)');
         }
+        clearTimeout(timeout);
+        _dbg('Auth: setLoading(false) via SIGNED_IN');
+        setLoading(false);
       }
 
       if (event === 'SIGNED_OUT') {
