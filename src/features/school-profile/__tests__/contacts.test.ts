@@ -15,10 +15,7 @@ vi.mock('@/lib/supabase/client', () => ({
           eq: (...eqArgs: unknown[]) => {
             mockEq1(...eqArgs);
             return {
-              eq: (...eq2Args: unknown[]) => {
-                mockEq2(...eq2Args);
-                return Promise.resolve({ count: 0, error: null });
-              },
+              eq: (...eq2Args: unknown[]) => mockEq2(...eq2Args),
             };
           },
         };
@@ -76,6 +73,7 @@ describe('ContactForm schema validation', () => {
 describe('canDeleteContact', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockEq2.mockReturnValue(Promise.resolve({ count: 0, error: null }));
   });
 
   it('allows deletion when no conversations are linked', async () => {
