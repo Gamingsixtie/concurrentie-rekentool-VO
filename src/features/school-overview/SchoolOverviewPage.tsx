@@ -41,7 +41,7 @@ function storePreference(key: string, value: string): void {
 
 export default function SchoolOverviewPage() {
   const search = useSearch({ from: '/scholen' }) as { error?: string };
-  const { data: schools, isLoading } = useSchools();
+  const { data: schools, isLoading, isError, refetch } = useSchools();
   const { userProfile } = useAuth();
   const [query, setQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<SchoolRecord | null>(null);
@@ -68,6 +68,28 @@ export default function SchoolOverviewPage() {
     setCardMode(mode);
     storePreference('school-overview-cardMode', mode);
   };
+
+  // Error state — show message with retry instead of endless skeleton
+  if (isError && !isLoading) {
+    return (
+      <div className="min-h-screen bg-cito-bg">
+        <div className="max-w-[1200px] mx-auto pt-12 px-8 sm:px-4">
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <p className="text-base text-neutral-600 mb-2">
+              Kon scholen niet laden. Controleer je internetverbinding.
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="mt-4 px-4 py-2 text-sm font-medium text-white bg-cito-primary rounded-lg hover:bg-cito-primary/90 transition-colors"
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Loading
   if (isLoading || !schools) {

@@ -6,6 +6,7 @@ export function useSchools() {
   return useQuery({
     queryKey: ['schools'],
     queryFn: getAllSchools,
+    retry: 2,
   });
 }
 

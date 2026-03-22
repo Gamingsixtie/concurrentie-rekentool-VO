@@ -90,10 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetchUserProfile(currentSession.user.id).then((profile) => {
           setUserProfile(profile);
           setLoading(false);
+        }).catch(() => {
+          setLoading(false);
         });
       } else {
         setLoading(false);
       }
+    }).catch(() => {
+      setLoading(false);
     });
 
     // Subscribe to auth state changes
