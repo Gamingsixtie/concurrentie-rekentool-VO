@@ -1,10 +1,17 @@
 import { create } from 'zustand';
-import { calculateComparison } from '../../engine/price-comparison';
-import type { ComparisonResult } from '../../engine/price-comparison';
+import { calculateComparison, getTotalStudents } from '../../engine/price-comparison';
+import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
 import type { PriceRecord } from '../../models/pricing';
 import { DEFAULT_PRICES } from '../../data/default-prices';
 import { useSchoolProfileStore } from '../school-profile/store';
 import type { SchoolRecord } from '@/db/types';
+import { calculateHybridScenario } from '../../engine/hybrid-scenario';
+import type { HybridScenarioResult } from '../../engine/hybrid-scenario';
+import { calculateSensitivity } from '../../engine/sensitivity';
+import type { SensitivityResult } from '../../engine/sensitivity';
+import { calculateDiaModuleCosts } from '../../engine/dia-packages';
+import type { DiaPackageResult } from '../../models/dia-packages';
+import { DIA_PACKAGES } from '../../data/dia-packages';
 
 export interface PriceOverride {
   moduleId: string;
@@ -21,6 +28,19 @@ interface PriceComparisonState {
   // Migration (Scenario B)
   migrationHourlyRate: number;
   migrationTimeSavingOverrides: Record<string, number>;
+
+  // Mode toggle (per D-19, D-20)
+  isInternalMode: boolean;
+  setInternalMode: (mode: boolean) => void;
+  // Contract period toggle (per D-10)
+  contractPeriod: 'annual' | 'three-year';
+  setContractPeriod: (period: 'annual' | 'three-year') => void;
+  // Computed results from new engines
+  hybridResult: HybridScenarioResult | null;
+  sensitivityResult: SensitivityResult | null;
+  diaPackageResult: DiaPackageResult | null;
+  // Active competitor for sensitivity (per D-14)
+  activeCompetitor: ProviderKey | null;
 
   initialize: () => void;
   setDraftOverride: (override: PriceOverride) => void;
@@ -60,6 +80,80 @@ function mergeOverrides(
   });
 }
 
+/**
+ * Determine the active competitor from moduleSetups using DETERMINISTIC ordering:
+ * iterate moduleSetups sorted alphabetically by moduleId, find the first entry
+ * where currentProvider is 'dia' or 'jij'.
+ */
+function determineActiveCompetitor(
+  moduleSetups: { moduleId: string; currentProvider: string }[],
+): ProviderKey | null {
+  const sortedSetups = [...moduleSetups].sort((a, b) =>
+    a.moduleId.localeCompare(b.moduleId),
+  );
+  for (const setup of sortedSetups) {
+    if (setup.currentProvider === 'dia') return 'dia';
+    if (setup.currentProvider === 'jij') return 'jij';
+  }
+  return null;
+}
+
+/**
+ * Compute extended results (hybrid, sensitivity, DIA packages)
+ * from a base comparison result.
+ */
+function computeExtendedResults(
+  result: ComparisonResult,
+  selectedModules: string[],
+  studentCounts: Partial<Record<string, Record<number, number>>>,
+  mergedPrices: PriceRecord[],
+) {
+  const { moduleSetups } = useSchoolProfileStore.getState();
+  const totalStudents = getTotalStudents(studentCounts);
+
+  // Determine active competitor deterministically
+  const activeCompetitor = determineActiveCompetitor(moduleSetups);
+
+  // Hybrid scenario
+  const hybridResult = calculateHybridScenario(result, moduleSetups);
+
+  // Sensitivity analysis
+  let sensitivityResult: SensitivityResult | null = null;
+  if (activeCompetitor !== null) {
+    sensitivityResult = calculateSensitivity(result, activeCompetitor, [0, 10, 20]);
+  }
+
+  // DIA package calculation
+  const diaModuleIds = selectedModules.filter((modId) => {
+    const price = mergedPrices.find(
+      (p) => p.moduleId === modId && p.provider === 'dia',
+    );
+    return price !== undefined;
+  });
+  const diaMap = new Map<string, number>();
+  for (const modId of diaModuleIds) {
+    const price = mergedPrices.find(
+      (p) => p.moduleId === modId && p.provider === 'dia',
+    );
+    if (price) {
+      diaMap.set(modId, price.amountPerStudent);
+    }
+  }
+  const diaResult = calculateDiaModuleCosts(
+    diaModuleIds,
+    totalStudents,
+    diaMap,
+    DIA_PACKAGES,
+  );
+
+  return {
+    activeCompetitor,
+    hybridResult,
+    sensitivityResult,
+    diaPackageResult: diaResult.packageResult,
+  };
+}
+
 export const usePriceComparisonStore = create<PriceComparisonState>()(
   (set, get) => ({
     result: null,
@@ -69,6 +163,17 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     migrationHourlyRate: 50,
     migrationTimeSavingOverrides: {},
 
+    // New state defaults
+    isInternalMode: true,
+    contractPeriod: 'annual' as const,
+    hybridResult: null,
+    sensitivityResult: null,
+    diaPackageResult: null,
+    activeCompetitor: null,
+
+    setInternalMode: (mode) => set({ isInternalMode: mode }),
+    setContractPeriod: (period) => set({ contractPeriod: period }),
+
     initialize: () => {
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
@@ -77,7 +182,18 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         studentCounts,
         DEFAULT_PRICES,
       );
-      set({ result });
+
+      const extended = computeExtendedResults(
+        result,
+        selectedModules,
+        studentCounts,
+        DEFAULT_PRICES,
+      );
+
+      set({
+        result,
+        ...extended,
+      });
     },
 
     setDraftOverride: (override) => {
@@ -131,11 +247,19 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         mergedPrices,
       );
 
+      const extended = computeExtendedResults(
+        result,
+        selectedModules,
+        studentCounts,
+        mergedPrices,
+      );
+
       set({
         result,
         appliedOverrides: mergedOverrides,
         draftOverrides: [],
         hasPendingChanges: false,
+        ...extended,
       });
     },
 

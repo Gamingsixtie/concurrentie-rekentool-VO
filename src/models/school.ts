@@ -18,17 +18,6 @@ export const YEARS_PER_LEVEL: Record<SchoolLevel, number[]> = {
   'vwo': [1, 2, 3, 4, 5, 6],
 };
 
-export type CurrentProvider = 'cito-oud' | 'cito-nieuw' | 'dia' | 'jij' | 'overig' | 'geen';
-
-export interface ModuleCurrentSetup {
-  moduleId: string;
-  currentProvider: CurrentProvider;
-  pricePerStudent: number | null;
-  customProviderName?: string;
-}
-
-export type Scenario = 'A' | 'B';
-
 export type CurrentProvider =
   | 'cito-oud'   // huidig Cito platform
   | 'cito-nieuw' // nieuw Cito platform (al klant)
@@ -36,6 +25,15 @@ export type CurrentProvider =
   | 'jij'
   | 'overig'     // andere aanbieder (naam invulbaar)
   | 'geen';      // module niet in gebruik
+
+export interface ModuleCurrentSetup {
+  moduleId: string;
+  currentProvider: CurrentProvider;
+  pricePerStudent: number | null; // null = gebruik publicatieprijs van die aanbieder
+  customProviderName?: string;    // alleen bij currentProvider === 'overig'
+}
+
+export type Scenario = 'A' | 'B';
 
 export const CURRENT_PROVIDER_LABELS: Record<CurrentProvider, string> = {
   'cito-oud':   'Cito (huidig platform)',
@@ -45,13 +43,6 @@ export const CURRENT_PROVIDER_LABELS: Record<CurrentProvider, string> = {
   'overig':     'Andere aanbieder',
   'geen':       'Geen / nog niet bepaald',
 };
-
-export interface ModuleCurrentSetup {
-  moduleId: string;
-  currentProvider: CurrentProvider;
-  pricePerStudent: number | null; // null = gebruik publicatieprijs van die aanbieder
-  customProviderName?: string;    // alleen bij currentProvider === 'overig'
-}
 
 export const SCENARIO_LABELS: Record<Scenario, { title: string; description: string }> = {
   A: {
