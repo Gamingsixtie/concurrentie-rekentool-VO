@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-22T11:08:32.579Z"
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-22T11:13:58.461Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 12
-  completed_plans: 6
+  completed_plans: 8
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 08 (supabase-deploy) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -61,6 +61,8 @@ Recent decisions affecting current work:
 - [Phase 08]: AuthProvider uses React Context (not Zustand) for auth state - session-scoped, not persisted
 - [Phase 08]: Dutch error messages mapped from Supabase AuthApiError via mapAuthError helper
 - [Phase 08]: Throw on missing env vars for fail-fast; preserved existing operations.test.ts real tests
+- [Phase 08]: CRM data moved from embedded arrays to separate Supabase tables with dedicated React Query hooks
+- [Phase 08]: SchoolRecord.id changed from optional number to required string UUID
 
 ### Pending Todos
 
@@ -77,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T11:08:32.570Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-03-22T11:13:58.454Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
