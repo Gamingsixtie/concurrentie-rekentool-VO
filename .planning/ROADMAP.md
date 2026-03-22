@@ -129,13 +129,13 @@ Plans:
   4. Gebruiker kan in de Producten-tab meerdere prijzen per module/aanbieder beheren met prijsgeschiedenis, en kiest welke prijs actief is met een verplichte reden — met bruto/netto onderscheid
   5. Gebruiker kan een document (PDF, Excel, Word, CSV) uploaden en de AI extraheert prijzen die in dezelfde diff-view ter goedkeuring worden getoond — nooit automatisch doorgevoerd
   6. Prijzen worden gevalideerd tegen publicatieprijzen (>50% afwijking = inline ⚠ waarschuwing) of gemarkeerd als handmatige invoer als geen referentie beschikbaar is
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
-- [ ] 09-03: TBD
-- [ ] 09-04: TBD
+- [ ] 09-01-PLAN.md — Shared foundation: extended extraction schema, price deviation logic, useSchoolPrices hook, PriceBadge extension en serverless v2 prompt
+- [ ] 09-02-PLAN.md — AI intake flow: IntakeModeToggle, StreamingExtraction, DiffView components, ConversationForm AI-modus en append-only save
+- [ ] 09-03-PLAN.md — Prijsbeheer UI: PriceManager, PriceEditModal, PriceHistoryList, ProductsTab uitbreiding met prijsgeschiedenis en actieve selectie
+- [ ] 09-04-PLAN.md — Document upload: serverless document parser (PDF/Excel/Word/CSV), DocumentDropzone, DocumentExtractionPreview en ProductsTab integratie
 
 ### Phase 10: Prijsvergelijking & Gevoeligheid
 **Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
@@ -218,7 +218,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
-| 9. AI Intake & Prijsbeheer | v2.0 | 0/4 | Context gathered | - |
+| 9. AI Intake & Prijsbeheer | v2.0 | 0/4 | Planning complete | - |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
