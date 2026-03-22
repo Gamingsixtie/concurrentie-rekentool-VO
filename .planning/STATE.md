@@ -79,10 +79,13 @@ Recent decisions affecting current work:
 - [Phase 10]: Sales signals use only Cito differentiators count to determine signal type
 - [Phase 10]: Added CurrentProvider and ModuleCurrentSetup types to src/models/school.ts
 - [Phase 10]: isInternalMode defaults to true; activeCompetitor via alphabetical moduleId sort; sensitivity computed unconditionally
+- [Phase 10]: DiaPackageManager UI deferred — user approved Phase 10 visual verification and moved to Vercel deployment
+- [Phase 10]: DIA package price override store slice (diaPackageOverrides) deferred with DiaPackageManager component
 
 ### Pending Todos
 
-None yet.
+- [10-03 deferred] DiaPackageManager UI: create `DiaPackageManager.tsx`, add `diaPackageOverrides`/`setDiaPackageOverride` to store.ts, wire ModeToggle + SensitivitySection + DiaPackageManager into PriceComparisonPage.tsx — deferred to post-Vercel deployment
+- [10-02/10-03 pending] Verify PriceComparisonPage.tsx integration (ModeToggle, PeriodToggle, SensitivitySection) is applied in main branch — worktree commits may not be merged
 
 ### Blockers/Concerns
 

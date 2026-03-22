@@ -154,8 +154,8 @@ Plans:
 
 Plans:
 - [x] 10-01-PLAN.md — TDD engine: DIA-pakketprijzen, hybride scenario, gevoeligheidsanalyse met break-even en sales-signalen (4 engine files + 4 test files)
-- [ ] 10-02-PLAN.md — Store uitbreiding en UI-componenten: ModeToggle, PeriodToggle, SalesSignalBadge, SensitivitySection + wiring in ComparisonTable, Chart, DetailPanel en Page
-- [ ] 10-03-PLAN.md — DIA-pakketconfiguratie UI en end-to-end visuele verificatie van alle Phase 10 features
+- [x] 10-02-PLAN.md — Store uitbreiding en UI-componenten: ModeToggle, PeriodToggle, SalesSignalBadge, SensitivitySection + wiring in ComparisonTable, Chart, DetailPanel en Page
+- [x] 10-03-PLAN.md — Visuele verificatie van alle Phase 10 features goedgekeurd door gebruiker; DiaPackageManager UI uitgesteld naar post-Vercel deployment
 
 ### Phase 11: Waarde-engine & Migratie
 **Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
@@ -256,7 +256,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
-| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 1/3 | In Progress|  |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
