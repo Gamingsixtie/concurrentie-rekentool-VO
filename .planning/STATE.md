@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-03-22T11:13:58.461Z"
+stopped_at: Completed 08-04-PLAN.md
+last_updated: "2026-03-22T11:14:29.011Z"
 progress:
   total_phases: 8
   completed_phases: 1
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 08 (supabase-deploy) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 ## Performance Metrics
 
@@ -63,6 +63,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Throw on missing env vars for fail-fast; preserved existing operations.test.ts real tests
 - [Phase 08]: CRM data moved from embedded arrays to separate Supabase tables with dedicated React Query hooks
 - [Phase 08]: SchoolRecord.id changed from optional number to required string UUID
+- [Phase 08]: DexieSchoolRecord inline type for parallel safety with Plan 08-03
+- [Phase 08]: Contact ID mapping by insertion order for migration FK resolution
 
 ### Pending Todos
 
@@ -79,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T11:13:58.454Z
-Stopped at: Completed 08-03-PLAN.md
+Last session: 2026-03-22T11:14:29.005Z
+Stopped at: Completed 08-04-PLAN.md
 Resume file: None
