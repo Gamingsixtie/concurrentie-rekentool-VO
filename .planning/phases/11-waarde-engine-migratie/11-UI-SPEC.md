@@ -50,7 +50,7 @@ Exceptions: Touch targets for inline editable fields use min 44px height (h-11) 
 | Body | 14px (text-sm) | 400 (font-normal) | 1.5 (leading-snug) | Table cells, descriptions, disclaimer text |
 | Label | 14px (text-sm) | 600 (font-semibold) | 1.5 | Table headers, field labels, section subtitles |
 | Heading | 18px (text-lg) | 600 (font-semibold) | 1.3 (leading-tight) | Section titles: "Tijdwinst", "Migratie", "Meerjarenprojectie" |
-| Display | 28px (text-2xl) | 700 (font-bold) | 1.2 | Hero card total value number |
+| Display | 28px (text-2xl) | 600 (font-semibold) | 1.2 | Hero card total value number |
 
 ---
 
@@ -61,7 +61,7 @@ Exceptions: Touch targets for inline editable fields use min 44px height (h-11) 
 | Dominant (60%) | `#F8F9FA` (`cito-bg`) | Page background, tab content area |
 | Secondary (30%) | `#FFFFFF` | Cards (hero, sections), table backgrounds, input backgrounds |
 | Accent (10%) | `#FF6600` (`cito-accent`) | Hero card total value number, primary CTA, upsell badge strong signal |
-| Primary | `#003082` (`cito-primary`) | Section headings, editable field underlines, chart bars, tab active state |
+| Primary | `#003082` (`cito-primary`) | Section headings, editable field underlines, chart bars, tab active state, tab active indicator |
 | Destructive | `#dc2626` (red-600) | Not used in this phase (no destructive actions) |
 
 ### Semantic Colors (Phase 11 specific)
@@ -75,7 +75,7 @@ Exceptions: Touch targets for inline editable fields use min 44px height (h-11) 
 | Negative red | `text-red-600` | Negative financial differences (meerkosten) |
 | Modified | `bg-modified-bg border-modified-border` (`#fef3c7` / `#f59e0b`) | Edited assumption highlight (existing pattern) |
 
-Accent reserved for: hero card total value display, "Bekijk vergelijking" link in upsell card, tab active indicator on Waarde tab.
+Accent reserved for: hero card total value display, "Bekijk vergelijking" link in upsell card.
 
 ---
 
@@ -86,7 +86,7 @@ Accent reserved for: hero card total value display, "Bekijk vergelijking" link i
 | Component | Location | Description |
 |-----------|----------|-------------|
 | `WaardeTab` | `src/features/school-profile/tabs/WaardeTab.tsx` | 6th tab shell: hero card + 3 sections stacked vertically |
-| `ValueHeroCard` | `src/features/school-profile/components/ValueHeroCard.tsx` | Prominent card showing total annual value (prijsverschil + tijdwinst + migratie) |
+| `ValueHeroCard` | `src/features/school-profile/components/ValueHeroCard.tsx` | Prominent card showing total annual value (prijsverschil + tijdwinst + migratie-effect) |
 | `TimeSavingsSection` | `src/features/school-profile/components/TimeSavingsSection.tsx` | Table with 5 TIME_SAVING_TASKS, inline editable hours, euro/year column, total row |
 | `MigrationSection` | `src/features/school-profile/components/MigrationSection.tsx` | Warning banner + per-module table (Module / Huidig / Nieuw / Verschil) + total row |
 | `MultiYearSection` | `src/features/school-profile/components/MultiYearSection.tsx` | Recharts bar chart (1/3/5 year) + table with exact amounts + break-even display |
@@ -173,7 +173,7 @@ Accent reserved for: hero card total value display, "Bekijk vergelijking" link i
 - Full-width white card with `rounded-lg shadow-sm border border-neutral-200`
 - Padding: 24px (`p-6`)
 - Top line: section title "Totale jaarlijkse waarde" in `text-lg font-semibold text-cito-primary`
-- Center: total value in `text-2xl font-bold text-cito-accent` using `formatCurrency()`
+- Center: total value in `text-2xl font-semibold text-cito-accent` using `formatCurrency()`
 - Bottom row: three sub-values in a horizontal flex with dividers
   - "Prijsverschil: EUR X.XXX" | "Tijdwinst: EUR X.XXX" | "Migratie: EUR X.XXX"
   - Each in `text-sm text-neutral-500`
