@@ -8,9 +8,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import type { ComparisonResult } from '../../engine/price-comparison';
+import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
 import { PROVIDER_LABELS } from '../../engine/price-comparison';
 import { formatCurrency, formatCurrencyCompact } from '../../lib/format';
+import { useSchoolProfileStore } from '../school-profile/store';
+import { usePriceComparisonStore } from './store';
 
 interface ChartDataPoint {
   module: string;
@@ -18,6 +20,7 @@ interface ChartDataPoint {
   cito: number | null;
   dia: number | null;
   jij: number | null;
+  naOverstap: number | null;
   citoPerStudent: number | null;
   diaPerStudent: number | null;
   jijPerStudent: number | null;
@@ -79,6 +82,17 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
     typeof window !== 'undefined' ? window.innerWidth : 1024,
   );
 
+  const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
+  const hybridResult = usePriceComparisonStore((s) => s.hybridResult);
+
+  // Dynamic visibility: only show JIJ if school uses JIJ
+  const showJij = moduleSetups.some((s) => s.currentProvider === 'jij');
+  const showNaOverstap = (hybridResult?.modules.length ?? 0) > 0;
+
+  const visibleProviders: ProviderKey[] = showJij
+    ? ['cito', 'dia', 'jij']
+    : ['cito', 'dia'];
+
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -87,17 +101,23 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
 
   const data: ChartDataPoint[] = useMemo(
     () =>
-      result.modules.map((mod) => ({
-        module: mod.moduleName,
-        moduleId: mod.moduleId,
-        cito: mod.providers.cito?.totalCost ?? null,
-        dia: mod.providers.dia?.totalCost ?? null,
-        jij: mod.providers.jij?.totalCost ?? null,
-        citoPerStudent: mod.providers.cito?.pricePerStudent ?? null,
-        diaPerStudent: mod.providers.dia?.pricePerStudent ?? null,
-        jijPerStudent: mod.providers.jij?.pricePerStudent ?? null,
-      })),
-    [result.modules],
+      result.modules.map((mod) => {
+        const hybridMod = hybridResult?.modules.find(
+          (m) => m.moduleId === mod.moduleId,
+        );
+        return {
+          module: mod.moduleName,
+          moduleId: mod.moduleId,
+          cito: mod.providers.cito?.totalCost ?? null,
+          dia: mod.providers.dia?.totalCost ?? null,
+          jij: mod.providers.jij?.totalCost ?? null,
+          naOverstap: hybridMod?.citoCost ?? null,
+          citoPerStudent: mod.providers.cito?.pricePerStudent ?? null,
+          diaPerStudent: mod.providers.dia?.pricePerStudent ?? null,
+          jijPerStudent: mod.providers.jij?.pricePerStudent ?? null,
+        };
+      }),
+    [result.modules, hybridResult],
   );
 
   const barSize = windowWidth < 640 ? 20 : 32;
@@ -133,7 +153,17 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
           style={{ cursor: onBarClick ? 'pointer' : undefined }}
         />
         <Bar dataKey="dia" name={PROVIDER_LABELS.dia} fill="#9CA3AF" />
-        <Bar dataKey="jij" name={PROVIDER_LABELS.jij} fill="#6B7280" />
+        {visibleProviders.includes('jij') && (
+          <Bar dataKey="jij" name={PROVIDER_LABELS.jij} fill="#6B7280" />
+        )}
+        {showNaOverstap && (
+          <Bar
+            dataKey="naOverstap"
+            name="Na overstap"
+            fill="#003082"
+            fillOpacity={0.5}
+          />
+        )}
       </BarChart>
     </ResponsiveContainer>
   );
