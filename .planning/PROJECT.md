@@ -39,6 +39,13 @@ Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk 
 - [x] Recharts staafdiagram component
 - [x] Prijsdata-structuur met bronvermelding en houdbaarheidsdatum
 
+**v2.0 School Intelligence** (validated Phase 07, 2026-03-22):
+- [x] CRM-lite data layer: contacts, conversations, actions, pipeline management (SCHOOL-01)
+- [x] School profile page with 5 tabs: dashboard, vergelijking, producten, contacten, gesprekken (SCHOOL-02, SCHOOL-03, SCHOOL-04)
+- [x] Pipeline status management with transition validation and dialog guards (SCHOOL-05)
+- [x] School overview with filtering, list/kanban views, compact/extended cards (SCHOOL-06)
+- [x] School-specific price overrides clearly separated from publication prices (PRIJS-07)
+
 ### Active
 
 *Wordt gedefinieerd in REQUIREMENTS.md voor v2.0*
@@ -128,4 +135,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-21 after v2.0 milestone start*
+*Last updated: 2026-03-22 after Phase 07 school-intelligence completion*
