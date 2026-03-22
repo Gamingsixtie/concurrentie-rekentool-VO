@@ -16,6 +16,9 @@ function debugLog(msg: string) {
   debugEl.innerHTML += msg + '<br>';
 }
 
+// Expose globally so other files can use it
+(window as unknown as Record<string, unknown>).__debugLog = debugLog;
+
 window.addEventListener('error', (e) => {
   debugLog(`ERROR: ${e.message} @ ${e.filename}:${e.lineno}`);
 });

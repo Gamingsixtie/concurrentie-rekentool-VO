@@ -74,11 +74,18 @@ function mapAuthError(error: AuthError): string {
   return 'Er is iets misgegaan. Probeer het later opnieuw.';
 }
 
+const _dbg = (msg: string) => {
+  const fn = (window as unknown as Record<string, unknown>).__debugLog as ((m: string) => void) | undefined;
+  fn?.(msg);
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  _dbg('AuthProvider render: loading=' + loading + ' user=' + (user?.email ?? 'null'));
 
   // Suppress Supabase auth lock errors (non-fatal)
   useEffect(() => {
@@ -93,34 +100,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    _dbg('Auth effect: starting getSession...');
+
     // Hard maximum — never show spinner longer than 3 seconds
-    const timeout = setTimeout(() => setLoading(false), 3000);
+    const timeout = setTimeout(() => {
+      _dbg('Auth: 3s TIMEOUT fired — forcing loading=false');
+      setLoading(false);
+    }, 3000);
 
     // 1. Fetch initial session directly with its own timeout
     const sessionTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2500));
+    _dbg('Auth: calling getSession()...');
     Promise.race([supabase.auth.getSession(), sessionTimeout])
       .then(async (result) => {
+        _dbg('Auth: getSession resolved, result=' + (result ? 'has data' : 'timeout/null'));
         if (result && typeof result === 'object' && 'data' in result) {
           const currentSession = result.data.session;
+          _dbg('Auth: session=' + (currentSession ? 'exists (user=' + currentSession.user?.email + ')' : 'null'));
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
           if (currentSession?.user) {
             try {
+              _dbg('Auth: fetching profile...');
               const profileTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2000));
               const profile = await Promise.race([
                 fetchUserProfile(currentSession.user.id),
                 profileTimeout,
               ]);
+              _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
               setUserProfile(profile);
             } catch {
-              // Continue without profile
+              _dbg('Auth: profile fetch failed');
             }
           }
         }
         clearTimeout(timeout);
+        _dbg('Auth: setLoading(false)');
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        _dbg('Auth: getSession FAILED: ' + err);
         clearTimeout(timeout);
         setLoading(false);
       });
