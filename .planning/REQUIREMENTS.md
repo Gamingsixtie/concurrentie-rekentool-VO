@@ -25,11 +25,11 @@
 
 ### AI Intake
 
-- [ ] **INTAKE-01**: Gebruiker kan tijdens een telefoongesprek vrije tekst invoeren die real-time (streaming) wordt gestructureerd in schooldata, prijzen en actiepunten
-- [ ] **INTAKE-02**: AI extraheert modulegebruik, aanbieders, prijzen en contactpersonen uit vrije tekst met fuzzy matching op modulenamen
-- [ ] **INTAKE-03**: Geextraheerde data wordt getoond op een bevestigingsscherm waar de gebruiker kan corrigeren voordat het wordt opgeslagen
-- [ ] **INTAKE-04**: Prijzen worden semantisch gevalideerd tegen bekende ranges (per provider/module) — afwijkingen worden gemarkeerd als "ongebruikelijk, controleer"
-- [ ] **INTAKE-05**: AI intake voegt toe aan een bestaand schoolprofiel (append) — overschrijft niet eerder vastgelegde data
+- [x] **INTAKE-01**: Gebruiker kan tijdens een telefoongesprek vrije tekst invoeren die real-time (streaming) wordt gestructureerd in schooldata, prijzen en actiepunten
+- [x] **INTAKE-02**: AI extraheert modulegebruik, aanbieders, prijzen en contactpersonen uit vrije tekst met fuzzy matching op modulenamen
+- [x] **INTAKE-03**: Geextraheerde data wordt getoond op een bevestigingsscherm waar de gebruiker kan corrigeren voordat het wordt opgeslagen
+- [x] **INTAKE-04**: Prijzen worden semantisch gevalideerd tegen bekende ranges (per provider/module) — afwijkingen worden gemarkeerd als "ongebruikelijk, controleer"
+- [x] **INTAKE-05**: AI intake voegt toe aan een bestaand schoolprofiel (append) — overschrijft niet eerder vastgelegde data
 
 ### Prijsvergelijking
 
@@ -71,10 +71,10 @@
 
 ### Prijsbeheer
 
-- [ ] **PRIJSMGT-01**: Gebruiker kan prijzen handmatig invoeren of bijwerken met bron, verificatiedatum en vertrouwensniveau
-- [ ] **PRIJSMGT-02**: Prijzen ouder dan 6 maanden worden automatisch gemarkeerd als "mogelijk verouderd"
-- [ ] **PRIJSMGT-03**: Gebruiker kan prijsdocumenten uploaden (PDF) voor AI-gestuurde prijsextractie
-- [ ] **PRIJSMGT-04**: Geextraheerde prijzen worden getoond ter goedkeuring — nooit automatisch doorgevoerd
+- [x] **PRIJSMGT-01**: Gebruiker kan prijzen handmatig invoeren of bijwerken met bron, verificatiedatum en vertrouwensniveau
+- [x] **PRIJSMGT-02**: Prijzen ouder dan 6 maanden worden automatisch gemarkeerd als "mogelijk verouderd"
+- [x] **PRIJSMGT-03**: Gebruiker kan prijsdocumenten uploaden (PDF) voor AI-gestuurde prijsextractie
+- [x] **PRIJSMGT-04**: Geextraheerde prijzen worden getoond ter goedkeuring — nooit automatisch doorgevoerd
 
 ### Modus & Weergave
 
@@ -134,11 +134,11 @@
 | SCHOOL-05 | Phase 7 | Complete |
 | SCHOOL-06 | Phase 7 | Complete |
 | SCHOOL-07 | Phase 11 | Pending |
-| INTAKE-01 | Phase 9 | Pending |
-| INTAKE-02 | Phase 9 | Pending |
-| INTAKE-03 | Phase 9 | Pending |
-| INTAKE-04 | Phase 9 | Pending |
-| INTAKE-05 | Phase 9 | Pending |
+| INTAKE-01 | Phase 9 | Complete |
+| INTAKE-02 | Phase 9 | Complete |
+| INTAKE-03 | Phase 9 | Complete |
+| INTAKE-04 | Phase 9 | Complete |
+| INTAKE-05 | Phase 9 | Complete |
 | PRIJS-01 | Phase 10 | Pending |
 | PRIJS-02 | Phase 10 | Pending |
 | PRIJS-03 | Phase 10 | Pending |
@@ -162,10 +162,10 @@
 | EXPORT-03 | Phase 12 | Pending |
 | EXPORT-04 | Phase 12 | Pending |
 | EXPORT-05 | Phase 12 | Pending |
-| PRIJSMGT-01 | Phase 9 | Pending |
-| PRIJSMGT-02 | Phase 9 | Pending |
-| PRIJSMGT-03 | Phase 9 | Pending |
-| PRIJSMGT-04 | Phase 9 | Pending |
+| PRIJSMGT-01 | Phase 9 | Complete |
+| PRIJSMGT-02 | Phase 9 | Complete |
+| PRIJSMGT-03 | Phase 9 | Complete |
+| PRIJSMGT-04 | Phase 9 | Complete |
 | MODE-01 | Phase 6 | Pending |
 | MODE-02 | Phase 10 | Pending |
 | MODE-03 | Phase 6 | Pending |
