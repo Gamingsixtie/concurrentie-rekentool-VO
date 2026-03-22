@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-22T11:07:17.610Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-22T11:08:32.579Z"
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 12
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 08 (supabase-deploy) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Recent decisions affecting current work:
 - [Phase 07]: @dnd-kit/core for kanban drag-and-drop with validation guard pattern
 - [Phase 08]: AuthProvider uses React Context (not Zustand) for auth state - session-scoped, not persisted
 - [Phase 08]: Dutch error messages mapped from Supabase AuthApiError via mapAuthError helper
+- [Phase 08]: Throw on missing env vars for fail-fast; preserved existing operations.test.ts real tests
 
 ### Pending Todos
 
@@ -76,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T11:07:17.606Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-03-22T11:08:32.570Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None

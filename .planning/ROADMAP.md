@@ -112,7 +112,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Supabase client, Database types, genormaliseerd SQL schema (8 tabellen) en RLS policies
+- [x] 08-01-PLAN.md — Supabase client, Database types, genormaliseerd SQL schema (8 tabellen) en RLS policies
 - [x] 08-02-PLAN.md — Auth systeem: AuthProvider, LoginPage, ProtectedRoute, UserMenu en AuthLoadingScreen
 - [ ] 08-03-PLAN.md — Data layer migratie: operations.ts herschrijven voor Supabase, React Query hooks, QueryClientProvider
 - [ ] 08-04-PLAN.md — Cloud migratie wizard (IndexedDB naar Supabase) en role-based UI componenten
