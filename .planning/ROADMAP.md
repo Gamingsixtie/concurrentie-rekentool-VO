@@ -134,12 +134,12 @@ Plans:
 Plans:
 - [x] 09-00-PLAN.md — Wave 0: test stub files voor alle Phase 9 plannen (8 test stubs)
 - [x] 09-01-PLAN.md — Shared foundation: extended extraction schema, price deviation logic, useSchoolPrices hook, PriceBadge extension en serverless v2 prompt
-- [ ] 09-02-PLAN.md — AI intake flow: IntakeModeToggle, StreamingExtraction, DiffView components (met bewerkbare velden), ConversationForm AI-modus en append-only save
+- [x] 09-02-PLAN.md — AI intake flow: IntakeModeToggle, StreamingExtraction, DiffView components (met bewerkbare velden), ConversationForm AI-modus en append-only save
 - [x] 09-03-PLAN.md — Prijsbeheer UI: PriceManager, PriceEditModal, PriceHistoryList, ProductsTab uitbreiding met prijsgeschiedenis en actieve selectie
 - [ ] 09-04-PLAN.md — Document upload: documents bucket, serverless document parser (PDF/Excel/Word/CSV), DocumentDropzone, DocumentExtractionPreview en ProductsTab integratie
 
 ### Phase 10: Prijsvergelijking & Gevoeligheid
-**Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
+**Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica en JIJ-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
 **Depends on**: Phase 8 (Supabase), Phase 9 (prijsdata)
 **Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, PRIJS-08, GEVOEL-01, GEVOEL-02, GEVOEL-03, MODE-02
 **Success Criteria** (what must be TRUE):
