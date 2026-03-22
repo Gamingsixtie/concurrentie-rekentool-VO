@@ -59,7 +59,7 @@ Plans:
 - [ ] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
 - [ ] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
 - [ ] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
-- [ ] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse
+- [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
 - [ ] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
@@ -256,7 +256,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
-| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete    | 2026-03-22 |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
