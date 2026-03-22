@@ -105,9 +105,9 @@
 
 ### Authenticatie & Deploy
 
-- [ ] **AUTH-01**: Gebruiker kan inloggen via email/wachtwoord of magic link met Supabase Auth
-- [ ] **AUTH-02**: Drie rollen: accountmanager (bewerkt eigen scholen), manager (leest alles), viewer (leest alles). Alle teamleden zien alle scholen.
-- [ ] **AUTH-03**: Elke wijziging toont wie (created_by/updated_by) en wanneer — traceerbaarheid per gebruiker
+- [x] **AUTH-01**: Gebruiker kan inloggen via email/wachtwoord of magic link met Supabase Auth
+- [x] **AUTH-02**: Drie rollen: accountmanager (bewerkt eigen scholen), manager (leest alles), viewer (leest alles). Alle teamleden zien alle scholen.
+- [x] **AUTH-03**: Elke wijziging toont wie (created_by/updated_by) en wanneer — traceerbaarheid per gebruiker
 - [ ] **DEPLOY-01**: App draait op Vercel met Supabase backend, API keys server-side via serverless functions
 
 ### Architectuur Review
@@ -123,9 +123,9 @@
 | ARCH-03 | Phase 8 | Pending |
 | ARCH-04 | Phase 6 | Pending |
 | ARCH-05 | Phase 12 | Pending |
-| AUTH-01 | Phase 8 | Pending |
-| AUTH-02 | Phase 8 | Pending |
-| AUTH-03 | Phase 8 | Pending |
+| AUTH-01 | Phase 8 | Complete |
+| AUTH-02 | Phase 8 | Complete |
+| AUTH-03 | Phase 8 | Complete |
 | DEPLOY-01 | Phase 8 | Pending |
 | SCHOOL-01 | Phase 7 | Complete |
 | SCHOOL-02 | Phase 7 | Complete |

@@ -113,7 +113,7 @@ Plans:
 
 Plans:
 - [ ] 08-01-PLAN.md — Supabase client, Database types, genormaliseerd SQL schema (8 tabellen) en RLS policies
-- [ ] 08-02-PLAN.md — Auth systeem: AuthProvider, LoginPage, ProtectedRoute, UserMenu en AuthLoadingScreen
+- [x] 08-02-PLAN.md — Auth systeem: AuthProvider, LoginPage, ProtectedRoute, UserMenu en AuthLoadingScreen
 - [ ] 08-03-PLAN.md — Data layer migratie: operations.ts herschrijven voor Supabase, React Query hooks, QueryClientProvider
 - [ ] 08-04-PLAN.md — Cloud migratie wizard (IndexedDB naar Supabase) en role-based UI componenten
 - [ ] 08-05-PLAN.md — Vercel serverless AI proxy, useLiveQuery vervanging, component integratie en deploy verificatie
@@ -217,7 +217,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
-| 8. Supabase & Deploy | v2.0 | 0/5 | Planning complete | - |
+| 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/4 | Context gathered | - |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
