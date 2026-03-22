@@ -124,4 +124,133 @@ describe('calculateMigration', () => {
     expect(result.financialDifference).toBe(0);
     expect(result.modules[0].annualDifference).toBe(0);
   });
+
+  describe('breakEvenMonth', () => {
+    it('calculates breakEvenMonth with switchingCosts and positive totalAnnualValue', () => {
+      // rekenwiskunde: financialDifference = 50, timeSavingsValue = 48 * 50 = 2400
+      // totalAnnualValue = 2450
+      // breakEvenMonth = ceil(5000 / 2450 * 12) = ceil(24.49) = 25
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+        5000,
+      );
+      expect(result.switchingCosts).toBe(5000);
+      expect(result.breakEvenMonth).toBe(Math.ceil((5000 / 2450) * 12));
+    });
+
+    it('returns breakEvenMonth=0 when switchingCosts is 0', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+        0,
+      );
+      expect(result.switchingCosts).toBe(0);
+      expect(result.breakEvenMonth).toBe(0);
+    });
+
+    it('returns breakEvenMonth=null when totalAnnualValue is 0', () => {
+      // Use nederlands (same old/new price = 4.5) with all time saving overrides set to 0
+      const zeroTimeOverrides: Record<string, number> = {
+        rechten: 0,
+        resetten: 0,
+        inloggen: 0,
+        planning: 0,
+        koppeling: 0,
+      };
+      const result = calculateMigration(
+        ['nederlands'],
+        studentCounts,
+        mockMigrationPrices,
+        zeroTimeOverrides,
+        50,
+        5000,
+      );
+      // financialDifference = 0 (same prices), timeSavingsValue = 0
+      expect(result.totalAnnualValue).toBe(0);
+      expect(result.breakEvenMonth).toBeNull();
+    });
+
+    it('returns breakEvenMonth=null when totalAnnualValue is negative', () => {
+      // Create a scenario where new platform is MORE expensive
+      const expensiveMigrationPrices: CitoMigrationPriceRecord[] = [
+        {
+          moduleId: 'rekenwiskunde',
+          oldPricePerStudent: 4.0,
+          newPricePerStudent: 10.0,
+          verifiedAt: new Date('2026-01-01'),
+        },
+      ];
+      // financialDifference = (4.0 - 10.0) * 100 = -600
+      // timeSavingsValue = 48 * 50 = 2400
+      // totalAnnualValue = -600 + 2400 = 1800 > 0, so let's make it negative
+      // Need high hourly cost difference: old=4, new=30, students=100 -> diff = -2600
+      // timeSavings at hourlyRate=1: 48*1=48 -> totalAnnualValue = -2600+48 = -2552
+      const veryExpensivePrices: CitoMigrationPriceRecord[] = [
+        {
+          moduleId: 'rekenwiskunde',
+          oldPricePerStudent: 4.0,
+          newPricePerStudent: 30.0,
+          verifiedAt: new Date('2026-01-01'),
+        },
+      ];
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        veryExpensivePrices,
+        {},
+        1, // low hourly rate to keep timeSavingsValue low
+        5000,
+      );
+      expect(result.totalAnnualValue).toBeLessThan(0);
+      expect(result.breakEvenMonth).toBeNull();
+    });
+
+    it('includes switchingCosts field in result', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+        3000,
+      );
+      expect(result.switchingCosts).toBe(3000);
+    });
+
+    it('multiYearProjection cumulativeSavings remain unchanged (backward compatible)', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+        5000,
+      );
+      const totalAnnual = result.totalAnnualValue;
+      expect(result.multiYearProjection).toEqual([
+        { year: 1, cumulativeSavings: totalAnnual },
+        { year: 3, cumulativeSavings: totalAnnual * 3 },
+        { year: 5, cumulativeSavings: totalAnnual * 5 },
+      ]);
+    });
+
+    it('defaults switchingCosts to 0 when not provided (backward compatible)', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+      );
+      expect(result.switchingCosts).toBe(0);
+      expect(result.breakEvenMonth).toBe(0);
+    });
+  });
 });

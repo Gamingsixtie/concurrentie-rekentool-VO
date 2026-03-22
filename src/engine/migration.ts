@@ -41,6 +41,18 @@ export interface MigrationResult {
   /** financialDifference + totalTimeSavingsValue */
   totalAnnualValue: number;
   multiYearProjection: MultiYearProjectionEntry[];
+  switchingCosts: number;
+  breakEvenMonth: number | null;
+}
+
+/**
+ * Compute the break-even month: how many months until switching costs are recovered.
+ * Returns 0 if no switching costs, null if value never breaks even.
+ */
+function computeBreakEvenMonth(totalAnnualValue: number, switchingCosts: number): number | null {
+  if (switchingCosts <= 0) return 0;
+  if (totalAnnualValue <= 0) return null;
+  return Math.ceil((switchingCosts / totalAnnualValue) * 12);
 }
 
 /**
@@ -52,6 +64,7 @@ export interface MigrationResult {
  * @param migrationPrices   Old vs new Cito prices per module
  * @param timeSavingOverrides  taskId → hours/year override (consultant-entered)
  * @param hourlyRate        Value per hour saved (default: 50)
+ * @param switchingCosts    One-time switching costs (default: 0)
  */
 export function calculateMigration(
   selectedModules: string[],
@@ -59,6 +72,7 @@ export function calculateMigration(
   migrationPrices: CitoMigrationPriceRecord[],
   timeSavingOverrides: Record<string, number>,
   hourlyRate: number,
+  switchingCosts: number = 0,
 ): MigrationResult {
   const totalStudents = getTotalStudents(studentCounts);
 
@@ -121,5 +135,7 @@ export function calculateMigration(
     totalTimeSavingsValue,
     totalAnnualValue,
     multiYearProjection,
+    switchingCosts,
+    breakEvenMonth: computeBreakEvenMonth(totalAnnualValue, switchingCosts),
   };
 }
