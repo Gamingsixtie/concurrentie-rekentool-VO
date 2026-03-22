@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useContacts } from '@/hooks/useContacts';
 import { useConversations } from '@/hooks/useConversations';
 import { useActions, useCreateAction } from '@/hooks/useActions';
+import { useSchools } from '@/hooks/useSchools';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { buildTimeline } from '@/models/timeline';
 import type { Conversation } from '@/db/types';
@@ -18,9 +19,13 @@ export default function ConversationsTab() {
   const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
   const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
   const { data: actions = [] } = useActions(activeSchoolId ?? '');
+  const { data: schools = [] } = useSchools();
   const createActionMutation = useCreateAction();
 
   if (!activeSchoolId) return null;
+
+  // Find the current school record for DiffView comparison
+  const school = schools.find(s => s.id === activeSchoolId);
 
   // System events are no longer embedded in school record; use empty array for now
   const systemEvents: never[] = [];
@@ -102,6 +107,8 @@ export default function ConversationsTab() {
               setEditingConversation(null);
             }}
             onSaved={handleSaved}
+            school={school}
+            actions={actions}
           />
         )}
 
