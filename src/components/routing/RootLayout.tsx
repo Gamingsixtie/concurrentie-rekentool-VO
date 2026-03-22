@@ -6,9 +6,12 @@ import { UserMenu } from '@/features/auth/UserMenu';
 import { CloudMigrationWizard } from '@/features/migration/CloudMigrationWizard';
 import { hasLocalData, isMigrationComplete } from '@/db/migrations';
 
+// Skip auth in development when VITE_SKIP_AUTH is set
+const SKIP_AUTH = import.meta.env.VITE_SKIP_AUTH === 'true';
+
 /**
  * Root layout providing:
- * - Auth guard on all routes except /login
+ * - Auth guard on all routes except /login (skippable via VITE_SKIP_AUTH)
  * - UserMenu in the header
  * - Cloud migration wizard on first login with local data
  */
@@ -21,6 +24,10 @@ export default function RootLayout() {
 
   // Check for local data migration after auth completes
   useEffect(() => {
+    if (SKIP_AUTH) {
+      setNeedsMigration(false);
+      return;
+    }
     if (!user || loading) {
       setNeedsMigration(null);
       return;
@@ -38,6 +45,19 @@ export default function RootLayout() {
   // Login page is not protected
   if (isLoginPage) {
     return <Outlet />;
+  }
+
+  // Skip auth guard in dev mode
+  if (SKIP_AUTH) {
+    return (
+      <>
+        <header className="bg-white border-b border-neutral-200 px-8 max-sm:px-4 h-12 flex items-center justify-between">
+          <span className="text-sm font-medium text-cito-primary">Cito Rekentool</span>
+          <span className="text-xs text-orange-500 font-medium">DEV MODE — auth uitgeschakeld</span>
+        </header>
+        <Outlet />
+      </>
+    );
   }
 
   // All other routes require auth
