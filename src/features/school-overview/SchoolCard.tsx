@@ -4,6 +4,8 @@ import { SCHOOL_LEVEL_LABELS } from '@/models/school';
 import type { SchoolLevel } from '@/models/school';
 import IncompleteIndicator from '@/components/ui/IncompleteIndicator';
 import PipelineBadge from '@/components/ui/PipelineBadge';
+import { OwnerBadge } from '@/components/ui/OwnerBadge';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 interface SchoolCardProps {
   school: SchoolRecord;
@@ -30,6 +32,7 @@ function totalStudents(studentCounts: SchoolRecord['studentCounts']): number {
 }
 
 export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) {
+  const { userProfile } = useAuth();
   const levelLabels = school.levels
     .map((l) => SCHOOL_LEVEL_LABELS[l as SchoolLevel] || l)
     .join('/');
@@ -91,18 +94,24 @@ export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) 
         </svg>
       </button>
 
-      {/* School name + pipeline badge + incomplete indicator */}
+      {/* School name + pipeline badge + owner badge + incomplete indicator */}
       <div className="flex items-center gap-2 mb-2 pr-8">
         <h3 className={`font-semibold text-cito-primary truncate ${isCompact ? 'text-lg' : 'text-xl'}`}>
           {school.name}
         </h3>
         <PipelineBadge status={school.pipelineStatus} size="sm" />
+        {school.ownerName && (
+          <OwnerBadge
+            ownerName={school.ownerName}
+            isCurrentUser={school.ownerId === userProfile?.id}
+          />
+        )}
         {!school.isComplete && <IncompleteIndicator />}
       </div>
 
       {/* Last edited - shown in both modes */}
       <div className="text-sm text-neutral-400">
-        Laatst bewerkt: {dateFormatter.format(school.updatedAt)}
+        Laatst bewerkt: {dateFormatter.format(new Date(school.updatedAt))}
       </div>
 
       {/* Extended mode: extra details */}

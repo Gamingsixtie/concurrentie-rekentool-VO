@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { Outlet, useParams, useNavigate, useRouterState } from '@tanstack/react-router';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/database';
+import { useSchool } from '@/hooks/useSchools';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { ReadOnlyBanner } from '@/components/ui/ReadOnlyBanner';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
 import ProfileHeader from '@/features/school-profile/components/ProfileHeader';
@@ -12,21 +13,23 @@ export default function SchoolLayout() {
   const navigate = useNavigate();
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
+  const { userProfile } = useAuth();
 
   // Detect if we're on a wizard path — hide tabs on wizard
   const isWizardPath = currentPath.includes('/wizard/');
 
-  const school = useLiveQuery(
-    () => db.schools.where('slug').equals(slug).first(),
-    [slug],
-  );
+  const { data: school, isLoading } = useSchool(slug);
+
+  // Determine ownership and role-based visibility
+  const isOwner = !!(school?.ownerId && userProfile?.id && school.ownerId === userProfile.id);
+  const showReadOnlyBanner = !isOwner && userProfile?.role && userProfile.role !== 'accountmanager';
 
   // Redirect if school not found (after loading)
   useEffect(() => {
-    if (school === null) {
+    if (!isLoading && school === null) {
       navigate({ to: '/scholen', search: { error: 'not-found' } });
     }
-  }, [school, navigate]);
+  }, [school, isLoading, navigate]);
 
   // Hydrate stores when school data changes
   useEffect(() => {
@@ -34,10 +37,10 @@ export default function SchoolLayout() {
       useSchoolProfileStore.getState().hydrate(school);
       usePriceComparisonStore.getState().hydrate(school);
     }
-  }, [school?.id, school?.updatedAt?.getTime()]);
+  }, [school?.id, school?.updatedAt]);
 
   // Loading state
-  if (school === undefined) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-cito-bg flex items-center justify-center">
         <div className="animate-pulse text-neutral-400">Laden...</div>
@@ -50,6 +53,11 @@ export default function SchoolLayout() {
   return (
     <div className="min-h-screen bg-cito-bg">
       {!isWizardPath && <ProfileHeader />}
+      {!isWizardPath && showReadOnlyBanner && (
+        <div className="px-8 max-sm:px-4">
+          <ReadOnlyBanner role={userProfile!.role as 'manager' | 'viewer'} />
+        </div>
+      )}
       {!isWizardPath && <TabNavigation />}
       <Outlet />
     </div>

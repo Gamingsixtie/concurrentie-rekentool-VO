@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/database';
-import { deleteContact, canDeleteContact } from '@/db/operations';
+import { useContacts, useDeleteContact } from '@/hooks/useContacts';
+import { useConversations } from '@/hooks/useConversations';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
-import type { Contact, SchoolRecord } from '@/db/types';
+import type { Contact } from '@/db/types';
 import ContactCard from '@/features/school-profile/components/ContactCard';
 import ContactForm from '@/features/school-profile/components/ContactForm';
 
@@ -12,14 +11,11 @@ export default function ContactsTab() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
-  const school = useLiveQuery(
-    () => (activeSchoolId ? db.schools.get(activeSchoolId) : undefined),
-    [activeSchoolId],
-  );
+  const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
+  const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
+  const deleteContactMutation = useDeleteContact();
 
-  if (!school || !activeSchoolId) return null;
-
-  const contacts = school.contacts ?? [];
+  if (!activeSchoolId) return null;
 
   const handleEdit = (contact: Contact) => {
     setEditingContact(contact);
@@ -32,7 +28,7 @@ export default function ContactsTab() {
   };
 
   const handleDelete = async (contact: Contact) => {
-    await deleteContact(activeSchoolId, contact.id);
+    deleteContactMutation.mutate({ schoolId: activeSchoolId, contactId: contact.id });
   };
 
   const handleSaved = () => {
@@ -41,7 +37,11 @@ export default function ContactsTab() {
   };
 
   const getDeleteInfo = (contactId: string) => {
-    return canDeleteContact(school as SchoolRecord, contactId);
+    const linkedConversations = conversations.filter(c => c.contactId === contactId).length;
+    return {
+      canDelete: linkedConversations === 0,
+      linkedConversations,
+    };
   };
 
   return (

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/database';
-import { addAction } from '@/db/operations';
+import { useContacts } from '@/hooks/useContacts';
+import { useConversations } from '@/hooks/useConversations';
+import { useActions, useCreateAction } from '@/hooks/useActions';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { buildTimeline } from '@/models/timeline';
 import type { Conversation } from '@/db/types';
@@ -15,17 +15,15 @@ export default function ConversationsTab() {
   const [editingConversation, setEditingConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const school = useLiveQuery(
-    () => (activeSchoolId ? db.schools.get(activeSchoolId) : undefined),
-    [activeSchoolId],
-  );
+  const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
+  const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
+  const { data: actions = [] } = useActions(activeSchoolId ?? '');
+  const createActionMutation = useCreateAction();
 
-  if (!school || !activeSchoolId) return null;
+  if (!activeSchoolId) return null;
 
-  const contacts = school.contacts ?? [];
-  const conversations = school.conversations ?? [];
-  const systemEvents = school.systemEvents ?? [];
-  const actions = school.actions ?? [];
+  // System events are no longer embedded in school record; use empty array for now
+  const systemEvents: never[] = [];
 
   // Build timeline events
   const timelineEvents = useMemo(
@@ -60,7 +58,10 @@ export default function ConversationsTab() {
     const title = conv
       ? `Vervolg: ${conv.content.slice(0, 50)}${conv.content.length > 50 ? '...' : ''}`
       : 'Nieuwe actie';
-    await addAction(activeSchoolId, { title, conversationId: conversationId ?? null });
+    createActionMutation.mutate({
+      schoolId: activeSchoolId,
+      data: { title, conversationId: conversationId ?? null },
+    });
   };
 
   return (

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearch } from '@tanstack/react-router';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/database';
+import { useSchools } from '@/hooks/useSchools';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { detectV1Data } from '@/db/migrations';
 import type { SchoolRecord } from '@/db/types';
 import type { PipelineStatus } from '@/models/school';
@@ -18,6 +18,7 @@ import FilterBar from './FilterBar';
 import ViewToggle from './ViewToggle';
 import CardModeToggle from './CardModeToggle';
 import PipelineKanbanView from './PipelineKanbanView';
+import { SchoolOwnerFilter } from './SchoolOwnerFilter';
 
 type FilterValue = PipelineStatus | 'all';
 
@@ -40,10 +41,14 @@ function storePreference(key: string, value: string): void {
 
 export default function SchoolOverviewPage() {
   const search = useSearch({ from: '/scholen' }) as { error?: string };
-  const schools = useLiveQuery(() => db.schools.orderBy('updatedAt').reverse().toArray());
+  const { data: schools, isLoading } = useSchools();
+  const { userProfile } = useAuth();
   const [query, setQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<SchoolRecord | null>(null);
   const [showMigration, setShowMigration] = useState(() => detectV1Data());
+  const [ownerFilter, setOwnerFilter] = useState<'mine' | 'all'>(() =>
+    userProfile?.role === 'accountmanager' ? 'mine' : 'all',
+  );
 
   // View preferences persisted in localStorage
   const [pipelineFilter, setPipelineFilter] = useState<FilterValue>('all');
@@ -65,7 +70,7 @@ export default function SchoolOverviewPage() {
   };
 
   // Loading
-  if (schools === undefined) {
+  if (isLoading || !schools) {
     return (
       <div className="min-h-screen bg-cito-bg">
         <div className="max-w-[1200px] mx-auto pt-12 px-8 sm:px-4">
@@ -97,16 +102,21 @@ export default function SchoolOverviewPage() {
     );
   }
 
-  // Calculate filter counts from ALL schools (before text search)
-  const filterCounts: Record<FilterValue, number> = { all: schools.length } as Record<FilterValue, number>;
+  // Apply owner filter first
+  const ownerFiltered = ownerFilter === 'mine'
+    ? schools.filter(s => s.ownerId === userProfile?.id)
+    : schools;
+
+  // Calculate filter counts from owner-filtered schools (before text search)
+  const filterCounts: Record<FilterValue, number> = { all: ownerFiltered.length } as Record<FilterValue, number>;
   for (const status of PIPELINE_STATUSES) {
-    filterCounts[status] = schools.filter(s => s.pipelineStatus === status).length;
+    filterCounts[status] = ownerFiltered.filter(s => s.pipelineStatus === status).length;
   }
 
   // Apply text search filter
   let filtered = query
-    ? schools.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
-    : schools;
+    ? ownerFiltered.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
+    : ownerFiltered;
 
   // Apply pipeline filter
   if (pipelineFilter !== 'all') {
@@ -130,6 +140,17 @@ export default function SchoolOverviewPage() {
         <div className="mb-4">
           <SchoolSearchBar value={query} onChange={setQuery} />
         </div>
+
+        {/* Owner filter */}
+        {userProfile && (
+          <div className="mb-4">
+            <SchoolOwnerFilter
+              value={ownerFilter}
+              onChange={setOwnerFilter}
+              userRole={userProfile.role}
+            />
+          </div>
+        )}
 
         {/* Controls row: FilterBar left, ViewToggle + CardModeToggle right */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">

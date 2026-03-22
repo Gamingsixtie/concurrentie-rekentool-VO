@@ -1,4 +1,4 @@
-import { db } from '@/db/database';
+import { getSchoolBySlug } from '@/db/operations';
 import type { SchoolRecord } from '@/db/types';
 
 export interface SmartRedirectResult {
@@ -22,5 +22,6 @@ export async function getSmartRedirect(
 export async function checkSchoolExists(
   slug: string,
 ): Promise<SchoolRecord | undefined> {
-  return db.schools.where('slug').equals(slug).first();
+  const school = await getSchoolBySlug(slug);
+  return school ?? undefined;
 }

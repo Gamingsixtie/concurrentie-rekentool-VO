@@ -2,10 +2,9 @@ import {
   createRootRoute,
   createRoute,
   redirect,
-  Outlet,
 } from '@tanstack/react-router';
-import { db } from '@/db/database';
 import { checkSchoolExists } from './guards';
+import RootLayout from '@/components/routing/RootLayout';
 import SchoolLayout from '@/components/routing/SchoolLayout';
 import WizardPage from '@/components/routing/WizardPage';
 import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProposedPage';
@@ -16,27 +15,25 @@ import ComparisonTab from '@/features/school-profile/tabs/ComparisonTab';
 import ProductsTab from '@/features/school-profile/tabs/ProductsTab';
 import ContactsTab from '@/features/school-profile/tabs/ContactsTab';
 import ConversationsTab from '@/features/school-profile/tabs/ConversationsTab';
+import { LoginPage } from '@/features/auth/LoginPage';
 
-// Root layout
+// Root layout (with UserMenu header and migration gate)
 export const rootRoute = createRootRoute({
-  component: Outlet,
+  component: RootLayout,
 });
 
-// Index route — smart redirect based on school count
+// Login route — outside ProtectedRoute
+export const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
+});
+
+// Index route — smart redirect to overview
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: async () => {
-    const count = await db.schools.count();
-    if (count === 1) {
-      const first = await db.schools.toCollection().first();
-      if (first) {
-        throw redirect({
-          to: '/scholen/$slug',
-          params: { slug: first.slug },
-        });
-      }
-    }
     throw redirect({ to: '/scholen' });
   },
 });
@@ -122,6 +119,7 @@ export const schoolConversationsRoute = createRoute({
 });
 
 export const routeTree = rootRoute.addChildren([
+  loginRoute,
   indexRoute,
   scholenRoute,
   schoolRoute.addChildren([

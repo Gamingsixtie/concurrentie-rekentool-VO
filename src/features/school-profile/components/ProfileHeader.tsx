@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '../store';
+import { useSchool } from '@/hooks/useSchools';
 import { setPipelineStatus, validatePipelineTransition } from '@/db/operations';
 import {
   PIPELINE_STATUSES,
@@ -10,6 +11,7 @@ import type { PipelineStatus } from '@/models/school';
 import type { LostDealInfo } from '@/db/types';
 import LostDealDialog from './LostDealDialog';
 import PipelineReasonDialog from './PipelineReasonDialog';
+import { AuditMeta } from '@/components/ui/AuditMeta';
 
 // Context-smart CTA configuration per pipeline status
 const SMART_CTA: Record<PipelineStatus, { label: string; tab: string }> = {
@@ -29,17 +31,18 @@ export default function ProfileHeader() {
   const schoolName = useSchoolProfileStore((s) => s.schoolName);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
   const pipelineStatus = useSchoolProfileStore((s) => s.pipelineStatus);
+  const { data: school } = useSchool(slug);
 
   const [pendingStatus, setPendingStatus] = useState<PipelineStatus | null>(null);
   const [showLostDealDialog, setShowLostDealDialog] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
 
-  // Format the "Laatst bewerkt" date
+  // Format the "Laatst bewerkt" date (fallback to current date if no school data)
   const lastEdited = new Intl.DateTimeFormat('nl-NL', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(new Date());
+  }).format(school?.updatedAt ? new Date(school.updatedAt) : new Date());
 
   const handleStatusChange = (newStatus: PipelineStatus) => {
     if (!activeSchoolId || newStatus === pipelineStatus) return;
@@ -121,6 +124,14 @@ export default function ProfileHeader() {
             <p className="text-[14px] text-neutral-500 mt-1">
               Laatst bewerkt: {lastEdited}
             </p>
+            {school && (
+              <AuditMeta
+                createdBy={school.createdBy}
+                updatedBy={school.updatedBy}
+                createdAt={school.createdAt}
+                updatedAt={school.updatedAt}
+              />
+            )}
           </div>
 
           {/* Right side: pipeline dropdown + CTA */}
