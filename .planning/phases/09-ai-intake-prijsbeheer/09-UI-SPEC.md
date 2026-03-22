@@ -52,13 +52,17 @@ Exceptions: Touch targets at 44px (`h-[44px]`) for all buttons, inputs, and inte
 | Heading | 20px | 600 (semibold) | 1.2 |
 | Display | 24px | 600 (semibold) | 1.2 |
 
-Additional text roles for this phase:
+Maximum 4 sizes. No additional text roles.
 
-| Role | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| Caption | 12px | 600 (semibold) | 1.4 | Price source labels ("Publicatieprijs", "Schoolspecifieke prijs"), section labels |
-| Section label | 12px (xs) | 600 (semibold) | 1.4 | Uppercase tracking-wide labels above extraction groups (existing ExtractionPreview pattern) |
-| Streaming indicator | 14px | 600 (semibold) | 1.4 | Checkmark items during streaming extraction |
+Sub-roles within the 14px Label size:
+
+| Sub-role | Size | Weight | Line Height | Styling | Usage |
+|----------|------|--------|-------------|---------|-------|
+| Caption | 14px | 600 (semibold) | 1.4 | `text-sm font-semibold` | Price source labels ("Publicatieprijs", "Schoolspecifieke prijs") |
+| Section label | 14px | 600 (semibold) | 1.4 | `text-sm font-semibold uppercase tracking-wide` | Uppercase tracking-wide labels above extraction groups (existing ExtractionPreview pattern) |
+| Streaming indicator | 14px | 600 (semibold) | 1.4 | `text-sm font-semibold` | Checkmark items during streaming extraction |
+
+All three sub-roles use the same 14px/600 type spec as Label. Visual distinction comes from CSS styling (`uppercase tracking-wide`), not from a separate font size.
 
 ---
 
@@ -134,7 +138,7 @@ All copy in formal Dutch (u-vorm). No emojis in UI text.
 | Diff-view: existing item badge | Bestaand |
 | Diff-view: conflict item badge | Verschilt |
 | Confirm CTA | Overnemen en opslaan |
-| Cancel CTA | Annuleren |
+| Cancel CTA (diff-view) | Analyse annuleren |
 | Edit CTA | Pas notities aan |
 | Empty extraction | Geen gegevens herkend. Controleer uw notities en probeer opnieuw. |
 | Error state | Analyse mislukt. Controleer uw internetverbinding en probeer opnieuw. |
@@ -160,7 +164,7 @@ All copy in formal Dutch (u-vorm). No emojis in UI text.
 | Activation reason field | Waarom deze prijs? |
 | Activation reason placeholder | Bijv. offerte 2026, afspraak met regiomanager |
 | Save CTA | Prijs opslaan |
-| Cancel CTA | Annuleren |
+| Cancel CTA (price modal) | Bewerken annuleren |
 | Reset CTA | Reset naar publicatieprijs |
 | Reset confirmation | Weet u zeker dat u wilt terugkeren naar de publicatieprijs? Schoolspecifieke prijzen worden gedeactiveerd. |
 | Publication reference label | Publicatieprijs |
@@ -169,7 +173,7 @@ All copy in formal Dutch (u-vorm). No emojis in UI text.
 | Price deviation warning | Ongebruikelijk: publicatieprijs {amount}. Controleer het bedrag. |
 | Stale price warning | Mogelijk verouderd — laatst geverifieerd op {date} |
 | Price history heading | Prijsgeschiedenis |
-| Empty price history | Nog geen prijzen vastgelegd voor deze module. |
+| Empty price history | Nog geen prijzen vastgelegd. Klik op '+ Prijs toevoegen' om te beginnen. |
 
 ### Document Upload
 
@@ -181,7 +185,7 @@ All copy in formal Dutch (u-vorm). No emojis in UI text.
 | Extraction heading | Herkende prijzen uit document |
 | Extraction subheading | Vink aan welke prijzen u wilt overnemen. |
 | Confirm CTA | Prijzen overnemen |
-| Cancel CTA | Annuleren |
+| Cancel CTA (document upload) | Upload annuleren |
 | Error: unreadable | Dit document kon niet worden gelezen. Controleer het bestandsformaat. |
 | Error: no prices found | Geen prijzen gevonden in dit document. Voer prijzen handmatig in. |
 | Error: upload failed | Upload mislukt. Controleer uw internetverbinding en probeer opnieuw. |
@@ -275,16 +279,28 @@ All copy in formal Dutch (u-vorm). No emojis in UI text.
 7. User checks which prices to import, clicks "Prijzen overnemen"
 8. Each accepted price creates a SchoolPriceEntry with source = document filename
 
+### Focal Point
+
+The primary visual anchor for each screen:
+
+| Screen | Focal Point | Rationale |
+|--------|-------------|-----------|
+| ConversationsTab (AI mode) | "Analyseer notities" CTA button (bg-cito-primary, 44px height) | The single action the user is building toward after entering notes |
+| ConversationsTab (diff-view) | DiffView checkbox list with "Overnemen en opslaan" CTA at the bottom | The user's attention must scan checkboxes then land on the confirm action |
+| ProductsTab (prijsbeheer) | Active price radio indicator (cito-primary filled radio) per module card | The user needs to immediately see which price is active for each module |
+
 ### State Indicators
 
-| Indicator | Icon | Color | Tooltip |
-|-----------|------|-------|---------|
-| Verified price | Checkmark | green (status-verified) | Geverifieerd op {date} |
-| Manual price | Pencil | blue (status-manual) | Handmatig ingevoerd |
-| Stale price | Clock | orange (status-stale) | Mogelijk verouderd — laatst geverifieerd op {date} |
-| Unknown source | Question mark | grey (neutral-400) | Geen bron bekend |
-| Price deviation | Warning triangle | amber (modified-border) | Ongebruikelijk: publicatieprijs {amount} |
-| Active price | Filled radio | cito-primary | Actieve prijs voor vergelijking |
+| Indicator | Icon | Color | Tooltip | Screen reader label (`aria-label`) |
+|-----------|------|-------|---------|--------------------------------------|
+| Verified price | Checkmark | green (status-verified) | Geverifieerd op {date} | Geverifieerde prijs, geverifieerd op {date} |
+| Manual price | Pencil | blue (status-manual) | Handmatig ingevoerd | Handmatig ingevoerde prijs |
+| Stale price | Clock | orange (status-stale) | Mogelijk verouderd — laatst geverifieerd op {date} | Mogelijk verouderde prijs, laatst geverifieerd op {date} |
+| Unknown source | Question mark | grey (neutral-400) | Geen bron bekend | Prijs zonder bekende bron |
+| Price deviation | Warning triangle | amber (modified-border) | Ongebruikelijk: publicatieprijs {amount} | Prijsafwijking: publicatieprijs {amount} |
+| Active price | Filled radio | cito-primary | Actieve prijs voor vergelijking | Actieve prijs voor vergelijking |
+
+All icon-only indicators must include `aria-label` with the full text label. Icons are decorative (`aria-hidden="true"`) when accompanied by visible text; they carry `role="img"` plus `aria-label` when the icon is the sole indicator.
 
 ---
 
