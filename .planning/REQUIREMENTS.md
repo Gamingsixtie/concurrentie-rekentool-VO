@@ -38,15 +38,15 @@
 - [ ] **PRIJS-03**: Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
 - [ ] **PRIJS-04**: Gebruiker kan prijzen handmatig overschrijven met bronvermelding, en de vergelijking herberekent reactief
 - [ ] **PRIJS-05**: Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) — onderscheidend vermogen
-- [ ] **PRIJS-06**: Engine berekent correcte DIA-pakketprijzen: als school 3+ DIA-modules afneemt wordt automatisch het voordeligste pakket berekend
+- [x] **PRIJS-06**: Engine berekent correcte DIA-pakketprijzen: als school 3+ DIA-modules afneemt wordt automatisch het voordeligste pakket berekend
 - [x] **PRIJS-07**: Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en niet verward met publicatieprijzen
-- [ ] **PRIJS-08**: Hybride scenario: engine berekent per module apart waar school wisselt van aanbieder en toont besparingen per module
+- [x] **PRIJS-08**: Hybride scenario: engine berekent per module apart waar school wisselt van aanbieder en toont besparingen per module
 
 ### Gevoeligheidsanalyse
 
-- [ ] **GEVOEL-01**: Gebruiker kan in interne modus automatische gevoeligheidsanalyse zien: wat als DIA/JIJ 10% of 20% korting geeft
-- [ ] **GEVOEL-02**: Gevoeligheidsanalyse toont per kortingsscenario het effect op totaalverschil en per-module verschil
-- [ ] **GEVOEL-03**: Gebruiker ziet bij welk kortingspercentage de concurrent goedkoper wordt dan Cito (break-even korting)
+- [x] **GEVOEL-01**: Gebruiker kan in interne modus automatische gevoeligheidsanalyse zien: wat als DIA/JIJ 10% of 20% korting geeft
+- [x] **GEVOEL-02**: Gevoeligheidsanalyse toont per kortingsscenario het effect op totaalverschil en per-module verschil
+- [x] **GEVOEL-03**: Gebruiker ziet bij welk kortingspercentage de concurrent goedkoper wordt dan Cito (break-even korting)
 
 ### Waarde & Tijdwinst
 
@@ -79,7 +79,7 @@
 ### Modus & Weergave
 
 - [ ] **MODE-01**: Alle UI-tekst in formeel Nederlands (u-vorm)
-- [ ] **MODE-02**: Interne modus toont sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
+- [x] **MODE-02**: Interne modus toont sales-signalen per module ("benadruk prijs" / "focus op kwaliteit" / "focus op meerwaarde")
 - [ ] **MODE-03**: Applicatie is bruikbaar op tablet (touch-friendly, responsief)
 
 ## v2.x Requirements (Deferred)
@@ -144,12 +144,12 @@
 | PRIJS-03 | Phase 10 | Pending |
 | PRIJS-04 | Phase 10 | Pending |
 | PRIJS-05 | Phase 10 | Pending |
-| PRIJS-06 | Phase 10 | Pending |
+| PRIJS-06 | Phase 10 | Complete |
 | PRIJS-07 | Phase 7 | Complete |
-| PRIJS-08 | Phase 10 | Pending |
-| GEVOEL-01 | Phase 10 | Pending |
-| GEVOEL-02 | Phase 10 | Pending |
-| GEVOEL-03 | Phase 10 | Pending |
+| PRIJS-08 | Phase 10 | Complete |
+| GEVOEL-01 | Phase 10 | Complete |
+| GEVOEL-02 | Phase 10 | Complete |
+| GEVOEL-03 | Phase 10 | Complete |
 | WAARDE-01 | Phase 11 | Pending |
 | WAARDE-02 | Phase 11 | Pending |
 | WAARDE-03 | Phase 11 | Pending |
@@ -167,7 +167,7 @@
 | PRIJSMGT-03 | Phase 9 | Complete |
 | PRIJSMGT-04 | Phase 9 | Complete |
 | MODE-01 | Phase 6 | Pending |
-| MODE-02 | Phase 10 | Pending |
+| MODE-02 | Phase 10 | Complete |
 | MODE-03 | Phase 6 | Pending |
 | REVIEW-01 | Phase 13 | Pending |
 

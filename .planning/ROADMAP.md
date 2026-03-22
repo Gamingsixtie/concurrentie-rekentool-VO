@@ -256,7 +256,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
-| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Planning complete | - |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Planned    |  |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
