@@ -33,11 +33,11 @@
 
 ### Prijsvergelijking
 
-- [ ] **PRIJS-01**: Gebruiker ziet per geselecteerde module de kosten per leerling en totaalkosten per aanbieder (Cito, DIA, JIJ) naast elkaar
-- [ ] **PRIJS-02**: Gebruiker ziet een visuele vergelijking (staafdiagram) van totaalkosten per aanbieder
-- [ ] **PRIJS-03**: Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
-- [ ] **PRIJS-04**: Gebruiker kan prijzen handmatig overschrijven met bronvermelding, en de vergelijking herberekent reactief
-- [ ] **PRIJS-05**: Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) — onderscheidend vermogen
+- [x] **PRIJS-01**: Gebruiker ziet per geselecteerde module de kosten per leerling en totaalkosten per aanbieder (Cito, DIA, JIJ) naast elkaar
+- [x] **PRIJS-02**: Gebruiker ziet een visuele vergelijking (staafdiagram) van totaalkosten per aanbieder
+- [x] **PRIJS-03**: Gebruiker kan berekeningsdetails per module uitklappen en ziet de formule en inputs
+- [x] **PRIJS-04**: Gebruiker kan prijzen handmatig overschrijven met bronvermelding, en de vergelijking herberekent reactief
+- [x] **PRIJS-05**: Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) — onderscheidend vermogen
 - [x] **PRIJS-06**: Engine berekent correcte DIA-pakketprijzen: als school 3+ DIA-modules afneemt wordt automatisch het voordeligste pakket berekend
 - [x] **PRIJS-07**: Schoolspecifieke prijsoverschrijvingen (deals/kortingen) worden apart opgeslagen per school en niet verward met publicatieprijzen
 - [x] **PRIJS-08**: Hybride scenario: engine berekent per module apart waar school wisselt van aanbieder en toont besparingen per module
@@ -139,11 +139,11 @@
 | INTAKE-03 | Phase 9 | Complete |
 | INTAKE-04 | Phase 9 | Complete |
 | INTAKE-05 | Phase 9 | Complete |
-| PRIJS-01 | Phase 10 | Pending |
-| PRIJS-02 | Phase 10 | Pending |
-| PRIJS-03 | Phase 10 | Pending |
-| PRIJS-04 | Phase 10 | Pending |
-| PRIJS-05 | Phase 10 | Pending |
+| PRIJS-01 | Phase 10 | Complete |
+| PRIJS-02 | Phase 10 | Complete |
+| PRIJS-03 | Phase 10 | Complete |
+| PRIJS-04 | Phase 10 | Complete |
+| PRIJS-05 | Phase 10 | Complete |
 | PRIJS-06 | Phase 10 | Complete |
 | PRIJS-07 | Phase 7 | Complete |
 | PRIJS-08 | Phase 10 | Complete |

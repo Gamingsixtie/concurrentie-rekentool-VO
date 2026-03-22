@@ -37,12 +37,12 @@ const WizardStep2 = forwardRef<WizardStepRef>(function WizardStep2(_props, ref) 
     applyPreset(presetId);
     setActivePreset(presetId);
 
-    // Update form values from preset
+    // Only fill form values for levels the user selected in step 1.
+    // The preset may contain other levels — skip those.
     const preset = SCHOOL_SIZE_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
 
-    const presetLevels = Object.keys(preset.studentCounts) as SchoolLevel[];
-    for (const level of presetLevels) {
+    for (const level of levels) {
       const yearCounts = preset.studentCounts[level];
       if (yearCounts) {
         for (const [year, count] of Object.entries(yearCounts)) {

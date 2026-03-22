@@ -9,9 +9,6 @@ import { ComparisonChart } from './ComparisonChart';
 import { ComparisonTable } from './ComparisonTable';
 import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
-import { ModeToggle } from './ModeToggle';
-import { PeriodToggle } from './PeriodToggle';
-import { SensitivitySection } from './SensitivitySection';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -183,8 +180,6 @@ function TimeSavingsSection() {
 export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   const result = usePriceComparisonStore((s) => s.result);
   const initialize = usePriceComparisonStore((s) => s.initialize);
-  const isInternalMode = usePriceComparisonStore((s) => s.isInternalMode);
-  const sensitivityResult = usePriceComparisonStore((s) => s.sensitivityResult);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
 
@@ -256,21 +251,15 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
     <div className="max-w-[960px] mx-auto px-4 sm:px-8 py-12">
       {BackButton}
 
-      {/* Paginatitel + toggles */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <h1 className="text-[28px] font-semibold leading-[1.2] text-cito-primary">
-            Prijsvergelijking
-          </h1>
-          <p className="mt-2 text-base text-neutral-500">
-            Vergelijk de kosten van Cito, DIA en JIJ per module op basis van publicatieprijzen
-            {totalStudents > 0 && ` · ${totalStudents} leerlingen`}.
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:items-end">
-          <ModeToggle />
-          <PeriodToggle />
-        </div>
+      {/* Paginatitel */}
+      <div className="mb-8">
+        <h1 className="text-[28px] font-semibold leading-[1.2] text-cito-primary">
+          Prijsvergelijking
+        </h1>
+        <p className="mt-2 text-base text-neutral-500">
+          Vergelijk de kosten van Cito, DIA en JIJ per module op basis van publicatieprijzen
+          {totalStudents > 0 && ` · ${totalStudents} leerlingen`}.
+        </p>
       </div>
 
       {/* Grafiek */}
@@ -285,13 +274,6 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
       <div className="mb-8">
         <ComparisonTable result={result} onBarHighlight={chartHighlight} />
       </div>
-
-      {/* Gevoeligheidsanalyse (per D-15, D-16: only in internal mode) */}
-      {isInternalMode && sensitivityResult && (
-        <div className="mb-8">
-          <SensitivitySection result={sensitivityResult} />
-        </div>
-      )}
 
       {/* Business case CTA */}
       <div className="mb-8">

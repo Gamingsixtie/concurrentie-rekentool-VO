@@ -8,8 +8,8 @@
   ],
   "functions": {
     "api/*": {
-      "region": "fra1",
       "maxDuration": 30
     }
-  }
+  },
+  "regions": ["fra1"]
 }
