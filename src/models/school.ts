@@ -18,6 +18,15 @@ export const YEARS_PER_LEVEL: Record<SchoolLevel, number[]> = {
   'vwo': [1, 2, 3, 4, 5, 6],
 };
 
+export type CurrentProvider = 'cito-oud' | 'cito-nieuw' | 'dia' | 'jij' | 'overig' | 'geen';
+
+export interface ModuleCurrentSetup {
+  moduleId: string;
+  currentProvider: CurrentProvider;
+  pricePerStudent: number | null;
+  customProviderName?: string;
+}
+
 export type Scenario = 'A' | 'B';
 
 export const SCENARIO_LABELS: Record<Scenario, { title: string; description: string }> = {
