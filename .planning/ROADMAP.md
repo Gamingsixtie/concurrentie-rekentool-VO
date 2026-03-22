@@ -95,7 +95,7 @@ Plans:
 - [x] 07-01-PLAN.md — CRM-lite data layer: types, Dexie v2 schema migratie, CRUD operaties, Zod schemas en timeline utility
 - [x] 07-02-PLAN.md — Profiel-UI: tab-routing, ProfileHeader, TabNavigation, DashboardTab, ComparisonTab, ProductsTab en pipeline-management
 - [x] 07-03-PLAN.md — ContactsTab met CRUD en DMU-mapping, ConversationsTab met tijdlijn, tags, zoekfunctie en kanban-actielijst
-- [ ] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
+- [x] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
 
 ### Phase 8: AI Intake & Prijsbeheer
 **Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die automatisch wordt gestructureerd in schooldata, en kan prijzen beheren via handmatige invoer of AI-documentextractie

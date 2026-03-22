@@ -20,7 +20,7 @@
 - [x] **SCHOOL-03**: Gebruiker kan contactpersonen per school vastleggen met naam, rol en DMU-positie (coordinator, MT, finance)
 - [x] **SCHOOL-04**: Gebruiker kan gespreksnotities per school toevoegen met datum, contactpersoon en kernpunten
 - [x] **SCHOOL-05**: Gebruiker kan pipeline-status per school instellen (prospect, contact, offerte, besluit, klant, at-risk)
-- [ ] **SCHOOL-06**: Gebruiker ziet schooloverzicht met zoekfunctie, gesorteerd op laatst gebruikt, met pipeline-status badge
+- [x] **SCHOOL-06**: Gebruiker ziet schooloverzicht met zoekfunctie, gesorteerd op laatst gebruikt, met pipeline-status badge
 - [ ] **SCHOOL-07**: Systeem detecteert upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
 
 ### AI Intake
@@ -117,7 +117,7 @@
 | SCHOOL-03 | Phase 7 | Complete |
 | SCHOOL-04 | Phase 7 | Complete |
 | SCHOOL-05 | Phase 7 | Complete |
-| SCHOOL-06 | Phase 7 | Pending |
+| SCHOOL-06 | Phase 7 | Complete |
 | SCHOOL-07 | Phase 10 | Pending |
 | INTAKE-01 | Phase 8 | Pending |
 | INTAKE-02 | Phase 8 | Pending |
