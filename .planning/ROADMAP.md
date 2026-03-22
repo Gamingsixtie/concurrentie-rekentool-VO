@@ -109,13 +109,14 @@ Plans:
   3. Bestaande IndexedDB data wordt bij eerste login automatisch gemigreerd naar Supabase zonder dataverlies
   4. AI-calls lopen via Vercel serverless functions met server-side API key — geen API keys in de browser
   5. App is bereikbaar via Vercel URL met werkende auth, database en AI-proxy
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
-- [ ] 08-03: TBD
-- [ ] 08-04: TBD
+- [ ] 08-01-PLAN.md — Supabase client, Database types, genormaliseerd SQL schema (8 tabellen) en RLS policies
+- [ ] 08-02-PLAN.md — Auth systeem: AuthProvider, LoginPage, ProtectedRoute, UserMenu en AuthLoadingScreen
+- [ ] 08-03-PLAN.md — Data layer migratie: operations.ts herschrijven voor Supabase, React Query hooks, QueryClientProvider
+- [ ] 08-04-PLAN.md — Cloud migratie wizard (IndexedDB naar Supabase) en role-based UI componenten
+- [ ] 08-05-PLAN.md — Vercel serverless AI proxy, useLiveQuery vervanging, component integratie en deploy verificatie
 
 ### Phase 9: AI Intake & Prijsbeheer
 **Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die real-time wordt gestructureerd in schooldata, en kan prijzen beheren met actieve selectie, handmatige invoer en document-upload extractie (PDF/Excel/Word/CSV)
@@ -216,7 +217,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
-| 8. Supabase & Deploy | v2.0 | 0/4 | Context gathered | - |
+| 8. Supabase & Deploy | v2.0 | 0/5 | Planning complete | - |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/4 | Context gathered | - |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
