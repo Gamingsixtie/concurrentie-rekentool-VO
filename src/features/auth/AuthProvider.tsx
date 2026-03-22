@@ -80,12 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Suppress Supabase auth lock errors — they are not fatal and
-  // should not crash the app
+  // Suppress Supabase auth lock errors (non-fatal)
   useEffect(() => {
     const handler = (e: PromiseRejectionEvent) => {
       const msg = String(e.reason?.message ?? e.reason ?? '');
-      if (msg.includes('Lock') && msg.includes('stolen')) {
+      if (msg.includes('Lock') || msg.includes('lock')) {
         e.preventDefault();
       }
     };
@@ -94,33 +93,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Safety timeout — never hang on auth check longer than 8 seconds
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 8000);
+    // Hard maximum — never show spinner longer than 3 seconds
+    const timeout = setTimeout(() => setLoading(false), 3000);
 
-    // Use onAuthStateChange with INITIAL_SESSION to avoid lock conflicts
+    // 1. Fetch initial session directly with its own timeout
+    const sessionTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2500));
+    Promise.race([supabase.auth.getSession(), sessionTimeout])
+      .then(async (result) => {
+        if (result && typeof result === 'object' && 'data' in result) {
+          const currentSession = result.data.session;
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          if (currentSession?.user) {
+            try {
+              const profileTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2000));
+              const profile = await Promise.race([
+                fetchUserProfile(currentSession.user.id),
+                profileTimeout,
+              ]);
+              setUserProfile(profile);
+            } catch {
+              // Continue without profile
+            }
+          }
+        }
+        clearTimeout(timeout);
+        setLoading(false);
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        setLoading(false);
+      });
+
+    // 2. Subscribe to later auth changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      // Skip INITIAL_SESSION — handled by getSession() above
+      if (event === 'INITIAL_SESSION') return;
+
       setSession(newSession);
       setUser(newSession?.user ?? null);
-
-      if (event === 'INITIAL_SESSION') {
-        // This fires once after getSession() resolves — use it as the
-        // single source of truth for the initial load
-        clearTimeout(timeout);
-        if (newSession?.user) {
-          try {
-            const profile = await fetchUserProfile(newSession.user.id);
-            setUserProfile(profile);
-          } catch {
-            // Profile fetch failed — continue without profile
-          }
-        }
-        setLoading(false);
-        return;
-      }
 
       if (
         (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
@@ -130,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const profile = await fetchUserProfile(newSession.user.id);
           setUserProfile(profile);
         } catch {
-          // Profile fetch failed — keep existing profile
+          // Keep existing profile
         }
       }
 
@@ -142,7 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Cleanup subscription and timeout on unmount
     return () => {
       clearTimeout(timeout);
       subscription.unsubscribe();
