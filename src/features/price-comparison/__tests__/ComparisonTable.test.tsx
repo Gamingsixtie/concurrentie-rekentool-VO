@@ -4,14 +4,18 @@ import { ComparisonTable } from '../ComparisonTable';
 import type { ComparisonResult } from '../../../engine/price-comparison';
 import type { PriceRecord } from '../../../models/pricing';
 
-// Mock the store so ModuleDetailPanel can render inside expanded rows.
-// We need result to contain the actual mockResult so detail panels find module data.
-// The mock is hoisted, so we reference a variable set before tests run.
+// Mock the price comparison store
 const storeState = {
   result: null as ComparisonResult | null,
   draftOverrides: [] as unknown[],
   appliedOverrides: [] as unknown[],
   hasPendingChanges: false,
+  isInternalMode: true,
+  hybridResult: null,
+  diaPackageResult: null,
+  activeCompetitor: null as string | null,
+  sensitivityResult: null,
+  contractPeriod: 'annual' as const,
   setDraftOverride: vi.fn(),
   resetOverride: vi.fn(),
   recalculate: vi.fn(),
@@ -21,6 +25,20 @@ vi.mock('../store', () => ({
   usePriceComparisonStore: Object.assign(
     (selector: (s: typeof storeState) => unknown) => selector(storeState),
     { getState: () => ({ initialize: vi.fn() }) },
+  ),
+}));
+
+// Mock school profile store: include JIJ in moduleSetups so JIJ column shows
+const mockSchoolProfileState = {
+  moduleSetups: [
+    { moduleId: 'rekenwiskunde', currentProvider: 'jij', pricePerStudent: null },
+  ],
+};
+
+vi.mock('../../school-profile/store', () => ({
+  useSchoolProfileStore: Object.assign(
+    (selector: (s: typeof mockSchoolProfileState) => unknown) => selector(mockSchoolProfileState),
+    { getState: () => mockSchoolProfileState },
   ),
 }));
 
@@ -160,7 +178,7 @@ describe('ComparisonTable', () => {
     expect(screen.getByText('Overige instrumenten')).toBeInTheDocument();
   });
 
-  it('shows n.v.t. when difference is null', () => {
+  it('shows n.v.t. when difference is null (with JIJ column visible)', () => {
     const resultWithNull: ComparisonResult = {
       ...mockResult,
       differences: { citoVsDia: 100, citoVsJij: null },

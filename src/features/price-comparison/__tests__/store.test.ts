@@ -9,6 +9,10 @@ const mockSchoolProfileState = {
     vwo: { 1: 50, 2: 50, 3: 50 },
   },
   selectedModules: ['rekenwiskunde', 'nederlands'],
+  moduleSetups: [
+    { moduleId: 'rekenwiskunde', currentProvider: 'geen', pricePerStudent: null },
+    { moduleId: 'nederlands', currentProvider: 'geen', pricePerStudent: null },
+  ],
   scenario: null,
   currentStep: 0,
 };
