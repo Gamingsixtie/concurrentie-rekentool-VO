@@ -74,18 +74,11 @@ function mapAuthError(error: AuthError): string {
   return 'Er is iets misgegaan. Probeer het later opnieuw.';
 }
 
-const _dbg = (msg: string) => {
-  const fn = (window as unknown as Record<string, unknown>).__debugLog as ((m: string) => void) | undefined;
-  fn?.(msg);
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-
-  _dbg('AuthProvider render: loading=' + loading + ' user=' + (user?.email ?? 'null'));
 
   // Suppress Supabase auth lock errors (non-fatal)
   useEffect(() => {
@@ -100,13 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    _dbg('Auth effect: subscribing to onAuthStateChange (NO getSession)...');
-
-    // Safety timeout
-    const timeout = setTimeout(() => {
-      _dbg('Auth: 5s TIMEOUT — forcing loading=false');
-      setLoading(false);
-    }, 5000);
+    // Safety timeout — never show loading longer than 5 seconds
+    const timeout = setTimeout(() => setLoading(false), 5000);
 
     // ONLY use onAuthStateChange — do NOT call getSession() separately.
     // Calling both causes a Navigator Lock deadlock that blocks ALL
@@ -114,27 +102,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      _dbg('Auth event: ' + event + ' user=' + (newSession?.user?.email ?? 'null'));
-
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
       if (event === 'INITIAL_SESSION') {
         if (newSession?.user) {
           try {
-            _dbg('Auth: fetching profile...');
             const profile = await Promise.race([
               fetchUserProfile(newSession.user.id),
               new Promise<null>((r) => setTimeout(() => r(null), 3000)),
             ]);
-            _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
             setUserProfile(profile);
           } catch {
-            _dbg('Auth: profile fetch failed');
+            // Continue without profile
           }
         }
         clearTimeout(timeout);
-        _dbg('Auth: setLoading(false)');
         setLoading(false);
         return;
       }
@@ -144,18 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         newSession?.user
       ) {
         try {
-          _dbg('Auth: fetching profile (SIGNED_IN)...');
           const profile = await Promise.race([
             fetchUserProfile(newSession.user.id),
             new Promise<null>((r) => setTimeout(() => r(null), 3000)),
           ]);
-          _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
           setUserProfile(profile);
         } catch {
-          _dbg('Auth: profile fetch failed (SIGNED_IN)');
+          // Keep existing profile
         }
         clearTimeout(timeout);
-        _dbg('Auth: setLoading(false) via SIGNED_IN');
         setLoading(false);
       }
 
