@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 
 // import { mergeIntakeExtraction } from '@/features/school-profile/utils/intake-merge';
 
