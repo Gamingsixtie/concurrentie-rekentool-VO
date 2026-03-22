@@ -1,13 +1,23 @@
-import 'fake-indexeddb/auto';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { db } from '@/db/database';
-import { getSmartRedirect, checkSchoolExists } from '../guards';
+import { describe, expect, it, vi } from 'vitest';
+import { getSmartRedirect } from '../guards';
+
+// Mock the Supabase-based operations used by checkSchoolExists
+vi.mock('@/db/operations', () => ({
+  getSchoolBySlug: vi.fn().mockImplementation(async (slug: string) => {
+    if (slug === 'montessori-college') {
+      return {
+        id: 'test-uuid',
+        slug: 'montessori-college',
+        name: 'Montessori College',
+        createdAt: '2026-03-15T10:00:00Z',
+        updatedAt: '2026-03-15T10:00:00Z',
+      };
+    }
+    return null;
+  }),
+}));
 
 describe('Router guards', () => {
-  beforeEach(async () => {
-    await db.schools.clear();
-  });
-
   describe('getSmartRedirect', () => {
     it('redirects to /scholen when 0 schools', async () => {
       const result = await getSmartRedirect(0);
@@ -28,37 +38,14 @@ describe('Router guards', () => {
 
   describe('checkSchoolExists', () => {
     it('returns school record when slug exists', async () => {
-      await db.schools.add({
-        slug: 'montessori-college',
-        name: 'Montessori College',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isComplete: false,
-        completedSteps: [],
-        levels: [],
-        studentCounts: {},
-        selectedModules: [],
-        moduleSetups: [],
-        scenario: null,
-        appliedOverrides: [],
-        migrationHourlyRate: 50,
-        migrationTimeSavingOverrides: {},
-        contacts: [],
-        conversations: [],
-        actions: [],
-        systemEvents: [],
-        pipelineStatus: 'prospect',
-        region: '',
-        tags: [],
-        viewPreference: 'compact',
-      });
-
+      const { checkSchoolExists } = await import('../guards');
       const result = await checkSchoolExists('montessori-college');
       expect(result).toBeDefined();
       expect(result!.name).toBe('Montessori College');
     });
 
     it('returns undefined for nonexistent slug', async () => {
+      const { checkSchoolExists } = await import('../guards');
       const result = await checkSchoolExists('nonexistent');
       expect(result).toBeUndefined();
     });

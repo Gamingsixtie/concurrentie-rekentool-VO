@@ -4,6 +4,7 @@ import { db } from './database';
 import type { SchoolRecord, PriceOverride } from './types';
 import { uniqueSlug } from '@/lib/slugify';
 import { supabase } from '@/lib/supabase/client';
+import type { Json } from '@/lib/supabase/types';
 
 // ── Cloud migration types ──────────────────────────────────────────
 
@@ -114,23 +115,23 @@ export async function migrateIndexedDBToSupabase(
           is_complete: school.isComplete,
           completed_steps: school.completedSteps,
           levels: school.levels,
-          student_counts: school.studentCounts,
+          student_counts: school.studentCounts as unknown as Json,
           selected_modules: school.selectedModules,
-          module_setups: school.moduleSetups,
+          module_setups: school.moduleSetups as unknown as Json,
           scenario: school.scenario,
           migration_hourly_rate: school.migrationHourlyRate,
-          migration_time_saving_overrides: school.migrationTimeSavingOverrides,
+          migration_time_saving_overrides: school.migrationTimeSavingOverrides as unknown as Json,
           pipeline_status: school.pipelineStatus,
-          lost_deal_info: school.lostDealInfo ?? null,
+          lost_deal_info: (school.lostDealInfo ?? null) as unknown as Json | null,
           region: school.region,
           tags: school.tags,
           view_preference: school.viewPreference,
           owner_id: user.id,
-          team_id: teamId,
+          team_id: teamId ?? user.id,
           created_by: user.id,
           updated_by: user.id,
-          created_at: school.createdAt.toISOString(),
-          updated_at: school.updatedAt.toISOString(),
+          created_at: typeof school.createdAt === 'string' ? school.createdAt : (school.createdAt as unknown as Date).toISOString(),
+          updated_at: typeof school.updatedAt === 'string' ? school.updatedAt : (school.updatedAt as unknown as Date).toISOString(),
         })
         .select('id')
         .single();
@@ -405,8 +406,8 @@ export async function migrateV1ToSchool(name: string): Promise<SchoolRecord> {
   const record: Omit<SchoolRecord, 'id'> = {
     slug,
     name,
-    createdAt: now,
-    updatedAt: now,
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
     isComplete: true,
     completedSteps: [0, 1, 2, 3, 4],
     levels: v1Data.schoolRecord.levels ?? [],
@@ -423,8 +424,9 @@ export async function migrateV1ToSchool(name: string): Promise<SchoolRecord> {
     actions: [],
     systemEvents: [{
       id: crypto.randomUUID(),
+      schoolId: '',
       timestamp: now.toISOString(),
-      eventType: 'school_created',
+      eventType: 'school_created' as const,
       description: 'School gemigreerd vanuit v1',
     }],
     pipelineStatus: 'prospect',

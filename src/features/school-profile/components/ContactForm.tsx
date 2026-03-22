@@ -10,7 +10,7 @@ type ContactFormInput = z.input<typeof contactSchema>;
 
 interface ContactFormProps {
   contact?: Contact;
-  schoolId: number;
+  schoolId: string;
   onClose: () => void;
   onSaved: () => void;
 }

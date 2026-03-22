@@ -39,8 +39,8 @@ describe('Wizard Navigation', () => {
     await db.schools.add({
       slug: 'test-school',
       name: 'Test School',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       isComplete: false,
       completedSteps: [],
       levels: [],

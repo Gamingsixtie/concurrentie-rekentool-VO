@@ -10,7 +10,7 @@ type ConversationFormInput = z.input<typeof conversationSchema>;
 
 interface ConversationFormProps {
   conversation?: Conversation;
-  schoolId: number;
+  schoolId: string;
   contacts: Contact[];
   existingTags: string[];
   onClose: () => void;

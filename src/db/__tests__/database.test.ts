@@ -22,8 +22,8 @@ describe('RekenToolDB', () => {
     const id = await db.schools.add({
       slug: 'test-school',
       name: 'Test School',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       isComplete: false,
       completedSteps: [],
       levels: [],
@@ -61,8 +61,8 @@ describe('RekenToolDB', () => {
     const id = await db.schools.add({
       slug: 'v1-school',
       name: 'V1 School',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       isComplete: false,
       completedSteps: [],
       levels: [],

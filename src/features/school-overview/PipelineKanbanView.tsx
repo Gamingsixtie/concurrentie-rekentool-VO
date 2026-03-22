@@ -114,7 +114,7 @@ function DroppableColumn({
 }
 
 interface PendingTransition {
-  schoolId: number;
+  schoolId: string;
   school: SchoolRecord;
   fromStatus: PipelineStatus;
   toStatus: PipelineStatus;
@@ -143,8 +143,7 @@ export default function PipelineKanbanView({
     const { active, over } = event;
     if (!over) return;
 
-    const schoolIdStr = (active.id as string).replace('school-', '');
-    const schoolId = Number(schoolIdStr);
+    const schoolId = (active.id as string).replace('school-', '');
     const school = schools.find(s => s.id === schoolId);
     if (!school) return;
 
@@ -162,7 +161,7 @@ export default function PipelineKanbanView({
 
     if (!targetStatus) {
       // Dropped on a school card - get its status
-      const targetSchoolId = Number(overId.replace('school-', ''));
+      const targetSchoolId = overId.replace('school-', '');
       const targetSchool = schools.find(s => s.id === targetSchoolId);
       if (targetSchool) {
         targetStatus = targetSchool.pipelineStatus;
@@ -212,7 +211,7 @@ export default function PipelineKanbanView({
   };
 
   const activeSchool = activeId
-    ? schools.find(s => s.id === Number((activeId as string).replace('school-', '')))
+    ? schools.find(s => s.id === (activeId as string).replace('school-', ''))
     : null;
 
   return (

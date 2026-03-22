@@ -6,6 +6,7 @@ import type { Conversation, SystemEvent } from '@/db/types';
 describe('buildTimeline', () => {
   const mockConversation: Conversation = {
     id: 'conv-1',
+    schoolId: 'school-1',
     date: '2026-03-15',
     contactId: 'contact-1',
     content: 'Gesprek over prijzen',
@@ -16,6 +17,7 @@ describe('buildTimeline', () => {
 
   const mockSystemEvent: SystemEvent = {
     id: 'evt-1',
+    schoolId: 'school-1',
     timestamp: '2026-03-16T12:00:00Z',
     eventType: 'pipeline_changed',
     description: 'Pipeline gewijzigd: prospect -> contact-gelegd',

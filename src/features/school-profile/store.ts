@@ -5,7 +5,7 @@ import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, Lost
 
 interface SchoolProfileState {
   // Multi-school identity
-  activeSchoolId: number | null;
+  activeSchoolId: string | null;
   schoolName: string;
   setSchoolName: (name: string) => void;
 
@@ -52,7 +52,7 @@ interface SchoolProfileState {
 }
 
 const initialState = {
-  activeSchoolId: null as number | null,
+  activeSchoolId: null as string | null,
   schoolName: '',
   levels: [] as SchoolLevel[],
   studentCounts: {} as Partial<Record<SchoolLevel, Record<number, number>>>,

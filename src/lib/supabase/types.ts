@@ -29,6 +29,7 @@ export interface Database {
           name?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       users: {
         Row: {
@@ -58,6 +59,7 @@ export interface Database {
           team_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       schools: {
         Row: {
@@ -135,6 +137,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       contacts: {
         Row: {
@@ -185,6 +188,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       conversations: {
         Row: {
@@ -223,6 +227,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       actions: {
         Row: {
@@ -258,6 +263,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       system_events: {
         Row: {
@@ -287,6 +293,7 @@ export interface Database {
           metadata?: Json | null;
           user_id?: string | null;
         };
+        Relationships: [];
       };
       school_prices: {
         Row: {
@@ -346,6 +353,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: {

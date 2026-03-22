@@ -23,10 +23,11 @@ function calculateCounts(schools: SchoolRecord[]): Record<FilterValue, number> {
 function makeSchool(overrides: Partial<SchoolRecord> & { name: string; pipelineStatus: PipelineStatus }): SchoolRecord {
   const { name, pipelineStatus, ...rest } = overrides;
   return {
+    id: crypto.randomUUID(),
     slug: name.toLowerCase().replace(/\s/g, '-'),
     name,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     isComplete: false,
     completedSteps: [],
     levels: [],
@@ -98,6 +99,7 @@ describe('Card mode rendering logic', () => {
       contacts: [
         {
           id: '1',
+          schoolId: 'school-1',
           name: 'Jan de Vries',
           dmuPosition: 'coordinator',
           jobTitle: 'Toetscoordinator',
@@ -133,6 +135,7 @@ describe('Card mode rendering logic', () => {
       contacts: [
         {
           id: '1',
+          schoolId: 'school-2',
           name: 'Piet Bakker',
           dmuPosition: 'mt',
           jobTitle: 'Conrector',
@@ -149,6 +152,7 @@ describe('Card mode rendering logic', () => {
       actions: [
         {
           id: 'a1',
+          schoolId: 'school-2',
           title: 'Demo inplannen',
           status: 'todo',
           conversationId: null,

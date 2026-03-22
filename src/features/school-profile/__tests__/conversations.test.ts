@@ -6,6 +6,7 @@ import type { Conversation, SystemEvent } from '@/db/types';
 function makeConversation(overrides: Partial<Conversation> = {}): Conversation {
   return {
     id: crypto.randomUUID(),
+    schoolId: 'school-1',
     date: '2026-03-20',
     contactId: 'c1',
     content: 'Test conversation content',
@@ -19,6 +20,7 @@ function makeConversation(overrides: Partial<Conversation> = {}): Conversation {
 function makeSystemEvent(overrides: Partial<SystemEvent> = {}): SystemEvent {
   return {
     id: crypto.randomUUID(),
+    schoolId: 'school-1',
     timestamp: '2026-03-20T10:00:00Z',
     eventType: 'school_created',
     description: 'School aangemaakt',

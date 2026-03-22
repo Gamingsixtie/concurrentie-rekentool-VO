@@ -11,9 +11,8 @@ export async function uniqueSlug(name: string, excludeId?: string): Promise<stri
   let candidate = base;
   let counter = 1;
   while (true) {
-    const { data } = await supabase.from('schools').select('id').eq('slug', candidate).maybeSingle();
-    const existing = data !== null;
-    if (!existing || (data && data.id === excludeId)) return candidate;
+    const { data } = await supabase.from('schools').select('id').eq('slug', candidate).maybeSingle() as { data: { id: string } | null };
+    if (!data || data.id === excludeId) return candidate;
     counter++;
     candidate = `${base}-${counter}`;
   }

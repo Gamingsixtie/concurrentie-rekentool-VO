@@ -36,10 +36,10 @@ async function fetchUserProfile(
     .from('users')
     .select('*')
     .eq('id', userId)
-    .single();
+    .single() as { data: { id: string; email: string; name: string; role: 'accountmanager' | 'manager' | 'viewer'; region: string; team_id: string } | null; error: unknown };
 
   if (error || !data) {
-    console.error('Failed to fetch user profile:', error?.message);
+    console.error('Failed to fetch user profile:', (error as { message?: string })?.message);
     return null;
   }
 

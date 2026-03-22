@@ -21,7 +21,7 @@ import ActionItemCard from '@/features/school-profile/components/ActionItem';
 interface ActionKanbanProps {
   actions: ActionItemType[];
   conversations: Conversation[];
-  schoolId: number;
+  schoolId: string;
   onAddAction: (conversationId?: string) => void;
 }
 
