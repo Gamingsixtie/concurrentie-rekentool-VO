@@ -100,59 +100,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    _dbg('Auth effect: starting getSession...');
+    _dbg('Auth effect: subscribing to onAuthStateChange (NO getSession)...');
 
-    // Hard maximum — never show spinner longer than 3 seconds
+    // Safety timeout
     const timeout = setTimeout(() => {
-      _dbg('Auth: 3s TIMEOUT fired — forcing loading=false');
+      _dbg('Auth: 5s TIMEOUT — forcing loading=false');
       setLoading(false);
-    }, 3000);
+    }, 5000);
 
-    // 1. Fetch initial session directly with its own timeout
-    const sessionTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2500));
-    _dbg('Auth: calling getSession()...');
-    Promise.race([supabase.auth.getSession(), sessionTimeout])
-      .then(async (result) => {
-        _dbg('Auth: getSession resolved, result=' + (result ? 'has data' : 'timeout/null'));
-        if (result && typeof result === 'object' && 'data' in result) {
-          const currentSession = result.data.session;
-          _dbg('Auth: session=' + (currentSession ? 'exists (user=' + currentSession.user?.email + ')' : 'null'));
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          if (currentSession?.user) {
-            try {
-              _dbg('Auth: fetching profile...');
-              const profileTimeout = new Promise<null>((r) => setTimeout(() => r(null), 2000));
-              const profile = await Promise.race([
-                fetchUserProfile(currentSession.user.id),
-                profileTimeout,
-              ]);
-              _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
-              setUserProfile(profile);
-            } catch {
-              _dbg('Auth: profile fetch failed');
-            }
+    // ONLY use onAuthStateChange — do NOT call getSession() separately.
+    // Calling both causes a Navigator Lock deadlock that blocks ALL
+    // Supabase operations including database queries.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      _dbg('Auth event: ' + event + ' user=' + (newSession?.user?.email ?? 'null'));
+
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+
+      if (event === 'INITIAL_SESSION') {
+        if (newSession?.user) {
+          try {
+            _dbg('Auth: fetching profile...');
+            const profile = await Promise.race([
+              fetchUserProfile(newSession.user.id),
+              new Promise<null>((r) => setTimeout(() => r(null), 3000)),
+            ]);
+            _dbg('Auth: profile=' + (profile ? profile.name : 'null/timeout'));
+            setUserProfile(profile);
+          } catch {
+            _dbg('Auth: profile fetch failed');
           }
         }
         clearTimeout(timeout);
         _dbg('Auth: setLoading(false)');
         setLoading(false);
-      })
-      .catch((err) => {
-        _dbg('Auth: getSession FAILED: ' + err);
-        clearTimeout(timeout);
-        setLoading(false);
-      });
-
-    // 2. Subscribe to later auth changes (login, logout, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      // Skip INITIAL_SESSION — handled by getSession() above
-      if (event === 'INITIAL_SESSION') return;
-
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
+        return;
+      }
 
       if (
         (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
