@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 09-00-PLAN.md
-last_updated: "2026-03-22T20:52:02.214Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-22T20:57:05.431Z"
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 09 (ai-intake-prijsbeheer) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 
 ## Performance Metrics
 
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [Phase 08]: SchoolRecord.id changed from optional number to required string UUID
 - [Phase 08]: DexieSchoolRecord inline type for parallel safety with Plan 08-03
 - [Phase 08]: Contact ID mapping by insertion order for migration FK resolution
+- [Phase 09]: Use .default([]) on V2 schema arrays for backward compatibility with v1 data
+- [Phase 09]: Zod v4 uses 'error' instead of 'required_error' for custom number error messages
+- [Phase 09]: Mutual exclusion activation via two sequential Supabase queries (deactivate all, then activate one)
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T20:52:02.211Z
-Stopped at: Completed 09-00-PLAN.md
+Last session: 2026-03-22T20:57:05.428Z
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None
