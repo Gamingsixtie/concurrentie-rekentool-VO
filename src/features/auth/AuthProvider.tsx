@@ -81,8 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Safety timeout — never hang on auth check longer than 8 seconds
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+
     // Restore existing session on mount
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      clearTimeout(timeout);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
@@ -97,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     }).catch(() => {
+      clearTimeout(timeout);
       setLoading(false);
     });
 
@@ -124,8 +131,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Cleanup subscription on unmount
+    // Cleanup subscription and timeout on unmount
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);

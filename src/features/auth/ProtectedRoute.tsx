@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useAuth } from './AuthProvider';
 import { AuthLoadingScreen } from './AuthLoadingScreen';
 
@@ -8,14 +8,21 @@ import { AuthLoadingScreen } from './AuthLoadingScreen';
  */
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !redirecting) {
+      setRedirecting(true);
       window.location.href = '/login';
     }
-  }, [user, loading]);
+  }, [user, loading, redirecting]);
 
-  if (loading || !user) {
+  if (loading) {
+    return <AuthLoadingScreen />;
+  }
+
+  if (!user) {
+    // Show loading while redirect to /login is in progress
     return <AuthLoadingScreen />;
   }
 

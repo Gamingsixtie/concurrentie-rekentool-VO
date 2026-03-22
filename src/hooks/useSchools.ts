@@ -5,7 +5,13 @@ import type { SchoolRecord } from '@/db/types';
 export function useSchools() {
   return useQuery({
     queryKey: ['schools'],
-    queryFn: getAllSchools,
+    queryFn: () =>
+      Promise.race([
+        getAllSchools(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout: server reageert niet')), 15000),
+        ),
+      ]),
     retry: 2,
   });
 }
