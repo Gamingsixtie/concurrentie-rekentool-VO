@@ -35,7 +35,20 @@ Regels:
 - Als een module wordt genoemd zonder aanbieder, gebruik 'geen'.
 - Als een prijs wordt genoemd als totaal per jaar (niet per leerling), bereken dan de prijs per leerling door te delen door het leerlingaantal (als bekend).
 - Schrijf unsureAbout-punten in het Nederlands, kort en concreet.
-- Sluit af met maximaal 3 unsureAbout-punten.`;
+- Sluit af met maximaal 3 unsureAbout-punten.
+
+Contactpersonen:
+- Extraheer naam, rol, DMU-positie (coordinator/mt/finance/it/onbekend), email, telefoon.
+- Als alleen een naam wordt genoemd, gebruik rol en dmuPositie als optioneel.
+
+Actiepunten:
+- Extraheer concrete vervolgacties: wat moet er gebeuren, wanneer, wie is verantwoordelijk.
+
+Pipelinesignaal:
+- Detecteer signalen: 'interesse' (positief), 'twijfel' (onzeker), 'afwijzing' (negatief), 'concurrent-switch' (overweegt concurrent), 'verlenging' (blijft bij huidige), 'neutraal' (geen signaal).
+- Als geen duidelijk signaal, laat pipelineSignaal weg.
+
+Outputformaat: JSON met de velden levels, studentCountsPerLevel, selectedModules, moduleSetups, unsureAbout, contactPersonen, actiePunten, pipelineSignaal.`;
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -64,7 +77,7 @@ export async function POST(request: Request): Promise<Response> {
     // Stream the Anthropic response via SSE
     const stream = anthropic.messages.stream({
       model: 'claude-haiku-4-5',
-      max_tokens: 1024,
+      max_tokens: 2048,
       system: systemPrompt || DEFAULT_SYSTEM_PROMPT,
       messages: [
         {
