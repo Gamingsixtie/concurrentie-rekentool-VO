@@ -6,6 +6,7 @@ import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
 import { formatCurrency } from '../../lib/format';
 import { PriceBadge } from '../../components/ui/PriceBadge';
 import type { PriceRecord } from '../../models/pricing';
+import { DIA_PACKAGES } from '../../data/dia-packages';
 
 interface ModuleDetailPanelProps {
   moduleId: string;
@@ -93,10 +94,26 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
   const setDraftOverride = usePriceComparisonStore((s) => s.setDraftOverride);
   const resetOverride = usePriceComparisonStore((s) => s.resetOverride);
   const recalculate = usePriceComparisonStore((s) => s.recalculate);
+  const diaPackageResult = usePriceComparisonStore((s) => s.diaPackageResult);
+  const sensitivityResult = usePriceComparisonStore((s) => s.sensitivityResult);
+  const isInternalMode = usePriceComparisonStore((s) => s.isInternalMode);
 
   const moduleData = result?.modules.find((m) => m.moduleId === moduleId);
   const differentiators = MODULE_DIFFERENTIATORS.find(
     (d) => d.moduleId === moduleId,
+  );
+
+  // DIA package info for this module
+  const isInDiaPackage =
+    diaPackageResult?.selectedPackage !== null &&
+    diaPackageResult?.coveredModuleIds.includes(moduleId);
+  const diaPackageDef = isInDiaPackage
+    ? DIA_PACKAGES.find((p) => p.id === diaPackageResult?.selectedPackage?.id)
+    : null;
+
+  // Per-module break-even from sensitivity result
+  const moduleBreakEven = sensitivityResult?.breakEven.perModule.find(
+    (m) => m.moduleId === moduleId,
   );
 
   if (!moduleData) return null;
@@ -116,16 +133,69 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
                 </div>
               );
             }
+
+            // DIA package formula (per D-03)
+            if (provider === 'dia' && isInDiaPackage && diaPackageDef) {
+              const coveredModuleNames = diaPackageDef.includedModuleIds
+                .map((id) => result?.modules.find((m) => m.moduleId === id)?.moduleName ?? id)
+                .join(', ');
+
+              return (
+                <div key={provider} className="text-sm">
+                  <span>
+                    DIA (Pakketprijs -- {diaPackageDef.name}):{' '}
+                    {cost.studentCount} leerlingen x{' '}
+                    {formatCurrency(diaPackageDef.pricePerStudent)} ={' '}
+                    {formatCurrency(cost.totalCost)}
+                  </span>
+                  <div className="text-xs text-neutral-500 mt-0.5 ml-4">
+                    Dit pakket omvat: {coveredModuleNames}.
+                    {diaPackageResult && diaPackageResult.savings > 0 && (
+                      <> Losse prijs zou{' '}
+                        {formatCurrency(diaPackageResult.individualTotal * cost.studentCount)} zijn
+                        (besparing: {formatCurrency(diaPackageResult.savings * cost.studentCount)}).
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={provider} className="text-sm">
-                {PROVIDER_LABELS[provider]}: {cost.studentCount} leerlingen x{' '}
-                {formatCurrency(cost.pricePerStudent)} ={' '}
-                {formatCurrency(cost.totalCost)}
+                <span>
+                  {PROVIDER_LABELS[provider]}: {cost.studentCount} leerlingen x{' '}
+                  {formatCurrency(cost.pricePerStudent)} ={' '}
+                  {formatCurrency(cost.totalCost)}
+                </span>
+                {cost.priceRecord.note && (
+                  <span
+                    className="inline-flex items-center ml-1.5 cursor-help align-middle"
+                    title={cost.priceRecord.note}
+                    aria-label={cost.priceRecord.note}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                  </span>
+                )}
               </div>
             );
           })}
         </div>
       </section>
+
+      {/* Section: Break-even analyse (per D-13, only internal mode) */}
+      {isInternalMode && moduleBreakEven && sensitivityResult && (
+        <section>
+          <h4 className="text-sm font-semibold mb-2">Break-even analyse</h4>
+          <p className="text-sm text-neutral-700">
+            {moduleBreakEven.percent !== null
+              ? `${sensitivityResult.competitorLabel} wordt goedkoper bij ${moduleBreakEven.percent}% korting`
+              : `${sensitivityResult.competitorLabel} is nu al goedkoper`}
+          </p>
+        </section>
+      )}
 
       {/* Section B: Onderscheidend vermogen */}
       <section>
