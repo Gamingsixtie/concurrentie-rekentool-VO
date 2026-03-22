@@ -4,71 +4,20 @@
  * Calls the Vercel serverless proxy at /api/ai-intake with SSE streaming.
  */
 
-import { z } from 'zod';
 import { YEARS_PER_LEVEL, type SchoolLevel } from '../models/school';
+import {
+  IntakeExtractionSchemaV2,
+  type IntakeExtractionV2,
+} from '@/features/school-profile/schemas/intake-extraction.schema';
 
-// ─── Schema returned by Claude ───────────────────────────────────────────────
+// ─── V2 Schema re-exports ────────────────────────────────────────────────────
 
-const MODULE_IDS = [
-  'rekenwiskunde',
-  'nederlands',
-  'engels',
-  'taalverzorging',
-  'sociaal-emotioneel',
-  'cognitieve-capaciteiten',
-] as const;
+export { IntakeExtractionSchemaV2, type IntakeExtractionV2 };
 
-const SCHOOL_LEVELS = ['vmbo-b', 'vmbo-k', 'vmbo-gt', 'havo', 'vwo'] as const;
-const PROVIDERS = ['cito-oud', 'cito-nieuw', 'dia', 'jij', 'overig', 'geen'] as const;
-
-export const IntakeExtractionSchema = z.object({
-  /**
-   * School levels mentioned (vmbo-b, vmbo-k, vmbo-gt, havo, vwo).
-   * Empty array if none mentioned.
-   */
-  levels: z.array(z.enum(SCHOOL_LEVELS)),
-
-  /**
-   * Student counts per level. null if not mentioned at all.
-   * Example: { havo: 200, vwo: 150 }
-   * If only a total is mentioned, distribute proportionally or evenly across levels.
-   */
-  studentCountsPerLevel: z.record(z.string(), z.number()).nullable(),
-
-  /**
-   * Module IDs that the school uses or wants to compare.
-   */
-  selectedModules: z.array(z.enum(MODULE_IDS)),
-
-  /**
-   * Per-module current situation as described by the school.
-   */
-  moduleSetups: z.array(z.object({
-    moduleId: z.enum(MODULE_IDS),
-    /**
-     * Current provider:
-     * - cito-oud: school already uses Cito but on the old platform
-     * - cito-nieuw: already on the new Cito platform
-     * - dia: DIA Toetsen
-     * - jij: JIJ (IEP)
-     * - overig: another provider (set customProviderName)
-     * - geen: not using this module yet / unknown
-     */
-    currentProvider: z.enum(PROVIDERS),
-    /** Price per student per year in euros. null if not mentioned. */
-    pricePerStudent: z.number().nullable(),
-    /** Provider name when currentProvider === 'overig'. */
-    customProviderName: z.string().optional(),
-  })),
-
-  /**
-   * Things the AI was not sure about or that the consultant should verify.
-   * Short bullet points in Dutch.
-   */
-  unsureAbout: z.array(z.string()),
-});
-
-export type IntakeExtraction = z.infer<typeof IntakeExtractionSchema>;
+/** @deprecated Use IntakeExtractionSchemaV2 instead */
+export const IntakeExtractionSchema = IntakeExtractionSchemaV2;
+/** @deprecated Use IntakeExtractionV2 instead */
+export type IntakeExtraction = IntakeExtractionV2;
 
 // ─── Student count distribution helper ───────────────────────────────────────
 
@@ -131,7 +80,7 @@ Regels:
  * Parses SSE data lines from a chunk and extracts text deltas.
  * Returns accumulated text and whether an error occurred.
  */
-function parseSSEChunk(chunk: string): { texts: string[]; error?: string } {
+export function parseSSEChunk(chunk: string): { texts: string[]; error?: string } {
   const texts: string[] = [];
   const lines = chunk.split('\n');
 
@@ -208,8 +157,43 @@ export async function extractIntakeFromNotes(
 
   if (!fullText) throw new Error('Onverwacht leeg AI-antwoord');
 
-  const parsed = IntakeExtractionSchema.parse(JSON.parse(fullText));
+  const parsed = parseExtractionFromText(fullText);
   return parsed;
+}
+
+// ─── Parse extraction from accumulated text ─────────────────────────────────
+
+/**
+ * Parses accumulated streaming text into a validated IntakeExtractionV2 object.
+ * Strips markdown code fences (```json ... ```) if present.
+ * Throws a descriptive Dutch error on failure.
+ */
+export function parseExtractionFromText(fullText: string): IntakeExtractionV2 {
+  // Strip markdown code fences if present
+  let cleaned = fullText.trim();
+  const fenceMatch = cleaned.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/);
+  if (fenceMatch) {
+    cleaned = fenceMatch[1].trim();
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    throw new Error(
+      'AI-antwoord kon niet worden verwerkt. Het antwoord is geen geldig JSON-formaat.',
+    );
+  }
+
+  try {
+    return IntakeExtractionSchemaV2.parse(parsed);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'Onbekende validatiefout';
+    throw new Error(
+      `Geëxtraheerde gegevens voldoen niet aan het verwachte schema: ${message}`,
+    );
+  }
 }
 
 // ─── Streaming generator variant ─────────────────────────────────────────────
