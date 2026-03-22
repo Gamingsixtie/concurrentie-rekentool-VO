@@ -309,6 +309,11 @@ export async function migrateIndexedDBToSupabase(
  */
 export async function hasLocalData(): Promise<boolean> {
   try {
+    // Check if the IndexedDB database exists without opening via Dexie
+    // (Dexie may fail due to schema type changes in 08-03)
+    const databases = await indexedDB.databases();
+    const exists = databases.some((d) => d.name === 'rekentool-vo');
+    if (!exists) return false;
     const count = await db.schools.count();
     return count > 0;
   } catch {

@@ -109,12 +109,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ) {
         const profile = await fetchUserProfile(newSession.user.id);
         setUserProfile(profile);
+        setLoading(false);
       }
 
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
         setUserProfile(null);
+        setLoading(false);
       }
     });
 

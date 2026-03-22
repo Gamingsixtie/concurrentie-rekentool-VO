@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,11 +28,18 @@ type ActiveTab = 'password' | 'magic-link';
  * - 44px minimum touch targets
  */
 export function LoginPage() {
-  const { signIn, signInWithMagicLink } = useAuth();
+  const { signIn, signInWithMagicLink, user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState<ActiveTab>('password');
   const [error, setError] = useState<string | null>(null);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect to /scholen when already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      window.location.href = '/scholen';
+    }
+  }, [user, loading]);
 
   // Password form
   const passwordForm = useForm<PasswordFormData>({

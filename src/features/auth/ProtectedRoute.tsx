@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useAuth } from './AuthProvider';
 import { AuthLoadingScreen } from './AuthLoadingScreen';
 
@@ -9,13 +9,14 @@ import { AuthLoadingScreen } from './AuthLoadingScreen';
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return <AuthLoadingScreen />;
-  }
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login';
+    }
+  }, [user, loading]);
 
-  if (!user) {
-    window.location.href = '/login';
-    return null;
+  if (loading || !user) {
+    return <AuthLoadingScreen />;
   }
 
   return <>{children}</>;
