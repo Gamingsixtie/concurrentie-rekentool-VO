@@ -116,7 +116,7 @@ Plans:
 - [x] 08-02-PLAN.md — Auth systeem: AuthProvider, LoginPage, ProtectedRoute, UserMenu en AuthLoadingScreen
 - [x] 08-03-PLAN.md — Data layer migratie: operations.ts herschrijven voor Supabase, React Query hooks, QueryClientProvider
 - [x] 08-04-PLAN.md — Cloud migratie wizard (IndexedDB naar Supabase) en role-based UI componenten
-- [ ] 08-05-PLAN.md — Vercel serverless AI proxy, useLiveQuery vervanging, component integratie en deploy verificatie
+- [x] 08-05-PLAN.md — Vercel serverless AI proxy, useLiveQuery vervanging, component integratie en deploy verificatie
 
 ### Phase 9: AI Intake & Prijsbeheer
 **Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die real-time wordt gestructureerd in schooldata, en kan prijzen beheren met actieve selectie, handmatige invoer en document-upload extractie (PDF/Excel/Word/CSV)
