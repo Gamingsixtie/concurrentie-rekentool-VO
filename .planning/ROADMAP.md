@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Fundament** - Phases 1-5 (shipped 2026-03-20)
-- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-13 (in progress)
+- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-15 (in progress)
 
 ## Phases
 
@@ -63,6 +63,8 @@ Plans:
 - [ ] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
+- [ ] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken
+- [ ] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
 
 ## Phase Details
 
@@ -148,12 +150,12 @@ Plans:
   3. Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) als onderscheidend vermogen
   4. Hybride scenario berekent per module apart de besparingen waar een school van aanbieder wisselt
   5. In interne modus ziet de gebruiker gevoeligheidsanalyse met 10%/20% kortingsscenario's, het effect per module, en het break-even kortingspercentage — plus sales-signalen per module
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
-- [ ] 10-03: TBD
+- [ ] 10-01-PLAN.md — TDD engine: DIA-pakketprijzen, hybride scenario, gevoeligheidsanalyse met break-even en sales-signalen (4 engine files + 4 test files)
+- [ ] 10-02-PLAN.md — Store uitbreiding en UI-componenten: ModeToggle, PeriodToggle, SalesSignalBadge, SensitivitySection + wiring in ComparisonTable, Chart, DetailPanel en Page
+- [ ] 10-03-PLAN.md — DIA-pakketconfiguratie UI en end-to-end visuele verificatie van alle Phase 10 features
 
 ### Phase 11: Waarde-engine & Migratie
 **Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
@@ -203,10 +205,44 @@ Plans:
 - [ ] 13-01: TBD
 - [ ] 13-02: TBD
 
+### Phase 14: Schoolplan Upload & Kansen-analyse
+**Goal**: Accountmanager kan een schoolplan (PDF/Word) uploaden dat door AI wordt geanalyseerd om Cito-kansen te identificeren, concurrentie-verdwijning te signaleren en strategische inzichten per school te genereren
+**Depends on**: Phase 9 (document upload infra), Phase 7 (schoolprofielen)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan een schoolplan-document (PDF/Word) uploaden per school
+  2. AI extraheert relevante thema's, doelen en prioriteiten uit het schoolplan
+  3. Systeem matcht schoolplan-thema's met Cito-productaanbod en toont concrete kansen (bijv. "school focust op adaptief toetsen → Cito Volgsysteem is relevant")
+  4. Systeem signaleert waar concurrenten kwetsbaar zijn op basis van schoolplan-prioriteiten (bijv. "school wil meer data-inzicht → DIA biedt dit beperkt")
+  5. Kansen en inzichten worden opgeslagen bij het schoolprofiel en zijn zichtbaar in het school-dashboard
+**Plans**: TBD
+
+Plans:
+- [ ] 14-01: TBD
+- [ ] 14-02: TBD
+- [ ] 14-03: TBD
+
+### Phase 15: DMU Klantreis Registratie
+**Goal**: Accountmanager kan per school de DMU-contactpersonen volgen door de klantreis — van eerste contact via oriëntatie, evaluatie en onderhandeling tot aan beslissing — met tijdlijn en status per persoon
+**Depends on**: Phase 7 (contactpersonen), Phase 8 (Supabase)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan per DMU-contactpersoon een klantreis-fase instellen: Onbekend → Eerste contact → Oriëntatie → Evaluatie → Onderhandeling → Beslissing → Gewonnen/Verloren
+  2. Elke fase-overgang wordt vastgelegd met datum en optionele notitie — de volledige tijdlijn is zichtbaar per contactpersoon
+  3. School-dashboard toont een overzicht van alle DMU-leden en hun huidige klantreis-fase, zodat de accountmanager in één oogopslag ziet wie waar staat
+  4. Gebruiker kan filteren op klantreis-fase in het schooloverzicht (bijv. "toon alle scholen met DMU in evaluatie-fase")
+  5. Systeem toont hoelang een contactpersoon al in de huidige fase zit en signaleert stagnatie (bijv. >30 dagen in dezelfde fase)
+**Plans**: TBD
+
+Plans:
+- [ ] 15-01: TBD
+- [ ] 15-02: TBD
+- [ ] 15-03: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15
 (Decimal phases, if inserted, execute between their surrounding integers)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -220,7 +256,9 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
-| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Planning complete | - |
 | 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
+| 14. Schoolplan Upload & Kansen-analyse | v2.0 | 0/3 | Not started | - |
+| 15. DMU Klantreis Registratie | v2.0 | 0/3 | Not started | - |
