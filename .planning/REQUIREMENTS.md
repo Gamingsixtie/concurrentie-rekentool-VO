@@ -103,63 +103,79 @@
 | Uitputtende feature-matrix concurrenten | Onderhoudsnachtmerrie, verschuift gesprek van behoefte naar checkboxes |
 | Dynamische korting-suggesties | Prijsautoriteit bij sales management, niet bij de tool |
 
+### Authenticatie & Deploy
+
+- [ ] **AUTH-01**: Gebruiker kan inloggen via email/wachtwoord of magic link met Supabase Auth
+- [ ] **AUTH-02**: Drie rollen: accountmanager (bewerkt eigen scholen), manager (leest alles), viewer (leest alles). Alle teamleden zien alle scholen.
+- [ ] **AUTH-03**: Elke wijziging toont wie (created_by/updated_by) en wanneer — traceerbaarheid per gebruiker
+- [ ] **DEPLOY-01**: App draait op Vercel met Supabase backend, API keys server-side via serverless functions
+
+### Architectuur Review
+
+- [ ] **REVIEW-01**: Architectuur-check, performance audit, security review en productie-readiness voordat de app live gaat
+
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ARCH-01 | Phase 6 | Pending |
-| ARCH-02 | Phase 6 | Pending |
-| ARCH-03 | Phase 6 | Pending |
+| ARCH-01 | Phase 6, 8 | Pending |
+| ARCH-02 | Phase 6, 8 | Pending |
+| ARCH-03 | Phase 8 | Pending |
 | ARCH-04 | Phase 6 | Pending |
-| ARCH-05 | Phase 11 | Pending |
+| ARCH-05 | Phase 12 | Pending |
+| AUTH-01 | Phase 8 | Pending |
+| AUTH-02 | Phase 8 | Pending |
+| AUTH-03 | Phase 8 | Pending |
+| DEPLOY-01 | Phase 8 | Pending |
 | SCHOOL-01 | Phase 7 | Complete |
 | SCHOOL-02 | Phase 7 | Complete |
 | SCHOOL-03 | Phase 7 | Complete |
 | SCHOOL-04 | Phase 7 | Complete |
 | SCHOOL-05 | Phase 7 | Complete |
 | SCHOOL-06 | Phase 7 | Complete |
-| SCHOOL-07 | Phase 10 | Pending |
-| INTAKE-01 | Phase 8 | Pending |
-| INTAKE-02 | Phase 8 | Pending |
-| INTAKE-03 | Phase 8 | Pending |
-| INTAKE-04 | Phase 8 | Pending |
-| INTAKE-05 | Phase 8 | Pending |
-| PRIJS-01 | Phase 9 | Pending |
-| PRIJS-02 | Phase 9 | Pending |
-| PRIJS-03 | Phase 9 | Pending |
-| PRIJS-04 | Phase 9 | Pending |
-| PRIJS-05 | Phase 9 | Pending |
-| PRIJS-06 | Phase 9 | Pending |
+| SCHOOL-07 | Phase 11 | Pending |
+| INTAKE-01 | Phase 9 | Pending |
+| INTAKE-02 | Phase 9 | Pending |
+| INTAKE-03 | Phase 9 | Pending |
+| INTAKE-04 | Phase 9 | Pending |
+| INTAKE-05 | Phase 9 | Pending |
+| PRIJS-01 | Phase 10 | Pending |
+| PRIJS-02 | Phase 10 | Pending |
+| PRIJS-03 | Phase 10 | Pending |
+| PRIJS-04 | Phase 10 | Pending |
+| PRIJS-05 | Phase 10 | Pending |
+| PRIJS-06 | Phase 10 | Pending |
 | PRIJS-07 | Phase 7 | Complete |
-| PRIJS-08 | Phase 9 | Pending |
-| GEVOEL-01 | Phase 9 | Pending |
-| GEVOEL-02 | Phase 9 | Pending |
-| GEVOEL-03 | Phase 9 | Pending |
-| WAARDE-01 | Phase 10 | Pending |
-| WAARDE-02 | Phase 10 | Pending |
-| WAARDE-03 | Phase 10 | Pending |
-| WAARDE-04 | Phase 10 | Pending |
-| MIGR-01 | Phase 10 | Pending |
-| MIGR-02 | Phase 10 | Pending |
-| MIGR-03 | Phase 10 | Pending |
-| EXPORT-01 | Phase 11 | Pending |
-| EXPORT-02 | Phase 11 | Pending |
-| EXPORT-03 | Phase 11 | Pending |
-| EXPORT-04 | Phase 11 | Pending |
-| EXPORT-05 | Phase 11 | Pending |
-| PRIJSMGT-01 | Phase 8 | Pending |
-| PRIJSMGT-02 | Phase 8 | Pending |
-| PRIJSMGT-03 | Phase 8 | Pending |
-| PRIJSMGT-04 | Phase 8 | Pending |
+| PRIJS-08 | Phase 10 | Pending |
+| GEVOEL-01 | Phase 10 | Pending |
+| GEVOEL-02 | Phase 10 | Pending |
+| GEVOEL-03 | Phase 10 | Pending |
+| WAARDE-01 | Phase 11 | Pending |
+| WAARDE-02 | Phase 11 | Pending |
+| WAARDE-03 | Phase 11 | Pending |
+| WAARDE-04 | Phase 11 | Pending |
+| MIGR-01 | Phase 11 | Pending |
+| MIGR-02 | Phase 11 | Pending |
+| MIGR-03 | Phase 11 | Pending |
+| EXPORT-01 | Phase 12 | Pending |
+| EXPORT-02 | Phase 12 | Pending |
+| EXPORT-03 | Phase 12 | Pending |
+| EXPORT-04 | Phase 12 | Pending |
+| EXPORT-05 | Phase 12 | Pending |
+| PRIJSMGT-01 | Phase 9 | Pending |
+| PRIJSMGT-02 | Phase 9 | Pending |
+| PRIJSMGT-03 | Phase 9 | Pending |
+| PRIJSMGT-04 | Phase 9 | Pending |
 | MODE-01 | Phase 6 | Pending |
-| MODE-02 | Phase 9 | Pending |
+| MODE-02 | Phase 10 | Pending |
 | MODE-03 | Phase 6 | Pending |
+| REVIEW-01 | Phase 13 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 47 total
-- Mapped to phases: 47
+- v2.0 requirements: 52 total
+- Mapped to phases: 52
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after roadmap creation — all requirements mapped to phases*
+*Last updated: 2026-03-22 after roadmap restructuring — Phase 8 split into Supabase & Deploy + AI Intake, phases renumbered 8-13*

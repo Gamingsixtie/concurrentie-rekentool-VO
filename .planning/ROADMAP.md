@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Fundament** - Phases 1-5 (shipped 2026-03-20)
-- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-11 (in progress)
+- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-13 (in progress)
 
 ## Phases
 
@@ -57,10 +57,12 @@ Plans:
 
 - [ ] **Phase 6: Multi-School Data Layer** - IndexedDB persistentie, v1 migratie, navigatie-scaffolding en basisweergave
 - [ ] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
-- [ ] **Phase 8: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking en prijsinvoer/-beheer met validatie
-- [ ] **Phase 9: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse
-- [ ] **Phase 10: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
-- [ ] **Phase 11: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
+- [ ] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
+- [ ] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
+- [ ] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse
+- [ ] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
+- [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
+- [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
 
 ## Phase Details
 
@@ -97,26 +99,46 @@ Plans:
 - [x] 07-03-PLAN.md — ContactsTab met CRUD en DMU-mapping, ConversationsTab met tijdlijn, tags, zoekfunctie en kanban-actielijst
 - [x] 07-04-PLAN.md — Schooloverzicht: FilterBar, ViewToggle, CardModeToggle, PipelineKanbanView met drag & drop en visuele verificatie
 
-### Phase 8: AI Intake & Prijsbeheer
-**Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die automatisch wordt gestructureerd in schooldata, en kan prijzen beheren via handmatige invoer of AI-documentextractie
+### Phase 8: Supabase & Deploy
+**Goal**: Migratie van lokale IndexedDB/Dexie-architectuur naar Supabase (Postgres) met Vercel hosting, team-authenticatie (accountmanager/manager/viewer), serverless AI-proxy en data-migratie
 **Depends on**: Phase 7
-**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05, PRIJSMGT-01, PRIJSMGT-02, PRIJSMGT-03, PRIJSMGT-04
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, AUTH-01, AUTH-02, AUTH-03, DEPLOY-01
 **Success Criteria** (what must be TRUE):
-  1. Gebruiker kan tijdens een gesprek vrije tekst invoeren die real-time (streaming) wordt gestructureerd — modules, aanbieders, prijzen en contactpersonen worden herkend met fuzzy matching
-  2. Geextraheerde data verschijnt op een bevestigingsscherm waar de gebruiker kan corrigeren voordat het wordt opgeslagen — prijzen buiten bekende ranges worden gemarkeerd als ongebruikelijk
-  3. AI intake voegt toe aan een bestaand schoolprofiel zonder eerdere data te overschrijven
-  4. Gebruiker kan prijzen handmatig invoeren/bijwerken met bron en verificatiedatum, en prijzen ouder dan 6 maanden worden automatisch als "mogelijk verouderd" gemarkeerd
-  5. Gebruiker kan een prijsdocument (PDF) uploaden en de AI extraheert prijzen die ter goedkeuring worden getoond — nooit automatisch doorgevoerd
+  1. Alle schooldata is opgeslagen in Supabase Postgres met genormaliseerd schema (schools, contacts, conversations, actions, system_events, school_prices tabellen)
+  2. Gebruiker kan inloggen via email/wachtwoord of magic link en ziet alleen data van het eigen team — accountmanagers bewerken eigen scholen, managers en viewers zijn read-only
+  3. Bestaande IndexedDB data wordt bij eerste login automatisch gemigreerd naar Supabase zonder dataverlies
+  4. AI-calls lopen via Vercel serverless functions met server-side API key — geen API keys in de browser
+  5. App is bereikbaar via Vercel URL met werkende auth, database en AI-proxy
 **Plans**: TBD
 
 Plans:
 - [ ] 08-01: TBD
 - [ ] 08-02: TBD
 - [ ] 08-03: TBD
+- [ ] 08-04: TBD
 
-### Phase 9: Prijsvergelijking & Gevoeligheid
+### Phase 9: AI Intake & Prijsbeheer
+**Goal**: Accountmanager kan tijdens een telefoongesprek vrije tekst invoeren die real-time wordt gestructureerd in schooldata, en kan prijzen beheren met actieve selectie, handmatige invoer en document-upload extractie (PDF/Excel/Word/CSV)
+**Depends on**: Phase 8
+**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05, PRIJSMGT-01, PRIJSMGT-02, PRIJSMGT-03, PRIJSMGT-04
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan in de Gesprekken-tab vrije tekst invoeren die real-time (streaming) wordt gestructureerd — modules, aanbieders, prijzen, contactpersonen en actiepunten worden herkend
+  2. Geëxtraheerde data verschijnt in een diff-view bevestigingsscherm waar de gebruiker per item kan aanvinken wat overgenomen wordt — bestaande data wordt getoond als referentie
+  3. AI intake voegt toe aan een bestaand schoolprofiel zonder eerdere data te overschrijven
+  4. Gebruiker kan in de Producten-tab meerdere prijzen per module/aanbieder beheren met prijsgeschiedenis, en kiest welke prijs actief is met een verplichte reden — met bruto/netto onderscheid
+  5. Gebruiker kan een document (PDF, Excel, Word, CSV) uploaden en de AI extraheert prijzen die in dezelfde diff-view ter goedkeuring worden getoond — nooit automatisch doorgevoerd
+  6. Prijzen worden gevalideerd tegen publicatieprijzen (>50% afwijking = inline ⚠ waarschuwing) of gemarkeerd als handmatige invoer als geen referentie beschikbaar is
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+- [ ] 09-02: TBD
+- [ ] 09-03: TBD
+- [ ] 09-04: TBD
+
+### Phase 10: Prijsvergelijking & Gevoeligheid
 **Goal**: Accountmanager ziet een compleet, interactief prijsvergelijkingsoverzicht met DIA-pakketlogica, hybride scenario's, onderscheidend vermogen en gevoeligheidsanalyse voor interne voorbereiding
-**Depends on**: Phase 7 (schoolprofielen), Phase 8 (prijsdata)
+**Depends on**: Phase 8 (Supabase), Phase 9 (prijsdata)
 **Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, PRIJS-08, GEVOEL-01, GEVOEL-02, GEVOEL-03, MODE-02
 **Success Criteria** (what must be TRUE):
   1. Gebruiker ziet per module de kosten per leerling en totaalkosten per aanbieder naast elkaar, met visueel staafdiagram en uitklapbare berekeningsdetails
@@ -127,13 +149,13 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
-- [ ] 09-03: TBD
+- [ ] 10-01: TBD
+- [ ] 10-02: TBD
+- [ ] 10-03: TBD
 
-### Phase 10: Waarde-engine & Migratie
+### Phase 11: Waarde-engine & Migratie
 **Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
-**Depends on**: Phase 9 (prijsvergelijking)
+**Depends on**: Phase 10 (prijsvergelijking)
 **Requirements**: WAARDE-01, WAARDE-02, WAARDE-03, WAARDE-04, MIGR-01, MIGR-02, MIGR-03, SCHOOL-07
 **Success Criteria** (what must be TRUE):
   1. Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames, en kan een uurtarief instellen om tijdsbesparing in euro's te zien
@@ -143,13 +165,13 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
-- [ ] 10-03: TBD
+- [ ] 11-01: TBD
+- [ ] 11-02: TBD
+- [ ] 11-03: TBD
 
-### Phase 11: DMU-Export & Offline
+### Phase 12: DMU-Export & Offline
 **Goal**: Accountmanager kan na elk gesprek direct een op de DMU afgestemd PDF-rapport genereren en de applicatie werkt offline op tablet
-**Depends on**: Phase 10 (waarde-engine, migratie), Phase 9 (prijsvergelijking)
+**Depends on**: Phase 11 (waarde-engine, migratie), Phase 10 (prijsvergelijking)
 **Requirements**: EXPORT-01, EXPORT-02, EXPORT-03, EXPORT-04, EXPORT-05, ARCH-05
 **Success Criteria** (what must be TRUE):
   1. Gebruiker kan een PDF-rapport genereren per DMU-rol: coordinator (tijdwinst, dagelijks gebruik), MT (overzicht, onderbouwing, strategische waarde), finance (euro's, meerjarenprojectie, terugverdientijd)
@@ -159,14 +181,30 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
-- [ ] 11-03: TBD
+- [ ] 12-01: TBD
+- [ ] 12-02: TBD
+- [ ] 12-03: TBD
+
+### Phase 13: Architectuur Review & Go-Live
+**Goal**: Volledige architectuur-check, performance audit, security review en productie-readiness verificatie voordat de app live gaat voor het team
+**Depends on**: Phase 12
+**Requirements**: REVIEW-01
+**Success Criteria** (what must be TRUE):
+  1. Architectuur-review bevestigt dat Supabase schema, RLS policies, serverless functions en auth correct werken onder productie-condities
+  2. Performance audit: pagina-laadtijd <2s, AI-response <5s, database queries <500ms voor 200+ scholen
+  3. Security review: geen API keys in frontend, RLS policies getest, auth flow veilig, CORS correct
+  4. Data-integriteit: migratie van IndexedDB naar Supabase is volledig en correct, geen dataverlies
+  5. Team kan de app gebruiken via de productie-URL met stabiele performance
+**Plans**: TBD
+
+Plans:
+- [ ] 13-01: TBD
+- [ ] 13-02: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 (Decimal phases, if inserted, execute between their surrounding integers)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -177,8 +215,10 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
-| 7. School Intelligence | v2.0 | 1/4 | In Progress|  |
-| 8. AI Intake & Prijsbeheer | v2.0 | 0/3 | Not started | - |
-| 9. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
-| 10. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
-| 11. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
+| 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
+| 8. Supabase & Deploy | v2.0 | 0/4 | Context gathered | - |
+| 9. AI Intake & Prijsbeheer | v2.0 | 0/4 | Context gathered | - |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 0/3 | Not started | - |
+| 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
+| 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
+| 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
