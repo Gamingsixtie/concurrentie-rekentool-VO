@@ -80,15 +80,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Suppress Supabase auth lock errors — they are not fatal and
+  // should not crash the app
+  useEffect(() => {
+    const handler = (e: PromiseRejectionEvent) => {
+      const msg = String(e.reason?.message ?? e.reason ?? '');
+      if (msg.includes('Lock') && msg.includes('stolen')) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('unhandledrejection', handler);
+    return () => window.removeEventListener('unhandledrejection', handler);
+  }, []);
+
   useEffect(() => {
     // Safety timeout — never hang on auth check longer than 8 seconds
     const timeout = setTimeout(() => {
       setLoading(false);
     }, 8000);
 
-    // IMPORTANT: Subscribe to auth changes BEFORE calling getSession()
-    // to avoid the Supabase auth lock steal error:
-    // "Lock was released because another request stole it"
+    // Use onAuthStateChange with INITIAL_SESSION to avoid lock conflicts
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {

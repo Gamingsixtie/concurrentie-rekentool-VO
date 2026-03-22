@@ -15,4 +15,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient<Database>(
   supabaseUrl || 'http://localhost:54321',
   supabaseAnonKey || 'test-anon-key',
+  {
+    auth: {
+      storageKey: 'sb-toolvo-auth',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  },
 );
