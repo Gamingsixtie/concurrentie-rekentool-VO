@@ -86,41 +86,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }, 8000);
 
-    // Restore existing session on mount
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      clearTimeout(timeout);
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-
-      if (currentSession?.user) {
-        fetchUserProfile(currentSession.user.id).then((profile) => {
-          setUserProfile(profile);
-          setLoading(false);
-        }).catch(() => {
-          setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
-    }).catch(() => {
-      clearTimeout(timeout);
-      setLoading(false);
-    });
-
-    // Subscribe to auth state changes
+    // IMPORTANT: Subscribe to auth changes BEFORE calling getSession()
+    // to avoid the Supabase auth lock steal error:
+    // "Lock was released because another request stole it"
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
 
+      if (event === 'INITIAL_SESSION') {
+        // This fires once after getSession() resolves — use it as the
+        // single source of truth for the initial load
+        clearTimeout(timeout);
+        if (newSession?.user) {
+          try {
+            const profile = await fetchUserProfile(newSession.user.id);
+            setUserProfile(profile);
+          } catch {
+            // Profile fetch failed — continue without profile
+          }
+        }
+        setLoading(false);
+        return;
+      }
+
       if (
         (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
         newSession?.user
       ) {
-        const profile = await fetchUserProfile(newSession.user.id);
-        setUserProfile(profile);
-        setLoading(false);
+        try {
+          const profile = await fetchUserProfile(newSession.user.id);
+          setUserProfile(profile);
+        } catch {
+          // Profile fetch failed — keep existing profile
+        }
       }
 
       if (event === 'SIGNED_OUT') {
