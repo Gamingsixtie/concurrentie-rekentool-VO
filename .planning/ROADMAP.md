@@ -135,7 +135,7 @@ Plans:
 - [x] 09-00-PLAN.md — Wave 0: test stub files voor alle Phase 9 plannen (8 test stubs)
 - [x] 09-01-PLAN.md — Shared foundation: extended extraction schema, price deviation logic, useSchoolPrices hook, PriceBadge extension en serverless v2 prompt
 - [ ] 09-02-PLAN.md — AI intake flow: IntakeModeToggle, StreamingExtraction, DiffView components (met bewerkbare velden), ConversationForm AI-modus en append-only save
-- [ ] 09-03-PLAN.md — Prijsbeheer UI: PriceManager, PriceEditModal, PriceHistoryList, ProductsTab uitbreiding met prijsgeschiedenis en actieve selectie
+- [x] 09-03-PLAN.md — Prijsbeheer UI: PriceManager, PriceEditModal, PriceHistoryList, ProductsTab uitbreiding met prijsgeschiedenis en actieve selectie
 - [ ] 09-04-PLAN.md — Document upload: documents bucket, serverless document parser (PDF/Excel/Word/CSV), DocumentDropzone, DocumentExtractionPreview en ProductsTab integratie
 
 ### Phase 10: Prijsvergelijking & Gevoeligheid

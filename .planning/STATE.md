@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: unknown
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-03-22T20:57:05.431Z"
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-03-22T21:03:49.520Z"
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 17
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 09 (ai-intake-prijsbeheer) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 
 ## Performance Metrics
 
@@ -68,6 +68,8 @@ Recent decisions affecting current work:
 - [Phase 09]: Use .default([]) on V2 schema arrays for backward compatibility with v1 data
 - [Phase 09]: Zod v4 uses 'error' instead of 'required_error' for custom number error messages
 - [Phase 09]: Mutual exclusion activation via two sequential Supabase queries (deactivate all, then activate one)
+- [Phase 09]: Replaced usePriceComparisonStore appliedOverrides with useSchoolPrices for ProductsTab price display
+- [Phase 09]: Reset-to-publication deactivates all school prices via direct Supabase update in PriceManager
 
 ### Pending Todos
 
@@ -84,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T20:57:05.428Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-03-22T21:03:49.517Z
+Stopped at: Completed 09-03-PLAN.md
 Resume file: None
