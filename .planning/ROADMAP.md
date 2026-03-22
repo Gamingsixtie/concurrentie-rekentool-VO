@@ -59,7 +59,7 @@ Plans:
 - [ ] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
 - [ ] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
 - [ ] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
-- [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
+- [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
 - [ ] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
@@ -166,12 +166,12 @@ Plans:
   2. Gebruiker ziet de totale waarde van de overstap: financieel verschil plus tijdsbesparing in euro's, met meerjarenprojectie over 1, 3 en 5 jaar inclusief cumulatieve besparing en break-even punt
   3. Gebruiker ziet het financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal, met een gecombineerde businesscase (prijsverschil + tijdwinst + meerjarenprojectie)
   4. Systeem detecteert automatisch upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
-- [ ] 11-03: TBD
+- [ ] 11-01-PLAN.md — TDD engines: migratie-engine uitbreiden met switchingCosts en break-even, nieuwe upsell-detectie engine, data layer uitbreiding (SchoolRecord + Supabase)
+- [ ] 11-02-PLAN.md — WaardeTab UI: hero-kaart, tijdwinst-tabel, migratie-tabel, meerjarenprojectie-chart, EditableField extractie, tab-routing en navigatie
+- [ ] 11-03-PLAN.md — Upsell UI: UpsellCard op school-dashboard, UpsellBadge op schoolkaarten, visuele verificatie alle Phase 11 features
 
 ### Phase 12: DMU-Export & Offline
 **Goal**: Accountmanager kan na elk gesprek direct een op de DMU afgestemd PDF-rapport genereren en de applicatie werkt offline op tablet
@@ -257,7 +257,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete    | 2026-03-22 |
-| 11. Waarde-engine & Migratie | v2.0 | 0/3 | Not started | - |
+| 11. Waarde-engine & Migratie | v2.0 | 0/3 | Planning complete | - |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 0/3 | Not started | - |
