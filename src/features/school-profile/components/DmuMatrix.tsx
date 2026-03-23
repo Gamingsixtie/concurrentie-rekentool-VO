@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Contact } from '@/db/types';
 import type { PipelineStatus, EngagementStatus } from '@/models/school';
-import { DMU_POSITION_LABELS, STAGNATION_THRESHOLD_DAYS } from '@/models/school';
+import { STAGNATION_THRESHOLD_DAYS } from '@/models/school';
 import DMUBadge from '@/components/ui/DMUBadge';
 import EngagementBadge from '@/components/ui/EngagementBadge';
 import EngagementStatusSelect from './EngagementStatusSelect';

@@ -500,13 +500,15 @@ export async function setEngagementStatus(
   const user = await getCurrentUser();
 
   // Get current engagement status for the event log
-  const { data: contact, error: fetchError } = await supabase.from('contacts')
-    .select('engagement_status, name')
+  const { data: contactRow, error: fetchError } = await supabase.from('contacts')
+    .select('*')
     .eq('id', contactId)
     .single();
-  if (fetchError || !contact) throw fetchError ?? new Error('Contact niet gevonden');
+  if (fetchError || !contactRow) throw fetchError ?? new Error('Contact niet gevonden');
 
-  const oldStatus = contact.engagement_status;
+  const contact = contactRow as Record<string, unknown>;
+  const oldStatus = (contact.engagement_status as string) ?? 'nog-niet-benaderd';
+  const contactName = contact.name as string;
 
   // Build update payload
   const updateData: Record<string, unknown> = {
@@ -537,10 +539,10 @@ export async function setEngagementStatus(
   await supabase.from('system_events').insert({
     school_id: schoolId,
     event_type: 'engagement_changed',
-    description: `${contact.name}: ${oldStatus} \u2192 ${newStatus}`,
+    description: `${contactName}: ${oldStatus} \u2192 ${newStatus}`,
     metadata: {
       contactId,
-      contactName: contact.name,
+      contactName,
       oldStatus,
       newStatus,
       ...(options?.dropOffReason ? { reason: options.dropOffReason } : {}),
