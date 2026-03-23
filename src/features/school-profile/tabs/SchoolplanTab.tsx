@@ -1,5 +1,6 @@
 import { useParams } from '@tanstack/react-router';
 import { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSchool } from '@/hooks/useSchools';
 import {
   useSchoolplanAnalysis,
@@ -18,6 +19,7 @@ export default function SchoolplanTab() {
   const { slug } = useParams({ from: '/scholen/$slug' });
   const { data: school } = useSchool(slug);
   const schoolId = school?.id ?? '';
+  const queryClient = useQueryClient();
 
   // Analysis data from DB
   const { data: analysis, isLoading } = useSchoolplanAnalysis(schoolId);
@@ -44,6 +46,8 @@ export default function SchoolplanTab() {
           setStreamingStep(step);
         });
         setStreamingStep(3);
+        // Invalidate query so React Query refetches the updated DB row
+        await queryClient.invalidateQueries({ queryKey: ['schoolplan-analysis', schoolId] });
         // After a brief completion display, reset to show results from DB
         setTimeout(() => {
           setStreamingStep(0);
