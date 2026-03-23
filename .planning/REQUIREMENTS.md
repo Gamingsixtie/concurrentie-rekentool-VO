@@ -59,7 +59,7 @@
 
 - [x] **MIGR-01**: Gebruiker ziet financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal
 - [x] **MIGR-02**: Migratie-engine verwerkt het gewijzigde prijsmodel van het nieuwe Cito-platform correct
-- [ ] **MIGR-03**: Gebruiker ziet gecombineerde business case: prijsverschil + tijdwinst + meerjarenprojectie
+- [x] **MIGR-03**: Gebruiker ziet gecombineerde business case: prijsverschil + tijdwinst + meerjarenprojectie
 
 ### DMU-Export
 
@@ -156,7 +156,7 @@
 | WAARDE-04 | Phase 11 | Complete |
 | MIGR-01 | Phase 11 | Complete |
 | MIGR-02 | Phase 11 | Complete |
-| MIGR-03 | Phase 11 | Pending |
+| MIGR-03 | Phase 11 | Complete |
 | EXPORT-01 | Phase 12 | Pending |
 | EXPORT-02 | Phase 12 | Pending |
 | EXPORT-03 | Phase 12 | Pending |

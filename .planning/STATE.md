@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-23T00:01:46.342Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-03-23T00:10:30.656Z"
 progress:
   total_phases: 10
   completed_phases: 4
   total_plans: 23
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 11 (waarde-engine-migratie) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -84,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 11]: computeBreakEvenMonth as module-private function for clean encapsulation
 - [Phase 11]: UpsellSignalStrength limited to green/yellow; red signals excluded from results entirely
 - [Phase 11]: overig provider excluded from upsell (no comparison data for custom providers)
+- [Phase 11]: switchingCosts loaded from school record via useSchool hook (react-query cached) rather than Zustand store
+- [Phase 11]: EditableField extracted as shared component with a11y enhancements for tablet usability
 
 ### Pending Todos
 
@@ -101,6 +103,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T00:01:46.339Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-23T00:10:30.652Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
