@@ -2,10 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
-import { getModelConfig } from '../src/lib/ai-model-config';
-import { MODULE_CATALOG } from '../src/models/modules';
-import { MODULE_DIFFERENTIATORS } from '../src/data/differentiators';
-import { SchoolplanAnalysisResult } from '../src/features/school-profile/schemas/schoolplan-analysis.schema';
+import { z } from 'zod';
 
 // Module-level init (reused across warm invocations)
 const anthropic = new Anthropic({
@@ -17,7 +14,70 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_KEY!,
 );
 
-// ─── Text extraction (PDF, DOCX, TXT only per D-16) ────────────────────────
+// ─── Inline Zod schema (avoids ../src/ imports that break Vercel bundler) ────
+
+const SchoolplanAnalysisResult = z.object({
+  isSchoolplan: z.boolean(),
+  summary: z.string(),
+  themes: z.array(z.string()),
+  opportunities: z.array(
+    z.object({
+      theme: z.string(),
+      citoProduct: z.string(),
+      moduleId: z.string(),
+      explanation: z.string(),
+      conversationTip: z.string(),
+      relevance: z.enum(['hoog', 'midden', 'laag']),
+      quote: z.string(),
+      competitorVulnerabilities: z.array(
+        z.object({
+          provider: z.enum(['dia', 'jij']),
+          description: z.string(),
+        }),
+      ).default([]),
+    }),
+  ),
+  alsoRelevant: z.array(
+    z.object({
+      citoProduct: z.string(),
+      moduleId: z.string(),
+      reason: z.string(),
+      relevance: z.enum(['hoog', 'midden', 'laag']),
+    }),
+  ).default([]),
+});
+
+// ─── Inline module catalog (avoids ../src/ imports) ──────────────────────────
+
+const MODULE_CATALOG = [
+  { id: 'rekenwiskunde', name: 'Reken-Wiskunde', description: 'Volg de reken- en wiskundevaardigheden van leerlingen', category: 'leerlingvolgsysteem' },
+  { id: 'nederlands', name: 'Nederlands', description: 'Volg de taalvaardigheden Nederlands van leerlingen', category: 'leerlingvolgsysteem' },
+  { id: 'engels', name: 'Engels', description: 'Volg de Engelse taalvaardigheden van leerlingen', category: 'leerlingvolgsysteem' },
+  { id: 'taalverzorging', name: 'Taalverzorging Nederlands', description: 'Toets spelling en grammatica', category: 'overige-instrumenten' },
+  { id: 'sociaal-emotioneel', name: 'Sociaal-emotioneel functioneren', description: 'Breng het sociaal-emotioneel functioneren van leerlingen in kaart', category: 'overige-instrumenten' },
+  { id: 'cognitieve-capaciteiten', name: 'Cognitieve capaciteitentoets', description: 'Meet cognitieve capaciteiten van leerlingen (losse licentie)', category: 'overige-instrumenten' },
+];
+
+const MODULE_DIFFERENTIATORS = [
+  { moduleId: 'rekenwiskunde', cito: ['Remediering in samenwerking met methodeaanbieders', 'Adaptieve toetsafname'], dia: ['Adaptief toetsen', 'Koppeling met NUMO voor remediëring', 'Visuele groei-rapportage (Groeiwijzer)'], jij: ['Geïntegreerd in IEP-leerlingvolgsysteem', 'Adaptieve toetsroutes (ook praktijkonderwijs)', 'Woordeloze rekentoets beschikbaar (ISK)'] },
+  { moduleId: 'nederlands', cito: ['Remediering in samenwerking met methodeaanbieders', 'Adaptieve toetsafname'], dia: ['Adaptief toetsen', 'Tekstenlab NE oefenmateriaal (begrijpend lezen)', 'Koppeling met NUMO', 'Woordenschat apart toetsbaar (Diawoord)'], jij: ['Geïntegreerd in IEP-leerlingvolgsysteem', 'Referentieniveaus 0F-4F', 'NT2-toetsen beschikbaar voor ISK'] },
+  { moduleId: 'engels', cito: ['Enige aanbieder met gevalideerde VO-toets Engels in LVS'], dia: ['Pakket EN: begrijpend lezen + woordenschat', 'Tekstenlab EN oefenmateriaal'], jij: ['ERK-geijkt A1-B2/C1 (lezen + luisteren)', 'Kijk-/luistertoetsen als schoolexamen', 'Ook Frans, Duits en Spaans beschikbaar'] },
+  { moduleId: 'taalverzorging', cito: ['Specifieke toets voor spelling en grammatica'], dia: ['Diaspel: adaptief digitaal dictee', 'Spellab: innovatief oefenplatform voor spelling'], jij: [] as string[] },
+  { moduleId: 'sociaal-emotioneel', cito: ['Wetenschappelijk gevalideerd instrument'], dia: [] as string[], jij: ['Zelfevaluaties: leerbenadering, creatief vermogen, sociale context', 'Onderdeel van basislicentie (geen meerprijs)', '21e-eeuwse vaardigheden meeten'] },
+  { moduleId: 'cognitieve-capaciteiten', cito: ['Marktleider in VO-markt', 'Losse licentie mogelijk'], dia: ['NSCCT: niet-schoolse cognitieve capaciteitentoets', 'Digitaal (€9,75) en papier (€4,50) beschikbaar'], jij: [] as string[] },
+];
+
+// ─── Model config ────────────────────────────────────────────────────────────
+
+function getModelConfig() {
+  return {
+    model: process.env.SCHOOLPLAN_AI_MODEL || 'claude-sonnet-4-20250514',
+    maxTokensSummary: 2048,
+    maxTokensAnalysis: 4096,
+  };
+}
+
+// ─── Text extraction (PDF, DOCX, TXT only) ──────────────────────────────────
 
 export async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<string> {
   const ext = fileName.split('.').pop()?.toLowerCase();
@@ -38,7 +98,7 @@ export async function extractTextFromFile(buffer: Buffer, fileName: string): Pro
   }
 }
 
-// ─── AI Prompt builders (pure functions) ────────────────────────────────────
+// ─── AI Prompt builders ──────────────────────────────────────────────────────
 
 export function buildSummarizePrompt(): string {
   return `Je bent een AI-assistent die schoolplan-documenten analyseert voor Cito-accountmanagers.
@@ -63,12 +123,10 @@ export function buildMatchingPrompt(
   themes: string[],
   schoolContext?: { levels?: string[]; selectedModules?: string[] },
 ): string {
-  // Dynamically serialize MODULE_CATALOG (never hardcode module names per Research Pitfall 4)
   const moduleCatalogDescription = MODULE_CATALOG.map(
     (m) => `- ${m.id}: "${m.name}" — ${m.description} (categorie: ${m.category})`,
   ).join('\n');
 
-  // Dynamically serialize MODULE_DIFFERENTIATORS
   const differentiatorDescription = MODULE_DIFFERENTIATORS.map((d) => {
     const module = MODULE_CATALOG.find((m) => m.id === d.moduleId);
     const moduleName = module ? module.name : d.moduleId;
@@ -79,7 +137,6 @@ export function buildMatchingPrompt(
     return lines.join('\n');
   }).join('\n\n');
 
-  // School context section (optional)
   let schoolContextSection = '';
   if (schoolContext) {
     const parts: string[] = [];
@@ -137,7 +194,7 @@ BELANGRIJK:
 - Retourneer ALLEEN geldige JSON, geen markdown of extra uitleg`;
 }
 
-// ─── AI response parsers ────────────────────────────────────────────────────
+// ─── AI response parsers ─────────────────────────────────────────────────────
 
 function stripMarkdownFences(text: string): string {
   const fenceMatch = text.trim().match(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/);
@@ -201,7 +258,7 @@ function parseAnalysisResponse(
   }
 }
 
-// ─── Request interface ──────────────────────────────────────────────────────
+// ─── Request interface ───────────────────────────────────────────────────────
 
 interface AnalyzeRequest {
   storagePath: string;
@@ -212,7 +269,7 @@ interface AnalyzeRequest {
   };
 }
 
-// ─── SSE streaming POST handler ─────────────────────────────────────────────
+// ─── SSE streaming POST handler ──────────────────────────────────────────────
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -220,7 +277,6 @@ export async function POST(request: Request): Promise<Response> {
     const skipAuth = process.env.SKIP_AUTH === 'true';
 
     if (!skipAuth) {
-      // Extract and verify Bearer token
       const authHeader = request.headers.get('Authorization');
       const token = authHeader?.replace('Bearer ', '');
 
@@ -228,7 +284,6 @@ export async function POST(request: Request): Promise<Response> {
         return new Response('Unauthorized', { status: 401 });
       }
 
-      // Verify JWT via Supabase admin client
       const {
         data: { user },
         error: authError,
@@ -256,6 +311,7 @@ export async function POST(request: Request): Promise<Response> {
       .download(storagePath);
 
     if (downloadError || !fileData) {
+      console.error('Storage download error:', downloadError);
       return new Response('Bestand niet gevonden', { status: 404 });
     }
 
@@ -298,7 +354,6 @@ export async function POST(request: Request): Promise<Response> {
             messages: [{ role: 'user', content: documentText.slice(0, 30000) }],
           });
 
-          // Parse step 1 result
           const summaryResult = parseSummaryResponse(summaryResponse);
 
           // If not a schoolplan, send result immediately
@@ -352,7 +407,6 @@ export async function POST(request: Request): Promise<Response> {
           );
           controller.close();
         } catch (streamError) {
-          // Send SSE error event with actual error details
           const errMsg = streamError instanceof Error ? streamError.message : String(streamError);
           console.error('Schoolplan analysis SSE error:', errMsg);
           controller.enqueue(
