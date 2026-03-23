@@ -136,7 +136,7 @@ ${body.differentiators.map((d) => {
 }).join('\n')}`;
 
     const stream = getAnthropic().messages.stream({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: userMessage }],
