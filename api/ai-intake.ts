@@ -13,42 +13,41 @@ const supabaseAdmin = createClient(
 
 const DEFAULT_SYSTEM_PROMPT = `Je helpt een Cito-consultant de huidige situatie van een school te structureren op basis van aantekeningen uit een gesprek (vaak telefonisch).
 
-Beschikbare modules:
-- rekenwiskunde  -> "Reken-Wiskunde"
-- nederlands     -> "Nederlands"
-- engels         -> "Engels"
-- taalverzorging -> "Taalverzorging Nederlands"
-- sociaal-emotioneel -> "Sociaal-emotioneel functioneren"
-- cognitieve-capaciteiten -> "Cognitieve capaciteitentoets"
+BELANGRIJK: Antwoord UITSLUITEND met geldig JSON. Geen uitleg, geen markdown, geen tekst voor of na de JSON.
 
-Beschikbare aanbieders:
-- cito-oud   -> school gebruikt al Cito, maar op het OUDE platform
-- cito-nieuw -> school gebruikt al het NIEUWE Cito-platform
-- dia        -> DIA Toetsen
-- jij        -> JIJ (IEP)
-- overig     -> andere aanbieder (vul customProviderName in)
-- geen       -> module niet in gebruik of onbekend
+Beschikbare modules (exacte moduleId waarden):
+- rekenwiskunde, nederlands, engels, taalverzorging, sociaal-emotioneel, cognitieve-capaciteiten
+
+Beschikbare aanbieders (exacte waarden):
+- cito-oud, cito-nieuw, dia, jij, overig, geen
+
+Beschikbare levels (exacte waarden):
+- vmbo-b, vmbo-k, vmbo-gt, havo, vwo
 
 Regels:
 - Neem alleen levels op die expliciet worden genoemd of duidelijk zijn.
 - Neem alleen modules op die de school gebruikt of wil vergelijken.
-- Als een module wordt genoemd zonder aanbieder, gebruik 'geen'.
-- Als een prijs wordt genoemd als totaal per jaar (niet per leerling), bereken dan de prijs per leerling door te delen door het leerlingaantal (als bekend).
-- Schrijf unsureAbout-punten in het Nederlands, kort en concreet.
-- Sluit af met maximaal 3 unsureAbout-punten.
+- Als een module wordt genoemd zonder aanbieder, gebruik "geen".
+- Als een prijs wordt genoemd als totaal per jaar, deel door het leerlingaantal (als bekend).
+- unsureAbout: maximaal 3 punten, in het Nederlands.
+- contactPersonen: extraheer naam, rol, dmuPositie (coordinator/mt/finance/it/onbekend), email, telefoon.
+- actiePunten: extraheer wat, wanneer, verantwoordelijke.
+- pipelineSignaal: interesse/twijfel/afwijzing/concurrent-switch/verlenging/neutraal. Laat weg als onduidelijk.
 
-Contactpersonen:
-- Extraheer naam, rol, DMU-positie (coordinator/mt/finance/it/onbekend), email, telefoon.
-- Als alleen een naam wordt genoemd, gebruik rol en dmuPositie als optioneel.
-
-Actiepunten:
-- Extraheer concrete vervolgacties: wat moet er gebeuren, wanneer, wie is verantwoordelijk.
-
-Pipelinesignaal:
-- Detecteer signalen: 'interesse' (positief), 'twijfel' (onzeker), 'afwijzing' (negatief), 'concurrent-switch' (overweegt concurrent), 'verlenging' (blijft bij huidige), 'neutraal' (geen signaal).
-- Als geen duidelijk signaal, laat pipelineSignaal weg.
-
-Outputformaat: JSON met de velden levels, studentCountsPerLevel, selectedModules, moduleSetups, unsureAbout, contactPersonen, actiePunten, pipelineSignaal.`;
+Verplicht JSON-formaat (voorbeeld):
+{
+  "levels": ["havo", "vwo"],
+  "studentCountsPerLevel": {"havo": 200, "vwo": 150},
+  "selectedModules": ["rekenwiskunde", "nederlands"],
+  "moduleSetups": [
+    {"moduleId": "rekenwiskunde", "currentProvider": "dia", "pricePerStudent": 4.50},
+    {"moduleId": "nederlands", "currentProvider": "cito-oud", "pricePerStudent": null}
+  ],
+  "unsureAbout": ["Exacte prijzen DIA onbekend"],
+  "contactPersonen": [{"naam": "Jan de Vries", "rol": "Toetscoordinator", "dmuPositie": "coordinator"}],
+  "actiePunten": [{"wat": "Offerte opvragen", "wanneer": "Volgende week"}],
+  "pipelineSignaal": "interesse"
+}`;
 
 export async function POST(request: Request): Promise<Response> {
   try {
@@ -73,7 +72,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     // Parse and validate request body
-    const { notes, systemPrompt } = await request.json();
+    const { notes } = await request.json();
 
     if (!notes || typeof notes !== 'string' || notes.trim().length === 0) {
       return new Response('Notes zijn verplicht', { status: 400 });
@@ -82,12 +81,12 @@ export async function POST(request: Request): Promise<Response> {
     // Stream the Anthropic response via SSE
     const stream = anthropic.messages.stream({
       model: 'claude-haiku-4-5',
-      max_tokens: 2048,
-      system: systemPrompt || DEFAULT_SYSTEM_PROMPT,
+      max_tokens: 4096,
+      system: DEFAULT_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `Analyseer de volgende aantekeningen en extraheer de gestructureerde schoolgegevens:\n\n${notes}`,
+          content: `Analyseer de volgende aantekeningen en extraheer de gestructureerde schoolgegevens als JSON:\n\n${notes}`,
         },
       ],
     });

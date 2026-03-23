@@ -46,33 +46,7 @@ export function distributeStudentCounts(
   return result;
 }
 
-// ─── System prompt ────────────────────────────────────────────────────────────
-
-const SYSTEM_PROMPT = `Je helpt een Cito-consultant de huidige situatie van een school te structureren op basis van aantekeningen uit een gesprek (vaak telefonisch).
-
-Beschikbare modules:
-- rekenwiskunde  -> "Reken-Wiskunde"
-- nederlands     -> "Nederlands"
-- engels         -> "Engels"
-- taalverzorging -> "Taalverzorging Nederlands"
-- sociaal-emotioneel -> "Sociaal-emotioneel functioneren"
-- cognitieve-capaciteiten -> "Cognitieve capaciteitentoets"
-
-Beschikbare aanbieders:
-- cito-oud   -> school gebruikt al Cito, maar op het OUDE platform
-- cito-nieuw -> school gebruikt al het NIEUWE Cito-platform
-- dia        -> DIA Toetsen
-- jij        -> JIJ (IEP)
-- overig     -> andere aanbieder (vul customProviderName in)
-- geen       -> module niet in gebruik of onbekend
-
-Regels:
-- Neem alleen levels op die expliciet worden genoemd of duidelijk zijn.
-- Neem alleen modules op die de school gebruikt of wil vergelijken.
-- Als een module wordt genoemd zonder aanbieder, gebruik 'geen'.
-- Als een prijs wordt genoemd als totaal per jaar (niet per leerling), bereken dan de prijs per leerling door te delen door het leerlingaantal (als bekend).
-- Schrijf unsureAbout-punten in het Nederlands, kort en concreet.
-- Sluit af met maximaal 3 unsureAbout-punten.`;
+// System prompt is now server-side only (single source of truth in api/ai-intake.ts)
 
 // ─── SSE stream parsing helper ───────────────────────────────────────────────
 
@@ -138,7 +112,7 @@ export async function extractIntakeFromNotes(
   const response = await fetch('/api/ai-intake', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ notes, systemPrompt: SYSTEM_PROMPT }),
+    body: JSON.stringify({ notes }),
   });
 
   if (!response.ok) {
@@ -172,24 +146,50 @@ export async function extractIntakeFromNotes(
 
 /**
  * Parses accumulated streaming text into a validated IntakeExtractionV2 object.
- * Strips markdown code fences (```json ... ```) if present.
+ * Tries multiple strategies to extract JSON:
+ * 1. Direct JSON.parse
+ * 2. Strip markdown code fences (anywhere in text)
+ * 3. Extract first {...} block from mixed text
  * Throws a descriptive Dutch error on failure.
  */
 export function parseExtractionFromText(fullText: string): IntakeExtractionV2 {
-  // Strip markdown code fences if present
-  let cleaned = fullText.trim();
-  const fenceMatch = cleaned.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?\s*```$/);
-  if (fenceMatch) {
-    cleaned = fenceMatch[1].trim();
-  }
+  const cleaned = fullText.trim();
 
   let parsed: unknown;
+
+  // Strategy 1: Direct JSON.parse
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    throw new Error(
-      'AI-antwoord kon niet worden verwerkt. Het antwoord is geen geldig JSON-formaat.',
-    );
+    // Strategy 2: Strip markdown code fences (anywhere in text, not just start/end)
+    const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+    if (fenceMatch) {
+      try {
+        parsed = JSON.parse(fenceMatch[1].trim());
+      } catch {
+        // Continue to strategy 3
+      }
+    }
+
+    // Strategy 3: Extract first {...} JSON block from mixed text
+    if (!parsed) {
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        try {
+          parsed = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+        } catch {
+          // All strategies failed
+        }
+      }
+    }
+
+    if (!parsed) {
+      const preview = cleaned.slice(0, 200);
+      throw new Error(
+        `AI-antwoord kon niet worden verwerkt. Het antwoord is geen geldig JSON-formaat. Begin van antwoord: "${preview}"`,
+      );
+    }
   }
 
   try {
@@ -215,7 +215,7 @@ export async function* streamIntakeFromNotes(notes: string): AsyncGenerator<stri
   const response = await fetch('/api/ai-intake', {
     method: 'POST',
     headers,
-    body: JSON.stringify({ notes, systemPrompt: SYSTEM_PROMPT }),
+    body: JSON.stringify({ notes }),
   });
 
   if (!response.ok) throw new Error('AI-verwerking mislukt.');

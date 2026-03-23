@@ -372,7 +372,7 @@ export default function ConversationForm({
               onChange={e => setAiNotes(e.target.value)}
               rows={10}
               disabled={isAnalyzing}
-              placeholder="Typ uw aantekeningen in vrije tekst. De AI extraheert automatisch modules, prijzen, contactpersonen en actiepunten."
+              placeholder={`Typ uw gespreksnotities in vrije tekst, bijvoorbeeld:\n\nBelde met Jan de Vries (toetscoordinator) van school De Horizon.\n450 leerlingen, havo en vwo.\nGebruiken DIA voor rekenen (€4,50/leerling) en Cito oud voor Nederlands.\nWillen overstappen naar nieuw platform. Volgende week offerte sturen.\n\nDe AI herkent automatisch:\n- Schoolniveaus en leerlingaantallen\n- Modules, aanbieders en prijzen\n- Contactpersonen en hun rol\n- Actiepunten en deadlines\n- Interesse- of twijfelsignalen`}
               className="w-full border border-neutral-200 rounded-lg px-4 py-3 text-base text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary resize-y disabled:opacity-50"
             />
           </div>
