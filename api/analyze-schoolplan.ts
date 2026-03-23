@@ -1,3 +1,14 @@
+// Polyfill browser globals required by pdfjs-dist (used by pdf-parse) in serverless
+if (typeof globalThis.DOMMatrix === 'undefined') {
+  // @ts-expect-error — minimal polyfill for PDF text extraction only
+  globalThis.DOMMatrix = class DOMMatrix {
+    m: number[] = [1, 0, 0, 1, 0, 0];
+    constructor(init?: string | number[]) {
+      if (Array.isArray(init)) this.m = init;
+    }
+  };
+}
+
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 
