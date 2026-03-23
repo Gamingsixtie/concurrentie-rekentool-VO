@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { MODULE_IDS, SCHOOL_LEVELS, PROVIDERS } from '@/features/school-profile/schemas/intake-extraction.schema';
 import { YEARS_PER_LEVEL, type SchoolLevel } from '@/models/school';
+import { useSchoolProfileStore } from '@/features/school-profile/store';
 
 // Display labels for modules and providers
 const MODULE_LABELS: Record<string, string> = {
@@ -95,7 +96,8 @@ function buildNotesFromFields(fields: {
 }
 
 export default function StructuredIntakeForm({ disabled, onAnalyze, onCancel }: StructuredIntakeFormProps) {
-  const [schoolName, setSchoolName] = useState('');
+  const storeSchoolName = useSchoolProfileStore((s) => s.schoolName);
+  const [schoolName, setSchoolName] = useState(storeSchoolName || '');
   const [levels, setLevels] = useState<string[]>([]);
   const [studentCounts, setStudentCounts] = useState<Record<string, Record<string, string>>>({});
   const [modules, setModules] = useState<ModuleEntry[]>(
