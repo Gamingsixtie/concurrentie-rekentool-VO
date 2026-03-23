@@ -107,14 +107,21 @@ export function parseSSEChunk(chunk: string): { texts: string[]; error?: string 
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  // Skip auth token in dev mode (matches VITE_SKIP_AUTH + server-side SKIP_AUTH)
+  if (import.meta.env.VITE_SKIP_AUTH === 'true') {
+    return headers;
+  }
+
   const { supabase } = await import('@/lib/supabase/client');
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Niet ingelogd. Log opnieuw in om AI-functies te gebruiken.');
 
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`,
-  };
+  headers['Authorization'] = `Bearer ${session.access_token}`;
+  return headers;
 }
 
 // ─── Main extraction function ─────────────────────────────────────────────────

@@ -52,19 +52,24 @@ Outputformaat: JSON met de velden levels, studentCountsPerLevel, selectedModules
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Extract and verify Bearer token
-    const authHeader = request.headers.get('Authorization');
-    const token = authHeader?.replace('Bearer ', '');
+    // Skip auth in dev mode (SKIP_AUTH=true in .env.local)
+    const skipAuth = process.env.SKIP_AUTH === 'true';
 
-    if (!token) {
-      return new Response('Unauthorized', { status: 401 });
-    }
+    if (!skipAuth) {
+      // Extract and verify Bearer token
+      const authHeader = request.headers.get('Authorization');
+      const token = authHeader?.replace('Bearer ', '');
 
-    // Verify JWT via Supabase admin client
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      if (!token) {
+        return new Response('Unauthorized', { status: 401 });
+      }
 
-    if (authError || !user) {
-      return new Response('Unauthorized', { status: 401 });
+      // Verify JWT via Supabase admin client
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !user) {
+        return new Response('Unauthorized', { status: 401 });
+      }
     }
 
     // Parse and validate request body
