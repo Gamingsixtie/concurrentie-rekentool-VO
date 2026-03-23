@@ -121,14 +121,13 @@ export default function DashboardTab() {
     .sort((a, b) => (b.lastContactDate! > a.lastContactDate! ? 1 : -1))[0]?.lastContactDate;
 
   const navigateToTab = (tab: string) => {
-    const basePath = `/scholen/${slug}`;
     const paths: Record<string, string> = {
-      vergelijking: `${basePath}/vergelijking`,
-      producten: `${basePath}/producten`,
-      contacten: `${basePath}/contacten`,
-      gesprekken: `${basePath}/gesprekken`,
+      vergelijking: '/scholen/$slug/vergelijking',
+      producten: '/scholen/$slug/producten',
+      contacten: '/scholen/$slug/contacten',
+      gesprekken: '/scholen/$slug/gesprekken',
     };
-    navigate({ to: paths[tab] ?? basePath });
+    navigate({ to: paths[tab] ?? '/scholen/$slug', params: { slug } });
   };
 
   const handleStartEdit = () => {
@@ -159,7 +158,7 @@ export default function DashboardTab() {
       await updateSchoolData(activeSchoolId, updates);
       // If slug changed, navigate to new URL
       if (updates.slug) {
-        navigate({ to: `/scholen/${updates.slug}` });
+        navigate({ to: '/scholen/$slug', params: { slug: updates.slug as string } });
       }
     }
     setIsEditing(false);

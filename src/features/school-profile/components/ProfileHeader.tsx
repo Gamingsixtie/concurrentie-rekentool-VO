@@ -91,16 +91,14 @@ export default function ProfileHeader() {
       dropdownRef.current?.focus();
       return;
     }
-    // Navigate to the appropriate tab
-    const basePath = `/scholen/${slug}`;
-    const tabPath = cta.tab === 'vergelijking'
-      ? `${basePath}/vergelijking`
-      : cta.tab === 'producten'
-        ? `${basePath}/producten`
-        : cta.tab === 'gesprekken'
-          ? `${basePath}/gesprekken`
-          : basePath;
-    navigate({ to: tabPath });
+    // Navigate to the appropriate tab using type-safe route paths
+    const tabRoutes: Record<string, string> = {
+      vergelijking: '/scholen/$slug/vergelijking',
+      producten: '/scholen/$slug/producten',
+      gesprekken: '/scholen/$slug/gesprekken',
+    };
+    const to = tabRoutes[cta.tab] ?? '/scholen/$slug';
+    navigate({ to, params: { slug } });
   };
 
   return (
