@@ -3,12 +3,16 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createMemoryHistory, createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import WizardShell from '../../../components/wizard/WizardShell';
 import { useSchoolProfileStore } from '../store';
 import { db } from '@/db/database';
 
 // Create a minimal router that provides the params WizardShell expects
 function renderWithRouter(stepNum = '1') {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   const rootRoute = createRootRoute();
   const schoolRoute = createRoute({
     getParentRoute: () => rootRoute,
@@ -28,7 +32,11 @@ function renderWithRouter(stepNum = '1') {
   });
 
   const router = createRouter({ routeTree, history: memoryHistory });
-  return render(<RouterProvider router={router} />);
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 describe('Wizard Navigation', () => {

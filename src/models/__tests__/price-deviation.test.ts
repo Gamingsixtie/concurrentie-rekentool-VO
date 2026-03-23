@@ -31,14 +31,14 @@ function makeEntry(overrides: Partial<SchoolPriceEntry> = {}): SchoolPriceEntry 
 
 describe('checkPriceDeviation', () => {
   it('returns no deviation when amount matches publication price', () => {
-    const result = checkPriceDeviation('rekenwiskunde', 'cito', 4.5);
-    expect(result).toEqual({ hasDeviation: false, publicationPrice: 4.5, percentDiff: 0 });
+    const result = checkPriceDeviation('rekenwiskunde', 'cito', 7.82);
+    expect(result).toEqual({ hasDeviation: false, publicationPrice: 7.82, percentDiff: 0 });
   });
 
   it('returns deviation when amount >50% above publication price', () => {
     const result = checkPriceDeviation('rekenwiskunde', 'cito', 12.0);
     expect(result.hasDeviation).toBe(true);
-    expect(result.publicationPrice).toBe(4.5);
+    expect(result.publicationPrice).toBe(7.82);
     expect(result.percentDiff).toBeGreaterThan(0.5);
   });
 
@@ -48,10 +48,10 @@ describe('checkPriceDeviation', () => {
   });
 
   it('returns correct percentDiff for partial deviation under threshold', () => {
-    // 4.5 * 1.4 = 6.3 => 40% over, should NOT flag
+    // 6.3 vs 7.82 => ~19.4% under, should NOT flag
     const result = checkPriceDeviation('rekenwiskunde', 'cito', 6.3);
     expect(result.hasDeviation).toBe(false);
-    expect(result.publicationPrice).toBe(4.5);
+    expect(result.publicationPrice).toBe(7.82);
     expect(result.percentDiff).toBeLessThanOrEqual(0.5);
   });
 });

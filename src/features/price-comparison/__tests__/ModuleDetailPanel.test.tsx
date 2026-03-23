@@ -135,7 +135,7 @@ describe('ModuleDetailPanel', () => {
     render(<ModuleDetailPanel moduleId="rekenwiskunde" />);
     expect(screen.getByText('Prijs aanpassen')).toBeInTheDocument();
     const inputs = screen.getAllByRole('textbox');
-    expect(inputs.length).toBe(3); // cito, dia, jij
+    expect(inputs.length).toBe(4); // cito, dia, jij, saqi
   });
 
   it('typing new price calls setDraftOverride', () => {
