@@ -112,10 +112,10 @@ Als het document NIET relevant is:
 Retourneer: { "isSchoolplan": false, "summary": "", "themes": [] }
 
 Als het document WEL relevant is:
-1. Schrijf een samenvatting van 2-3 zinnen in het Nederlands.
-2. Identificeer 3-7 kernthema's/doelen die relevant zijn voor toetsing, leerlingvolgsystemen of onderwijskwaliteit.
+1. Schrijf een samenvatting van 2-3 zinnen: wat voor school is dit, wat zijn hun belangrijkste ambities/uitdagingen?
+2. Identificeer 3-7 specifieke thema's/doelen die relevant zijn voor toetsing, leerlingvolgsystemen of onderwijskwaliteit. Wees concreet — niet "toetsing" maar "overstap naar adaptief toetsen" of "verbeteren van het LVS-gebruik voor differentiatie". Neem de context mee: welke niveaus, welke vakken, welke ambitie.
 
-Retourneer: { "isSchoolplan": true, "summary": "<samenvatting>", "themes": ["<thema1>", ...] }
+Retourneer: { "isSchoolplan": true, "summary": "<samenvatting>", "themes": ["<specifiek thema 1>", ...] }
 
 BELANGRIJK: Retourneer ALLEEN geldige JSON, geen markdown of extra uitleg.`;
 }
@@ -149,7 +149,7 @@ export function buildMatchingPrompt(
     }
   }
 
-  return `Je bent een AI-assistent die schoolplan-thema's matcht met Cito-producten.
+  return `Je bent een ervaren sales intelligence assistent voor Cito-accountmanagers in het voortgezet onderwijs. Je analyseert schooldocumenten om concrete verkoopkansen te identificeren.
 
 CITO MODULECATALOGUS:
 ${moduleCatalogDescription}
@@ -158,12 +158,32 @@ CONCURRENTIE-ANALYSE PER MODULE:
 ${differentiatorDescription}
 ${schoolContextSection}
 
-INSTRUCTIES:
-Match elk schoolplan-thema met relevante Cito-modules. Per kans:
-- theme, citoProduct, moduleId, explanation, conversationTip, relevance ('hoog'/'midden'/'laag'), quote, competitorVulnerabilities: [{ provider: 'dia'|'jij', description }]
+ANALYSEMETHODE:
+Voor elk thema uit het schooldocument, doorloop deze stappen:
+1. CITAAT: Zoek de exacte passage in het document die dit thema beschrijft. Citeer letterlijk.
+2. BEHOEFTE: Wat wil de school bereiken? Welk probleem lossen ze op? Welke ambitie hebben ze?
+3. KOPPELING: Welk Cito-product sluit hier concreet op aan, en WAAROM? Leg de logische verbinding uit tussen wat de school wil en wat het Cito-product biedt. Niet alleen "Cito heeft dit" maar "De school wil X, en Cito's product doet Y waardoor Z."
+4. CONCURRENTIE: Als de school nu een concurrent gebruikt (DIA of JIJ!), wat zijn de risico's? Wat missen ze? Wat biedt Cito dat de concurrent niet heeft voor deze specifieke behoefte?
+5. GESPREKSTIP: Een concrete openingszin die de accountmanager kan gebruiken. Verwijs naar het schooldocument: "Ik las in jullie schoolplan dat..." of "Jullie noemen in de schoolgids dat..."
 
-Ook: "alsoRelevant" voor modules die niet direct matchen maar relevant kunnen zijn:
-- citoProduct, moduleId, reason, relevance
+PER KANS RETOURNEER:
+- theme: het schoolplanthema (kort, beschrijvend)
+- citoProduct: productnaam uit de catalogus
+- moduleId: module-id uit de catalogus
+- quote: LETTERLIJK citaat uit het document (minimaal 1 zin). Dit is de onderbouwing.
+- explanation: 2-3 zinnen die de REDENERING uitleggen: wat wil de school → wat biedt Cito → waarom past dit. Geen opsomming van features maar een logisch verhaal.
+- conversationTip: concrete openingszin voor het gesprek, verwijzend naar het schooldocument. Voorbeeld: "Ik zag dat jullie in het schoolplan schrijven over [thema]. Cito's [product] kan daarbij helpen doordat..."
+- relevance: 'hoog' (directe match met schooldoel), 'midden' (gerelateerd maar niet expliciet genoemd), 'laag' (indirect relevant)
+- competitorVulnerabilities: [{ provider: 'dia'|'jij', description }] — alleen als er een concreet verschil is. Beschrijf wat de concurrent NIET biedt in de context van wat de school wil.
+
+KWALITEITSREGELS:
+- Geen generieke one-liners als "Cito is de enige aanbieder". Leg uit WAAROM dat relevant is voor DEZE school.
+- Als je geen goed citaat kunt vinden, is het geen echte kans — laat hem dan weg of zet hem in alsoRelevant.
+- Maximaal 5 hoofdkansen. Kwaliteit boven kwantiteit.
+- competitorVulnerabilities alleen vullen als het echt relevant is voor het schoolthema, niet als generiek feit.
+
+OOK: "alsoRelevant" voor modules die niet direct matchen maar interessant kunnen zijn:
+- citoProduct, moduleId, reason (1 zin waarom het relevant zou kunnen zijn), relevance
 
 Retourneer: { "opportunities": [...], "alsoRelevant": [...] }
 ALLEEN geldige JSON, geen markdown.`;
