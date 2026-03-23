@@ -66,7 +66,7 @@ Plans:
 - [x] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie (completed 2026-03-23)
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
-- [ ] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken
+- [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
 - [ ] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
 
 ## Phase Details
@@ -271,8 +271,8 @@ Plans:
 
 Plans:
 - [x] 14-01-PLAN.md — Data foundation: Zod schemas, model config, Supabase migration, React Query hooks en client orchestrator
-- [ ] 14-02-PLAN.md — Serverless analyse: twee-stappen AI pipeline (samenvatting + kansen-matching) met SSE streaming
-- [ ] 14-03-PLAN.md — Schoolplan-tab UI: route, componenten (KansCard, KansCardList, streaming progress), SchoolplanTab container en visuele verificatie
+- [x] 14-02-PLAN.md — Serverless analyse: twee-stappen AI pipeline (samenvatting + kansen-matching) met SSE streaming
+- [x] 14-03-PLAN.md — Schoolplan-tab UI: route, componenten (KansCard, KansCardList, streaming progress), SchoolplanTab container en visuele verificatie
 
 ### Phase 15: DMU Klantreis Registratie
 **Goal**: Accountmanager kan per school de DMU-contactpersonen volgen door de klantreis — van eerste contact via oriëntatie, evaluatie en onderhandeling tot aan beslissing — met tijdlijn en status per persoon
@@ -316,5 +316,5 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
-| 14. Schoolplan Upload & Kansen-analyse | v2.0 | 1/3 | In Progress|  |
+| 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 0/3 | Not started | - |
