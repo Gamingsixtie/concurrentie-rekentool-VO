@@ -5,7 +5,8 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { detectV1Data } from '@/db/migrations';
 import type { SchoolRecord } from '@/db/types';
 import type { PipelineStatus } from '@/models/school';
-import { PIPELINE_STATUSES } from '@/models/school';
+import { PIPELINE_STATUSES, ENGAGEMENT_STATUSES } from '@/models/school';
+import type { EngagementStatus } from '@/models/school';
 import SchoolCard from './SchoolCard';
 import SchoolSearchBar from './SchoolSearchBar';
 import SchoolCardSkeleton from './SchoolCardSkeleton';
@@ -19,6 +20,8 @@ import ViewToggle from './ViewToggle';
 import CardModeToggle from './CardModeToggle';
 import PipelineKanbanView from './PipelineKanbanView';
 import { SchoolOwnerFilter } from './SchoolOwnerFilter';
+import DmuStatusFilter from './DmuStatusFilter';
+import type { DmuFilterValue } from './DmuStatusFilter';
 
 type FilterValue = PipelineStatus | 'all';
 
@@ -52,6 +55,7 @@ export default function SchoolOverviewPage() {
 
   // View preferences persisted in localStorage
   const [pipelineFilter, setPipelineFilter] = useState<FilterValue>('all');
+  const [dmuFilter, setDmuFilter] = useState<DmuFilterValue>('all');
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>(() =>
     getStoredPreference('school-overview-viewMode', 'list'),
   );
@@ -135,6 +139,14 @@ export default function SchoolOverviewPage() {
     filterCounts[status] = ownerFiltered.filter(s => s.pipelineStatus === status).length;
   }
 
+  // Calculate DMU filter counts
+  const dmuFilterCounts: Record<DmuFilterValue, number> = { all: ownerFiltered.length } as Record<DmuFilterValue, number>;
+  for (const status of ENGAGEMENT_STATUSES) {
+    dmuFilterCounts[status as DmuFilterValue] = ownerFiltered.filter(
+      (s) => s.contacts?.some((c) => c.engagementStatus === status),
+    ).length;
+  }
+
   // Apply text search filter
   let filtered = query
     ? ownerFiltered.filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
@@ -143,6 +155,13 @@ export default function SchoolOverviewPage() {
   // Apply pipeline filter
   if (pipelineFilter !== 'all') {
     filtered = filtered.filter(s => s.pipelineStatus === pipelineFilter);
+  }
+
+  // Apply DMU engagement status filter (AND logic with pipeline filter)
+  if (dmuFilter !== 'all') {
+    filtered = filtered.filter(
+      (s) => s.contacts?.some((c) => c.engagementStatus === (dmuFilter as EngagementStatus)),
+    );
   }
 
   return (
@@ -175,7 +194,7 @@ export default function SchoolOverviewPage() {
         )}
 
         {/* Controls row: FilterBar left, ViewToggle + CardModeToggle right */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
           <FilterBar
             activeFilter={pipelineFilter}
             onFilterChange={setPipelineFilter}
@@ -185,6 +204,15 @@ export default function SchoolOverviewPage() {
             <ViewToggle activeView={viewMode} onViewChange={handleViewModeChange} />
             <CardModeToggle mode={cardMode} onModeChange={handleCardModeChange} />
           </div>
+        </div>
+
+        {/* DMU engagement status filter */}
+        <div className="mb-6">
+          <DmuStatusFilter
+            activeFilter={dmuFilter}
+            onFilterChange={setDmuFilter}
+            counts={dmuFilterCounts}
+          />
         </div>
 
         {/* Content: List view or Pipeline Kanban view */}
