@@ -41,17 +41,17 @@ export const IntakeExtractionSchemaV2 = z.object({
   /** Contact persons mentioned during the intake conversation. */
   contactPersonen: z.array(z.object({
     naam: z.string(),
-    rol: z.string().optional(),
-    dmuPositie: z.enum(['coordinator', 'mt', 'finance', 'it', 'onbekend']).optional(),
-    email: z.string().optional(),
-    telefoon: z.string().optional(),
+    rol: z.string().nullable().optional(),
+    dmuPositie: z.enum(['coordinator', 'mt', 'finance', 'it', 'onbekend']).nullable().optional(),
+    email: z.string().nullable().optional(),
+    telefoon: z.string().nullable().optional(),
   })).default([]),
 
   /** Action items extracted from the conversation. */
   actiePunten: z.array(z.object({
     wat: z.string(),
-    wanneer: z.string().optional(),
-    verantwoordelijke: z.string().optional(),
+    wanneer: z.string().nullable().optional(),
+    verantwoordelijke: z.string().nullable().optional(),
   })).default([]),
 
   /** Pipeline signal detected from conversation tone and content. */
