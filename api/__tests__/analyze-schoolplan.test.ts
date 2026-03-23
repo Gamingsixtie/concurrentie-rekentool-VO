@@ -11,13 +11,12 @@ vi.mock('mammoth', () => ({
   },
 }));
 
-vi.mock('@anthropic-ai/sdk', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    messages: {
-      create: vi.fn(),
-    },
-  })),
-}));
+vi.mock('@anthropic-ai/sdk', () => {
+  const MockAnthropic = function (this: Record<string, unknown>) {
+    this.messages = { create: vi.fn() };
+  } as unknown as new (...args: unknown[]) => unknown;
+  return { default: MockAnthropic };
+});
 
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn().mockReturnValue({
