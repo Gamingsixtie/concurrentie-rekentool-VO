@@ -1,7 +1,6 @@
-import { useParams } from '@tanstack/react-router';
 import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useSchool } from '@/hooks/useSchools';
+import { useSchoolProfileStore } from '../store';
 import {
   useSchoolplanAnalysis,
   useUpdateAnnotation,
@@ -16,9 +15,7 @@ import SchoolplanStreamingProgress from '../components/SchoolplanStreamingProgre
 import type { OpportunityAnnotation } from '../schemas/schoolplan-analysis.schema';
 
 export default function SchoolplanTab() {
-  const { slug } = useParams({ from: '/scholen/$slug' });
-  const { data: school, isLoading: schoolLoading } = useSchool(slug);
-  const schoolId = school?.id ?? '';
+  const schoolId = useSchoolProfileStore((s) => s.activeSchoolId) ?? '';
   const queryClient = useQueryClient();
 
   // Analysis data from DB
@@ -86,9 +83,11 @@ export default function SchoolplanTab() {
     [updateAnnotation],
   );
 
-  // ─── Loading state ────────────────────────────────────────────────────────
+  // ─── Loading / guard ─────────────────────────────────────────────────────
 
-  if (schoolLoading || (schoolId && analysisLoading)) {
+  if (!schoolId) return null; // SchoolLayout handles redirect
+
+  if (analysisLoading) {
     return (
       <div className="p-8 max-sm:p-4">
         <p className="text-sm text-neutral-400">Laden...</p>
