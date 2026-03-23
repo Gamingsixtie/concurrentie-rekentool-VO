@@ -275,7 +275,7 @@ export async function POST(request: Request): Promise<Response> {
 
           if (!summaryResult.isSchoolplan) {
             controller.enqueue(encoder.encode(
-              `data: ${JSON.stringify({ type: 'result', data: { ...summaryResult, opportunities: [], alsoRelevant: [] } })}\n\n`,
+              `data: ${JSON.stringify({ type: 'result', summary: '', themes: [], opportunities: [], alsoRelevant: [], pageCount: null })}\n\n`,
             ));
             controller.close();
             return;
@@ -296,7 +296,7 @@ export async function POST(request: Request): Promise<Response> {
           const validated = parseAnalysisResponse(analysisResponse, summaryResult);
 
           controller.enqueue(encoder.encode(
-            `data: ${JSON.stringify({ type: 'result', data: validated })}\n\n`,
+            `data: ${JSON.stringify({ type: 'result', summary: validated.summary, themes: validated.themes, opportunities: validated.opportunities, alsoRelevant: validated.alsoRelevant, pageCount: null })}\n\n`,
           ));
           controller.close();
         } catch (streamError) {
