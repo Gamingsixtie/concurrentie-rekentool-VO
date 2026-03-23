@@ -8,6 +8,7 @@ import {
 import type { IntakeExtraction } from '../../lib/ai-intake';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { SCHOOL_LEVEL_LABELS, CURRENT_PROVIDER_LABELS, type SchoolLevel } from '../../models/school';
+import { detectScenario } from '../../engine/scenario-detection';
 import { MODULE_CATALOG } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
 
@@ -175,7 +176,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
   const [enrichedSetups, setEnrichedSetups] = useState<EnrichedModuleSetup[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep } = useSchoolProfileStore();
+  const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep, setScenario } = useSchoolProfileStore();
 
   const handleAnalyse = async () => {
     if (!notes.trim()) return;
@@ -209,15 +210,19 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
     setSelectedModules(extraction.selectedModules);
 
     // Use enriched setups (with auto-filled default prices)
-    if (enrichedSetups.length > 0) {
-      setModuleSetups(
-        enrichedSetups.map((s) => ({
-          moduleId: s.moduleId,
-          currentProvider: s.currentProvider,
-          pricePerStudent: s.pricePerStudent,
-          customProviderName: s.customProviderName,
-        })),
-      );
+    const mappedSetups = enrichedSetups.map((s) => ({
+      moduleId: s.moduleId,
+      currentProvider: s.currentProvider,
+      pricePerStudent: s.pricePerStudent,
+      customProviderName: s.customProviderName,
+    }));
+
+    if (mappedSetups.length > 0) {
+      setModuleSetups(mappedSetups);
+
+      // Auto-detect and set scenario from module setups
+      const detection = detectScenario(mappedSetups);
+      setScenario(detection.recommended);
     }
 
     // Jump to step 4 (Situatie) or 0 depending on what was extracted

@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useContacts } from '@/hooks/useContacts';
 import { useConversations } from '@/hooks/useConversations';
 import { useActions, useCreateAction } from '@/hooks/useActions';
@@ -15,6 +16,8 @@ export default function ConversationsTab() {
   const [conversationFormOpen, setConversationFormOpen] = useState(false);
   const [editingConversation, setEditingConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+  const { slug } = useParams({ strict: false }) as { slug?: string };
 
   const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
   const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
@@ -57,6 +60,12 @@ export default function ConversationsTab() {
     setConversationFormOpen(false);
     setEditingConversation(null);
   };
+
+  const handleNavigateToComparison = useCallback(() => {
+    if (slug) {
+      navigate({ to: '/scholen/$slug/vergelijking', params: { slug } });
+    }
+  }, [navigate, slug]);
 
   const handleCreateAction = async (conversationId?: string) => {
     const conv = conversations.find(c => c.id === conversationId);
@@ -112,6 +121,7 @@ export default function ConversationsTab() {
               setEditingConversation(null);
             }}
             onSaved={handleSaved}
+            onNavigateToComparison={handleNavigateToComparison}
             school={school}
             actions={actions}
           />

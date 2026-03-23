@@ -14,6 +14,7 @@ import DiffView, { type DiffSelection } from '@/features/school-profile/componen
 import { streamIntakeFromNotes, parseExtractionFromText } from '@/lib/ai-intake';
 import type { IntakeExtractionV2 } from '@/features/school-profile/schemas/intake-extraction.schema';
 import StructuredIntakeForm from '@/features/school-profile/components/StructuredIntakeForm';
+import { detectScenario } from '@/engine/scenario-detection';
 
 type ConversationFormInput = z.input<typeof conversationSchema>;
 
@@ -24,6 +25,8 @@ interface ConversationFormProps {
   existingTags: string[];
   onClose: () => void;
   onSaved: () => void;
+  /** Called after AI intake confirm to navigate to comparison view. */
+  onNavigateToComparison?: () => void;
   school?: SchoolRecord;
   actions?: ActionItem[];
 }
@@ -43,6 +46,7 @@ export default function ConversationForm({
   existingTags,
   onClose,
   onSaved,
+  onNavigateToComparison,
   school,
   actions = [],
 }: ConversationFormProps) {
@@ -176,9 +180,13 @@ export default function ConversationForm({
           new Set([...school.selectedModules, ...selection.modules.map(m => m.moduleId)]),
         );
 
+        // Auto-detect scenario from module setups
+        const detection = detectScenario(mergedSetups);
+
         await updateSchoolData(schoolId, {
           moduleSetups: mergedSetups,
           selectedModules: mergedModules,
+          scenario: detection.recommended,
         });
       }
 
@@ -216,8 +224,11 @@ export default function ConversationForm({
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       queryClient.invalidateQueries({ queryKey: ['school'] });
 
-      // 6. Close form
+      // 6. Close form and navigate to comparison if modules were saved
       onSaved();
+      if (selection.modules.length > 0 && onNavigateToComparison) {
+        onNavigateToComparison();
+      }
     } catch (err) {
       setAiError(
         err instanceof Error

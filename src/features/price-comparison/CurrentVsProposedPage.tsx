@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { calculateCurrentVsProposed } from '../../engine/current-vs-proposed';
@@ -12,6 +13,7 @@ import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
 import { getCitoBundle } from '../../data/cito-bundles';
 import { applyCitoBundlePrices } from '../../engine/cito-bundles';
+import { detectScenario } from '../../engine/scenario-detection';
 
 interface CurrentVsProposedPageProps {
   onBack?: () => void;
@@ -182,6 +184,85 @@ function CitoAdvantages({ moduleIds }: { moduleIds: string[] }) {
   );
 }
 
+// ─── Upsell opportunities ─────────────────────────────────────────────────────
+
+function UpsellSection({ modules }: { modules: ModuleCurrentVsProposed[] }) {
+  const newModules = modules.filter((m) => m.isNewModule && m.proposedCitoTotalCost !== null);
+  if (newModules.length === 0) return null;
+
+  const upsellTotal = newModules.reduce((sum, m) => sum + (m.proposedCitoTotalCost ?? 0), 0);
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
+      <h3 className="text-[15px] font-semibold text-blue-900 mb-2">
+        Upsell-mogelijkheden
+      </h3>
+      <p className="text-sm text-blue-800 mb-4">
+        Deze school gebruikt de volgende modules nog niet. Met Cito erbij kost dat{' '}
+        <span className="font-semibold">{formatCurrency(upsellTotal)}/jaar</span> extra.
+      </p>
+      <div className="space-y-2">
+        {newModules.map((mod) => (
+          <div
+            key={mod.moduleId}
+            className="flex items-center justify-between bg-white rounded-lg border border-blue-100 px-4 py-2"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">
+                Nieuw
+              </span>
+              <span className="text-sm font-medium text-neutral-900">{mod.moduleName}</span>
+            </div>
+            <span className="text-sm font-semibold text-neutral-700">
+              {mod.proposedCitoCostPerStudent !== null
+                ? `${formatCurrency(mod.proposedCitoCostPerStudent)}/leerling`
+                : '—'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Migration CTA banner ─────────────────────────────────────────────────────
+
+function MigrationBanner({ migrationModuleCount, slug }: { migrationModuleCount: number; slug?: string }) {
+  const navigate = useNavigate();
+
+  if (migrationModuleCount === 0) return null;
+
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8 flex items-start gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-amber-900">
+          {migrationModuleCount} module{migrationModuleCount > 1 ? 's' : ''} op het oude Cito-platform
+        </p>
+        <p className="text-sm text-amber-800 mt-1">
+          Voor deze modules is een migratieberekening (oud → nieuw platform) relevanter dan een concurrentieprijsvergelijking.
+        </p>
+        {slug && (
+          <button
+            type="button"
+            onClick={() => navigate({ to: '/scholen/$slug/migratie', params: { slug } })}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-900 hover:text-amber-700 underline"
+          >
+            Bekijk migratieberekening
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
@@ -191,6 +272,10 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const levels = useSchoolProfileStore((s) => s.levels);
+  const { slug } = useParams({ strict: false }) as { slug?: string };
+
+  // Detect mixed scenario for migration CTA
+  const detection = useMemo(() => detectScenario(moduleSetups), [moduleSetups]);
 
   useEffect(() => {
     initialize();
@@ -346,6 +431,17 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
           </tfoot>
         </table>
       </div>
+
+      {/* Migration CTA for mixed scenarios */}
+      {detection.hasMigrationModules && (
+        <MigrationBanner
+          migrationModuleCount={detection.migrationModuleIds.length}
+          slug={slug}
+        />
+      )}
+
+      {/* Upsell opportunities for modules not yet in use */}
+      {result && <UpsellSection modules={result.modules} />}
 
       {/* Cito advantages */}
       <CitoAdvantages moduleIds={selectedModules} />
