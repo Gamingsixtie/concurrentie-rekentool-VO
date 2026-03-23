@@ -103,6 +103,7 @@ export default function SchoolplanTab() {
   const hasAnalysis = analysis !== null && analysis !== undefined;
   const isComplete = hasAnalysis && analysis.analysis_status === 'complete';
   const isFailed = hasAnalysis && analysis.analysis_status === 'failed';
+  const isPending = hasAnalysis && analysis.analysis_status === 'pending';
   const isSchoolplan =
     isComplete && (analysis.summary !== '' || analysis.opportunities.length > 0);
 
@@ -187,8 +188,8 @@ export default function SchoolplanTab() {
         </>
       )}
 
-      {/* ── State A: Empty (no analysis and not uploading) ─────────────────── */}
-      {!isAnalyzing && !isCompleteStreaming && !hasAnalysis && (
+      {/* ── State A: Empty (no analysis, or stuck pending from previous attempt) */}
+      {!isAnalyzing && !isCompleteStreaming && (!hasAnalysis || isPending) && (
         <>
           <DocumentDropzone
             onFileSelected={handleUpload}
