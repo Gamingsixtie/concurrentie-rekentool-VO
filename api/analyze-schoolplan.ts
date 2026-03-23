@@ -2,8 +2,6 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
-import { z } from 'zod';
-
 // Module-level init (reused across warm invocations)
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -13,39 +11,6 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!,
 );
-
-// ─── Inline Zod schema (avoids ../src/ imports that break Vercel bundler) ────
-
-const SchoolplanAnalysisResult = z.object({
-  isSchoolplan: z.boolean(),
-  summary: z.string(),
-  themes: z.array(z.string()),
-  opportunities: z.array(
-    z.object({
-      theme: z.string(),
-      citoProduct: z.string(),
-      moduleId: z.string(),
-      explanation: z.string(),
-      conversationTip: z.string(),
-      relevance: z.enum(['hoog', 'midden', 'laag']),
-      quote: z.string(),
-      competitorVulnerabilities: z.array(
-        z.object({
-          provider: z.enum(['dia', 'jij']),
-          description: z.string(),
-        }),
-      ).default([]),
-    }),
-  ),
-  alsoRelevant: z.array(
-    z.object({
-      citoProduct: z.string(),
-      moduleId: z.string(),
-      reason: z.string(),
-      relevance: z.enum(['hoog', 'midden', 'laag']),
-    }),
-  ).default([]),
-});
 
 // ─── Inline module catalog (avoids ../src/ imports) ──────────────────────────
 
@@ -397,9 +362,8 @@ export async function POST(request: Request): Promise<Response> {
             ],
           });
 
-          // Parse and validate against Zod schema
-          const analysisResult = parseAnalysisResponse(analysisResponse, summaryResult);
-          const validated = SchoolplanAnalysisResult.parse(analysisResult);
+          // Parse AI response (no Zod in serverless — breaks Vercel bundler with Zod v4)
+          const validated = parseAnalysisResponse(analysisResponse, summaryResult);
 
           // Send final result
           controller.enqueue(
