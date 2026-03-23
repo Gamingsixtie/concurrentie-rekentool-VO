@@ -9,6 +9,7 @@ vi.mock('mammoth', () => ({
   default: {
     extractRawText: vi.fn(),
   },
+  extractRawText: vi.fn(),
 }));
 
 vi.mock('@anthropic-ai/sdk', () => {
@@ -52,31 +53,36 @@ describe('extractTextFromFile', () => {
 
   it('returns text for PDF buffer', async () => {
     const mockPdfParse = vi.mocked(pdfParse);
-    mockPdfParse.mockResolvedValue({ text: 'PDF text content' } as never);
+    mockPdfParse.mockResolvedValue({ text: 'PDF text content', numpages: 5 } as never);
 
     const buffer = Buffer.from('fake pdf');
     const result = await extractTextFromFile(buffer, 'schoolplan.pdf');
 
-    expect(result).toBe('PDF text content');
+    expect(result.text).toBe('PDF text content');
+    expect(result.pageCount).toBe(5);
     expect(mockPdfParse).toHaveBeenCalledWith(buffer);
   });
 
   it('returns text for DOCX buffer', async () => {
-    const mockMammoth = vi.mocked(mammoth.extractRawText);
-    mockMammoth.mockResolvedValue({ value: 'DOCX text content', messages: [] });
+    // Dynamic import resolves the module namespace — mock the named export
+    const mammothModule = await import('mammoth');
+    const mockExtract = vi.mocked(mammothModule.extractRawText);
+    mockExtract.mockResolvedValue({ value: 'DOCX text content', messages: [] });
 
     const buffer = Buffer.from('fake docx');
     const result = await extractTextFromFile(buffer, 'schoolplan.docx');
 
-    expect(result).toBe('DOCX text content');
-    expect(mockMammoth).toHaveBeenCalledWith({ buffer });
+    expect(result.text).toBe('DOCX text content');
+    expect(result.pageCount).toBeNull();
+    expect(mockExtract).toHaveBeenCalledWith({ buffer });
   });
 
   it('returns text for TXT buffer', async () => {
     const buffer = Buffer.from('Plain text content');
     const result = await extractTextFromFile(buffer, 'schoolplan.txt');
 
-    expect(result).toBe('Plain text content');
+    expect(result.text).toBe('Plain text content');
+    expect(result.pageCount).toBeNull();
   });
 
   it('throws for unsupported extensions (xlsx, csv)', async () => {

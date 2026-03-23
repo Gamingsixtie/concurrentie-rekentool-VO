@@ -22,51 +22,36 @@ function getSupabaseAdmin() {
   return supabaseAdmin;
 }
 
-// ─── Text extraction (no pdf-parse/mammoth at module level) ──────────────────
+// ─── Text extraction ────────────────────────────────────────────────────────
 
 function getFileExtension(fileName: string): string {
   return (fileName.split('.').pop() || '').toLowerCase();
 }
 
-// For DOCX/TXT: extract text. For PDF: we send it directly to Claude as a document.
-async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<string> {
+interface ExtractionResult {
+  text: string;
+  pageCount: number | null;
+}
+
+export async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<ExtractionResult> {
   const ext = getFileExtension(fileName);
 
   switch (ext) {
-    case 'pdf':
-      // PDFs are sent directly to Claude as base64 document — no text extraction needed
-      return '';
+    case 'pdf': {
+      const pdfParse = (await import('pdf-parse')).default;
+      const result = await pdfParse(buffer);
+      return { text: result.text, pageCount: result.numpages ?? null };
+    }
     case 'docx': {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
-      return result.value;
+      return { text: result.value, pageCount: null };
     }
     case 'txt':
-      return buffer.toString('utf-8');
+      return { text: buffer.toString('utf-8'), pageCount: null };
     default:
       throw new Error(`Niet-ondersteund bestandsformaat: .${ext}`);
   }
-}
-
-// Build Claude message content — PDF as native document, others as text
-function buildUserContent(buffer: Buffer, fileName: string, documentText: string): Anthropic.MessageParam['content'] {
-  const ext = getFileExtension(fileName);
-
-  if (ext === 'pdf') {
-    return [
-      {
-        type: 'document',
-        source: {
-          type: 'base64',
-          media_type: 'application/pdf',
-          data: buffer.toString('base64'),
-        },
-      },
-    ];
-  }
-
-  // For text-based formats, send the extracted text (truncated)
-  return documentText.slice(0, 30000);
 }
 
 // ─── Inline module catalog ───────────────────────────────────────────────────
@@ -91,7 +76,7 @@ const MODULE_DIFFERENTIATORS = [
 
 // ─── AI Prompt builders ──────────────────────────────────────────────────────
 
-function buildSummarizePrompt(): string {
+export function buildSummarizePrompt(): string {
   return `Je bent een AI-assistent die schoolplan-documenten analyseert voor Cito-accountmanagers.
 
 STAP 1: Bepaal of het document een schoolplan is.
@@ -109,7 +94,7 @@ Retourneer: { "isSchoolplan": true, "summary": "<samenvatting>", "themes": ["<th
 BELANGRIJK: Retourneer ALLEEN geldige JSON, geen markdown of extra uitleg.`;
 }
 
-function buildMatchingPrompt(
+export function buildMatchingPrompt(
   summary: string,
   themes: string[],
   schoolContext?: { levels?: string[]; selectedModules?: string[] },
@@ -168,14 +153,24 @@ function stripMarkdownFences(text: string): string {
 function parseSummaryResponse(response: Anthropic.Message) {
   try {
     const content = response.content[0];
-    if (content.type !== 'text') return { isSchoolplan: false, summary: '', themes: [] as string[] };
-    const parsed = JSON.parse(stripMarkdownFences(content.text));
+    if (content.type !== 'text') {
+      console.error('parseSummaryResponse: content type is not text:', content.type);
+      return { isSchoolplan: false, summary: '', themes: [] as string[] };
+    }
+    const cleanText = stripMarkdownFences(content.text);
+    console.log('parseSummaryResponse raw:', cleanText.slice(0, 500));
+    const parsed = JSON.parse(cleanText);
+    // Accept field name variants (isSchoolplan, is_schoolplan, is_school_plan)
+    const isSchoolplan = Boolean(
+      parsed.isSchoolplan ?? parsed.is_schoolplan ?? parsed.is_school_plan,
+    );
     return {
-      isSchoolplan: Boolean(parsed.isSchoolplan),
+      isSchoolplan,
       summary: typeof parsed.summary === 'string' ? parsed.summary : '',
       themes: Array.isArray(parsed.themes) ? parsed.themes : [],
     };
-  } catch {
+  } catch (err) {
+    console.error('parseSummaryResponse parse error:', err);
     return { isSchoolplan: false, summary: '', themes: [] as string[] };
   }
 }
@@ -235,20 +230,21 @@ export async function POST(request: Request): Promise<Response> {
 
     const buffer = Buffer.from(await fileData.arrayBuffer());
 
-    // Extract text
-    let documentText: string;
+    // Extract text from all file types (including PDF via pdf-parse)
+    let extraction: ExtractionResult;
     try {
-      documentText = await extractTextFromFile(buffer, fileName);
+      extraction = await extractTextFromFile(buffer, fileName);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Onbekende fout';
+      console.error('Text extraction failed:', message);
       return new Response(message, { status: 422 });
     }
 
-    // For non-PDF: check we got text. PDF sends document directly to Claude.
-    const isPdf = getFileExtension(fileName) === 'pdf';
-    if (!isPdf && (!documentText || documentText.trim().length === 0)) {
+    if (!extraction.text || extraction.text.trim().length === 0) {
       return new Response('Geen tekst gevonden in document.', { status: 422 });
     }
+
+    console.log(`Extracted ${extraction.text.length} chars, ${extraction.pageCount ?? '?'} pages from ${fileName}`);
 
     // SSE streaming response
     const encoder = new TextEncoder();
@@ -257,7 +253,7 @@ export async function POST(request: Request): Promise<Response> {
         try {
           const ai = getAnthropic();
           const model = process.env.SCHOOLPLAN_AI_MODEL || 'claude-sonnet-4-20250514';
-          const userContent = buildUserContent(buffer, fileName, documentText);
+          const userContent = extraction.text.slice(0, 30000);
 
           // Step 1: Summarize
           controller.enqueue(encoder.encode(
@@ -272,10 +268,12 @@ export async function POST(request: Request): Promise<Response> {
           });
 
           const summaryResult = parseSummaryResponse(summaryResponse);
+          console.log('Summary result:', JSON.stringify(summaryResult).slice(0, 300));
 
           if (!summaryResult.isSchoolplan) {
+            console.log('Document classified as non-schoolplan');
             controller.enqueue(encoder.encode(
-              `data: ${JSON.stringify({ type: 'result', summary: '', themes: [], opportunities: [], alsoRelevant: [], pageCount: null })}\n\n`,
+              `data: ${JSON.stringify({ type: 'result', summary: '', themes: [], opportunities: [], alsoRelevant: [], pageCount: extraction.pageCount })}\n\n`,
             ));
             controller.close();
             return;
@@ -296,7 +294,7 @@ export async function POST(request: Request): Promise<Response> {
           const validated = parseAnalysisResponse(analysisResponse, summaryResult);
 
           controller.enqueue(encoder.encode(
-            `data: ${JSON.stringify({ type: 'result', summary: validated.summary, themes: validated.themes, opportunities: validated.opportunities, alsoRelevant: validated.alsoRelevant, pageCount: null })}\n\n`,
+            `data: ${JSON.stringify({ type: 'result', summary: validated.summary, themes: validated.themes, opportunities: validated.opportunities, alsoRelevant: validated.alsoRelevant, pageCount: extraction.pageCount })}\n\n`,
           ));
           controller.close();
         } catch (streamError) {

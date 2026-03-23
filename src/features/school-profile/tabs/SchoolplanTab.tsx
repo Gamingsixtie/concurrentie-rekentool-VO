@@ -50,8 +50,11 @@ export default function SchoolplanTab() {
           setStreamingStep(0);
         }, 1000);
       } catch (err) {
+        console.error('Schoolplan upload/analysis error:', err);
         setUploadError(err instanceof Error ? err.message : 'Onbekende fout');
         setStreamingStep(0);
+        // Also invalidate so we pick up any DB status changes (e.g. failed status)
+        await queryClient.invalidateQueries({ queryKey: ['schoolplan-analysis', schoolId] });
       } finally {
         setIsUploading(false);
       }
