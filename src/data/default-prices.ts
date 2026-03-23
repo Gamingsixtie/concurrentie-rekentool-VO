@@ -130,10 +130,10 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'taalverzorging',
     provider: 'cito',
-    amountPerStudent: 3.8,
+    amountPerStudent: 1.6,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Huidig platform 2025-2026 — Taalverzorging per licentie',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
   },
   {
@@ -154,10 +154,10 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'sociaal-emotioneel',
     provider: 'cito',
-    amountPerStudent: 3.5,
+    amountPerStudent: 3.0,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Nieuw platform — SEF los (excl. Leer-werkhouding), o.b.v. PowerPoint/Excel uitsplitsing',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
   },
   // DIA biedt geen eigen sociaal-emotioneel instrument aan (SAQI is extern, geen Dia-product)
