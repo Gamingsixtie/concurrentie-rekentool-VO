@@ -3,15 +3,15 @@ import { selectOptimalDiaPackage, calculateDiaModuleCosts } from '../dia-package
 import { DIA_PACKAGES } from '../../data/dia-packages';
 
 describe('selectOptimalDiaPackage', () => {
-  // Individual prices from default-prices.ts
+  // Individual prices from default-prices.ts (updated 2026-03-23)
   const perModulePrices = new Map<string, number>([
-    ['rekenwiskunde', 5.20],
-    ['nederlands', 5.20],
-    ['engels', 5.20],
-    ['sociaal-emotioneel', 4.00],
+    ['rekenwiskunde', 3.36],
+    ['nederlands', 3.36],
+    ['engels', 5.84],
+    ['taalverzorging', 3.36],
   ]);
 
-  it('Test 1: 2 DIA modules -> no package applies, individual pricing', () => {
+  it('Test 1: 2 DIA modules -> no package qualifies, individual pricing', () => {
     const result = selectOptimalDiaPackage(
       ['rekenwiskunde', 'nederlands'],
       DIA_PACKAGES,
@@ -19,61 +19,67 @@ describe('selectOptimalDiaPackage', () => {
     );
 
     expect(result.selectedPackage).toBeNull();
-    expect(result.totalCost).toBe(5.20 + 5.20); // 10.40 per student
-    expect(result.individualTotal).toBe(5.20 + 5.20);
+    expect(result.totalCost).toBe(3.36 + 3.36); // 6.72 per student
+    expect(result.individualTotal).toBe(3.36 + 3.36);
     expect(result.savings).toBe(0);
     expect(result.coveredModuleIds).toEqual([]);
   });
 
-  it('Test 2: 3 DIA modules -> lvs-basis selected, savings calculated', () => {
+  it('Test 2: 3 DIA modules -> individual cheaper than any package', () => {
     const result = selectOptimalDiaPackage(
       ['rekenwiskunde', 'nederlands', 'engels'],
       DIA_PACKAGES,
       perModulePrices,
     );
 
-    expect(result.selectedPackage).not.toBeNull();
-    expect(result.selectedPackage!.id).toBe('lvs-basis');
-    expect(result.totalCost).toBe(13.00); // package price per student
-    expect(result.individualTotal).toBeCloseTo(15.60); // 3 x 5.20
-    expect(result.savings).toBeCloseTo(2.60); // 15.60 - 13.00
-    expect(result.coveredModuleIds).toEqual(['rekenwiskunde', 'nederlands', 'engels']);
+    // Individual: 3.36 + 3.36 + 5.84 = 12.56
+    // pakket-compleet covers all 3 at 18.13 -> more expensive
+    // No package is cheaper -> individual pricing
+    expect(result.selectedPackage).toBeNull();
+    expect(result.totalCost).toBeCloseTo(12.56);
+    expect(result.individualTotal).toBeCloseTo(12.56);
+    expect(result.savings).toBe(0);
   });
 
-  it('Test 3: 4 DIA modules including sociaal-emotioneel -> lvs-compleet selected because cheaper', () => {
+  it('Test 3: 4 DIA modules -> pakket-compleet selected when cheaper than individual', () => {
     const result = selectOptimalDiaPackage(
-      ['rekenwiskunde', 'nederlands', 'engels', 'sociaal-emotioneel'],
+      ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
       DIA_PACKAGES,
       perModulePrices,
     );
 
-    // lvs-basis (13.00) + sociaal-emotioneel individual (4.00) = 17.00
-    // lvs-compleet (15.50) = 15.50
-    // lvs-compleet is cheaper
-    expect(result.selectedPackage).not.toBeNull();
-    expect(result.selectedPackage!.id).toBe('lvs-compleet');
-    expect(result.totalCost).toBe(15.50);
-    expect(result.individualTotal).toBeCloseTo(19.60); // 3 x 5.20 + 4.00
-    expect(result.savings).toBeCloseTo(4.10); // 19.60 - 15.50
+    // Individual: 3.36 + 3.36 + 5.84 + 3.36 = 15.92
+    // pakket-compleet covers all 4 at 18.13 -> more expensive
+    // pakket-ne-compleet covers ne + taalverzorging at 8.58, rek + en individual = 9.20, total 17.78 -> more expensive
+    // No package cheaper -> individual
+    expect(result.selectedPackage).toBeNull();
+    expect(result.totalCost).toBeCloseTo(15.92);
+    expect(result.individualTotal).toBeCloseTo(15.92);
+    expect(result.savings).toBe(0);
   });
 
-  it('Test 4: User override -- when per-module price is overridden, individual total uses the override', () => {
-    const overriddenPrices = new Map<string, number>([
-      ['rekenwiskunde', 4.50], // overridden from 5.20
-      ['nederlands', 5.20],
-      ['engels', 5.20],
+  it('Test 4: With higher overridden prices, package becomes cheaper', () => {
+    // Simulate school-specific higher prices where packages ARE worthwhile
+    const highPrices = new Map<string, number>([
+      ['rekenwiskunde', 5.50],
+      ['nederlands', 5.50],
+      ['engels', 6.50],
+      ['taalverzorging', 5.50],
     ]);
 
     const result = selectOptimalDiaPackage(
-      ['rekenwiskunde', 'nederlands', 'engels'],
+      ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
       DIA_PACKAGES,
-      overriddenPrices,
+      highPrices,
     );
 
-    expect(result.individualTotal).toBe(4.50 + 5.20 + 5.20); // 14.90
-    expect(result.selectedPackage!.id).toBe('lvs-basis');
-    expect(result.totalCost).toBe(13.00);
-    expect(result.savings).toBeCloseTo(1.90); // 14.90 - 13.00
+    // Individual: 5.50 + 5.50 + 6.50 + 5.50 = 23.00
+    // pakket-compleet covers all 4 at 18.13 -> cheaper!
+    expect(result.selectedPackage).not.toBeNull();
+    expect(result.selectedPackage!.id).toBe('pakket-compleet');
+    expect(result.totalCost).toBe(18.13);
+    expect(result.individualTotal).toBeCloseTo(23.00);
+    expect(result.savings).toBeCloseTo(4.87);
   });
 
   it('Test 5: Empty DIA modules -> null package, 0 total', () => {
@@ -90,42 +96,34 @@ describe('selectOptimalDiaPackage', () => {
     expect(result.coveredModuleIds).toEqual([]);
   });
 
-  it('Test 6: Modules not in any package -> individual pricing for uncovered modules', () => {
-    const pricesWithExtra = new Map<string, number>([
-      ['rekenwiskunde', 5.20],
-      ['nederlands', 5.20],
-      ['engels', 5.20],
-      ['taalverzorging', 3.80], // not in any DIA package
+  it('Test 6: pakket-ne-compleet selected when it covers subset cheaper', () => {
+    // Use prices where the NE-compleet package is worthwhile
+    const highNePrices = new Map<string, number>([
+      ['nederlands', 5.00],
+      ['taalverzorging', 5.00],
     ]);
 
     const result = selectOptimalDiaPackage(
-      ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
+      ['nederlands', 'taalverzorging'],
       DIA_PACKAGES,
-      pricesWithExtra,
+      highNePrices,
     );
 
-    // lvs-basis covers 3 modules (13.00), taalverzorging individual (3.80) = 16.80
-    // lvs-compleet doesn't cover taalverzorging, only covers 3 of 4 selected = 15.50 + 3.80 = 19.30
-    // Wait: lvs-compleet includes sociaal-emotioneel which is NOT selected here
-    // So lvs-compleet covers rekenwiskunde, nederlands, engels (3 of its 4), but taalverzorging is uncovered
-    // Actually: lvs-compleet includedModuleIds are ['rekenwiskunde', 'nederlands', 'engels', 'sociaal-emotioneel']
-    // Selected are ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging']
-    // Overlap for lvs-compleet: rekenwiskunde, nederlands, engels (3 modules) -- but minModules=3 so it qualifies
-    // Cost: 15.50 + 3.80 (taalverzorging uncovered) = 19.30
-    // lvs-basis: 13.00 + 3.80 = 16.80
-    // lvs-basis is cheaper
-    expect(result.selectedPackage!.id).toBe('lvs-basis');
-    expect(result.totalCost).toBe(13.00 + 3.80); // 16.80
-    expect(result.coveredModuleIds).toEqual(['rekenwiskunde', 'nederlands', 'engels']);
+    // Individual: 5.00 + 5.00 = 10.00
+    // pakket-ne-compleet covers both at 8.58 -> cheaper!
+    expect(result.selectedPackage).not.toBeNull();
+    expect(result.selectedPackage!.id).toBe('pakket-ne-compleet');
+    expect(result.totalCost).toBe(8.58);
+    expect(result.savings).toBeCloseTo(1.42);
   });
 });
 
 describe('calculateDiaModuleCosts', () => {
-  it('returns per-module cost map with package and individual prices', () => {
+  it('returns per-module cost map with individual prices when no package qualifies', () => {
     const diaPerModulePrices = new Map<string, number>([
-      ['rekenwiskunde', 5.20],
-      ['nederlands', 5.20],
-      ['engels', 5.20],
+      ['rekenwiskunde', 3.36],
+      ['nederlands', 3.36],
+      ['engels', 5.84],
     ]);
 
     const result = calculateDiaModuleCosts(
@@ -135,15 +133,37 @@ describe('calculateDiaModuleCosts', () => {
       DIA_PACKAGES,
     );
 
-    // lvs-basis should be selected
-    expect(result.packageResult.selectedPackage!.id).toBe('lvs-basis');
-    expect(result.total).toBe(13.00 * 100); // 1300
+    // No package cheaper than individual (12.56 < 18.13)
+    expect(result.packageResult.selectedPackage).toBeNull();
+    expect(result.total).toBeCloseTo(12.56 * 100);
 
-    // Each covered module should be marked as package price
+    const rw = result.perModule.get('rekenwiskunde');
+    expect(rw).toBeDefined();
+    expect(rw!.isPackagePrice).toBe(false);
+    expect(rw!.cost).toBeCloseTo(3.36 * 100);
+  });
+
+  it('returns package pricing when package is cheaper', () => {
+    const highPrices = new Map<string, number>([
+      ['rekenwiskunde', 5.50],
+      ['nederlands', 5.50],
+      ['engels', 6.50],
+      ['taalverzorging', 5.50],
+    ]);
+
+    const result = calculateDiaModuleCosts(
+      ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
+      100,
+      highPrices,
+      DIA_PACKAGES,
+    );
+
+    expect(result.packageResult.selectedPackage!.id).toBe('pakket-compleet');
+    expect(result.total).toBe(18.13 * 100);
+
     const rw = result.perModule.get('rekenwiskunde');
     expect(rw).toBeDefined();
     expect(rw!.isPackagePrice).toBe(true);
-    expect(rw!.packageId).toBe('lvs-basis');
-    expect(rw!.cost).toBeCloseTo(13.00 / 3 * 100); // allocated evenly
+    expect(rw!.packageId).toBe('pakket-compleet');
   });
 });

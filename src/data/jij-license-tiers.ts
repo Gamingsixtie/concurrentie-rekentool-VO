@@ -4,13 +4,11 @@
  * JIJ! uses a fundamentally different pricing model than Cito and DIA:
  * a fixed annual license fee + a per-test-administration fee.
  *
- * Base data: schooljaar 2022-2023 (Bureau ICE prijslijst).
- * Inflation-corrected to 2025-2026 using CBS CPI:
- *   2023: +3,8%, 2024: +3,3%, 2025: +3,3% → cumulative factor 1,1076.
+ * Base data: deskresearch MediaTest juni 2024 (R-5043), in opdracht van Cito.
+ * Bron: Concurrentieanalyse Leerling in beeld VO, tabel 3b (pagina 13).
  *
- * BELANGRIJK: Deze prijzen zijn schattingen op basis van inflatiecorrectie.
- * Werkelijke prijzen voor 2025-2026 kunnen afwijken.
- * Neem contact op met Bureau ICE voor actuele tarieven.
+ * BELANGRIJK: Dit zijn 2024-tarieven. Werkelijke 2025-2026 tarieven kunnen
+ * afwijken. Neem contact op met Bureau ICE voor actuele tarieven.
  */
 
 export interface JijLicenseTier {
@@ -24,55 +22,46 @@ export interface JijLicenseTier {
   magisterSomtodayFee: number;
 }
 
-const INFLATION_FACTOR = 1.1076; // CBS CPI 22-23 → 25-26
-
-/**
- * Round to nearest 5 cents for realistic pricing.
- */
-function inflationAdjust(amount: number): number {
-  return Math.round(amount * INFLATION_FACTOR * 20) / 20;
-}
-
 export const JIJ_LICENSE_TIERS: JijLicenseTier[] = [
   {
     tier: 1,
-    label: 'Licentie 1 (groot — 4.000+ afnames)',
-    annualFee: Math.round(4740 * INFLATION_FACTOR),
-    pricePerTest: inflationAdjust(2.10),
-    minAdministrations: 4000,
+    label: 'Licentie 1 (groot — 4.001+ afnames)',
+    annualFee: 5330,
+    pricePerTest: 2.40,
+    minAdministrations: 4001,
     maxAdministrations: 13000,
-    schoolExamPrice: inflationAdjust(5.15),
-    magisterSomtodayFee: Math.round(445 * INFLATION_FACTOR),
+    schoolExamPrice: 5.80,
+    magisterSomtodayFee: 500,
   },
   {
     tier: 2,
-    label: 'Licentie 2 (middelgroot — 2.500-4.000 afnames)',
-    annualFee: Math.round(2480 * INFLATION_FACTOR),
-    pricePerTest: inflationAdjust(2.70),
-    minAdministrations: 2500,
+    label: 'Licentie 2 (middelgroot — 2.501-4.000 afnames)',
+    annualFee: 2815,
+    pricePerTest: 3.05,
+    minAdministrations: 2501,
     maxAdministrations: 4000,
-    schoolExamPrice: inflationAdjust(5.15),
-    magisterSomtodayFee: Math.round(445 * INFLATION_FACTOR),
+    schoolExamPrice: 5.80,
+    magisterSomtodayFee: 500,
   },
   {
     tier: 3,
-    label: 'Licentie 3 (klein — 165-2.500 afnames)',
-    annualFee: Math.round(865 * INFLATION_FACTOR),
-    pricePerTest: inflationAdjust(3.35),
-    minAdministrations: 165,
+    label: 'Licentie 3 (klein — 166-2.500 afnames)',
+    annualFee: 975,
+    pricePerTest: 3.75,
+    minAdministrations: 166,
     maxAdministrations: 2500,
-    schoolExamPrice: inflationAdjust(5.15),
-    magisterSomtodayFee: Math.round(445 * INFLATION_FACTOR),
+    schoolExamPrice: 5.80,
+    magisterSomtodayFee: 500,
   },
   {
     tier: 4,
     label: 'Licentie 4 (zeer klein — 0-165 afnames)',
-    annualFee: Math.round(255 * INFLATION_FACTOR),
-    pricePerTest: inflationAdjust(7.05),
+    annualFee: 290,
+    pricePerTest: 7.90,
     minAdministrations: 0,
     maxAdministrations: 165,
-    schoolExamPrice: inflationAdjust(5.15),
-    magisterSomtodayFee: Math.round(170 * INFLATION_FACTOR),
+    schoolExamPrice: 5.80,
+    magisterSomtodayFee: 195,
   },
 ];
 

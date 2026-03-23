@@ -123,9 +123,7 @@ describe('ModuleDetailPanel', () => {
 
   it('shows warning when competitor does not offer module and has no differentiators', () => {
     render(<ModuleDetailPanel moduleId="cognitieve-capaciteiten" />);
-    expect(
-      screen.getByText(/Deze module wordt niet aangeboden door DIA/),
-    ).toBeInTheDocument();
+    // DIA now offers NSCCT (cognitieve capaciteiten) so only JIJ shows warning
     expect(
       screen.getByText(/Deze module wordt niet aangeboden door JIJ/),
     ).toBeInTheDocument();

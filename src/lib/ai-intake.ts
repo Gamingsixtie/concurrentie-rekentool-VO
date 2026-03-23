@@ -4,11 +4,12 @@
  * Calls the Vercel serverless proxy at /api/ai-intake with SSE streaming.
  */
 
-import { YEARS_PER_LEVEL, type SchoolLevel } from '../models/school';
+import { YEARS_PER_LEVEL, type SchoolLevel, type CurrentProvider } from '../models/school';
 import {
   IntakeExtractionSchemaV2,
   type IntakeExtractionV2,
 } from '@/features/school-profile/schemas/intake-extraction.schema';
+import { DEFAULT_PRICES } from '@/data/default-prices';
 
 // ─── V2 Schema re-exports ────────────────────────────────────────────────────
 
@@ -44,6 +45,96 @@ export function distributeStudentCounts(
     }
   }
   return result;
+}
+
+// ─── Per-year student count resolution ───────────────────────────────────────
+
+/**
+ * Resolve student counts from AI extraction into the store's nested year structure.
+ * Prefers per-year data (studentCountsPerYear) when available — passes it through
+ * with number keys. Falls back to distributing per-level totals evenly.
+ */
+export function resolveStudentCounts(
+  levels: SchoolLevel[],
+  extraction: Pick<IntakeExtractionV2, 'studentCountsPerLevel' | 'studentCountsPerYear'>,
+): Partial<Record<SchoolLevel, Record<number, number>>> {
+  if (levels.length === 0) return {};
+
+  // Prefer per-year data
+  const perYear = extraction.studentCountsPerYear;
+  if (perYear && Object.keys(perYear).length > 0) {
+    const result: Partial<Record<SchoolLevel, Record<number, number>>> = {};
+    for (const level of levels) {
+      const yearData = perYear[level];
+      if (!yearData) continue;
+      result[level] = {};
+      for (const [yearStr, count] of Object.entries(yearData)) {
+        const year = Number(yearStr);
+        if (!isNaN(year) && count > 0) {
+          result[level]![year] = count;
+        }
+      }
+    }
+    return result;
+  }
+
+  // Fallback to per-level totals with even distribution
+  return distributeStudentCounts(levels, extraction.studentCountsPerLevel);
+}
+
+// ─── Auto-enrich module setups with default prices ───────────────────────────
+
+/** Provider mapping from intake provider IDs to default-prices provider keys */
+const INTAKE_TO_PRICE_PROVIDER: Record<string, string> = {
+  'cito-oud': 'cito',
+  'cito-nieuw': 'cito',
+  'dia': 'dia',
+  'jij': 'jij',
+};
+
+export type IntakePriceSource = 'intake' | 'default';
+
+export interface EnrichedModuleSetup {
+  moduleId: string;
+  currentProvider: CurrentProvider;
+  pricePerStudent: number | null;
+  customProviderName?: string;
+  priceSource: IntakePriceSource;
+}
+
+/**
+ * Enrich module setups with default publication prices when the intake
+ * extracted a provider but no price. The user can always override in the wizard.
+ */
+export function enrichModuleSetupsWithDefaultPrices(
+  moduleSetups: IntakeExtractionV2['moduleSetups'],
+): EnrichedModuleSetup[] {
+  return moduleSetups.map((setup) => {
+    // If price was extracted from the conversation, keep it
+    if (setup.pricePerStudent !== null) {
+      return { ...setup, priceSource: 'intake' as IntakePriceSource };
+    }
+
+    // Look up default price for this provider + module
+    const priceProvider = INTAKE_TO_PRICE_PROVIDER[setup.currentProvider];
+    if (!priceProvider) {
+      return { ...setup, priceSource: 'intake' as IntakePriceSource };
+    }
+
+    const defaultPrice = DEFAULT_PRICES.find(
+      (p) => p.moduleId === setup.moduleId && p.provider === priceProvider,
+    );
+
+    if (defaultPrice) {
+      return {
+        ...setup,
+        pricePerStudent: defaultPrice.amountPerStudent,
+        priceSource: 'default' as IntakePriceSource,
+      };
+    }
+
+    return { ...setup, priceSource: 'intake' as IntakePriceSource };
+  });
 }
 
 // System prompt is now server-side only (single source of truth in api/ai-intake.ts)

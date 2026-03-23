@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { MODULE_IDS, SCHOOL_LEVELS, PROVIDERS } from '@/features/school-profile/schemas/intake-extraction.schema';
+import { YEARS_PER_LEVEL, type SchoolLevel } from '@/models/school';
 
 // Display labels for modules and providers
 const MODULE_LABELS: Record<string, string> = {
@@ -49,7 +50,7 @@ interface StructuredIntakeFormProps {
 function buildNotesFromFields(fields: {
   schoolName: string;
   levels: string[];
-  studentCounts: Record<string, string>;
+  studentCounts: Record<string, Record<string, string>>;
   modules: ModuleEntry[];
   contactName: string;
   contactRole: string;
@@ -62,8 +63,15 @@ function buildNotesFromFields(fields: {
   if (fields.levels.length) lines.push(`Niveaus: ${fields.levels.join(', ')}`);
 
   for (const level of fields.levels) {
-    const count = fields.studentCounts[level];
-    if (count) lines.push(`Leerlingen ${LEVEL_LABELS[level] || level}: ${count}`);
+    const yearCounts = fields.studentCounts[level];
+    if (!yearCounts) continue;
+    const parts = Object.entries(yearCounts)
+      .filter(([, count]) => count && Number(count) > 0)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([year, count]) => `leerjaar ${year}: ${count}`);
+    if (parts.length > 0) {
+      lines.push(`Leerlingen ${LEVEL_LABELS[level] || level}: ${parts.join(', ')}`);
+    }
   }
 
   for (const mod of fields.modules) {
@@ -89,7 +97,7 @@ function buildNotesFromFields(fields: {
 export default function StructuredIntakeForm({ disabled, onAnalyze, onCancel }: StructuredIntakeFormProps) {
   const [schoolName, setSchoolName] = useState('');
   const [levels, setLevels] = useState<string[]>([]);
-  const [studentCounts, setStudentCounts] = useState<Record<string, string>>({});
+  const [studentCounts, setStudentCounts] = useState<Record<string, Record<string, string>>>({});
   const [modules, setModules] = useState<ModuleEntry[]>(
     MODULE_IDS.map((id) => ({ moduleId: id, provider: '', price: '' })),
   );
@@ -116,8 +124,11 @@ export default function StructuredIntakeForm({ disabled, onAnalyze, onCancel }: 
     );
   }, []);
 
-  const updateStudentCount = useCallback((level: string, count: string) => {
-    setStudentCounts((prev) => ({ ...prev, [level]: count }));
+  const updateStudentCount = useCallback((level: string, year: string, count: string) => {
+    setStudentCounts((prev) => ({
+      ...prev,
+      [level]: { ...(prev[level] || {}), [year]: count },
+    }));
   }, []);
 
   const hasContent = schoolName || levels.length > 0 || contactName || notes.trim();
@@ -173,22 +184,33 @@ export default function StructuredIntakeForm({ disabled, onAnalyze, onCancel }: 
 
         {levels.length > 0 && (
           <div>
-            <label className={labelClass}>Leerlingaantal per niveau</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {levels.map((level) => (
-                <div key={level} className="flex items-center gap-2">
-                  <span className="text-sm text-neutral-600 w-20">{LEVEL_LABELS[level]}</span>
-                  <input
-                    type="number"
-                    min={0}
-                    value={studentCounts[level] || ''}
-                    onChange={(e) => updateStudentCount(level, e.target.value)}
-                    disabled={disabled}
-                    placeholder="0"
-                    className="h-10 w-24 text-center border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cito-primary disabled:opacity-50"
-                  />
-                </div>
-              ))}
+            <label className={labelClass}>Leerlingaantal per leerjaar</label>
+            <p className={subLabelClass}>Vul per niveau het aantal leerlingen per leerjaar in</p>
+            <div className="flex flex-col gap-4 mt-2">
+              {levels.map((level) => {
+                const years = YEARS_PER_LEVEL[level as SchoolLevel] || [];
+                return (
+                  <div key={level}>
+                    <span className="text-sm font-medium text-neutral-700">{LEVEL_LABELS[level]}</span>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {years.map((year) => (
+                        <div key={year} className="flex items-center gap-1">
+                          <span className="text-xs text-neutral-500 w-10">Jaar {year}</span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={studentCounts[level]?.[String(year)] || ''}
+                            onChange={(e) => updateStudentCount(level, String(year), e.target.value)}
+                            disabled={disabled}
+                            placeholder="0"
+                            className="h-10 w-20 text-center border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cito-primary disabled:opacity-50"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

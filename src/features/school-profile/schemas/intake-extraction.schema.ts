@@ -70,6 +70,11 @@ export const IntakeExtractionSchemaV2 = z.object({
     (v) => v ?? null,
     z.record(z.string(), coerceNumber).nullable(),
   ),
+  // Per-year counts: { "havo": { "1": 150, "2": 140 } } — preferred over per-level totals
+  studentCountsPerYear: z.preprocess(
+    (v) => v ?? null,
+    z.record(z.string(), z.record(z.string(), coerceNumber)).nullable(),
+  ).optional(),
   selectedModules: safeArray(z.enum(MODULE_IDS)),
   moduleSetups: safeArray(z.object({
     moduleId: z.enum(MODULE_IDS),

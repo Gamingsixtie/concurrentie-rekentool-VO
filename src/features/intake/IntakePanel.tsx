@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { extractIntakeFromNotes, distributeStudentCounts } from '../../lib/ai-intake';
+import {
+  extractIntakeFromNotes,
+  resolveStudentCounts,
+  enrichModuleSetupsWithDefaultPrices,
+  type EnrichedModuleSetup,
+} from '../../lib/ai-intake';
 import type { IntakeExtraction } from '../../lib/ai-intake';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { SCHOOL_LEVEL_LABELS, CURRENT_PROVIDER_LABELS, type SchoolLevel } from '../../models/school';
@@ -13,8 +18,16 @@ interface IntakePanelProps {
 
 // ─── Extracted data preview ───────────────────────────────────────────────────
 
-function ExtractionPreview({ extraction }: { extraction: IntakeExtraction }) {
-  const { levels, studentCountsPerLevel, moduleSetups, unsureAbout } = extraction;
+function ExtractionPreview({
+  extraction,
+  enrichedSetups,
+}: {
+  extraction: IntakeExtraction;
+  enrichedSetups: EnrichedModuleSetup[];
+}) {
+  const { levels, studentCountsPerLevel, studentCountsPerYear, unsureAbout } = extraction;
+  const hasPerYear = studentCountsPerYear && Object.keys(studentCountsPerYear).length > 0;
+  const hasPerLevel = studentCountsPerLevel && Object.keys(studentCountsPerLevel).length > 0;
 
   return (
     <div className="space-y-4">
@@ -34,14 +47,39 @@ function ExtractionPreview({ extraction }: { extraction: IntakeExtraction }) {
         </div>
       )}
 
-      {/* Student counts */}
-      {studentCountsPerLevel && Object.keys(studentCountsPerLevel).length > 0 && (
+      {/* Student counts — per year (preferred) or per level (fallback) */}
+      {hasPerYear && (
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+            Leerlingaantallen per leerjaar
+          </div>
+          <div className="space-y-2">
+            {Object.entries(studentCountsPerYear!).map(([level, years]) => (
+              <div key={level}>
+                <span className="text-sm font-medium text-neutral-900">
+                  {SCHOOL_LEVEL_LABELS[level as SchoolLevel] ?? level}
+                </span>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                  {Object.entries(years)
+                    .sort(([a], [b]) => Number(a) - Number(b))
+                    .map(([year, count]) => (
+                      <span key={year} className="text-xs text-neutral-600">
+                        Jaar {year}: <span className="font-medium text-neutral-800">{Number(count)}</span>
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {!hasPerYear && hasPerLevel && (
         <div className="bg-white rounded-lg border border-neutral-200 p-4">
           <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
             Leerlingaantallen
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {Object.entries(studentCountsPerLevel).map(([level, count]) => (
+            {Object.entries(studentCountsPerLevel!).map(([level, count]) => (
               <div key={level} className="text-sm">
                 <span className="font-medium text-neutral-900">
                   {SCHOOL_LEVEL_LABELS[level as SchoolLevel] ?? level}:
@@ -53,19 +91,19 @@ function ExtractionPreview({ extraction }: { extraction: IntakeExtraction }) {
         </div>
       )}
 
-      {/* Module setups */}
-      {moduleSetups.length > 0 && (
+      {/* Module setups with price source labels */}
+      {enrichedSetups.length > 0 && (
         <div className="bg-white rounded-lg border border-neutral-200 p-4">
           <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
             Huidige situatie per module
           </div>
           <div className="space-y-2">
-            {moduleSetups.map((setup) => {
+            {enrichedSetups.map((setup) => {
               const moduleDef = MODULE_CATALOG.find((m) => m.id === setup.moduleId);
               const providerLabel =
                 setup.currentProvider === 'overig' && setup.customProviderName
                   ? setup.customProviderName
-                  : CURRENT_PROVIDER_LABELS[setup.currentProvider];
+                  : CURRENT_PROVIDER_LABELS[setup.currentProvider as keyof typeof CURRENT_PROVIDER_LABELS];
               return (
                 <div key={setup.moduleId} className="flex items-center justify-between gap-3 text-sm py-1 border-b border-neutral-100 last:border-0">
                   <span className="font-medium text-neutral-900">
@@ -84,6 +122,9 @@ function ExtractionPreview({ extraction }: { extraction: IntakeExtraction }) {
                     {setup.pricePerStudent !== null && (
                       <span className="text-neutral-500 text-xs">
                         {formatCurrency(setup.pricePerStudent)}/lln
+                        {setup.priceSource === 'default' && (
+                          <span className="ml-1 text-neutral-400">(publicatieprijs)</span>
+                        )}
                       </span>
                     )}
                   </div>
@@ -131,6 +172,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [extraction, setExtraction] = useState<IntakeExtraction | null>(null);
+  const [enrichedSetups, setEnrichedSetups] = useState<EnrichedModuleSetup[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
 
   const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep } = useSchoolProfileStore();
@@ -140,10 +182,12 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
     setStatus('loading');
     setErrorMsg('');
     setExtraction(null);
+    setEnrichedSetups([]);
 
     try {
       const result = await extractIntakeFromNotes(notes);
       setExtraction(result);
+      setEnrichedSetups(enrichModuleSetupsWithDefaultPrices(result.moduleSetups));
       setStatus('done');
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Onbekende fout');
@@ -158,18 +202,16 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
     const levels = extraction.levels as SchoolLevel[];
     setLevels(levels);
 
-    const studentCounts = distributeStudentCounts(
-      levels,
-      extraction.studentCountsPerLevel as Record<string, number> | null,
-    );
+    // Resolve student counts: prefer per-year, fallback to per-level distribution
+    const studentCounts = resolveStudentCounts(levels, extraction);
     setStudentCounts(studentCounts);
 
     setSelectedModules(extraction.selectedModules);
 
-    if (extraction.moduleSetups.length > 0) {
+    // Use enriched setups (with auto-filled default prices)
+    if (enrichedSetups.length > 0) {
       setModuleSetups(
-        extraction.moduleSetups.map((s) => ({
-          ...s,
+        enrichedSetups.map((s) => ({
           moduleId: s.moduleId,
           currentProvider: s.currentProvider,
           pricePerStudent: s.pricePerStudent,
@@ -287,7 +329,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
             </h2>
           </div>
 
-          <ExtractionPreview extraction={extraction} />
+          <ExtractionPreview extraction={extraction} enrichedSetups={enrichedSetups} />
 
           {/* Confirm / edit */}
           <div className="mt-5 flex flex-wrap gap-3">

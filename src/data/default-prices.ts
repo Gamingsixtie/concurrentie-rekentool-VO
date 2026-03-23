@@ -3,24 +3,31 @@ import type { PriceRecord } from '../models/pricing';
 /**
  * Default publication pricing data for all providers and modules.
  * Only modules actually offered by a provider have a record.
- * Prices are per student per year based on publication lists 2025-2026.
+ * Prices are per student per year based on the most recent verified source.
  *
- * JIJ! (Bureau ICE) note:
+ * DIA (2025-2026):
+ * Bron: DIA Webshop (shop.dia.nl), geverifieerd maart 2026.
+ * Per leerling per schooljaar (excl. btw), inclusief nul- en volgmeting.
+ * Staffelkorting: 500+ = 5%, 1000+ = 10% (niet meegenomen in basisprijzen).
+ *
+ * JIJ! (Bureau ICE):
+ * Bron: Deskresearch MediaTest juni 2024 (R-5043), in opdracht van Cito.
  * JIJ! uses a license + per-test model, not a flat per-student rate.
- * The amountPerStudent values below are estimates based on a mid-size school
- * (800 students, Licentie 2, 2 administrations/student/year).
- * Base data: schooljaar 2022-2023, inflation-corrected with CBS CPI (+10,8%).
- * Actual 2025-2026 prices may differ — contact Bureau ICE for current rates.
+ * The amountPerStudent values are calculated for a mid-size school
+ * (800 students, Licentie 3, 2 administrations/student/year).
  * See src/data/jij-license-tiers.ts for the full tiered pricing model.
  */
 
 const JIJ_NOTE =
-  'Schatting o.b.v. prijslijst 22-23 + CBS-inflatiecorrectie (+10,8%). ' +
-  'JIJ! hanteert een licentie + toetsprijs-model; werkelijke kosten hangen af van schoolgrootte en afnameaantal. ' +
-  'Neem contact op met Bureau ICE voor actuele tarieven.';
+  'JIJ! hanteert een licentie + toetsprijs-model. Prijs berekend als ' +
+  '(€975 jaarfee + 1.600×€3,75 toetskosten + €500 Magister-koppeling) / 800 leerlingen = €9,34. ' +
+  'Werkelijke kosten variëren sterk met schoolgrootte. ' +
+  'Bron: deskresearch MediaTest 2024 (R-5043). Neem contact op met Bureau ICE voor actuele tarieven.';
 
 export const DEFAULT_PRICES: PriceRecord[] = [
-  // --- Rekenwiskunde ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REKENWISKUNDE
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'rekenwiskunde',
     provider: 'cito',
@@ -33,24 +40,27 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'rekenwiskunde',
     provider: 'dia',
-    amountPerStudent: 5.2,
+    amountPerStudent: 3.36,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'DIA Webshop — VO Diacijfer 2025-2026',
+    verifiedAt: new Date('2026-03-21'),
     isPublicationPrice: true,
+    note: 'Diacijfer (rekenniveau) los. Diawisk (wiskundig redeneren) apart beschikbaar voor €3,36.',
   },
   {
     moduleId: 'rekenwiskunde',
     provider: 'jij',
-    amountPerStudent: 9.0,
+    amountPerStudent: 9.34,
     source: 'manual',
-    sourceLabel: 'Inflatiecorrectie prijslijst 22-23 (CBS CPI +10,8%) — Licentie 2, 800 lln, 2 afnames/lln',
-    verifiedAt: new Date('2026-03-21'),
+    sourceLabel: 'Berekend o.b.v. deskresearch MediaTest 2024 (R-5043) — Licentie 3, 800 lln, 2 afnames/lln',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: false,
     note: JIJ_NOTE,
   },
 
-  // --- Nederlands ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NEDERLANDS
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'nederlands',
     provider: 'cito',
@@ -63,24 +73,27 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'nederlands',
     provider: 'dia',
-    amountPerStudent: 5.2,
+    amountPerStudent: 3.36,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'DIA Webshop — VO Diatekst NE 2025-2026',
+    verifiedAt: new Date('2026-03-21'),
     isPublicationPrice: true,
+    note: 'Diatekst NE (begrijpend lezen) los. Diawoord NE (woordenschat) apart €3,36. Pakket NE (beide): €5,84.',
   },
   {
     moduleId: 'nederlands',
     provider: 'jij',
-    amountPerStudent: 9.0,
+    amountPerStudent: 9.34,
     source: 'manual',
-    sourceLabel: 'Inflatiecorrectie prijslijst 22-23 (CBS CPI +10,8%) — Licentie 2, 800 lln, 2 afnames/lln',
-    verifiedAt: new Date('2026-03-21'),
+    sourceLabel: 'Berekend o.b.v. deskresearch MediaTest 2024 (R-5043) — Licentie 3, 800 lln, 2 afnames/lln',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: false,
     note: JIJ_NOTE,
   },
 
-  // --- Engels ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ENGELS
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'engels',
     provider: 'cito',
@@ -93,15 +106,27 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'engels',
     provider: 'dia',
-    amountPerStudent: 5.2,
+    amountPerStudent: 5.84,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'DIA Webshop — VO pakket EN compleet 2025-2026',
+    verifiedAt: new Date('2026-03-21'),
     isPublicationPrice: true,
+    note: 'Pakket EN compleet (Diatekst EN + Diawoord EN). Individueel: Diatekst EN €3,36, Diawoord EN €3,36.',
   },
-  // JIJ biedt Engels aan (ERK A1-B2/C1) maar exacte prijs onbekend — niet opgenomen
+  {
+    moduleId: 'engels',
+    provider: 'jij',
+    amountPerStudent: 9.34,
+    source: 'manual',
+    sourceLabel: 'Berekend o.b.v. deskresearch MediaTest 2024 (R-5043) — Licentie 3, 800 lln, 2 afnames/lln',
+    verifiedAt: new Date('2026-03-23'),
+    isPublicationPrice: false,
+    note: JIJ_NOTE + ' JIJ! biedt Engels aan op ERK-niveaus A1-B2/C1 (lezen + luisteren).',
+  },
 
-  // --- Taalverzorging ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TAALVERZORGING
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'taalverzorging',
     provider: 'cito',
@@ -111,10 +136,21 @@ export const DEFAULT_PRICES: PriceRecord[] = [
     verifiedAt: new Date('2026-01-15'),
     isPublicationPrice: true,
   },
-  // DIA does not offer Taalverzorging separately
-  // JIJ does not offer Taalverzorging
+  {
+    moduleId: 'taalverzorging',
+    provider: 'dia',
+    amountPerStudent: 3.36,
+    source: 'publication',
+    sourceLabel: 'DIA Webshop — VO Diaspel 2025-2026 (individuele prijs)',
+    verifiedAt: new Date('2026-03-23'),
+    isPublicationPrice: true,
+    note: 'Diaspel (digitaal dictee voor spelling). Ook in Pakket NE compleet (Diatekst + Diawoord + Diaspel): €8,58.',
+  },
+  // JIJ! biedt geen apart taalverzorgingsproduct aan
 
-  // --- Sociaal-emotioneel ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SOCIAAL-EMOTIONEEL
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'sociaal-emotioneel',
     provider: 'cito',
@@ -124,19 +160,21 @@ export const DEFAULT_PRICES: PriceRecord[] = [
     verifiedAt: new Date('2026-01-15'),
     isPublicationPrice: true,
   },
+  // DIA biedt geen eigen sociaal-emotioneel instrument aan (SAQI is extern, geen Dia-product)
   {
     moduleId: 'sociaal-emotioneel',
-    provider: 'dia',
-    amountPerStudent: 4.0,
-    source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
-    isPublicationPrice: true,
+    provider: 'jij',
+    amountPerStudent: 0,
+    source: 'manual',
+    sourceLabel: 'Bureau ICE — onderdeel van JIJ! LVS licentie (geen meerprijs)',
+    verifiedAt: new Date('2026-03-23'),
+    isPublicationPrice: false,
+    note: 'JIJ! Hart & Handen zelfevaluaties (leerbenadering, creatief vermogen, sociale context) zitten in de basislicentie. Geen aparte kosten per leerling.',
   },
-  // JIJ biedt zelfevaluaties aan (leerbenadering, creatief vermogen, sociale context)
-  // maar exacte prijs onbekend — niet opgenomen
 
-  // --- Cognitieve capaciteiten ---
+  // ═══════════════════════════════════════════════════════════════════════════
+  // COGNITIEVE CAPACITEITEN
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     moduleId: 'cognitieve-capaciteiten',
     provider: 'cito',
@@ -146,6 +184,15 @@ export const DEFAULT_PRICES: PriceRecord[] = [
     verifiedAt: new Date('2026-01-15'),
     isPublicationPrice: true,
   },
-  // DIA does not offer Cognitieve capaciteiten
-  // JIJ does not offer Cognitieve capaciteiten
+  {
+    moduleId: 'cognitieve-capaciteiten',
+    provider: 'dia',
+    amountPerStudent: 9.75,
+    source: 'manual',
+    sourceLabel: 'Deskresearch MediaTest juni 2024 (R-5043) — Dia NSCCT digitaal',
+    verifiedAt: new Date('2026-03-23'),
+    isPublicationPrice: false,
+    note: 'Dia NSCCT (Niet-Schoolse Cognitieve Capaciteitentoets). Digitaal: €9,75/leerling. Papier: €4,50/leerling. Prijs uit 2024.',
+  },
+  // JIJ! biedt geen cognitieve capaciteitentoets aan
 ];

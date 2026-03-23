@@ -29,15 +29,17 @@ Regels:
 - Neem alleen modules op die de school gebruikt of wil vergelijken.
 - Als een module wordt genoemd zonder aanbieder, gebruik "geen".
 - Als een prijs wordt genoemd als totaal per jaar, deel door het leerlingaantal (als bekend).
+- Leerlingaantallen: als aantallen per leerjaar bekend zijn (bijv. "leerjaar 1: 150, leerjaar 2: 140"), gebruik studentCountsPerYear. Als alleen totalen per niveau bekend zijn (bijv. "350 HAVO leerlingen"), gebruik studentCountsPerLevel. Gebruik bij voorkeur studentCountsPerYear als de data beschikbaar is — dit is het meest flexibel voor prijsberekeningen.
 - unsureAbout: maximaal 3 punten, in het Nederlands.
 - contactPersonen: extraheer naam, rol, dmuPositie (coordinator/mt/finance/it/onbekend), email, telefoon.
 - actiePunten: extraheer wat, wanneer, verantwoordelijke.
 - pipelineSignaal: interesse/twijfel/afwijzing/concurrent-switch/verlenging/neutraal. Laat weg als onduidelijk.
 
-Verplicht JSON-formaat (voorbeeld):
+Verplicht JSON-formaat (voorbeeld met per-leerjaar aantallen):
 {
   "levels": ["havo", "vwo"],
-  "studentCountsPerLevel": {"havo": 200, "vwo": 150},
+  "studentCountsPerLevel": null,
+  "studentCountsPerYear": {"havo": {"1": 150, "2": 140, "3": 130, "4": 120, "5": 110}, "vwo": {"1": 100, "2": 95, "3": 90, "4": 85, "5": 80, "6": 75}},
   "selectedModules": ["rekenwiskunde", "nederlands"],
   "moduleSetups": [
     {"moduleId": "rekenwiskunde", "currentProvider": "dia", "pricePerStudent": 4.50},
@@ -47,6 +49,14 @@ Verplicht JSON-formaat (voorbeeld):
   "contactPersonen": [{"naam": "Jan de Vries", "rol": "Toetscoordinator", "dmuPositie": "coordinator"}],
   "actiePunten": [{"wat": "Offerte opvragen", "wanneer": "Volgende week"}],
   "pipelineSignaal": "interesse"
+}
+
+Alternatief met alleen totalen per niveau (als per-leerjaar niet bekend is):
+{
+  "levels": ["havo", "vwo"],
+  "studentCountsPerLevel": {"havo": 650, "vwo": 525},
+  "studentCountsPerYear": null,
+  ...
 }`;
 
 export async function POST(request: Request): Promise<Response> {
