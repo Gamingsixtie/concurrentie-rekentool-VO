@@ -21,6 +21,7 @@ import type { PipelineStatus } from '@/models/school';
 import { PIPELINE_STATUSES, PIPELINE_STATUS_LABELS } from '@/models/school';
 import { setPipelineStatus, validatePipelineTransition } from '@/db/operations';
 import PipelineBadge from '@/components/ui/PipelineBadge';
+import DmuProgressIndicator from './DmuProgressIndicator';
 import LostDealDialog from '@/features/school-profile/components/LostDealDialog';
 import PipelineReasonDialog from '@/features/school-profile/components/PipelineReasonDialog';
 import type { LostDealInfo } from '@/db/types';
@@ -78,6 +79,7 @@ function DraggableSchoolCard({
           {school.name}
         </h4>
         <PipelineBadge status={school.pipelineStatus} size="sm" />
+        <DmuProgressIndicator contacts={school.contacts ?? []} />
       </div>
       {cardMode === 'extended' && (
         <div className="space-y-0.5 text-[12px] text-neutral-500">
