@@ -298,6 +298,66 @@ export interface Database {
         };
         Relationships: [];
       };
+      schoolplan_analyses: {
+        Row: {
+          id: string;
+          school_id: string;
+          file_name: string;
+          file_path: string;
+          page_count: number | null;
+          uploaded_at: string;
+          summary: string;
+          themes: Json;
+          opportunities: Json;
+          also_relevant: Json;
+          opportunity_annotations: Json;
+          analysis_status: string;
+          error_message: string | null;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          file_name: string;
+          file_path: string;
+          page_count?: number | null;
+          uploaded_at?: string;
+          summary?: string;
+          themes?: Json;
+          opportunities?: Json;
+          also_relevant?: Json;
+          opportunity_annotations?: Json;
+          analysis_status?: string;
+          error_message?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          school_id?: string;
+          file_name?: string;
+          file_path?: string;
+          page_count?: number | null;
+          uploaded_at?: string;
+          summary?: string;
+          themes?: Json;
+          opportunities?: Json;
+          also_relevant?: Json;
+          opportunity_annotations?: Json;
+          analysis_status?: string;
+          error_message?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       school_prices: {
         Row: {
           id: string;

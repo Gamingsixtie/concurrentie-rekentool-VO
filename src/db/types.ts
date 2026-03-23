@@ -1,4 +1,5 @@
 import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus, DMUPosition, PreferredChannel, AuthorityLevel } from '@/models/school';
+import type { SchoolplanOpportunity, AlsoRelevantItem, OpportunityAnnotation } from '@/features/school-profile/schemas/schoolplan-analysis.schema';
 
 export interface PriceOverride {
   moduleId: string;
@@ -125,4 +126,24 @@ export interface SchoolRecord {
 
   // Joined fields (not stored in DB)
   ownerName?: string;
+}
+
+export interface SchoolplanAnalysisRow {
+  id: string;
+  school_id: string;
+  file_name: string;
+  file_path: string;
+  page_count: number | null;
+  uploaded_at: string;
+  summary: string;
+  themes: string[];  // JSONB parsed
+  opportunities: SchoolplanOpportunity[];  // JSONB parsed
+  also_relevant: AlsoRelevantItem[];  // JSONB parsed
+  opportunity_annotations: Record<string, OpportunityAnnotation>;  // JSONB parsed, keyed by opportunity index
+  analysis_status: 'pending' | 'analyzing' | 'complete' | 'failed';
+  error_message: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
 }
