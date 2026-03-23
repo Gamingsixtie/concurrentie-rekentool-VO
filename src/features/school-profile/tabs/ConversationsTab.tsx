@@ -70,11 +70,16 @@ export default function ConversationsTab() {
   };
 
   return (
-    <div>
-      {/* Timeline section */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-semibold text-neutral-900">Gesprekken</h2>
+    <div className="space-y-10">
+      {/* Gesprekken section */}
+      <div className="bg-white border border-neutral-200 rounded-lg p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between mb-4">
+          <h2 className="text-[20px] font-semibold text-neutral-900 border-l-4 border-cito-primary pl-3 flex items-center gap-2">
+            Gesprekken
+            <span className="bg-cito-primary/10 text-cito-primary text-[14px] font-semibold px-2 py-0.5 rounded-full">
+              {conversations.length}
+            </span>
+          </h2>
           <button
             type="button"
             onClick={handleAddConversation}
@@ -123,14 +128,17 @@ export default function ConversationsTab() {
       </div>
 
       {/* Acties section */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[20px] font-semibold text-neutral-900">Acties</h2>
+      <div className="bg-white border border-neutral-200 rounded-lg p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between mb-4">
+          <h2 className="text-[20px] font-semibold text-neutral-900 border-l-4 border-cito-accent pl-3 flex items-center gap-2">
+            Acties
+            <span className="bg-cito-accent/10 text-cito-accent text-[14px] font-semibold px-2 py-0.5 rounded-full">
+              {actions.length}
+            </span>
+          </h2>
           <button
             type="button"
-            onClick={() => {
-              /* ActionKanban has its own inline add form */
-            }}
+            onClick={() => handleCreateAction()}
             className="h-[44px] px-4 text-[14px] font-semibold bg-cito-accent text-white rounded-lg hover:bg-orange-600 transition-colors"
           >
             + Actie toevoegen

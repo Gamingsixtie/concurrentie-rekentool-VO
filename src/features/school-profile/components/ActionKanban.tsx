@@ -159,9 +159,9 @@ export default function ActionKanban({
                 </SortableContext>
 
                 {columnActions.length === 0 && (
-                  <p className="text-[14px] text-neutral-400 text-center py-4">
-                    Geen acties
-                  </p>
+                  <div className="border border-dashed border-neutral-200 rounded-lg py-6 text-center">
+                    <p className="text-[14px] text-neutral-400">Geen acties</p>
+                  </div>
                 )}
 
                 {/* Add button in todo column */}

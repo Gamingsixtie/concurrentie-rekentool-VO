@@ -94,14 +94,13 @@ export default function Timeline({
   return (
     <div className="relative">
       {/* Timeline connector line */}
-      <div className="absolute left-[20px] top-0 bottom-0 w-[2px] bg-neutral-200" />
+      <div className="absolute left-[14px] sm:left-[20px] top-0 bottom-6 w-[2px] bg-neutral-200" />
 
       {grouped.map((group, gi) => (
         <div key={group.date}>
           {/* Date header */}
-          <div className={`flex items-center gap-2 ${gi > 0 ? 'mt-6' : ''}`}>
-            <div className="flex-1 h-px bg-neutral-200" />
-            <span className="text-[14px] font-semibold text-neutral-400 whitespace-nowrap px-2">
+          <div className={`flex items-center gap-3 ${gi > 0 ? 'mt-6' : ''} mb-2`}>
+            <span className="text-[14px] font-semibold text-neutral-500 bg-cito-bg px-3 py-1 rounded-full whitespace-nowrap">
               {group.label}
             </span>
             <div className="flex-1 h-px bg-neutral-200" />
@@ -131,7 +130,7 @@ export default function Timeline({
                 <div key={key} className="relative flex items-start">
                   {/* Timeline dot */}
                   <div
-                    className={`absolute left-[16px] top-3 w-[8px] h-[8px] rounded-full ${dotColor} z-10`}
+                    className={`absolute left-[10px] sm:left-[16px] top-3 w-[8px] h-[8px] rounded-full ${dotColor} z-10`}
                   />
                   <div className="flex-1">
                     <TimelineEntry

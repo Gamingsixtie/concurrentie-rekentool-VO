@@ -72,7 +72,7 @@ export default function TimelineEntry({
       : conversation.content;
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-lg p-4 ml-[56px]">
+    <div className="bg-white border border-neutral-200 rounded-lg p-4 ml-[40px] sm:ml-[56px] hover:border-neutral-300 hover:shadow-sm transition-all">
       <div className="flex items-start gap-3">
         {/* Contact initials */}
         <div className="flex-shrink-0 w-[32px] h-[32px] rounded-full bg-cito-primary flex items-center justify-center">
@@ -105,7 +105,7 @@ export default function TimelineEntry({
               {conversation.tags.map(tag => (
                 <span
                   key={tag}
-                  className="inline-flex items-center bg-neutral-100 text-neutral-700 border border-neutral-200 text-[14px] rounded-full px-2 py-0.5"
+                  className="inline-flex items-center bg-cito-primary/5 text-cito-primary border border-cito-primary/15 text-[13px] font-medium rounded-full px-2.5 py-0.5"
                 >
                   {tag}
                 </span>
@@ -114,13 +114,16 @@ export default function TimelineEntry({
           )}
 
           {/* Actions */}
-          <div className="flex items-center gap-4 mt-3">
+          <div className="flex items-center gap-3 mt-3">
             {onEdit && (
               <button
                 type="button"
                 onClick={() => onEdit(conversation)}
-                className="text-[14px] text-neutral-500 hover:text-neutral-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[14px] text-neutral-600 hover:text-neutral-800 border border-neutral-200 hover:border-neutral-300 rounded-md px-2.5 py-1 transition-colors"
               >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 1.5l2.5 2.5L4.5 12H2v-2.5L10 1.5z" />
+                </svg>
                 Bewerken
               </button>
             )}
@@ -128,8 +131,11 @@ export default function TimelineEntry({
               <button
                 type="button"
                 onClick={() => onCreateAction(conversation.id)}
-                className="text-[14px] text-neutral-500 hover:text-neutral-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[14px] text-cito-accent font-semibold hover:text-orange-700 border border-cito-accent/30 hover:border-cito-accent/50 bg-orange-50 hover:bg-orange-100 rounded-md px-2.5 py-1 transition-colors"
               >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M7 3v8M3 7h8" />
+                </svg>
                 Actie aanmaken
               </button>
             )}

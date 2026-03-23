@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { ActionItem as ActionItemType, Conversation } from '@/db/types';
@@ -13,6 +14,8 @@ export default function ActionItemCard({
   conversations,
   onDelete,
 }: ActionItemProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -27,6 +30,13 @@ export default function ActionItemCard({
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  // Auto-reset delete confirmation after 3 seconds
+  useEffect(() => {
+    if (!confirmingDelete) return;
+    const timer = setTimeout(() => setConfirmingDelete(false), 3000);
+    return () => clearTimeout(timer);
+  }, [confirmingDelete]);
 
   // Find linked conversation
   const linkedConversation = action.conversationId
@@ -66,27 +76,44 @@ export default function ActionItemCard({
       <div className="flex-1 min-w-0">
         <p className="text-[14px] font-semibold text-neutral-700">{action.title}</p>
         {linkedDate && (
-          <p className="text-[14px] text-neutral-400 mt-0.5">
-            &larr; gesprek {linkedDate}
+          <p className="text-[14px] text-neutral-500 mt-0.5 flex items-center gap-1">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 8L2 8L2 4" />
+              <path d="M12 7A5 5 0 1 0 7 12" />
+            </svg>
+            Gesprek {linkedDate}
           </p>
         )}
       </div>
 
-      {/* Delete */}
-      <button
-        type="button"
-        onClick={() => onDelete(action.id)}
-        className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"
-      >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path
-            d="M2 2L10 10M10 2L2 10"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+      {/* Delete with confirmation */}
+      {confirmingDelete ? (
+        <button
+          type="button"
+          onClick={() => {
+            onDelete(action.id);
+            setConfirmingDelete(false);
+          }}
+          className="flex-shrink-0 text-[13px] font-semibold text-red-600 hover:text-red-700 whitespace-nowrap transition-colors"
+        >
+          Verwijderen?
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setConfirmingDelete(true)}
+          className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M2 2L10 10M10 2L2 10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
