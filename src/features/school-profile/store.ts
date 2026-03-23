@@ -33,6 +33,10 @@ interface SchoolProfileState {
   currentStep: number;
   setCurrentStep: (step: number) => void;
 
+  // AI Intake mode
+  intakeMode: boolean;
+  setIntakeMode: (mode: boolean) => void;
+
   // CRM-lite fields
   pipelineStatus: PipelineStatus;
   contacts: Contact[];
@@ -60,6 +64,7 @@ const initialState = {
   moduleSetups: [] as ModuleCurrentSetup[],
   scenario: null as Scenario | null,
   currentStep: 0,
+  intakeMode: false,
   // CRM-lite defaults
   pipelineStatus: 'prospect' as PipelineStatus,
   contacts: [] as Contact[],
@@ -96,6 +101,7 @@ export const useSchoolProfileStore = create<SchoolProfileState>()(
     setModuleSetups: (moduleSetups) => set({ moduleSetups }),
     setScenario: (scenario) => set({ scenario }),
     setCurrentStep: (currentStep) => set({ currentStep }),
+    setIntakeMode: (intakeMode) => set({ intakeMode }),
 
     applyPreset: (presetId) => {
       const preset = SCHOOL_SIZE_PRESETS.find((p) => p.id === presetId);

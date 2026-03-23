@@ -6,11 +6,15 @@ import { useSchoolProfileStore } from '../store.ts';
 import StepContainer from '../../../components/wizard/StepContainer.tsx';
 import { forwardRef, useImperativeHandle } from 'react';
 import type { WizardStepRef } from './WizardStep1.tsx';
+import ScenarioPreview from '../../../components/wizard/ScenarioPreview.tsx';
+import DMUContextPanel from '../../../components/wizard/DMUContextPanel.tsx';
+import { useWizardInsights } from '../../../hooks/useWizardInsights.ts';
 
 const SCENARIOS: Scenario[] = ['A', 'B'];
 
 const WizardStep5 = forwardRef<WizardStepRef>(function WizardStep5(_props, ref) {
-  const { scenario, setScenario } = useSchoolProfileStore();
+  const { scenario, setScenario, contacts } = useSchoolProfileStore();
+  const { comparisonPreview, schijnvoordelen, upsellOpportunities, totalStudents } = useWizardInsights();
 
   const {
     watch,
@@ -98,6 +102,25 @@ const WizardStep5 = forwardRef<WizardStepRef>(function WizardStep5(_props, ref) 
         <p className="mt-3 text-[14px] text-red-600" role="alert">
           {errors.scenario.message}
         </p>
+      )}
+
+      {/* Scenario Preview */}
+      {currentScenario && (
+        <ScenarioPreview
+          scenario={currentScenario}
+          comparisonPreview={comparisonPreview}
+          schijnvoordelen={schijnvoordelen}
+          upsellOpportunities={upsellOpportunities}
+          totalStudents={totalStudents}
+        />
+      )}
+
+      {/* DMU Context */}
+      {currentScenario && (
+        <DMUContextPanel
+          contacts={contacts}
+          scenario={currentScenario}
+        />
       )}
     </StepContainer>
   );

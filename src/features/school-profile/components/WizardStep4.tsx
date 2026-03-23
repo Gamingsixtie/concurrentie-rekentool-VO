@@ -9,6 +9,9 @@ import type { WizardStepRef } from './WizardStep1.tsx';
 import { MODULE_CATALOG } from '../../../models/modules.ts';
 import { DEFAULT_PRICES } from '../../../data/default-prices.ts';
 import { formatCurrency } from '../../../lib/format.ts';
+import DifferentiatorComparison from '../../../components/wizard/DifferentiatorComparison.tsx';
+import { useWizardInsights } from '../../../hooks/useWizardInsights.ts';
+import { checkPriceDeviation } from '../../../models/pricing.ts';
 
 // Providers for which a price input is relevant
 const PRICE_RELEVANT_PROVIDERS: CurrentProvider[] = ['dia', 'jij', 'saqi', 'overig'];
@@ -33,6 +36,7 @@ function getProviderOptions(moduleId: string): CurrentProvider[] {
 
 const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) {
   const { moduleSetups, setModuleSetups, selectedModules } = useSchoolProfileStore();
+  const { schijnvoordelen } = useWizardInsights();
 
   const defaultSetups = selectedModules.map((moduleId) => {
     const existing = moduleSetups.find((s) => s.moduleId === moduleId);
@@ -177,6 +181,29 @@ const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) 
                   </div>
                 )}
 
+                {/* Price deviation context */}
+                {showPrice && currentSetup?.pricePerStudent !== null && provider && (
+                  (() => {
+                    const providerKey = provider === 'dia' ? 'dia' : provider === 'jij' ? 'jij' : provider === 'saqi' ? 'saqi' : null;
+                    if (!providerKey) return null;
+                    const deviation = checkPriceDeviation(moduleId, providerKey, currentSetup.pricePerStudent ?? 0);
+                    if (!deviation.hasDeviation || deviation.publicationPrice === null) return null;
+                    return (
+                      <div className="col-span-full">
+                        <div className="text-xs text-neutral-500 flex items-center gap-2">
+                          <span>Publicatieprijs: {formatCurrency(deviation.publicationPrice)}</span>
+                          <span>|</span>
+                          <span>Uw prijs: {formatCurrency(currentSetup.pricePerStudent ?? 0)}</span>
+                          <span>|</span>
+                          <span className={deviation.percentDiff > 0 ? 'text-red-600' : 'text-green-600'}>
+                            {deviation.percentDiff > 0 ? '+' : ''}{deviation.percentDiff.toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()
+                )}
+
                 {/* Naam andere aanbieder */}
                 {showCustomName && (
                   <div>
@@ -204,6 +231,37 @@ const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) 
                   </div>
                 )}
               </div>
+
+              {/* Schijnvoordeel tip for this module + provider */}
+              {provider && provider !== 'geen' && (() => {
+                const relevantWarnings = schijnvoordelen.filter(
+                  (w) => w.affectedModules.includes(moduleId),
+                );
+                if (relevantWarnings.length === 0) return null;
+                return (
+                  <div className="mt-2 space-y-1">
+                    {relevantWarnings.map((w, wi) => (
+                      <div key={wi} className={`text-xs rounded px-2 py-1 ${
+                        w.severity === 'critical'
+                          ? 'bg-red-50 text-red-700'
+                          : w.severity === 'warning'
+                            ? 'bg-amber-50 text-amber-700'
+                            : 'bg-blue-50 text-blue-700'
+                      }`}>
+                        {w.title}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Differentiator comparison */}
+              {provider && !['geen', 'cito-oud', 'cito-nieuw'].includes(provider) && (
+                <DifferentiatorComparison
+                  moduleId={moduleId}
+                  currentProvider={provider}
+                />
+              )}
             </div>
           );
         })}

@@ -1,13 +1,36 @@
+import { useMemo } from 'react';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
-import { getTotalStudents } from '@/engine/price-comparison';
+import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
+import { detectSchijnvoordelen, type SchijnvoordeelWarning } from '@/engine/schijnvoordeel';
+import { calculateUpsell, type UpsellOpportunity } from '@/engine/upsell';
+import { DEFAULT_PRICES } from '@/data/default-prices';
 
 export function useWizardInsights() {
+  const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
+  const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
+
   const totalStudents = getTotalStudents(studentCounts);
 
-  // TODO: implement schijnvoordeel detection
+  const comparisonPreview = useMemo(
+    () => calculateComparison(selectedModules, studentCounts, DEFAULT_PRICES),
+    [selectedModules, studentCounts],
+  );
+
+  const schijnvoordelen: SchijnvoordeelWarning[] = useMemo(
+    () => detectSchijnvoordelen(selectedModules, studentCounts, comparisonPreview, moduleSetups),
+    [selectedModules, studentCounts, comparisonPreview, moduleSetups],
+  );
+
+  const upsellOpportunities: UpsellOpportunity[] = useMemo(
+    () => calculateUpsell(moduleSetups, comparisonPreview),
+    [moduleSetups, comparisonPreview],
+  );
+
   return {
-    schijnvoordelen: [] as string[],
+    comparisonPreview,
+    schijnvoordelen,
+    upsellOpportunities,
     totalStudents,
   };
 }

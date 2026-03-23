@@ -4,6 +4,9 @@ import { moduleSelectionSchema, type ModuleSelectionData } from '../schemas/step
 import { MODULE_CATALOG, MODULE_CATEGORIES, type ModuleCategory } from '../../../models/modules.ts';
 import { useSchoolProfileStore } from '../store.ts';
 import StepContainer from '../../../components/wizard/StepContainer.tsx';
+import ModulePriceBadges from '../../../components/wizard/ModulePriceBadges.tsx';
+import SchijnvoordeelBadge from '../../../components/wizard/SchijnvoordeelBadge.tsx';
+import { useWizardInsights } from '../../../hooks/useWizardInsights.ts';
 import { forwardRef, useImperativeHandle } from 'react';
 import type { WizardStepRef } from './WizardStep1.tsx';
 
@@ -11,6 +14,7 @@ const CATEGORY_ORDER: ModuleCategory[] = ['leerlingvolgsysteem', 'overige-instru
 
 const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) {
   const { selectedModules, setSelectedModules } = useSchoolProfileStore();
+  const { schijnvoordelen, totalStudents, upsellOpportunities } = useWizardInsights();
 
   const {
     watch,
@@ -30,6 +34,7 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
       ? currentModules.filter((id) => id !== moduleId)
       : [...currentModules, moduleId];
     setValue('selectedModules', updated);
+    setSelectedModules(updated);
   };
 
   useImperativeHandle(ref, () => ({
@@ -49,6 +54,12 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
 
   return (
     <StepContainer title="Welke toetsen en instrumenten gebruikt uw school?">
+      {totalStudents > 0 && (
+        <p className="text-[13px] text-neutral-500 mb-4">
+          Prijzen per leerling/jaar op basis van {totalStudents.toLocaleString('nl-NL')} leerlingen
+        </p>
+      )}
+
       {CATEGORY_ORDER.map((category, catIndex) => {
         const modules = MODULE_CATALOG.filter((m) => m.category === category);
         return (
@@ -66,13 +77,14 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
                     onClick={() => toggleModule(mod.id)}
                     className={`
                       text-left rounded-lg p-4 shadow-sm transition-colors
-                      flex items-start justify-between gap-3
+                      flex flex-col gap-2
                       ${isSelected
                         ? 'border-2 border-cito-accent bg-[#fff7ed]'
                         : 'border border-neutral-200 bg-white'
                       }
                     `}
                   >
+                    <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="text-[16px] font-semibold text-neutral-900">
                         {mod.name}
@@ -107,6 +119,10 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
                         `}
                       />
                     </div>
+                    </div>
+
+                    {/* Inline price badges */}
+                    <ModulePriceBadges moduleId={mod.id} />
                   </button>
                 );
               })}
@@ -114,6 +130,26 @@ const WizardStep3 = forwardRef<WizardStepRef>(function WizardStep3(_props, ref) 
           </div>
         );
       })}
+
+      {/* Upsell hints for modules not yet selected */}
+      {upsellOpportunities.length > 0 && (
+        <div className="mt-4 rounded-lg bg-green-50 border border-green-200 p-3">
+          <div className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">
+            Upsell-kansen
+          </div>
+          {upsellOpportunities.map((u) => (
+            <p key={u.moduleId} className="text-sm text-green-800">
+              {u.moduleName}: school gebruikt {u.currentProvider}, Cito biedt meerwaarde
+              {u.savingsPerStudent !== null && u.savingsPerStudent > 0 && ` (€${u.savingsPerStudent.toFixed(2)}/lln besparing)`}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Schijnvoordeel warnings */}
+      {currentModules.length > 0 && (
+        <SchijnvoordeelBadge warnings={schijnvoordelen} />
+      )}
 
       {currentModules.length === 0 && (
         <p className="mt-4 text-[14px] text-neutral-500">

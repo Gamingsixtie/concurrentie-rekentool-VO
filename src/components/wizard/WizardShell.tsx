@@ -10,6 +10,7 @@ import WizardStep2 from '../../features/school-profile/components/WizardStep2';
 import WizardStep3 from '../../features/school-profile/components/WizardStep3';
 import WizardStep4 from '../../features/school-profile/components/WizardStep4';
 import WizardStep5 from '../../features/school-profile/components/WizardStep5';
+import { IntakePanel } from '../../features/intake/IntakePanel';
 
 const TOTAL_STEPS = 5;
 
@@ -17,7 +18,7 @@ export default function WizardShell() {
   const { slug } = useParams({ from: '/scholen/$slug/wizard/$step' });
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currentStep, setCurrentStep } = useSchoolProfileStore();
+  const { currentStep, setCurrentStep, intakeMode, setIntakeMode } = useSchoolProfileStore();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const stepRef = useRef<WizardStepRef>(null);
   const wizardRef = useRef<HTMLDivElement>(null);
@@ -109,6 +110,29 @@ export default function WizardShell() {
     [completedSteps, setCurrentStep, navigate, slug],
   );
 
+  const handleIntakeComplete = useCallback(() => {
+    setIntakeMode(false);
+    // After intake, jump to the step the intake set (usually step 4 or 5)
+    const state = useSchoolProfileStore.getState();
+    navigate({
+      to: '/scholen/$slug/wizard/$step',
+      params: { slug, step: String(state.currentStep + 1) },
+    });
+  }, [setIntakeMode, navigate, slug]);
+
+  const handleIntakeSkip = useCallback(() => {
+    setIntakeMode(false);
+  }, [setIntakeMode]);
+
+  // Show AI intake panel when intake mode is active
+  if (intakeMode) {
+    return (
+      <div ref={wizardRef}>
+        <IntakePanel onComplete={handleIntakeComplete} onSkip={handleIntakeSkip} />
+      </div>
+    );
+  }
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
@@ -131,6 +155,20 @@ export default function WizardShell() {
       ref={wizardRef}
       className="bg-white rounded-xl shadow-sm max-w-[720px] mx-auto py-12 px-8"
     >
+      {/* AI Intake toggle */}
+      <div className="flex items-center justify-end mb-4">
+        <button
+          type="button"
+          onClick={() => setIntakeMode(true)}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-cito-primary hover:text-cito-primary/80 bg-cito-primary/5 hover:bg-cito-primary/10 px-3 py-1.5 rounded-full transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          Vul in met AI
+        </button>
+      </div>
+
       <ProgressBar
         currentStep={currentStep}
         completedSteps={completedSteps}
