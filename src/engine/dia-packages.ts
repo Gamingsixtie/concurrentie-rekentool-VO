@@ -1,6 +1,26 @@
 import type { DiaPackage, DiaPackageResult } from '../models/dia-packages';
 
 /**
+ * DIA volume discount tiers (staffelkorting).
+ * Source: DIA Webshop (shop.dia.nl), verified March 2026.
+ */
+export const DIA_VOLUME_TIERS = [
+  { minStudents: 1000, discountPercent: 10 },
+  { minStudents: 500, discountPercent: 5 },
+] as const;
+
+/**
+ * Get the DIA volume discount percentage for a given student count.
+ * Returns 0, 5, or 10.
+ */
+export function getDiaVolumeDiscountPercent(totalStudents: number): number {
+  for (const tier of DIA_VOLUME_TIERS) {
+    if (totalStudents >= tier.minStudents) return tier.discountPercent;
+  }
+  return 0;
+}
+
+/**
  * Select the optimal DIA package for a given set of selected DIA modules.
  * Returns the cheapest combination of package + individual pricing.
  *

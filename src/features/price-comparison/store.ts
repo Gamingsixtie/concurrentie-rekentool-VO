@@ -9,10 +9,34 @@ import { calculateHybridScenario } from '../../engine/hybrid-scenario';
 import type { HybridScenarioResult } from '../../engine/hybrid-scenario';
 import { calculateSensitivity } from '../../engine/sensitivity';
 import type { SensitivityResult } from '../../engine/sensitivity';
-import { calculateDiaModuleCosts } from '../../engine/dia-packages';
+import { calculateDiaModuleCosts, getDiaVolumeDiscountPercent } from '../../engine/dia-packages';
 import type { DiaPackageResult } from '../../models/dia-packages';
 import { DIA_PACKAGES } from '../../data/dia-packages';
 import { estimateJijCostPerStudent } from '../../data/jij-license-tiers';
+
+/**
+ * Apply DIA volume discount (staffelkorting) based on school size.
+ * 500+ students = 5%, 1000+ students = 10%.
+ */
+function applyDiaVolumeDiscount(
+  basePrices: PriceRecord[],
+  studentCounts: Partial<Record<string, Record<number, number>>>,
+): PriceRecord[] {
+  const totalStudents = getTotalStudents(studentCounts);
+  const discountPercent = getDiaVolumeDiscountPercent(totalStudents);
+  if (discountPercent === 0) return basePrices;
+
+  const factor = 1 - discountPercent / 100;
+  return basePrices.map((price) => {
+    if (price.provider !== 'dia') return price;
+    const discounted = Math.round(price.amountPerStudent * factor * 100) / 100;
+    return {
+      ...price,
+      amountPerStudent: discounted,
+      sourceLabel: `${price.sourceLabel} (staffelkorting -${discountPercent}% bij ${totalStudents} lln)`,
+    };
+  });
+}
 
 /**
  * Replace static JIJ! prices with dynamically calculated prices
@@ -202,7 +226,10 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     initialize: () => {
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
-      const dynamicPrices = applyDynamicJijPrices(DEFAULT_PRICES, studentCounts);
+      const dynamicPrices = applyDiaVolumeDiscount(
+        applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
+        studentCounts,
+      );
       const result = calculateComparison(
         selectedModules,
         studentCounts,
@@ -266,7 +293,10 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       }
       const mergedOverrides = Array.from(deduped.values());
 
-      const dynamicPrices = applyDynamicJijPrices(DEFAULT_PRICES, studentCounts);
+      const dynamicPrices = applyDiaVolumeDiscount(
+        applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
+        studentCounts,
+      );
       const mergedPrices = mergeOverrides(dynamicPrices, mergedOverrides);
       const result = calculateComparison(
         selectedModules,
