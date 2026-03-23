@@ -294,7 +294,8 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15
+Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 → 13 → 12
+(Reprioritized 2026-03-23: Phase 14/15 first for feature value, then go-live, then DMU-export on termijn)
 (Decimal phases, if inserted, execute between their surrounding integers)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
