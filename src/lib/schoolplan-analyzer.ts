@@ -84,7 +84,8 @@ export async function uploadAndAnalyzeSchoolplan(
     });
 
   if (uploadError) {
-    throw new Error('Upload mislukt. Controleer uw internetverbinding en probeer opnieuw.');
+    console.error('Supabase Storage upload error:', uploadError);
+    throw new Error(`Upload mislukt: ${uploadError.message}`);
   }
 
   // 3. Create initial DB row via upsert (per D-06: one schoolplan per school)
@@ -108,7 +109,8 @@ export async function uploadAndAnalyzeSchoolplan(
     );
 
   if (upsertError) {
-    throw new Error('Opslaan mislukt. Probeer opnieuw.');
+    console.error('Supabase DB upsert error:', upsertError);
+    throw new Error(`Opslaan mislukt: ${upsertError.message}`);
   }
 
   // 4. Call serverless function for AI analysis via SSE
