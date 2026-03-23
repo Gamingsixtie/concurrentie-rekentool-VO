@@ -179,17 +179,6 @@ describe('calculateMigration', () => {
 
     it('returns breakEvenMonth=null when totalAnnualValue is negative', () => {
       // Create a scenario where new platform is MORE expensive
-      const expensiveMigrationPrices: CitoMigrationPriceRecord[] = [
-        {
-          moduleId: 'rekenwiskunde',
-          oldPricePerStudent: 4.0,
-          newPricePerStudent: 10.0,
-          verifiedAt: new Date('2026-01-01'),
-        },
-      ];
-      // financialDifference = (4.0 - 10.0) * 100 = -600
-      // timeSavingsValue = 48 * 50 = 2400
-      // totalAnnualValue = -600 + 2400 = 1800 > 0, so let's make it negative
       // Need high hourly cost difference: old=4, new=30, students=100 -> diff = -2600
       // timeSavings at hourlyRate=1: 48*1=48 -> totalAnnualValue = -2600+48 = -2552
       const veryExpensivePrices: CitoMigrationPriceRecord[] = [

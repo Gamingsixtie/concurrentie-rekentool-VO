@@ -423,6 +423,7 @@ export async function migrateV1ToSchool(name: string): Promise<SchoolRecord> {
     appliedOverrides: priceData?.appliedOverrides ?? [],
     migrationHourlyRate: priceData?.migrationHourlyRate ?? 50,
     migrationTimeSavingOverrides: priceData?.migrationTimeSavingOverrides ?? {},
+    switchingCosts: 0,
     // CRM-lite defaults
     contacts: [],
     conversations: [],

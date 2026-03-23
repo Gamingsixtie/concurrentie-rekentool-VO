@@ -47,6 +47,7 @@ function mapSchoolRow(row: any): SchoolRecord {
     appliedOverrides: [],  // Overrides now live in school_prices table
     migrationHourlyRate: row.migration_hourly_rate ?? 50,
     migrationTimeSavingOverrides: row.migration_time_saving_overrides ?? {},
+    switchingCosts: row.switching_costs ?? 0,
     contacts: [],        // Loaded separately via hooks
     conversations: [],   // Loaded separately via hooks
     actions: [],         // Loaded separately via hooks
@@ -138,6 +139,7 @@ function mapSchoolUpdateToSnakeCase(data: Partial<SchoolRecord>): Record<string,
     scenario: 'scenario',
     migrationHourlyRate: 'migration_hourly_rate',
     migrationTimeSavingOverrides: 'migration_time_saving_overrides',
+    switchingCosts: 'switching_costs',
     pipelineStatus: 'pipeline_status',
     lostDealInfo: 'lost_deal_info',
     region: 'region',

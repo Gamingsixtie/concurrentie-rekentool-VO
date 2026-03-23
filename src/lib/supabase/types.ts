@@ -77,6 +77,7 @@ export interface Database {
           scenario: string | null;
           migration_hourly_rate: number;
           migration_time_saving_overrides: Json;
+          switching_costs: number;
           pipeline_status: string;
           lost_deal_info: Json | null;
           region: string;
@@ -102,6 +103,7 @@ export interface Database {
           scenario?: string | null;
           migration_hourly_rate?: number;
           migration_time_saving_overrides?: Json;
+          switching_costs?: number;
           pipeline_status?: string;
           lost_deal_info?: Json | null;
           region?: string;
@@ -127,6 +129,7 @@ export interface Database {
           scenario?: string | null;
           migration_hourly_rate?: number;
           migration_time_saving_overrides?: Json;
+          switching_costs?: number;
           pipeline_status?: string;
           lost_deal_info?: Json | null;
           region?: string;

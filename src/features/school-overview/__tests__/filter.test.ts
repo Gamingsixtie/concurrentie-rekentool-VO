@@ -38,6 +38,7 @@ function makeSchool(overrides: Partial<SchoolRecord> & { name: string; pipelineS
     appliedOverrides: [],
     migrationHourlyRate: 50,
     migrationTimeSavingOverrides: {},
+    switchingCosts: 0,
     contacts: [],
     conversations: [],
     actions: [],

@@ -26,6 +26,7 @@ const existingSchool: SchoolRecord = {
   appliedOverrides: [],
   migrationHourlyRate: 50,
   migrationTimeSavingOverrides: {},
+  switchingCosts: 0,
   contacts: [],
   conversations: [],
   actions: [],

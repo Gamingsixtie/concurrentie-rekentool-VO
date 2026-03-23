@@ -104,6 +104,7 @@ export interface SchoolRecord {
   appliedOverrides: PriceOverride[];
   migrationHourlyRate: number;
   migrationTimeSavingOverrides: Record<string, number>;
+  switchingCosts: number;
 
   // CRM-lite data
   contacts: Contact[];

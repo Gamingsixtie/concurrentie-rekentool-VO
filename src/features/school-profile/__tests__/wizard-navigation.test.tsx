@@ -51,6 +51,7 @@ describe('Wizard Navigation', () => {
       appliedOverrides: [],
       migrationHourlyRate: 50,
       migrationTimeSavingOverrides: {},
+      switchingCosts: 0,
       contacts: [],
       conversations: [],
       actions: [],
