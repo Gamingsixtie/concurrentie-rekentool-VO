@@ -24,15 +24,18 @@ function getSupabaseAdmin() {
 
 // ─── Text extraction (no pdf-parse/mammoth at module level) ──────────────────
 
+function getFileExtension(fileName: string): string {
+  return (fileName.split('.').pop() || '').toLowerCase();
+}
+
+// For DOCX/TXT: extract text. For PDF: we send it directly to Claude as a document.
 async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<string> {
-  const ext = fileName.split('.').pop()?.toLowerCase();
+  const ext = getFileExtension(fileName);
 
   switch (ext) {
-    case 'pdf': {
-      const pdfParse = (await import('pdf-parse')).default;
-      const result = await pdfParse(buffer);
-      return result.text;
-    }
+    case 'pdf':
+      // PDFs are sent directly to Claude as base64 document — no text extraction needed
+      return '';
     case 'docx': {
       const mammoth = await import('mammoth');
       const result = await mammoth.extractRawText({ buffer });
@@ -43,6 +46,27 @@ async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<st
     default:
       throw new Error(`Niet-ondersteund bestandsformaat: .${ext}`);
   }
+}
+
+// Build Claude message content — PDF as native document, others as text
+function buildUserContent(buffer: Buffer, fileName: string, documentText: string): Anthropic.MessageParam['content'] {
+  const ext = getFileExtension(fileName);
+
+  if (ext === 'pdf') {
+    return [
+      {
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: buffer.toString('base64'),
+        },
+      },
+    ];
+  }
+
+  // For text-based formats, send the extracted text (truncated)
+  return documentText.slice(0, 30000);
 }
 
 // ─── Inline module catalog ───────────────────────────────────────────────────
@@ -220,7 +244,9 @@ export async function POST(request: Request): Promise<Response> {
       return new Response(message, { status: 422 });
     }
 
-    if (!documentText || documentText.trim().length === 0) {
+    // For non-PDF: check we got text. PDF sends document directly to Claude.
+    const isPdf = getFileExtension(fileName) === 'pdf';
+    if (!isPdf && (!documentText || documentText.trim().length === 0)) {
       return new Response('Geen tekst gevonden in document.', { status: 422 });
     }
 
@@ -231,6 +257,7 @@ export async function POST(request: Request): Promise<Response> {
         try {
           const ai = getAnthropic();
           const model = process.env.SCHOOLPLAN_AI_MODEL || 'claude-sonnet-4-20250514';
+          const userContent = buildUserContent(buffer, fileName, documentText);
 
           // Step 1: Summarize
           controller.enqueue(encoder.encode(
@@ -241,7 +268,7 @@ export async function POST(request: Request): Promise<Response> {
             model,
             max_tokens: 2048,
             system: buildSummarizePrompt(),
-            messages: [{ role: 'user', content: documentText.slice(0, 30000) }],
+            messages: [{ role: 'user', content: userContent }],
           });
 
           const summaryResult = parseSummaryResponse(summaryResponse);
