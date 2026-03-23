@@ -6,9 +6,9 @@ interface TimeSavingsSectionProps {
   timeSavings: TimeSavingResult[];
   totalHours: number;
   totalValue: number;
-  hourlyRate: number;
+  hourlyRate: number | null;
   onHoursChange: (taskId: string, hours: number) => void;
-  onHourlyRateChange: (rate: number) => void;
+  onHourlyRateChange: (rate: number | null) => void;
 }
 
 export function TimeSavingsSection({
@@ -19,18 +19,42 @@ export function TimeSavingsSection({
   onHoursChange,
   onHourlyRateChange,
 }: TimeSavingsSectionProps) {
+  const hasRate = hourlyRate !== null && hourlyRate > 0;
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
       <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
         <h3 className="text-lg font-semibold text-cito-primary">
           Tijdwinst nieuw platform
         </h3>
-        <EditableField
-          label="Uurtarief"
-          value={hourlyRate}
-          unit="EUR/uur"
-          onChange={onHourlyRateChange}
-        />
+        <div className="flex items-center gap-3">
+          {hasRate ? (
+            <EditableField
+              label="Uurtarief"
+              value={hourlyRate}
+              unit="EUR/uur"
+              onChange={(v) => onHourlyRateChange(v)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => onHourlyRateChange(50)}
+              className="text-sm text-cito-primary underline decoration-dashed underline-offset-2 hover:text-cito-accent"
+            >
+              Uurtarief invullen
+            </button>
+          )}
+          {hasRate && (
+            <button
+              type="button"
+              onClick={() => onHourlyRateChange(null)}
+              className="text-xs text-neutral-400 hover:text-neutral-600"
+              title="Uurtarief verwijderen"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -41,7 +65,9 @@ export function TimeSavingsSection({
               <th className="py-2 px-3 text-left text-sm font-semibold text-neutral-700">Oud</th>
               <th className="py-2 px-3 text-left text-sm font-semibold text-neutral-700">Nieuw</th>
               <th className="py-2 px-3 text-right text-sm font-semibold text-neutral-700">Uren/jaar</th>
-              <th className="py-2 px-3 text-right text-sm font-semibold text-neutral-700">EUR/jaar</th>
+              {hasRate && (
+                <th className="py-2 px-3 text-right text-sm font-semibold text-neutral-700">EUR/jaar</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -58,9 +84,11 @@ export function TimeSavingsSection({
                     onChange={(h) => onHoursChange(task.taskId, h)}
                   />
                 </td>
-                <td className="py-2 px-3 text-sm text-right">
-                  {formatCurrency(task.valuePerYear)}
-                </td>
+                {hasRate && (
+                  <td className="py-2 px-3 text-sm text-right">
+                    {formatCurrency(task.valuePerYear)}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -68,11 +96,19 @@ export function TimeSavingsSection({
             <tr className="font-semibold border-t-2 border-neutral-300">
               <td colSpan={3} className="py-2 px-3 text-sm">Totaal</td>
               <td className="py-2 px-3 text-sm text-right">{totalHours} uur</td>
-              <td className="py-2 px-3 text-sm text-right">{formatCurrency(totalValue)}</td>
+              {hasRate && (
+                <td className="py-2 px-3 text-sm text-right">{formatCurrency(totalValue)}</td>
+              )}
             </tr>
           </tfoot>
         </table>
       </div>
+
+      {!hasRate && (
+        <p className="mt-3 text-xs text-neutral-400 italic">
+          Vul een uurtarief in om de tijdwinst ook in euro's te zien
+        </p>
+      )}
     </div>
   );
 }

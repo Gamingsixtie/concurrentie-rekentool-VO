@@ -107,7 +107,7 @@ export interface SchoolRecord {
 
   // Price comparison data
   appliedOverrides: PriceOverride[];
-  migrationHourlyRate: number;
+  migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number>;
   switchingCosts: number;
 

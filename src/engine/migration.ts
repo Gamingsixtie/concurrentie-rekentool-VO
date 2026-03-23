@@ -25,7 +25,7 @@ export interface TimeSavingResult {
 }
 
 export interface MultiYearProjectionEntry {
-  year: 1 | 3 | 5;
+  year: 1 | 3;
   cumulativeSavings: number;
 }
 
@@ -63,7 +63,7 @@ function computeBreakEvenMonth(totalAnnualValue: number, switchingCosts: number)
  * @param studentCounts     Student counts per level/year
  * @param migrationPrices   Old vs new Cito prices per module
  * @param timeSavingOverrides  taskId → hours/year override (consultant-entered)
- * @param hourlyRate        Value per hour saved (default: 50)
+ * @param hourlyRate        Value per hour saved (null = unknown)
  * @param switchingCosts    One-time switching costs (default: 0)
  */
 export function calculateMigration(
@@ -71,7 +71,7 @@ export function calculateMigration(
   studentCounts: Partial<Record<string, Record<number, number>>>,
   migrationPrices: CitoMigrationPriceRecord[],
   timeSavingOverrides: Record<string, number>,
-  hourlyRate: number,
+  hourlyRate: number | null,
   switchingCosts: number = 0,
 ): MigrationResult {
   const totalStudents = getTotalStudents(studentCounts);
@@ -103,6 +103,8 @@ export function calculateMigration(
   const totalNewCost = modules.reduce((sum, m) => sum + m.newTotalCost, 0);
   const financialDifference = totalOldCost - totalNewCost;
 
+  const effectiveRate = hourlyRate ?? 0;
+
   const timeSavings: TimeSavingResult[] = TIME_SAVING_TASKS.map((task) => {
     const hoursPerYear = timeSavingOverrides[task.id] ?? task.defaultHoursPerYear;
     return {
@@ -111,7 +113,7 @@ export function calculateMigration(
       oldMethodLabel: task.oldMethodLabel,
       newMethodLabel: task.newMethodLabel,
       hoursPerYear,
-      valuePerYear: hoursPerYear * hourlyRate,
+      valuePerYear: hoursPerYear * effectiveRate,
     };
   });
 
@@ -122,7 +124,6 @@ export function calculateMigration(
   const multiYearProjection: MultiYearProjectionEntry[] = [
     { year: 1, cumulativeSavings: totalAnnualValue },
     { year: 3, cumulativeSavings: totalAnnualValue * 3 },
-    { year: 5, cumulativeSavings: totalAnnualValue * 5 },
   ];
 
   return {

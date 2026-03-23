@@ -38,7 +38,7 @@ interface DexieSchoolRecord {
   moduleSetups: Array<{ moduleId: string; currentProvider: string; currentPrice?: number; source?: string }>;
   scenario: string | null;
   appliedOverrides: Array<{ moduleId: string; provider: string; price: number; source: string }>;
-  migrationHourlyRate: number;
+  migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number>;
   contacts: Array<Record<string, unknown>>;
   conversations: Array<Record<string, unknown>>;
@@ -119,7 +119,7 @@ export async function migrateIndexedDBToSupabase(
           selected_modules: school.selectedModules,
           module_setups: school.moduleSetups as unknown as Json,
           scenario: school.scenario,
-          migration_hourly_rate: school.migrationHourlyRate,
+          migration_hourly_rate: school.migrationHourlyRate ?? 0,
           migration_time_saving_overrides: school.migrationTimeSavingOverrides as unknown as Json,
           pipeline_status: school.pipelineStatus,
           lost_deal_info: (school.lostDealInfo ?? null) as unknown as Json | null,
@@ -377,7 +377,7 @@ export function extractV1Data(): V1MigrationResult {
 
 export function extractV1PriceOverrides(): {
   appliedOverrides: PriceOverride[];
-  migrationHourlyRate: number;
+  migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number>;
 } | null {
   const raw = localStorage.getItem('rekentool-price-comparison');
@@ -390,7 +390,7 @@ export function extractV1PriceOverrides(): {
 
     return {
       appliedOverrides: state.appliedOverrides ?? [],
-      migrationHourlyRate: state.migrationHourlyRate ?? 50,
+      migrationHourlyRate: state.migrationHourlyRate ?? null,
       migrationTimeSavingOverrides: state.migrationTimeSavingOverrides ?? {},
     };
   } catch {
@@ -421,7 +421,7 @@ export async function migrateV1ToSchool(name: string): Promise<SchoolRecord> {
     moduleSetups: v1Data.schoolRecord.moduleSetups ?? [],
     scenario: v1Data.schoolRecord.scenario ?? null,
     appliedOverrides: priceData?.appliedOverrides ?? [],
-    migrationHourlyRate: priceData?.migrationHourlyRate ?? 50,
+    migrationHourlyRate: priceData?.migrationHourlyRate ?? null,
     migrationTimeSavingOverrides: priceData?.migrationTimeSavingOverrides ?? {},
     switchingCosts: 0,
     // CRM-lite defaults

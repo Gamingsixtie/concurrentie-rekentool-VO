@@ -101,10 +101,10 @@ export default function WaardeTab() {
   );
 
   // Handlers that persist to Supabase
-  const handleHourlyRateChange = (rate: number) => {
+  const handleHourlyRateChange = (rate: number | null) => {
     setMigrationHourlyRate(rate);
     if (activeSchoolId) {
-      updateSchoolData(activeSchoolId, { migrationHourlyRate: rate });
+      updateSchoolData(activeSchoolId, { migrationHourlyRate: rate ?? 0 });
     }
   };
 
@@ -128,7 +128,9 @@ export default function WaardeTab() {
       <ValueHeroCard
         priceDifference={priceDifference}
         timeSavingsValue={migrationResult.totalTimeSavingsValue}
+        timeSavingsHours={migrationResult.totalTimeSavingsHours}
         migrationDifference={migrationResult.financialDifference}
+        hourlyRateKnown={migrationHourlyRate !== null && migrationHourlyRate > 0}
       />
       <TimeSavingsSection
         timeSavings={migrationResult.timeSavings}

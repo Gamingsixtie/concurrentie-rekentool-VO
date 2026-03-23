@@ -95,7 +95,7 @@ describe('calculateMigration', () => {
     expect(result.totalAnnualValue).toBe(50 + 2400);
   });
 
-  it('generates multi-year projection', () => {
+  it('generates multi-year projection for 1 and 3 years', () => {
     const result = calculateMigration(
       ['rekenwiskunde'],
       studentCounts,
@@ -108,8 +108,21 @@ describe('calculateMigration', () => {
     expect(result.multiYearProjection).toEqual([
       { year: 1, cumulativeSavings: totalAnnual },
       { year: 3, cumulativeSavings: totalAnnual * 3 },
-      { year: 5, cumulativeSavings: totalAnnual * 5 },
     ]);
+  });
+
+  it('handles null hourlyRate (unknown)', () => {
+    const result = calculateMigration(
+      ['rekenwiskunde'],
+      studentCounts,
+      mockMigrationPrices,
+      {},
+      null,
+    );
+
+    expect(result.totalTimeSavingsHours).toBe(48);
+    expect(result.totalTimeSavingsValue).toBe(0);
+    expect(result.totalAnnualValue).toBe(result.financialDifference);
   });
 
   it('handles zero annualDifference when prices are equal', () => {
@@ -226,7 +239,6 @@ describe('calculateMigration', () => {
       expect(result.multiYearProjection).toEqual([
         { year: 1, cumulativeSavings: totalAnnual },
         { year: 3, cumulativeSavings: totalAnnual * 3 },
-        { year: 5, cumulativeSavings: totalAnnual * 5 },
       ]);
     });
 

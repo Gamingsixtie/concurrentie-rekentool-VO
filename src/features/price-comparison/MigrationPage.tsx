@@ -171,12 +171,22 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
       <div className="bg-white rounded-xl border border-neutral-200 mb-8 overflow-hidden">
         <div className="bg-neutral-50 border-b border-neutral-200 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
           <h2 className="text-[15px] font-semibold text-neutral-900">Tijdswinst-calculator</h2>
-          <EditableField
-            label="Uurtarief:"
-            value={migrationHourlyRate}
-            unit="€/uur"
-            onChange={setMigrationHourlyRate}
-          />
+          {migrationHourlyRate !== null && migrationHourlyRate > 0 ? (
+            <EditableField
+              label="Uurtarief:"
+              value={migrationHourlyRate}
+              unit="€/uur"
+              onChange={setMigrationHourlyRate}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setMigrationHourlyRate(50)}
+              className="text-sm text-cito-primary underline decoration-dashed underline-offset-2"
+            >
+              Uurtarief invullen
+            </button>
+          )}
         </div>
         <table className="w-full">
           <thead>
@@ -228,7 +238,11 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
         <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
           <div className="text-xs font-semibold text-neutral-500 mb-1 uppercase tracking-wide">Tijdsbesparing</div>
           <div className="text-[22px] font-semibold leading-none text-green-700">{formatCurrency(result.totalTimeSavingsValue)}</div>
-          <div className="text-xs text-neutral-400 mt-1">{result.totalTimeSavingsHours} uur × {formatCurrency(migrationHourlyRate)}/uur</div>
+          <div className="text-xs text-neutral-400 mt-1">
+            {migrationHourlyRate !== null && migrationHourlyRate > 0
+              ? `${result.totalTimeSavingsHours} uur × ${formatCurrency(migrationHourlyRate)}/uur`
+              : `${result.totalTimeSavingsHours} uur/jaar`}
+          </div>
         </div>
         <div className="rounded-lg bg-cito-primary p-4 text-white">
           <div className="text-xs font-semibold opacity-70 mb-1 uppercase tracking-wide">Totale jaarwaarde</div>
@@ -242,7 +256,7 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
         <h2 className="text-[15px] font-semibold text-neutral-900 mb-4">Meerjarenprojectie</h2>
         <MultiYearChart result={result} />
         <p className="text-xs text-neutral-400 mt-3 text-center">
-          Cumulatieve waarde over 1, 3 en 5 jaar (financieel + tijdswinst)
+          Cumulatieve waarde over 1 en 3 jaar (financieel + tijdswinst)
         </p>
       </div>
 

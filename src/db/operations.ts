@@ -45,7 +45,7 @@ function mapSchoolRow(row: any): SchoolRecord {
     moduleSetups: row.module_setups ?? [],
     scenario: row.scenario ?? null,
     appliedOverrides: [],  // Overrides now live in school_prices table
-    migrationHourlyRate: row.migration_hourly_rate ?? 50,
+    migrationHourlyRate: row.migration_hourly_rate ?? null,
     migrationTimeSavingOverrides: row.migration_time_saving_overrides ?? {},
     switchingCosts: row.switching_costs ?? 0,
     contacts: [],        // Loaded separately via hooks

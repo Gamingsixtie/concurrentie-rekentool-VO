@@ -78,7 +78,7 @@ interface PriceComparisonState {
   hasPendingChanges: boolean;
 
   // Migration (Scenario B)
-  migrationHourlyRate: number;
+  migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number>;
 
   // Mode toggle (per D-19, D-20)
@@ -103,7 +103,7 @@ interface PriceComparisonState {
   resetAllOverrides: () => void;
   recalculate: () => void;
   hydrate: (record: SchoolRecord) => void;
-  setMigrationHourlyRate: (rate: number) => void;
+  setMigrationHourlyRate: (rate: number | null) => void;
   setMigrationTimeSavingOverride: (taskId: string, hours: number) => void;
 }
 
@@ -232,7 +232,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     draftOverrides: [],
     appliedOverrides: [],
     hasPendingChanges: false,
-    migrationHourlyRate: 50,
+    migrationHourlyRate: null,
     migrationTimeSavingOverrides: {},
 
     // New state defaults
@@ -382,7 +382,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     hydrate: (record: SchoolRecord) => {
       set({
         appliedOverrides: record.appliedOverrides,
-        migrationHourlyRate: record.migrationHourlyRate,
+        migrationHourlyRate: record.migrationHourlyRate ?? null,
         migrationTimeSavingOverrides: record.migrationTimeSavingOverrides,
         draftOverrides: [],
         hasPendingChanges: false,
