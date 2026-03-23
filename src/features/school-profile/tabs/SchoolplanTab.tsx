@@ -132,6 +132,11 @@ export default function SchoolplanTab() {
             <p className="text-sm text-neutral-700">
               De analyse is mislukt. Probeer het opnieuw of neem contact op met ondersteuning.
             </p>
+            {analysis!.error_message && (
+              <p className="text-xs text-red-500 mt-2 font-mono">
+                {analysis!.error_message}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => handleUpload(new File([], analysis!.file_name))}
