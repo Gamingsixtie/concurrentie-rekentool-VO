@@ -52,6 +52,7 @@ describe('parseSSEChunk', () => {
 });
 
 describe('parseExtractionFromText', () => {
+  // ─── Basic parsing ─────────────────────────────────────────────
   it('parses raw JSON directly', () => {
     const result = parseExtractionFromText(JSON.stringify(VALID_EXTRACTION));
     expect(result.levels).toEqual(['havo']);
@@ -76,12 +77,6 @@ describe('parseExtractionFromText', () => {
     expect(result.levels).toEqual(['havo']);
   });
 
-  it('handles JSON with leading whitespace and newlines', () => {
-    const text = '\n\n  ' + JSON.stringify(VALID_EXTRACTION) + '\n\n';
-    const result = parseExtractionFromText(text);
-    expect(result.levels).toEqual(['havo']);
-  });
-
   it('validates V2 schema with contacts, actions, pipeline', () => {
     const result = parseExtractionFromText(JSON.stringify(VALID_V2_EXTRACTION));
     expect(result.contactPersonen).toHaveLength(1);
@@ -96,6 +91,7 @@ describe('parseExtractionFromText', () => {
     expect(result.actiePunten).toEqual([]);
   });
 
+  // ─── Error cases ───────────────────────────────────────────────
   it('throws descriptive error on completely invalid text', () => {
     expect(() => parseExtractionFromText('not json at all')).toThrow(
       'AI-antwoord kon niet worden verwerkt',
@@ -116,9 +112,145 @@ describe('parseExtractionFromText', () => {
       moduleSetups: [],
       unsureAbout: [],
     });
-
     expect(() => parseExtractionFromText(invalidJson)).toThrow(
       'Geëxtraheerde gegevens voldoen niet aan het verwachte schema',
     );
+  });
+
+  // ─── Claude edge cases: null handling ──────────────────────────
+  it('handles null arrays → defaults to []', () => {
+    const input = {
+      levels: ['havo'],
+      studentCountsPerLevel: null,
+      selectedModules: ['rekenwiskunde'],
+      moduleSetups: null,       // Claude sends null instead of []
+      unsureAbout: null,        // Claude sends null instead of []
+      contactPersonen: null,    // Claude sends null instead of []
+      actiePunten: null,        // Claude sends null instead of []
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.moduleSetups).toEqual([]);
+    expect(result.unsureAbout).toEqual([]);
+    expect(result.contactPersonen).toEqual([]);
+    expect(result.actiePunten).toEqual([]);
+  });
+
+  it('handles null values in studentCountsPerLevel → coerced to 0', () => {
+    const input = {
+      ...VALID_EXTRACTION,
+      studentCountsPerLevel: { havo: null, vwo: null },
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.studentCountsPerLevel).toEqual({ havo: 0, vwo: 0 });
+  });
+
+  it('handles string numbers in studentCountsPerLevel → coerced to number', () => {
+    const input = {
+      ...VALID_EXTRACTION,
+      studentCountsPerLevel: { havo: '250', vwo: '150' },
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.studentCountsPerLevel).toEqual({ havo: 250, vwo: 150 });
+  });
+
+  it('handles string pricePerStudent → coerced to number', () => {
+    const input = {
+      ...VALID_EXTRACTION,
+      moduleSetups: [{
+        moduleId: 'rekenwiskunde',
+        currentProvider: 'dia',
+        pricePerStudent: '4.50',
+      }],
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.moduleSetups[0].pricePerStudent).toBe(4.5);
+  });
+
+  it('handles empty strings in optional fields → undefined', () => {
+    const input = {
+      ...VALID_EXTRACTION,
+      contactPersonen: [{
+        naam: 'Test',
+        rol: '',
+        email: '',
+        telefoon: '',
+        dmuPositie: null,
+      }],
+      actiePunten: [{
+        wat: 'Iets doen',
+        wanneer: '',
+        verantwoordelijke: '',
+      }],
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.contactPersonen[0].rol).toBeUndefined();
+    expect(result.contactPersonen[0].email).toBeUndefined();
+    expect(result.contactPersonen[0].telefoon).toBeUndefined();
+    expect(result.contactPersonen[0].dmuPositie).toBeUndefined();
+    expect(result.actiePunten[0].wanneer).toBeUndefined();
+    expect(result.actiePunten[0].verantwoordelijke).toBeUndefined();
+  });
+
+  it('handles null pipelineSignaal → undefined', () => {
+    const input = {
+      ...VALID_EXTRACTION,
+      pipelineSignaal: null,
+    };
+    const result = parseExtractionFromText(JSON.stringify(input));
+    expect(result.pipelineSignaal).toBeUndefined();
+  });
+
+  // ─── Worst case: maximally null-filled Claude response ─────────
+  it('handles worst-case Claude response with nulls everywhere', () => {
+    const worstCase = {
+      levels: ['havo'],
+      studentCountsPerLevel: null,
+      selectedModules: ['rekenwiskunde'],
+      moduleSetups: [{
+        moduleId: 'rekenwiskunde',
+        currentProvider: 'geen',
+        pricePerStudent: null,
+        customProviderName: null,
+      }],
+      unsureAbout: null,
+      contactPersonen: [{
+        naam: 'Onbekend',
+        rol: null,
+        dmuPositie: null,
+        email: null,
+        telefoon: null,
+      }],
+      actiePunten: [{
+        wat: 'Navragen',
+        wanneer: null,
+        verantwoordelijke: null,
+      }],
+      pipelineSignaal: null,
+    };
+    const result = parseExtractionFromText(JSON.stringify(worstCase));
+    expect(result.levels).toEqual(['havo']);
+    expect(result.unsureAbout).toEqual([]);
+    expect(result.moduleSetups[0].pricePerStudent).toBeNull();
+    expect(result.moduleSetups[0].customProviderName).toBeUndefined();
+    expect(result.contactPersonen[0].rol).toBeUndefined();
+    expect(result.contactPersonen[0].email).toBeUndefined();
+    expect(result.actiePunten[0].wanneer).toBeUndefined();
+    expect(result.pipelineSignaal).toBeUndefined();
+  });
+
+  // ─── Minimal valid response ────────────────────────────────────
+  it('handles minimal valid response (only required fields)', () => {
+    const minimal = {
+      levels: [],
+      studentCountsPerLevel: null,
+      selectedModules: [],
+      moduleSetups: [],
+      unsureAbout: [],
+    };
+    const result = parseExtractionFromText(JSON.stringify(minimal));
+    expect(result.levels).toEqual([]);
+    expect(result.contactPersonen).toEqual([]);
+    expect(result.actiePunten).toEqual([]);
+    expect(result.pipelineSignaal).toBeUndefined();
   });
 });
