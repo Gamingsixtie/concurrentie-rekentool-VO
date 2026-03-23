@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from '@tanstack/react-router';
 import type { SchoolRecord } from '@/db/types';
 import { SCHOOL_LEVEL_LABELS } from '@/models/school';
@@ -5,7 +6,11 @@ import type { SchoolLevel } from '@/models/school';
 import IncompleteIndicator from '@/components/ui/IncompleteIndicator';
 import PipelineBadge from '@/components/ui/PipelineBadge';
 import { OwnerBadge } from '@/components/ui/OwnerBadge';
+import { UpsellBadge } from '@/components/ui/UpsellBadge';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { calculateComparison } from '@/engine/price-comparison';
+import { calculateUpsell } from '@/engine/upsell';
+import { DEFAULT_PRICES } from '@/data/default-prices';
 
 interface SchoolCardProps {
   school: SchoolRecord;
@@ -68,6 +73,27 @@ export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) 
   // Next action (first todo)
   const nextAction = school.actions?.find(a => a.status === 'todo');
 
+  // Compute upsell opportunities for badge (publication prices only)
+  const upsellData = useMemo(() => {
+    if (!school.moduleSetups || school.moduleSetups.length === 0) {
+      return { count: 0, hasGreenSignals: false };
+    }
+    try {
+      const comparisonResult = calculateComparison(
+        school.selectedModules,
+        school.studentCounts,
+        DEFAULT_PRICES,
+      );
+      const opportunities = calculateUpsell(school.moduleSetups, comparisonResult);
+      return {
+        count: opportunities.length,
+        hasGreenSignals: opportunities.some((o) => o.signalStrength === 'green'),
+      };
+    } catch {
+      return { count: 0, hasGreenSignals: false };
+    }
+  }, [school.selectedModules, school.studentCounts, school.moduleSetups]);
+
   const isCompact = mode === 'compact';
 
   return (
@@ -100,6 +126,7 @@ export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) 
           {school.name}
         </h3>
         <PipelineBadge status={school.pipelineStatus} size="sm" />
+        <UpsellBadge count={upsellData.count} hasGreenSignals={upsellData.hasGreenSignals} />
         {school.ownerName && (
           <OwnerBadge
             ownerName={school.ownerName}

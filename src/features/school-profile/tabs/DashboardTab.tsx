@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '../store';
 import { updateSchoolData } from '@/db/operations';
 import { uniqueSlug } from '@/lib/slugify';
-import { getTotalStudents } from '@/engine/price-comparison';
+import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
+import { calculateUpsell } from '@/engine/upsell';
+import { DEFAULT_PRICES } from '@/data/default-prices';
+import { useSchoolPrices } from '@/hooks/useSchoolPrices';
 import {
   SCHOOL_LEVELS,
   SCHOOL_LEVEL_LABELS,
@@ -11,6 +14,7 @@ import {
 } from '@/models/school';
 import type { PipelineStatus, SchoolLevel, Scenario } from '@/models/school';
 import PipelineBadge from '@/components/ui/PipelineBadge';
+import UpsellCard from '../components/UpsellCard';
 
 // Context-smart actions per pipeline status
 const SMART_ACTIONS: Record<
@@ -69,11 +73,41 @@ export default function DashboardTab() {
   const schoolName = useSchoolProfileStore((s) => s.schoolName);
   const pipelineStatus = useSchoolProfileStore((s) => s.pipelineStatus);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
+  const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const contacts = useSchoolProfileStore((s) => s.contacts);
   const levels = useSchoolProfileStore((s) => s.levels);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const scenario = useSchoolProfileStore((s) => s.scenario);
   const region = useSchoolProfileStore((s) => s.region);
+
+  // School-specific prices for upsell calculation
+  const { data: schoolPrices } = useSchoolPrices(activeSchoolId ?? '');
+
+  // Compute upsell opportunities
+  const hasModuleSetups = moduleSetups.some((m) => m.currentProvider !== 'geen');
+
+  const upsellOpportunities = useMemo(() => {
+    if (selectedModules.length === 0 || moduleSetups.length === 0) return [];
+
+    // Build prices array: active school prices override defaults
+    const activePrices = (schoolPrices ?? []).filter((p) => p.isActive);
+    const prices = DEFAULT_PRICES.map((dp) => {
+      const schoolPrice = activePrices.find(
+        (sp) => sp.moduleId === dp.moduleId && sp.provider === dp.provider,
+      );
+      if (schoolPrice) {
+        return { ...dp, amountPerStudent: schoolPrice.amount };
+      }
+      return dp;
+    });
+
+    try {
+      const comparisonResult = calculateComparison(selectedModules, studentCounts, prices);
+      return calculateUpsell(moduleSetups, comparisonResult);
+    } catch {
+      return [];
+    }
+  }, [selectedModules, studentCounts, moduleSetups, schoolPrices]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(schoolName);
@@ -332,6 +366,15 @@ export default function DashboardTab() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Upsell-kansen */}
+      <div className="mt-6">
+        <UpsellCard
+          opportunities={upsellOpportunities}
+          schoolSlug={slug}
+          hasModuleSetups={hasModuleSetups}
+        />
       </div>
     </div>
   );
