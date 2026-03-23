@@ -17,41 +17,48 @@ export interface CitoMigrationPriceRecord {
 }
 
 export const CITO_MIGRATION_PRICES: CitoMigrationPriceRecord[] = [
-  // TODO: Vervang de onderstaande placeholder-tarieven door de werkelijke tarieven.
+  // Prijzen per leerling per schooljaar, omgerekend van platformtarieven.
+  // Oud = huidig platform 2025-2026, Nieuw = Woots 2026-2027 (Basis 1jr).
+  // Kern: oud = (4 toetsen × €15,90 / 3 jr) / 3 vakken = €7,07.
+  //       nieuw = €23,45 Basis 1jr / 3 vakken = €7,82.
+  // Bron: intel-rapport 2026-03-23, secties 0 en B4.
   {
     moduleId: 'rekenwiskunde',
-    oldPricePerStudent: 4.50,
-    newPricePerStudent: 4.50,
-    verifiedAt: new Date('2026-01-01'),
+    oldPricePerStudent: 7.07,
+    newPricePerStudent: 7.82,
+    verifiedAt: new Date('2026-03-23'),
   },
   {
     moduleId: 'nederlands',
-    oldPricePerStudent: 4.50,
-    newPricePerStudent: 4.50,
-    verifiedAt: new Date('2026-01-01'),
+    oldPricePerStudent: 7.07,
+    newPricePerStudent: 7.82,
+    verifiedAt: new Date('2026-03-23'),
   },
   {
     moduleId: 'engels',
-    oldPricePerStudent: 4.50,
-    newPricePerStudent: 4.50,
-    verifiedAt: new Date('2026-01-01'),
+    oldPricePerStudent: 7.07,
+    newPricePerStudent: 7.82,
+    verifiedAt: new Date('2026-03-23'),
   },
   {
+    // Oud: €1,60 per licentie (1 toets/jr). Nieuw: €3,75 per toets (1 toets/jr).
     moduleId: 'taalverzorging',
-    oldPricePerStudent: 3.80,
-    newPricePerStudent: 3.80,
-    verifiedAt: new Date('2026-01-01'),
+    oldPricePerStudent: 1.60,
+    newPricePerStudent: 3.75,
+    verifiedAt: new Date('2026-03-23'),
   },
   {
+    // Oud: €4,15 BLB licentie (SEF + LWH samen). Nieuw: €3,00 SEF los (excl. LWH).
     moduleId: 'sociaal-emotioneel',
-    oldPricePerStudent: 3.50,
-    newPricePerStudent: 3.50,
-    verifiedAt: new Date('2026-01-01'),
+    oldPricePerStudent: 4.15,
+    newPricePerStudent: 3.00,
+    verifiedAt: new Date('2026-03-23'),
   },
   {
+    // Apart product, prijs ongewijzigd.
     moduleId: 'cognitieve-capaciteiten',
     oldPricePerStudent: 6.50,
     newPricePerStudent: 6.50,
-    verifiedAt: new Date('2026-01-01'),
+    verifiedAt: new Date('2026-03-23'),
   },
 ];
