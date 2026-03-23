@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Phase 14 UI-SPEC approved
-last_updated: "2026-03-23T16:35:14.366Z"
+status: Ready to execute
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-03-23T18:14:35.776Z"
 progress:
   total_phases: 13
   completed_phases: 5
-  total_plans: 23
-  completed_plans: 20
+  total_plans: 26
+  completed_plans: 21
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 11 — waarde-engine-migratie
+**Current focus:** Phase 14 — schoolplan-upload-kansen-analyse
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
+Phase: 14 (schoolplan-upload-kansen-analyse) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -86,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 11]: overig provider excluded from upsell (no comparison data for custom providers)
 - [Phase 11]: switchingCosts loaded from school record via useSchool hook (react-query cached) rather than Zustand store
 - [Phase 11]: EditableField extracted as shared component with a11y enhancements for tablet usability
+- [Phase 14]: Inline getAuthHeaders in schoolplan-analyzer.ts to avoid circular imports (same pattern as document-parser.ts)
+- [Phase 14]: SSE event protocol: step/result/error types for streaming AI analysis progress
+- [Phase 14]: JSONB merge pattern for opportunity_annotations: read current, spread new, write back
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T16:35:14.363Z
-Stopped at: Phase 14 UI-SPEC approved
-Resume file: .planning/phases/14-schoolplan-upload-kansen-analyse/14-UI-SPEC.md
+Last session: 2026-03-23T18:14:35.772Z
+Stopped at: Completed 14-01-PLAN.md
+Resume file: None

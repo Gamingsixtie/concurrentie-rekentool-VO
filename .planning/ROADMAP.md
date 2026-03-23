@@ -270,7 +270,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Data foundation: Zod schemas, model config, Supabase migration, React Query hooks en client orchestrator
+- [x] 14-01-PLAN.md — Data foundation: Zod schemas, model config, Supabase migration, React Query hooks en client orchestrator
 - [ ] 14-02-PLAN.md — Serverless analyse: twee-stappen AI pipeline (samenvatting + kansen-matching) met SSE streaming
 - [ ] 14-03-PLAN.md — Schoolplan-tab UI: route, componenten (KansCard, KansCardList, streaming progress), SchoolplanTab container en visuele verificatie
 
@@ -316,5 +316,5 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
-| 14. Schoolplan Upload & Kansen-analyse | v2.0 | 0/3 | Not started | - |
+| 14. Schoolplan Upload & Kansen-analyse | v2.0 | 1/3 | In Progress|  |
 | 15. DMU Klantreis Registratie | v2.0 | 0/3 | Not started | - |
