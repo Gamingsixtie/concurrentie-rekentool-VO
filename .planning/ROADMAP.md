@@ -66,7 +66,7 @@ Plans:
 - [x] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie (completed 2026-03-23)
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
-- [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
+- [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
 - [ ] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
 
 ## Phase Details
@@ -275,21 +275,21 @@ Plans:
 - [x] 14-03-PLAN.md — Schoolplan-tab UI: route, componenten (KansCard, KansCardList, streaming progress), SchoolplanTab container en visuele verificatie
 
 ### Phase 15: DMU Klantreis Registratie
-**Goal**: Accountmanager kan per school de DMU-contactpersonen volgen door de klantreis — van eerste contact via oriëntatie, evaluatie en onderhandeling tot aan beslissing — met tijdlijn en status per persoon
+**Goal**: Accountmanager kan per school de DMU-contactpersonen volgen door de engagement-klantreis met 6 statussen (Nog niet benaderd, In gesprek, Positief, Wacht op intern, Akkoord, Afgehaakt), met DMU-beslissingsoverzicht, stagnatie-detectie en filtering
 **Depends on**: Phase 7 (contactpersonen), Phase 8 (Supabase)
-**Requirements**: TBD
+**Requirements**: KR-01, KR-02, KR-03, KR-04, KR-05
 **Success Criteria** (what must be TRUE):
-  1. Gebruiker kan per DMU-contactpersoon een klantreis-fase instellen: Onbekend → Eerste contact → Oriëntatie → Evaluatie → Onderhandeling → Beslissing → Gewonnen/Verloren
-  2. Elke fase-overgang wordt vastgelegd met datum en optionele notitie — de volledige tijdlijn is zichtbaar per contactpersoon
-  3. School-dashboard toont een overzicht van alle DMU-leden en hun huidige klantreis-fase, zodat de accountmanager in één oogopslag ziet wie waar staat
-  4. Gebruiker kan filteren op klantreis-fase in het schooloverzicht (bijv. "toon alle scholen met DMU in evaluatie-fase")
-  5. Systeem toont hoelang een contactpersoon al in de huidige fase zit en signaleert stagnatie (bijv. >30 dagen in dezelfde fase)
-**Plans**: TBD
+  1. Gebruiker kan per DMU-contactpersoon een engagement-status instellen: Nog niet benaderd, In gesprek, Positief, Wacht op intern, Akkoord, Afgehaakt
+  2. Elke statuswijziging wordt vastgelegd als systeemevent met datum en optionele notitie — de volledige tijdlijn is zichtbaar per contactpersoon
+  3. School-dashboard toont een DMU-beslissingsoverzicht (matrix) van alle DMU-leden en hun huidige status, zodat de accountmanager in een oogopslag ziet wie waar staat
+  4. Gebruiker kan filteren op engagement-status in het schooloverzicht (bijv. "toon alle scholen met DMU in positief-fase")
+  5. Systeem toont hoelang een contactpersoon al in de huidige fase zit en signaleert stagnatie (>30 dagen in dezelfde fase)
+**Plans**: 3 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
-- [ ] 15-03: TBD
+- [ ] 15-01-PLAN.md — Data foundation: EngagementStatus types, Supabase migration, setEngagementStatus operation, Zod schema en unit tests
+- [ ] 15-02-PLAN.md — School-profiel UI: EngagementBadge, DropOffReasonDialog, DmuMatrix, DmuMismatchBanner en DashboardTab integratie
+- [ ] 15-03-PLAN.md — School-overzicht UI: DmuProgressIndicator op kaarten, DmuStatusFilter, getAllSchools contacts join en filtering
 
 ## Progress
 
@@ -317,4 +317,4 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
-| 15. DMU Klantreis Registratie | v2.0 | 0/3 | Not started | - |
+| 15. DMU Klantreis Registratie | v2.0 | 0/3 | Planning complete | - |
