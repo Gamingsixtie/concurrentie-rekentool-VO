@@ -31,8 +31,8 @@ function makeProviderCost(pricePerStudent: number, moduleId: string, provider: s
 function makeComparisonResult(modules: ModuleComparison[]): ComparisonResult {
   return {
     modules,
-    totals: { cito: 0, dia: 0, jij: 0 },
-    differences: { citoVsDia: null, citoVsJij: null },
+    totals: { cito: 0, dia: 0, jij: 0, saqi: 0 },
+    differences: { citoVsDia: null, citoVsJij: null, citoVsSaqi: null },
   };
 }
 
@@ -50,6 +50,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -79,6 +80,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'unknown-module', 'cito'),
           dia: makeProviderCost(5.0, 'unknown-module', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -103,6 +105,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(6.0, 'rekenwiskunde', 'cito'),
           dia: null,
           jij: makeProviderCost(4.0, 'rekenwiskunde', 'jij'),
+          saqi: null,
         },
       },
     ]);
@@ -126,6 +129,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(8.0, 'unknown-module', 'cito'),
           dia: makeProviderCost(5.0, 'unknown-module', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -148,6 +152,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -169,6 +174,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -190,6 +196,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -227,6 +234,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);
@@ -252,6 +260,7 @@ describe('calculateUpsell', () => {
           cito: makeProviderCost(3.0, 'rekenwiskunde', 'cito'),
           dia: makeProviderCost(5.0, 'rekenwiskunde', 'dia'),
           jij: null,
+          saqi: null,
         },
       },
     ]);

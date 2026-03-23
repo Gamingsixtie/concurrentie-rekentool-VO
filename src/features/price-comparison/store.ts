@@ -14,7 +14,7 @@ import type { DiaPackageResult } from '../../models/dia-packages';
 import { DIA_PACKAGES } from '../../data/dia-packages';
 import { estimateJijCostPerStudent } from '../../data/jij-license-tiers';
 import type { CitoBundleType, ContractPeriod } from '../../data/cito-bundles';
-import { getCitoBundle } from '../../data/cito-bundles';
+import { getCitoBundle, getCitoFactorForBundle } from '../../data/cito-bundles';
 import { applyCitoBundlePrices, applyContractPeriodToResult } from '../../engine/cito-bundles';
 
 /**
@@ -67,7 +67,7 @@ function applyDynamicJijPrices(
 
 export interface PriceOverride {
   moduleId: string;
-  provider: 'cito' | 'dia' | 'jij';
+  provider: 'cito' | 'dia' | 'jij' | 'saqi';
   amount: number;
 }
 
@@ -275,8 +275,9 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         dynamicPrices,
       );
 
-      // Apply contract period multipliers
-      const result = applyContractPeriodToResult(annualResult, state.contractPeriod);
+      // Apply contract period multipliers (bundle-aware factor)
+      const citoFactor = getCitoFactorForBundle(bundle, state.contractPeriod);
+      const result = applyContractPeriodToResult(annualResult, state.contractPeriod, citoFactor);
 
       const extended = computeExtendedResults(
         result,
@@ -355,8 +356,9 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         mergedPrices,
       );
 
-      // Apply contract period multipliers
-      const result = applyContractPeriodToResult(annualResult, state.contractPeriod);
+      // Apply contract period multipliers (bundle-aware factor)
+      const citoFactor = getCitoFactorForBundle(bundle, state.contractPeriod);
+      const result = applyContractPeriodToResult(annualResult, state.contractPeriod, citoFactor);
 
       const extended = computeExtendedResults(
         result,

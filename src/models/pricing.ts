@@ -6,7 +6,7 @@ export type PriceSource = 'publication' | 'manual' | 'ai-lookup';
 
 export interface PriceRecord {
   moduleId: string;
-  provider: 'cito' | 'dia' | 'jij';
+  provider: 'cito' | 'dia' | 'jij' | 'saqi';
   amountPerStudent: number;
   source: PriceSource;
   sourceLabel: string;

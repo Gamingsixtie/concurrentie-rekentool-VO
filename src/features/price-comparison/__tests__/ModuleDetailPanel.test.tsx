@@ -47,6 +47,7 @@ const mockResult: ComparisonResult = {
           studentCount: 450,
           priceRecord: makePriceRecord('rekenwiskunde', 'jij', 4.8),
         },
+        saqi: null,
       },
     },
     {
@@ -62,11 +63,12 @@ const mockResult: ComparisonResult = {
         },
         dia: null,
         jij: null,
+        saqi: null,
       },
     },
   ],
-  totals: { cito: 4725, dia: 2340, jij: 2160 },
-  differences: { citoVsDia: 2385, citoVsJij: 2565 },
+  totals: { cito: 4725, dia: 2340, jij: 2160, saqi: 0 },
+  differences: { citoVsDia: 2385, citoVsJij: 2565, citoVsSaqi: null },
 };
 
 let mockHasPendingChanges = false;

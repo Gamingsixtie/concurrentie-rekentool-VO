@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
-import { PROVIDERS, getTotalStudents } from '../../engine/price-comparison';
+import { PROVIDERS, PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
@@ -49,6 +49,19 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
     }))
     .filter((group) => group.modules.length > 0);
 
+  // Determine which providers have any module data (hide empty columns)
+  const activeProviders = PROVIDERS.filter((provider) =>
+    result.modules.some((m) => m.providers[provider] !== null),
+  );
+  const providerWidth = `${Math.floor(70 / activeProviders.length)}%`;
+
+  const getDifference = (provider: ProviderKey): number | null => {
+    if (provider === 'dia') return result.differences.citoVsDia;
+    if (provider === 'jij') return result.differences.citoVsJij;
+    if (provider === 'saqi') return result.differences.citoVsSaqi;
+    return null;
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -56,9 +69,11 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
         <thead>
           <tr className="bg-cito-primary text-white text-sm font-semibold">
             <th className="w-[30%] text-left py-3 px-4">Module</th>
-            <th className="w-[23.3%] text-left py-3 px-4">Cito</th>
-            <th className="w-[23.3%] text-left py-3 px-4">DIA</th>
-            <th className="w-[23.3%] text-left py-3 px-4">JIJ</th>
+            {activeProviders.map((provider) => (
+              <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
+                {PROVIDER_LABELS[provider]}
+              </th>
+            ))}
           </tr>
         </thead>
 
@@ -71,26 +86,27 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
               expandedModule={expandedModule}
               onBarHighlight={onBarHighlight}
               onToggle={toggleModule}
+              activeProviders={activeProviders}
             />
           ))}
 
           {/* Totaalrij */}
-          <TotaalRow result={result} />
+          <TotaalRow result={result} activeProviders={activeProviders} />
 
           {/* Verschil row */}
           <tr className="text-sm text-neutral-700">
             <td className="py-2 px-4"></td>
-            <td className="py-2 px-4"></td>
-            <td className="py-2 px-4">
-              {result.differences.citoVsDia !== null
-                ? `Verschil: ${formatCurrency(Math.abs(result.differences.citoVsDia))}`
-                : 'n.v.t.'}
-            </td>
-            <td className="py-2 px-4">
-              {result.differences.citoVsJij !== null
-                ? `Verschil: ${formatCurrency(Math.abs(result.differences.citoVsJij))}`
-                : 'n.v.t.'}
-            </td>
+            {activeProviders.map((provider) => {
+              if (provider === 'cito') return <td key={provider} className="py-2 px-4"></td>;
+              const diff = getDifference(provider);
+              return (
+                <td key={provider} className="py-2 px-4">
+                  {diff !== null
+                    ? `Verschil: ${formatCurrency(Math.abs(diff))}`
+                    : 'n.v.t.'}
+                </td>
+              );
+            })}
           </tr>
         </tbody>
       </table>
@@ -104,19 +120,21 @@ function CategoryGroup({
   expandedModule,
   onBarHighlight,
   onToggle,
+  activeProviders,
 }: {
   label: string;
   modules: ComparisonResult['modules'];
   expandedModule: string | null;
   onBarHighlight?: string | null;
   onToggle: (moduleId: string) => void;
+  activeProviders: readonly ProviderKey[];
 }) {
   return (
     <>
       {/* Category subheader */}
       <tr className="bg-cito-bg">
         <td
-          colSpan={4}
+          colSpan={1 + activeProviders.length}
           className="py-2 px-4 text-sm font-semibold text-neutral-700"
         >
           {label}
@@ -134,6 +152,7 @@ function CategoryGroup({
             isExpanded={isExpanded}
             isHighlighted={isHighlighted}
             onToggle={onToggle}
+            activeProviders={activeProviders}
           />
         );
       })}
@@ -146,11 +165,13 @@ function ModuleRow({
   isExpanded,
   isHighlighted,
   onToggle,
+  activeProviders,
 }: {
   mod: ComparisonResult['modules'][number];
   isExpanded: boolean;
   isHighlighted: boolean;
   onToggle: (moduleId: string) => void;
+  activeProviders: readonly ProviderKey[];
 }) {
   return (
     <>
@@ -181,7 +202,7 @@ function ModuleRow({
         </td>
 
         {/* Provider cells */}
-        {PROVIDERS.map((provider) => (
+        {activeProviders.map((provider) => (
           <ProviderCell
             key={provider}
             cost={mod.providers[provider]}
@@ -192,7 +213,7 @@ function ModuleRow({
       {/* Expanded detail row */}
       {isExpanded && (
         <tr>
-          <td colSpan={4} className="p-0">
+          <td colSpan={1 + activeProviders.length} className="p-0">
             <div className="border-l-[3px] border-l-cito-primary bg-white p-6 overflow-hidden transition-all duration-200 ease-out">
               <ModuleDetailPanel moduleId={mod.moduleId} />
             </div>
@@ -203,7 +224,7 @@ function ModuleRow({
   );
 }
 
-function TotaalRow({ result }: { result: ComparisonResult }) {
+function TotaalRow({ result, activeProviders }: { result: ComparisonResult; activeProviders: readonly ProviderKey[] }) {
   const diaPackageResult = usePriceComparisonStore((s) => s.diaPackageResult);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const totalStudents = getTotalStudents(studentCounts);
@@ -217,7 +238,7 @@ function TotaalRow({ result }: { result: ComparisonResult }) {
   return (
     <tr className="bg-neutral-50 font-semibold text-base">
       <td className="py-3 px-4">Totaal</td>
-      {PROVIDERS.map((provider) => (
+      {activeProviders.map((provider) => (
         <td key={provider} className="py-3 px-4">
           <span>{formatCurrency(result.totals[provider])}</span>
           {provider === 'dia' && hasPackageDiscount && (

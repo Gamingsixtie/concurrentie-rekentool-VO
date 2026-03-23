@@ -3,7 +3,7 @@ import type { SchoolplanOpportunity, AlsoRelevantItem, OpportunityAnnotation } f
 
 export interface PriceOverride {
   moduleId: string;
-  provider: 'cito' | 'dia' | 'jij';
+  provider: 'cito' | 'dia' | 'jij' | 'saqi';
   amount: number;
 }
 

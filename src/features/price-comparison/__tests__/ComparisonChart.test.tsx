@@ -43,6 +43,7 @@ const mockResult: ComparisonResult = {
           studentCount: 450,
           priceRecord: makePriceRecord('rekenwiskunde', 'jij', 4.8),
         },
+        saqi: null,
       },
     },
     {
@@ -58,11 +59,12 @@ const mockResult: ComparisonResult = {
         },
         dia: null,
         jij: null,
+        saqi: null,
       },
     },
   ],
-  totals: { cito: 3735, dia: 2340, jij: 2160 },
-  differences: { citoVsDia: 1395, citoVsJij: 1575 },
+  totals: { cito: 3735, dia: 2340, jij: 2160, saqi: 0 },
+  differences: { citoVsDia: 1395, citoVsJij: 1575, citoVsSaqi: null },
 };
 
 // Note: Recharts renders to SVG in jsdom which has limited support.

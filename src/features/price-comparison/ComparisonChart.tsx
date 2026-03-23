@@ -20,10 +20,12 @@ interface ChartDataPoint {
   cito: number | null;
   dia: number | null;
   jij: number | null;
+  saqi: number | null;
   naOverstap: number | null;
   citoPerStudent: number | null;
   diaPerStudent: number | null;
   jijPerStudent: number | null;
+  saqiPerStudent: number | null;
 }
 
 interface ComparisonChartProps {
@@ -85,13 +87,14 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const hybridResult = usePriceComparisonStore((s) => s.hybridResult);
 
-  // Dynamic visibility: only show JIJ if school uses JIJ
+  // Dynamic visibility: only show providers that have data
   const showJij = moduleSetups.some((s) => s.currentProvider === 'jij');
   const showNaOverstap = (hybridResult?.modules.length ?? 0) > 0;
+  const showSaqi = result.modules.some((m) => m.providers.saqi !== null);
 
-  const visibleProviders: ProviderKey[] = showJij
-    ? ['cito', 'dia', 'jij']
-    : ['cito', 'dia'];
+  const visibleProviders: ProviderKey[] = ['cito', 'dia'];
+  if (showJij) visibleProviders.push('jij');
+  if (showSaqi) visibleProviders.push('saqi');
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -111,10 +114,12 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
           cito: mod.providers.cito?.totalCost ?? null,
           dia: mod.providers.dia?.totalCost ?? null,
           jij: mod.providers.jij?.totalCost ?? null,
+          saqi: mod.providers.saqi?.totalCost ?? null,
           naOverstap: hybridMod?.citoCost ?? null,
           citoPerStudent: mod.providers.cito?.pricePerStudent ?? null,
           diaPerStudent: mod.providers.dia?.pricePerStudent ?? null,
           jijPerStudent: mod.providers.jij?.pricePerStudent ?? null,
+          saqiPerStudent: mod.providers.saqi?.pricePerStudent ?? null,
         };
       }),
     [result.modules, hybridResult],
@@ -155,6 +160,9 @@ export function ComparisonChart({ result, onBarClick }: ComparisonChartProps) {
         <Bar dataKey="dia" name={PROVIDER_LABELS.dia} fill="#9CA3AF" />
         {visibleProviders.includes('jij') && (
           <Bar dataKey="jij" name={PROVIDER_LABELS.jij} fill="#6B7280" />
+        )}
+        {visibleProviders.includes('saqi') && (
+          <Bar dataKey="saqi" name={PROVIDER_LABELS.saqi} fill="#8B5CF6" />
         )}
         {showNaOverstap && (
           <Bar

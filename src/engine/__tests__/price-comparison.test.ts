@@ -171,7 +171,7 @@ describe('formatNumber', () => {
 
 describe('exports', () => {
   it('exports PROVIDERS array with all three provider keys', () => {
-    expect(PROVIDERS).toEqual(['cito', 'dia', 'jij']);
+    expect(PROVIDERS).toEqual(['cito', 'dia', 'jij', 'saqi']);
   });
 
   it('exports PROVIDER_LABELS with Dutch display names', () => {

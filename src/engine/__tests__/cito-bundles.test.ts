@@ -47,7 +47,7 @@ describe('applyCitoBundlePrices', () => {
     const result = applyCitoBundlePrices(basePrices, basis, allModules);
 
     // Kern modules should have bundle price spread across 3
-    const expectedPerModule = Math.round((17.95 / 3) * 100) / 100; // 5.98
+    const expectedPerModule = Math.round((23.45 / 3) * 100) / 100; // 7.82
     const rekenCito = result.find((p) => p.moduleId === 'rekenwiskunde' && p.provider === 'cito');
     expect(rekenCito?.amountPerStudent).toBe(expectedPerModule);
 
@@ -64,7 +64,7 @@ describe('applyCitoBundlePrices', () => {
     const plus = getCitoBundle('plus');
     const result = applyCitoBundlePrices(basePrices, plus, allModules);
 
-    const expectedPerModule = Math.round((23.45 / 5) * 100) / 100; // 4.69
+    const expectedPerModule = Math.round((31.44 / 5) * 100) / 100; // 6.29
     const tvzCito = result.find((p) => p.moduleId === 'taalverzorging' && p.provider === 'cito');
     expect(tvzCito?.amountPerStudent).toBe(expectedPerModule);
 
@@ -173,13 +173,13 @@ describe('cito-bundles data', () => {
   it('basis bundle includes 3 kern modules', () => {
     const basis = getCitoBundle('basis');
     expect(basis.includedModuleIds).toEqual(['rekenwiskunde', 'nederlands', 'engels']);
-    expect(basis.pricePerStudent).toBe(17.95);
+    expect(basis.pricePerStudent).toBe(23.45);
   });
 
   it('plus bundle includes 5 modules', () => {
     const plus = getCitoBundle('plus');
     expect(plus.includedModuleIds).toHaveLength(5);
-    expect(plus.pricePerStudent).toBe(23.45);
+    expect(plus.pricePerStudent).toBe(31.44);
   });
 
   it('getContractPeriodConfig returns correct factors', () => {

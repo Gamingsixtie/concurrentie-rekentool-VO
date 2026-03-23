@@ -2,14 +2,15 @@ import type { PriceRecord } from '../models/pricing';
 import type { ModuleCategory } from '../models/modules';
 import { MODULE_CATALOG } from '../models/modules';
 
-export type ProviderKey = 'cito' | 'dia' | 'jij';
+export type ProviderKey = 'cito' | 'dia' | 'jij' | 'saqi';
 
-export const PROVIDERS = ['cito', 'dia', 'jij'] as const;
+export const PROVIDERS = ['cito', 'dia', 'jij', 'saqi'] as const;
 
 export const PROVIDER_LABELS: Record<ProviderKey, string> = {
   cito: 'Cito',
   dia: 'DIA',
   jij: 'JIJ',
+  saqi: 'SAQI',
 };
 
 export interface ProviderCost {
@@ -32,6 +33,7 @@ export interface ComparisonResult {
   differences: {
     citoVsDia: number | null;
     citoVsJij: number | null;
+    citoVsSaqi: number | null;
   };
 }
 
@@ -91,7 +93,7 @@ export function calculateComparison(
   });
 
   // Compute totals per provider
-  const totals: Record<ProviderKey, number> = { cito: 0, dia: 0, jij: 0 };
+  const totals: Record<ProviderKey, number> = { cito: 0, dia: 0, jij: 0, saqi: 0 };
   for (const mod of modules) {
     for (const provider of PROVIDERS) {
       const cost = mod.providers[provider];
@@ -102,7 +104,7 @@ export function calculateComparison(
   }
 
   // Track whether a provider has ANY module with a price
-  const hasAnyModule: Record<ProviderKey, boolean> = { cito: false, dia: false, jij: false };
+  const hasAnyModule: Record<ProviderKey, boolean> = { cito: false, dia: false, jij: false, saqi: false };
   for (const mod of modules) {
     for (const provider of PROVIDERS) {
       if (mod.providers[provider] !== null) {
@@ -115,6 +117,7 @@ export function calculateComparison(
   const differences = {
     citoVsDia: hasAnyModule.dia ? totals.cito - totals.dia : null,
     citoVsJij: hasAnyModule.jij ? totals.cito - totals.jij : null,
+    citoVsSaqi: hasAnyModule.saqi ? totals.cito - totals.saqi : null,
   };
 
   return { modules, totals, differences };

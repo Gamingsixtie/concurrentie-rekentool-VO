@@ -219,7 +219,7 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
         )}
 
         {/* Competitor advantages */}
-        {(['dia', 'jij'] as const).map((provider) => {
+        {(['dia', 'jij', 'saqi'] as const).map((provider) => {
           const cost = moduleData.providers[provider];
           const diffs = differentiators?.[provider] ?? [];
 

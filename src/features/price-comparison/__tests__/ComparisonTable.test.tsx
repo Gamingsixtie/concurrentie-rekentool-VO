@@ -82,6 +82,7 @@ const mockResult: ComparisonResult = {
           studentCount: 450,
           priceRecord: makePriceRecord('rekenwiskunde', 'jij', 4.8),
         },
+        saqi: null,
       },
     },
     {
@@ -97,11 +98,12 @@ const mockResult: ComparisonResult = {
         },
         dia: null,
         jij: null,
+        saqi: null,
       },
     },
   ],
-  totals: { cito: 4725, dia: 2340, jij: 2160 },
-  differences: { citoVsDia: 2385, citoVsJij: 2565 },
+  totals: { cito: 4725, dia: 2340, jij: 2160, saqi: 0 },
+  differences: { citoVsDia: 2385, citoVsJij: 2565, citoVsSaqi: null },
 };
 
 describe('ComparisonTable', () => {
@@ -182,7 +184,7 @@ describe('ComparisonTable', () => {
   it('shows n.v.t. when difference is null (with JIJ column visible)', () => {
     const resultWithNull: ComparisonResult = {
       ...mockResult,
-      differences: { citoVsDia: 100, citoVsJij: null },
+      differences: { citoVsDia: 100, citoVsJij: null, citoVsSaqi: null },
     };
     render(<ComparisonTable result={resultWithNull} />);
     expect(screen.getByText('n.v.t.')).toBeInTheDocument();

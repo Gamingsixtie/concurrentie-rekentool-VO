@@ -7,15 +7,16 @@
  * 3. Plus — extended bundle including taalverzorging and sociaal-emotioneel
  *
  * Pricing derived from:
- * - Intel-rapport 2026-03-23, secties 0 en B4
- * - Cito-migration-prices.ts (Basis 1jr = €23,45 / 3 kern)
- * - Gap analysis: €17,95 bundel (3 kern bij meerjarig contract)
+ * - Intel-rapport 2026-03-23, secties 0 en B2/B4
+ * - Cito nieuw platform prijslijst 2026-2027
  *
  * Contract period multipliers apply to ALL providers (not just Cito).
- * Cito offers multi-year discounts; DIA and JIJ are assumed at face value (3x for 3yr).
+ * Cito offers multi-year discounts; DIA, JIJ and SAQI are assumed at face value (3x for 3yr).
  */
 
 export type CitoBundleType = 'individual' | 'basis' | 'plus';
+
+export type ContractPeriod = 'annual' | 'three-year' | 'three-year-duo';
 
 export interface CitoBundle {
   id: CitoBundleType;
@@ -25,6 +26,12 @@ export interface CitoBundle {
   includedModuleIds: string[];
   /** Total price per student per year for all included modules combined. null = use individual prices. */
   pricePerStudent: number | null;
+  /**
+   * Per-period annual price per student. When a contract period is selected,
+   * this overrides the generic citoFactor from CONTRACT_PERIODS.
+   * null entries fall back to factor-based calculation.
+   */
+  contractPrices?: Partial<Record<ContractPeriod, number>>;
 }
 
 export const CITO_BUNDLES: CitoBundle[] = [
@@ -40,27 +47,36 @@ export const CITO_BUNDLES: CitoBundle[] = [
     name: 'Basis',
     description: 'Kernpakket: Rekenwiskunde, Nederlands en Engels',
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels'],
-    pricePerStudent: 17.95,
+    pricePerStudent: 23.45,
+    contractPrices: {
+      annual: 23.45,
+      'three-year': 22.05,
+      'three-year-duo': 21.05,
+    },
   },
   {
     id: 'plus',
     name: 'Plus',
     description: 'Kern + Taalverzorging en Sociaal-emotioneel',
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging', 'sociaal-emotioneel'],
-    pricePerStudent: 23.45,
+    pricePerStudent: 31.44,
+    contractPrices: {
+      annual: 31.44,
+      'three-year': 28.30,
+      'three-year-duo': 27.30,
+    },
   },
 ];
 
 /**
  * Contract period configuration.
  *
- * The factor is the multiplier for the total cost over the contract period.
+ * The factor is a fallback multiplier for individual (non-bundle) pricing.
+ * When a bundle is selected with contractPrices, those take precedence.
  * - Annual: 1x (one year)
  * - 3-year: 2.85x for Cito (5% annual discount), 3.00x for other providers
  * - 3-year + DUO: 2.70x for Cito (10% annual discount via DUO subsidy), 3.00x for others
  */
-export type ContractPeriod = 'annual' | 'three-year' | 'three-year-duo';
-
 export interface ContractPeriodConfig {
   id: ContractPeriod;
   label: string;
@@ -88,7 +104,7 @@ export const CONTRACT_PERIODS: ContractPeriodConfig[] = [
     years: 3,
     citoFactor: 2.85,
     otherFactor: 3,
-    note: 'Cito 3-jarig contract: 5% korting per jaar (factor 2,85×). DIA/JIJ: 3× jaarprijs.',
+    note: 'Cito 3-jarig contract: ~6% korting per jaar. DIA/JIJ/SAQI: 3× jaarprijs.',
   },
   {
     id: 'three-year-duo',
@@ -97,7 +113,7 @@ export const CONTRACT_PERIODS: ContractPeriodConfig[] = [
     years: 3,
     citoFactor: 2.70,
     otherFactor: 3,
-    note: 'Cito 3-jarig + DUO: 10% korting per jaar (factor 2,70×). DIA/JIJ: 3× jaarprijs. DUO-subsidie onder voorbehoud van toekenning.',
+    note: 'Cito 3-jarig + DUO: ~10% korting per jaar. DIA/JIJ/SAQI: 3× jaarprijs. DUO-subsidie onder voorbehoud van toekenning.',
   },
 ];
 
@@ -107,4 +123,27 @@ export function getContractPeriodConfig(period: ContractPeriod): ContractPeriodC
 
 export function getCitoBundle(bundleType: CitoBundleType): CitoBundle {
   return CITO_BUNDLES.find((b) => b.id === bundleType) ?? CITO_BUNDLES[0];
+}
+
+/**
+ * Get the effective Cito factor for a bundle + contract period combo.
+ * When the bundle has explicit contractPrices, compute the factor from those.
+ * Otherwise fall back to the generic citoFactor.
+ */
+export function getCitoFactorForBundle(
+  bundle: CitoBundle,
+  period: ContractPeriod,
+): number {
+  const config = getContractPeriodConfig(period);
+  if (config.years === 1) return 1;
+
+  const annualPrice = bundle.pricePerStudent;
+  const periodPrice = bundle.contractPrices?.[period];
+
+  if (annualPrice && periodPrice) {
+    // factor = (discounted annual price × years) / annual price
+    return (periodPrice * config.years) / annualPrice;
+  }
+
+  return config.citoFactor;
 }

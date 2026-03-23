@@ -54,23 +54,29 @@ export function applyCitoBundlePrices(
 /**
  * Apply contract period multiplier to a full ComparisonResult.
  * Adjusts both per-module totalCost and overall totals + differences.
- * Cito gets a discounted factor; DIA and JIJ pay full price × years.
+ * Cito gets a discounted factor; DIA, JIJ and SAQI pay full price × years.
+ *
+ * When customCitoFactor is provided (from bundle-specific contract pricing),
+ * it overrides the generic citoFactor from the period config.
  *
  * Pure function: returns a new result, does not mutate the input.
  */
 export function applyContractPeriodToResult(
   result: ComparisonResult,
   period: ContractPeriod,
+  customCitoFactor?: number,
 ): ComparisonResult {
   const config = getContractPeriodConfig(period);
   if (config.years === 1) return result;
+
+  const citoFactor = customCitoFactor ?? config.citoFactor;
 
   // Adjust per-module totals
   const modules = result.modules.map((mod) => {
     const providers = { ...mod.providers };
     for (const [provider, cost] of Object.entries(providers) as Array<[string, typeof mod.providers[keyof typeof mod.providers]]>) {
       if (cost === null) continue;
-      const factor = provider === 'cito' ? config.citoFactor : config.otherFactor;
+      const factor = provider === 'cito' ? citoFactor : config.otherFactor;
       (providers as Record<string, typeof cost>)[provider] = {
         ...cost,
         totalCost: Math.round(cost.totalCost * factor * 100) / 100,
@@ -82,7 +88,7 @@ export function applyContractPeriodToResult(
   // Adjust totals
   const totals = { ...result.totals };
   for (const provider of Object.keys(totals) as Array<keyof typeof totals>) {
-    const factor = provider === 'cito' ? config.citoFactor : config.otherFactor;
+    const factor = provider === 'cito' ? citoFactor : config.otherFactor;
     totals[provider] = Math.round(totals[provider] * factor * 100) / 100;
   }
 
@@ -90,6 +96,7 @@ export function applyContractPeriodToResult(
   const differences = {
     citoVsDia: totals.dia !== undefined ? totals.cito - totals.dia : null,
     citoVsJij: totals.jij !== undefined ? totals.cito - totals.jij : null,
+    citoVsSaqi: totals.saqi !== undefined ? totals.cito - totals.saqi : null,
   };
 
   return { modules, totals, differences };

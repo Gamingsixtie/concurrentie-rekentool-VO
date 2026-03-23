@@ -33,6 +33,7 @@ const PROVIDER_LABELS: Record<ProviderKey, string> = {
   cito: 'Cito',
   dia: 'DIA',
   jij: 'JIJ',
+  saqi: 'SAQI',
 };
 
 /**

@@ -31,11 +31,12 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'rekenwiskunde',
     provider: 'cito',
-    amountPerStudent: 4.5,
+    amountPerStudent: 7.82,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Nieuw platform — Basis bundel €23,45 ÷ 3 kern = €7,82/module',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
+    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is €23,45 ÷ 3.',
   },
   {
     moduleId: 'rekenwiskunde',
@@ -64,11 +65,12 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'nederlands',
     provider: 'cito',
-    amountPerStudent: 4.5,
+    amountPerStudent: 7.82,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Nieuw platform — Basis bundel €23,45 ÷ 3 kern = €7,82/module',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
+    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is €23,45 ÷ 3.',
   },
   {
     moduleId: 'nederlands',
@@ -97,11 +99,12 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'engels',
     provider: 'cito',
-    amountPerStudent: 4.5,
+    amountPerStudent: 7.82,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Nieuw platform — Basis bundel €23,45 ÷ 3 kern = €7,82/module',
+    verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
+    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is €23,45 ÷ 3.',
   },
   {
     moduleId: 'engels',
@@ -130,11 +133,12 @@ export const DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'taalverzorging',
     provider: 'cito',
-    amountPerStudent: 1.6,
+    amountPerStudent: 3.75,
     source: 'publication',
-    sourceLabel: 'Huidig platform 2025-2026 — Taalverzorging per licentie',
+    sourceLabel: 'Nieuw platform — Taalverzorging los €3,75/lln (of in Plus-bundel)',
     verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
+    note: 'Taalverzorging is op het nieuwe platform apart beschikbaar voor €3,75, of onderdeel van de Plus-bundel (€31,44 incl. SEF + LWH).',
   },
   {
     moduleId: 'taalverzorging',
@@ -160,7 +164,17 @@ export const DEFAULT_PRICES: PriceRecord[] = [
     verifiedAt: new Date('2026-03-23'),
     isPublicationPrice: true,
   },
-  // DIA biedt geen eigen sociaal-emotioneel instrument aan (SAQI is extern, geen Dia-product)
+  // DIA biedt geen eigen sociaal-emotioneel instrument aan
+  {
+    moduleId: 'sociaal-emotioneel',
+    provider: 'saqi',
+    amountPerStudent: 3.5,
+    source: 'publication',
+    sourceLabel: 'SAQI website — €3,50/lln/jaar, maart 2026',
+    verifiedAt: new Date('2026-03-23'),
+    isPublicationPrice: true,
+    note: 'SAQI: School Attitude Questionnaire Internet. COTAN-gecertificeerd, adaptief. Directe concurrent van Cito SEF voor sociaal-emotioneel functioneren.',
+  },
   {
     moduleId: 'sociaal-emotioneel',
     provider: 'jij',
