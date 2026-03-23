@@ -11,6 +11,7 @@ import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
+import { AdvicePanel } from './AdvicePanel';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -278,6 +279,9 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
       {/* Samenvatting: totalen + Cito-voordelen */}
       <ComparisonSummary result={result} />
 
+      {/* AI Gespreksadvies */}
+      <AdvicePanel />
+
       {/* Tabel met detail-panels */}
       <div className="mb-8">
         <ComparisonTable result={result} onBarHighlight={chartHighlight} />
@@ -293,8 +297,15 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         <TimeSavingsSection />
       </div>
 
-      {/* Disclaimer */}
-      <DisclaimerFooter showDisclaimer={true} />
+      {/* Disclaimer + bronvermelding */}
+      <DisclaimerFooter
+        showDisclaimer={true}
+        dataSources={[
+          { provider: 'Cito', label: 'Publicatieprijzen Cito VO 2025-2026' },
+          { provider: 'DIA', label: 'DIA Webshop (shop.dia.nl), geverifieerd maart 2026' },
+          { provider: 'JIJ! (Bureau ICE)', label: 'Deskresearch MediaTest juni 2024 (R-5043), in opdracht van Cito' },
+        ]}
+      />
     </div>
   );
 }
