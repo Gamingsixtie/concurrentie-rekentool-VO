@@ -169,7 +169,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — TDD engines: migratie-engine uitbreiden met switchingCosts en break-even, nieuwe upsell-detectie engine, data layer uitbreiding (SchoolRecord + Supabase)
+- [x] 11-01-PLAN.md — TDD engines: migratie-engine uitbreiden met switchingCosts en break-even, nieuwe upsell-detectie engine, data layer uitbreiding (SchoolRecord + Supabase)
 - [ ] 11-02-PLAN.md — WaardeTab UI: hero-kaart, tijdwinst-tabel, migratie-tabel, meerjarenprojectie-chart, EditableField extractie, tab-routing en navigatie
 - [ ] 11-03-PLAN.md — Upsell UI: UpsellCard op school-dashboard, UpsellBadge op schoolkaarten, visuele verificatie alle Phase 11 features
 
@@ -257,7 +257,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete    | 2026-03-22 |
-| 11. Waarde-engine & Migratie | v2.0 | 0/3 | Planning complete | - |
+| 11. Waarde-engine & Migratie | v2.0 | 1/3 | In Progress|  |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 0/3 | Not started | - |

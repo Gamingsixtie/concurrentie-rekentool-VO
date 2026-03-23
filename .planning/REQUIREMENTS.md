@@ -21,7 +21,7 @@
 - [x] **SCHOOL-04**: Gebruiker kan gespreksnotities per school toevoegen met datum, contactpersoon en kernpunten
 - [x] **SCHOOL-05**: Gebruiker kan pipeline-status per school instellen (prospect, contact, offerte, besluit, klant, at-risk)
 - [x] **SCHOOL-06**: Gebruiker ziet schooloverzicht met zoekfunctie, gesorteerd op laatst gebruikt, met pipeline-status badge
-- [ ] **SCHOOL-07**: Systeem detecteert upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
+- [x] **SCHOOL-07**: Systeem detecteert upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
 
 ### AI Intake
 
@@ -50,15 +50,15 @@
 
 ### Waarde & Tijdwinst
 
-- [ ] **WAARDE-01**: Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames
-- [ ] **WAARDE-02**: Gebruiker kan uurtarief instellen en ziet tijdsbesparing omgerekend naar euro's per jaar
-- [ ] **WAARDE-03**: Gebruiker ziet de totale waarde van de overstap: financieel verschil + tijdsbesparing in euro's
-- [ ] **WAARDE-04**: Gebruiker ziet meerjarenprojectie over 1, 3 en 5 jaar met cumulatieve besparing en break-even punt
+- [x] **WAARDE-01**: Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames
+- [x] **WAARDE-02**: Gebruiker kan uurtarief instellen en ziet tijdsbesparing omgerekend naar euro's per jaar
+- [x] **WAARDE-03**: Gebruiker ziet de totale waarde van de overstap: financieel verschil + tijdsbesparing in euro's
+- [x] **WAARDE-04**: Gebruiker ziet meerjarenprojectie over 1, 3 en 5 jaar met cumulatieve besparing en break-even punt
 
 ### Migratie (Huidig → Nieuw Platform)
 
-- [ ] **MIGR-01**: Gebruiker ziet financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal
-- [ ] **MIGR-02**: Migratie-engine verwerkt het gewijzigde prijsmodel van het nieuwe Cito-platform correct
+- [x] **MIGR-01**: Gebruiker ziet financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal
+- [x] **MIGR-02**: Migratie-engine verwerkt het gewijzigde prijsmodel van het nieuwe Cito-platform correct
 - [ ] **MIGR-03**: Gebruiker ziet gecombineerde business case: prijsverschil + tijdwinst + meerjarenprojectie
 
 ### DMU-Export
@@ -133,7 +133,7 @@
 | SCHOOL-04 | Phase 7 | Complete |
 | SCHOOL-05 | Phase 7 | Complete |
 | SCHOOL-06 | Phase 7 | Complete |
-| SCHOOL-07 | Phase 11 | Pending |
+| SCHOOL-07 | Phase 11 | Complete |
 | INTAKE-01 | Phase 9 | Complete |
 | INTAKE-02 | Phase 9 | Complete |
 | INTAKE-03 | Phase 9 | Complete |
@@ -150,12 +150,12 @@
 | GEVOEL-01 | Phase 10 | Complete |
 | GEVOEL-02 | Phase 10 | Complete |
 | GEVOEL-03 | Phase 10 | Complete |
-| WAARDE-01 | Phase 11 | Pending |
-| WAARDE-02 | Phase 11 | Pending |
-| WAARDE-03 | Phase 11 | Pending |
-| WAARDE-04 | Phase 11 | Pending |
-| MIGR-01 | Phase 11 | Pending |
-| MIGR-02 | Phase 11 | Pending |
+| WAARDE-01 | Phase 11 | Complete |
+| WAARDE-02 | Phase 11 | Complete |
+| WAARDE-03 | Phase 11 | Complete |
+| WAARDE-04 | Phase 11 | Complete |
+| MIGR-01 | Phase 11 | Complete |
+| MIGR-02 | Phase 11 | Complete |
 | MIGR-03 | Phase 11 | Pending |
 | EXPORT-01 | Phase 12 | Pending |
 | EXPORT-02 | Phase 12 | Pending |
