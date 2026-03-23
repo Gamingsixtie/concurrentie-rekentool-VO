@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { calculateMigration } from '../../engine/migration';
@@ -7,61 +7,11 @@ import { CITO_MIGRATION_PRICES } from '../../data/cito-migration-prices';
 import { getTotalStudents } from '../../engine/price-comparison';
 import { formatCurrency } from '../../lib/format';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
+import { EditableField } from '@/features/school-profile/components/EditableField';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface MigrationPageProps {
   onBack?: () => void;
-}
-
-// ─── Editable number input ────────────────────────────────────────────────────
-
-function EditableField({
-  label,
-  value,
-  unit,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-  onChange: (v: number) => void;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(String(value));
-
-  const commit = () => {
-    const parsed = parseFloat(draft);
-    if (!isNaN(parsed) && parsed >= 0) onChange(parsed);
-    else setDraft(String(value));
-    setEditing(false);
-  };
-
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-neutral-500">{label}</span>
-      {editing ? (
-        <input
-          type="number"
-          min="0"
-          step="0.5"
-          value={draft}
-          autoFocus
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(String(value)); setEditing(false); } }}
-          className="w-20 h-8 text-center border border-cito-primary rounded-md text-sm focus:outline-none"
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={() => { setDraft(String(value)); setEditing(true); }}
-          className="text-sm font-semibold text-cito-primary underline decoration-dashed underline-offset-2"
-        >
-          {value} {unit}
-        </button>
-      )}
-    </div>
-  );
 }
 
 // ─── Multi-year bar chart ─────────────────────────────────────────────────────
