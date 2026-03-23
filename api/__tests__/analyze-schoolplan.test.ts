@@ -98,13 +98,14 @@ describe('extractTextFromFile', () => {
 });
 
 describe('buildSummarizePrompt', () => {
-  it('includes instruction to classify whether document is a schoolplan', () => {
+  it('includes instruction to classify whether document is a school document', () => {
     const prompt = buildSummarizePrompt();
 
-    expect(prompt).toContain('schoolplan');
+    expect(prompt).toContain('schooldocument');
     expect(prompt).toContain('isSchoolplan');
-    // Should instruct to detect non-schoolplan documents
-    expect(prompt.toLowerCase()).toMatch(/niet.*schoolplan|geen.*schoolplan|false/);
+    expect(prompt).toContain('Schoolgids');
+    // Should instruct to detect non-relevant documents
+    expect(prompt.toLowerCase()).toMatch(/niet relevant|false/);
   });
 });
 

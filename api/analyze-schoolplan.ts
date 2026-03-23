@@ -77,17 +77,25 @@ const MODULE_DIFFERENTIATORS = [
 // ─── AI Prompt builders ──────────────────────────────────────────────────────
 
 export function buildSummarizePrompt(): string {
-  return `Je bent een AI-assistent die schoolplan-documenten analyseert voor Cito-accountmanagers.
+  return `Je bent een AI-assistent die schooldocumenten analyseert voor Cito-accountmanagers.
 
-STAP 1: Bepaal of het document een schoolplan is.
-Een schoolplan is een strategisch document van een school dat doelen, visie, en beleid beschrijft voor de komende jaren.
+STAP 1: Bepaal of het document een relevant schooldocument is.
+Relevante documenten zijn onder andere:
+- Schoolplan (strategisch meerjarenplan)
+- Schoolgids (jaarlijkse informatiegids voor ouders/leerlingen)
+- Jaarplan of jaarverslag
+- Beleidsplan (onderwijs, kwaliteit, zorg, ICT)
+- Schoolontwikkelplan
+- Elk ander document dat inzicht geeft in de school, het onderwijs, de visie of de doelen
 
-Als het document GEEN schoolplan is:
+Alleen documenten die GEEN relatie hebben met een school of onderwijs (bijv. een factuur, een cv, een willekeurig artikel) zijn niet relevant.
+
+Als het document NIET relevant is:
 Retourneer: { "isSchoolplan": false, "summary": "", "themes": [] }
 
-Als het document WEL een schoolplan is:
+Als het document WEL relevant is:
 1. Schrijf een samenvatting van 2-3 zinnen in het Nederlands.
-2. Identificeer 3-7 kernthema's/doelen.
+2. Identificeer 3-7 kernthema's/doelen die relevant zijn voor toetsing, leerlingvolgsystemen of onderwijskwaliteit.
 
 Retourneer: { "isSchoolplan": true, "summary": "<samenvatting>", "themes": ["<thema1>", ...] }
 
