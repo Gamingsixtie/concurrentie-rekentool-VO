@@ -49,6 +49,9 @@ export async function extractTextFromFile(buffer: Buffer, fileName: string): Pro
 
   switch (ext) {
     case 'pdf': {
+      // Pre-register pdfjs worker on main thread to avoid dynamic import of pdf.worker.mjs
+      // which fails in Vercel serverless (file not bundled)
+      await import('pdfjs-dist/legacy/build/pdf.worker.mjs');
       const { PDFParse } = await import('pdf-parse');
       const parser = new PDFParse({ data: buffer });
       const result = await parser.getText();
