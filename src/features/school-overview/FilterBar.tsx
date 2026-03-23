@@ -23,21 +23,27 @@ export default function FilterBar({
   ];
 
   return (
-    <div className="flex gap-2 overflow-x-auto flex-nowrap pb-1">
+    <div className="flex gap-1.5 overflow-x-auto flex-nowrap pb-0.5">
       {filters.map((filter) => {
         const isActive = activeFilter === filter.value;
+        const count = counts[filter.value] ?? 0;
         return (
           <button
             key={filter.value}
             type="button"
             onClick={() => onFilterChange(filter.value)}
-            className={`min-h-[44px] px-4 rounded-lg text-[14px] font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
+            className={`h-8 px-3 rounded-full text-[12px] font-medium whitespace-nowrap flex-shrink-0 transition-all ${
               isActive
-                ? 'bg-cito-primary text-white'
-                : 'bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50'
+                ? 'bg-cito-primary text-white shadow-sm'
+                : 'bg-neutral-50 text-neutral-600 hover:bg-neutral-100'
             }`}
           >
-            {filter.label} ({counts[filter.value] ?? 0})
+            {filter.label}
+            <span
+              className={`ml-1 ${isActive ? 'text-white/70' : 'text-neutral-400'}`}
+            >
+              {count}
+            </span>
           </button>
         );
       })}

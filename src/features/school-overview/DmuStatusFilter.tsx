@@ -1,4 +1,7 @@
-import { ENGAGEMENT_STATUSES, ENGAGEMENT_STATUS_LABELS } from '@/models/school';
+import {
+  ENGAGEMENT_STATUSES,
+  ENGAGEMENT_STATUS_LABELS,
+} from '@/models/school';
 import type { EngagementStatus } from '@/models/school';
 
 type DmuFilterValue = EngagementStatus | 'all';
@@ -23,24 +26,27 @@ export default function DmuStatusFilter({
   ];
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto flex-nowrap pb-1">
-      <span className="text-[14px] font-semibold text-neutral-700 mr-2 flex-shrink-0">
-        DMU:
-      </span>
+    <div className="flex gap-1.5 overflow-x-auto flex-nowrap pb-0.5">
       {filters.map((filter) => {
         const isActive = activeFilter === filter.value;
+        const count = counts[filter.value] ?? 0;
         return (
           <button
             key={filter.value}
             type="button"
             onClick={() => onFilterChange(filter.value)}
-            className={`min-h-[44px] px-4 rounded-lg text-[14px] font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
+            className={`h-8 px-3 rounded-full text-[12px] font-medium whitespace-nowrap flex-shrink-0 transition-all ${
               isActive
-                ? 'bg-cito-primary text-white'
-                : 'bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-50'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
             }`}
           >
-            {filter.label} ({counts[filter.value] ?? 0})
+            {filter.label}
+            <span
+              className={`ml-1 ${isActive ? 'text-white/70' : 'text-purple-400'}`}
+            >
+              {count}
+            </span>
           </button>
         );
       })}
