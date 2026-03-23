@@ -163,8 +163,8 @@ Voor elk thema uit het schooldocument, doorloop deze stappen:
 1. CITAAT: Zoek de exacte passage in het document die dit thema beschrijft. Citeer letterlijk.
 2. BEHOEFTE: Wat wil de school bereiken? Welk probleem lossen ze op? Welke ambitie hebben ze?
 3. KOPPELING: Welk Cito-product sluit hier concreet op aan, en WAAROM? Leg de logische verbinding uit tussen wat de school wil en wat het Cito-product biedt. Niet alleen "Cito heeft dit" maar "De school wil X, en Cito's product doet Y waardoor Z."
-4. CONCURRENTIE: Als de school nu een concurrent gebruikt (DIA of JIJ!), wat zijn de risico's? Wat missen ze? Wat biedt Cito dat de concurrent niet heeft voor deze specifieke behoefte?
-5. GESPREKSTIP: Een concrete openingszin die de accountmanager kan gebruiken. Verwijs naar het schooldocument: "Ik las in jullie schoolplan dat..." of "Jullie noemen in de schoolgids dat..."
+4. CONCURRENTIE: Geef ALTIJD voor zowel DIA als JIJ! aan hoe zij zich verhouden tot Cito voor dit thema. Wat biedt Cito dat zij niet hebben? En eerlijk: waar zijn zij sterk? De accountmanager moet voorbereid zijn op tegenargumenten.
+5. GESPREKSTIP: Schrijf een kant-en-klare gespreksopener van 2-3 zinnen die de accountmanager letterlijk kan gebruiken. Begin met een verwijzing naar het schooldocument, koppel naar de concrete behoefte, en eindig met een vraag die het gesprek opent. Voorbeeld: "Ik las in jullie schoolplan dat jullie inzetten op adaptief toetsen bij rekenen. Met Cito's adaptieve LVS-toetsen krijgen docenten per leerling inzicht in het exacte niveau, zodat ze gericht kunnen differentiëren. Hoe pakken jullie dat nu aan?"
 
 PER KANS RETOURNEER:
 - theme: het schoolplanthema (kort, beschrijvend)
@@ -172,15 +172,15 @@ PER KANS RETOURNEER:
 - moduleId: module-id uit de catalogus
 - quote: LETTERLIJK citaat uit het document (minimaal 1 zin). Dit is de onderbouwing.
 - explanation: 2-3 zinnen die de REDENERING uitleggen: wat wil de school → wat biedt Cito → waarom past dit. Geen opsomming van features maar een logisch verhaal.
-- conversationTip: concrete openingszin voor het gesprek, verwijzend naar het schooldocument. Voorbeeld: "Ik zag dat jullie in het schoolplan schrijven over [thema]. Cito's [product] kan daarbij helpen doordat..."
+- conversationTip: kant-en-klare gespreksopener van 2-3 zinnen. Verwijs naar het document, koppel aan de behoefte, sluit af met een open vraag. De accountmanager moet dit letterlijk kunnen voorlezen.
 - relevance: 'hoog' (directe match met schooldoel), 'midden' (gerelateerd maar niet expliciet genoemd), 'laag' (indirect relevant)
-- competitorVulnerabilities: [{ provider: 'dia'|'jij', description }] — alleen als er een concreet verschil is. Beschrijf wat de concurrent NIET biedt in de context van wat de school wil.
+- competitorVulnerabilities: ALTIJD twee entries: één voor DIA en één voor JIJ!. Format: [{ provider: 'dia', description: '...' }, { provider: 'jij', description: '...' }]. Beschrijf per concurrent: wat biedt Cito dat zij niet hebben voor dit thema, en waar is de concurrent sterk (zodat de accountmanager voorbereid is).
 
 KWALITEITSREGELS:
 - Geen generieke one-liners als "Cito is de enige aanbieder". Leg uit WAAROM dat relevant is voor DEZE school.
 - Als je geen goed citaat kunt vinden, is het geen echte kans — laat hem dan weg of zet hem in alsoRelevant.
 - Maximaal 5 hoofdkansen. Kwaliteit boven kwantiteit.
-- competitorVulnerabilities alleen vullen als het echt relevant is voor het schoolthema, niet als generiek feit.
+- competitorVulnerabilities ALTIJD voor beide concurrenten invullen. Wees eerlijk: noem ook waar de concurrent sterk is, zodat de accountmanager niet voor verrassingen komt te staan.
 
 OOK: "alsoRelevant" voor modules die niet direct matchen maar interessant kunnen zijn:
 - citoProduct, moduleId, reason (1 zin waarom het relevant zou kunnen zijn), relevance
