@@ -93,3 +93,27 @@ export type PreferredChannel = typeof PREFERRED_CHANNELS[number];
 
 export const AUTHORITY_LEVELS = ['adviserend', 'beslissend', 'budgethouder'] as const;
 export type AuthorityLevel = typeof AUTHORITY_LEVELS[number];
+
+// --- Engagement status (DMU klantreis) ---
+
+export const ENGAGEMENT_STATUSES = [
+  'nog-niet-benaderd',
+  'in-gesprek',
+  'positief',
+  'wacht-op-intern',
+  'akkoord',
+  'afgehaakt',
+] as const;
+export type EngagementStatus = typeof ENGAGEMENT_STATUSES[number];
+
+export const ENGAGEMENT_STATUS_LABELS: Record<EngagementStatus, string> = {
+  'nog-niet-benaderd': 'Nog niet benaderd',
+  'in-gesprek': 'In gesprek',
+  'positief': 'Positief',
+  'wacht-op-intern': 'Wacht op intern',
+  'akkoord': 'Akkoord',
+  'afgehaakt': 'Afgehaakt',
+};
+
+/** Stagnation threshold in days */
+export const STAGNATION_THRESHOLD_DAYS = 30;
