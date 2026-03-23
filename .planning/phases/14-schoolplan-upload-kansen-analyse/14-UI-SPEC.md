@@ -48,14 +48,16 @@ Exceptions: Touch targets minimum 44px height (existing EditableField pattern us
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (normal) | 1.5 |
-| Label | 14px (text-sm) | 500 (medium) | 1.5 |
 | Heading | 18px (text-lg) | 600 (semibold) | 1.2 |
-| Display | 20px (text-xl) | 700 (bold) | 1.2 |
+| Display | 20px (text-xl) | 600 (semibold) | 1.2 |
+| Label/Micro | 12px (text-xs) | 600 (semibold) | 1.5 |
 
 Notes:
+- Two weights only: 400 (normal) for body text, 600 (semibold) for all headings, labels, display, and emphasis
 - Body at 14px matches existing UpsellCard, DocumentDropzone patterns
 - Heading at 18px matches existing card title pattern (`text-lg font-semibold`)
 - Display at 20px for tab section headers only (AI summary header)
+- Label/Micro at 12px for KansCard section labels (uppercase tracking-wide)
 - All text in formeel Nederlands (u-vorm) per MODE-01
 
 ---
@@ -164,14 +166,14 @@ White card with 24px padding. Layout per D-03:
 |  Concurrentie                                                      |
 |  DIA biedt dit beperkt: geen adaptieve component in hun toetsen.   |
 |                                                                    |
-|  [Besproken] [Niet relevant]  Notitie: _______________  [Opslaan] |
+|  [Besproken] [Niet relevant]  Notitie: ___________  [Notitie opslaan] |
 +------------------------------------------------------------------+
 ```
 
 - Card: bg-white rounded-lg shadow-sm border border-neutral-200, p-6
-- Relevance badge: inline pill, top-right of title row, rounded-full px-3 py-1 text-xs font-medium
+- Relevance badge: inline pill, top-right of title row, rounded-full px-3 py-1 text-xs font-semibold
 - Product name: text-lg font-semibold text-cito-primary
-- Section labels ("Schoolplan-thema", "Toelichting", "Gesprekstip", "Citaat uit schoolplan"): text-xs font-medium text-neutral-400 uppercase tracking-wide, mb-1
+- Section labels ("Schoolplan-thema", "Toelichting", "Gesprekstip", "Citaat uit schoolplan"): text-xs font-semibold text-neutral-400 uppercase tracking-wide, mb-1
 - Section body text: text-sm text-neutral-700
 - Quote section: text-sm text-neutral-700 italic, left border-l-2 border-cito-primary pl-3
 - Competitor vulnerability section: bg-orange-50 border-l-2 border-cito-accent p-3 rounded-r, text-sm
@@ -179,7 +181,7 @@ White card with 24px padding. Layout per D-03:
 - "Besproken" toggle: small pill button, when active: bg-green-100 text-green-700 border-green-200
 - "Niet relevant" toggle: small pill button, when active: bg-neutral-100 text-neutral-500 border-neutral-300
 - Note input: text-sm border border-neutral-200 rounded px-2 py-1 flex-1 min-h-[44px]
-- "Opslaan" button: text-sm text-cito-primary font-medium
+- "Notitie opslaan" button: text-sm text-cito-primary font-semibold
 
 When marked "niet relevant": entire card gets opacity-60, note and status remain visible.
 
@@ -192,7 +194,7 @@ Step 1:  [*]  Document wordt samengevat...
 Step 2:  [ ]  Kansen worden geidentificeerd...
 ```
 
-- Active step: cito-primary dot (filled circle), text-sm font-medium text-neutral-900
+- Active step: cito-primary dot (filled circle), text-sm font-semibold text-neutral-900
 - Pending step: neutral-300 dot (empty circle), text-sm text-neutral-400
 - Complete step: green-500 dot (checkmark), text-sm text-neutral-500
 - Container: bg-white rounded-lg border border-neutral-200 p-6
@@ -233,7 +235,7 @@ Kansen die niet in het schoolplan staan maar relevant kunnen zijn
 1. User clicks "Besproken" or "Niet relevant" toggle on a KansCard
 2. Toggle activates immediately (optimistic update)
 3. Optional: user types note in note input field
-4. User clicks "Opslaan" to persist note
+4. User clicks "Notitie opslaan" to persist note
 5. Mutation via React Query `useMutation` to update `opportunity_annotations` JSONB
 
 ### Error Handling
@@ -272,7 +274,7 @@ Kansen die niet in het schoolplan staan maar relevant kunnen zijn
 | Besproken toggle | Besproken |
 | Niet relevant toggle | Niet relevant |
 | Note placeholder | Notitie toevoegen... |
-| Note save button | Opslaan |
+| Note save button | Notitie opslaan |
 | Relevance hoog label | Hoog |
 | Relevance midden label | Midden |
 | Relevance laag label | Laag |
