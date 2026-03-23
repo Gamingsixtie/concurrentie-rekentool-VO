@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Phase complete — ready for verification
-stopped_at: Completed 14-03-PLAN.md (Tasks 1-2; Task 3 checkpoint pending)
-last_updated: "2026-03-23T18:23:29.813Z"
+stopped_at: Phase 15 context gathered
+last_updated: "2026-03-23T20:38:05.188Z"
 progress:
   total_phases: 13
   completed_phases: 6
@@ -109,6 +109,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T18:23:29.807Z
-Stopped at: Completed 14-03-PLAN.md (Tasks 1-2; Task 3 checkpoint pending)
-Resume file: None
+Last session: 2026-03-23T20:38:05.184Z
+Stopped at: Phase 15 context gathered
+Resume file: .planning/phases/15-dmu-klantreis-registratie/15-CONTEXT.md
