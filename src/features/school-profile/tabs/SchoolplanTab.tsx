@@ -17,12 +17,12 @@ import type { OpportunityAnnotation } from '../schemas/schoolplan-analysis.schem
 
 export default function SchoolplanTab() {
   const { slug } = useParams({ from: '/scholen/$slug' });
-  const { data: school } = useSchool(slug);
+  const { data: school, isLoading: schoolLoading } = useSchool(slug);
   const schoolId = school?.id ?? '';
   const queryClient = useQueryClient();
 
   // Analysis data from DB
-  const { data: analysis, isLoading } = useSchoolplanAnalysis(schoolId);
+  const { data: analysis, isLoading: analysisLoading } = useSchoolplanAnalysis(schoolId);
   const updateAnnotation = useUpdateAnnotation(schoolId);
   const deleteAnalysis = useDeleteSchoolplanAnalysis(schoolId);
 
@@ -88,7 +88,7 @@ export default function SchoolplanTab() {
 
   // ─── Loading state ────────────────────────────────────────────────────────
 
-  if (isLoading) {
+  if (schoolLoading || (schoolId && analysisLoading)) {
     return (
       <div className="p-8 max-sm:p-4">
         <p className="text-sm text-neutral-400">Laden...</p>
