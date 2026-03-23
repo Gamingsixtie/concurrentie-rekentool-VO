@@ -49,8 +49,10 @@ export async function extractTextFromFile(buffer: Buffer, fileName: string): Pro
 
   switch (ext) {
     case 'pdf': {
-      const pdfParse = (await import('pdf-parse')).default;
-      const result = await pdfParse(buffer);
+      const mod = await import('pdf-parse');
+      // Handle CJS/ESM interop: .default in bundled ESM, module itself in CJS
+      const pdfParse = typeof mod.default === 'function' ? mod.default : mod;
+      const result = await (pdfParse as (buf: Buffer) => Promise<{ text: string; numpages?: number }>)(buffer);
       return { text: result.text, pageCount: result.numpages ?? null };
     }
     case 'docx': {
