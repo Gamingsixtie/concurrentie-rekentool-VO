@@ -23,6 +23,7 @@ export type CurrentProvider =
   | 'cito-nieuw' // nieuw Cito platform (al klant)
   | 'dia'
   | 'jij'
+  | 'saqi'       // SAQI — alleen sociaal-emotioneel instrument
   | 'overig'     // andere aanbieder (naam invulbaar)
   | 'geen';      // module niet in gebruik
 
@@ -40,6 +41,7 @@ export const CURRENT_PROVIDER_LABELS: Record<CurrentProvider, string> = {
   'cito-nieuw': 'Cito (nieuw platform)',
   'dia':        'DIA',
   'jij':        'JIJ (IEP)',
+  'saqi':       'SAQI',
   'overig':     'Andere aanbieder',
   'geen':       'Geen / nog niet bepaald',
 };

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const currentProviderEnum = z.enum(['cito-oud', 'cito-nieuw', 'dia', 'jij', 'overig', 'geen']);
+const currentProviderEnum = z.enum(['cito-oud', 'cito-nieuw', 'dia', 'jij', 'saqi', 'overig', 'geen']);
 
 export const moduleCurrentSetupSchema = z.object({
   moduleSetups: z.array(

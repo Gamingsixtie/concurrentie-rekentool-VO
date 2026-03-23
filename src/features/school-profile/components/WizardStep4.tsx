@@ -11,7 +11,7 @@ import { DEFAULT_PRICES } from '../../../data/default-prices.ts';
 import { formatCurrency } from '../../../lib/format.ts';
 
 // Providers for which a price input is relevant
-const PRICE_RELEVANT_PROVIDERS: CurrentProvider[] = ['dia', 'jij', 'overig'];
+const PRICE_RELEVANT_PROVIDERS: CurrentProvider[] = ['dia', 'jij', 'saqi', 'overig'];
 
 // Publication price lookup helper
 function getPublicationPrice(moduleId: string, provider: CurrentProvider): number | null {
@@ -21,7 +21,15 @@ function getPublicationPrice(moduleId: string, provider: CurrentProvider): numbe
   return record?.amountPerStudent ?? null;
 }
 
-const PROVIDER_OPTIONS: CurrentProvider[] = ['cito-oud', 'cito-nieuw', 'dia', 'jij', 'overig', 'geen'];
+const BASE_PROVIDER_OPTIONS: CurrentProvider[] = ['cito-oud', 'cito-nieuw', 'dia', 'jij', 'overig', 'geen'];
+
+/** SAQI only available for sociaal-emotioneel module */
+function getProviderOptions(moduleId: string): CurrentProvider[] {
+  if (moduleId === 'sociaal-emotioneel') {
+    return ['cito-oud', 'cito-nieuw', 'dia', 'jij', 'saqi', 'overig', 'geen'];
+  }
+  return BASE_PROVIDER_OPTIONS;
+}
 
 const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) {
   const { moduleSetups, setModuleSetups, selectedModules } = useSchoolProfileStore();
@@ -114,7 +122,7 @@ const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) 
                           }
                         }}
                       >
-                        {PROVIDER_OPTIONS.map((p) => (
+                        {getProviderOptions(moduleId).map((p) => (
                           <option key={p} value={p}>
                             {CURRENT_PROVIDER_LABELS[p]}
                           </option>
