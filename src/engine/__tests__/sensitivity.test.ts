@@ -30,6 +30,7 @@ describe('calculateSensitivity', () => {
           cito: { pricePerStudent: 4.50, totalCost: 450, studentCount: 100, priceRecord: makePrice('rekenwiskunde', 'cito', 4.50) },
           dia: { pricePerStudent: 5.20, totalCost: 520, studentCount: 100, priceRecord: makePrice('rekenwiskunde', 'dia', 5.20) },
           jij: { pricePerStudent: 4.80, totalCost: 480, studentCount: 100, priceRecord: makePrice('rekenwiskunde', 'jij', 4.80) },
+          saqi: null,
         },
       },
       {
@@ -40,11 +41,12 @@ describe('calculateSensitivity', () => {
           cito: { pricePerStudent: 4.50, totalCost: 450, studentCount: 100, priceRecord: makePrice('nederlands', 'cito', 4.50) },
           dia: { pricePerStudent: 5.20, totalCost: 520, studentCount: 100, priceRecord: makePrice('nederlands', 'dia', 5.20) },
           jij: { pricePerStudent: 4.80, totalCost: 480, studentCount: 100, priceRecord: makePrice('nederlands', 'jij', 4.80) },
+          saqi: null,
         },
       },
     ],
-    totals: { cito: 900, dia: 1040, jij: 960 },
-    differences: { citoVsDia: -140, citoVsJij: -60 },
+    totals: { cito: 900, dia: 1040, jij: 960, saqi: 0 },
+    differences: { citoVsDia: -140, citoVsJij: -60, citoVsSaqi: null },
   };
 
   it('Test 1: Cito 900, DIA 1040 at 0%, 10%, 20% discount', () => {

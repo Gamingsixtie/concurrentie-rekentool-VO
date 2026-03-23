@@ -44,6 +44,7 @@ function makeModuleComparison(
       jij: jijCost !== null
         ? { pricePerStudent: jijCost / studentCount, totalCost: jijCost, studentCount, priceRecord: makePrice(moduleId, 'jij', jijCost / studentCount) }
         : null,
+      saqi: null,
     },
   };
 }
@@ -54,8 +55,8 @@ describe('calculateHybridScenario', () => {
       modules: [
         makeModuleComparison('rekenwiskunde', 'Reken-Wiskunde', 450, 520, 480),
       ],
-      totals: { cito: 450, dia: 520, jij: 480 },
-      differences: { citoVsDia: -70, citoVsJij: -30 },
+      totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
+      differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -77,8 +78,8 @@ describe('calculateHybridScenario', () => {
       modules: [
         makeModuleComparison('nederlands', 'Nederlands', 450, 520, 480),
       ],
-      totals: { cito: 450, dia: 520, jij: 480 },
-      differences: { citoVsDia: -70, citoVsJij: -30 },
+      totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
+      differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -101,8 +102,8 @@ describe('calculateHybridScenario', () => {
         makeModuleComparison('nederlands', 'Nederlands', 450, 520, null),
         makeModuleComparison('engels', 'Engels', 450, null, 480),
       ],
-      totals: { cito: 1350, dia: 1040, jij: 480 },
-      differences: { citoVsDia: 310, citoVsJij: 870 },
+      totals: { cito: 1350, dia: 1040, jij: 480, saqi: 0 },
+      differences: { citoVsDia: 310, citoVsJij: 870, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -124,8 +125,8 @@ describe('calculateHybridScenario', () => {
       modules: [
         makeModuleComparison('rekenwiskunde', 'Reken-Wiskunde', 450, 520, 480),
       ],
-      totals: { cito: 450, dia: 520, jij: 480 },
-      differences: { citoVsDia: -70, citoVsJij: -30 },
+      totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
+      differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -143,8 +144,8 @@ describe('calculateHybridScenario', () => {
       modules: [
         makeModuleComparison('rekenwiskunde', 'Reken-Wiskunde', 450, 520, 480),
       ],
-      totals: { cito: 450, dia: 520, jij: 480 },
-      differences: { citoVsDia: -70, citoVsJij: -30 },
+      totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
+      differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -162,8 +163,8 @@ describe('calculateHybridScenario', () => {
         makeModuleComparison('rekenwiskunde', 'Reken-Wiskunde', 450, 520, 480),
         makeModuleComparison('nederlands', 'Nederlands', 450, 520, 480),
       ],
-      totals: { cito: 900, dia: 1040, jij: 960 },
-      differences: { citoVsDia: -140, citoVsJij: -60 },
+      totals: { cito: 900, dia: 1040, jij: 960, saqi: 0 },
+      differences: { citoVsDia: -140, citoVsJij: -60, citoVsSaqi: null },
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [

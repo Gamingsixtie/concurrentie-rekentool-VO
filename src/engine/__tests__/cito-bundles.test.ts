@@ -112,11 +112,12 @@ describe('applyContractPeriodToResult', () => {
             priceRecord: makePriceRecord('rekenwiskunde', 'dia', 3.36),
           },
           jij: null,
+          saqi: null,
         },
       },
     ],
-    totals: { cito: 4500, dia: 3360, jij: 0 },
-    differences: { citoVsDia: 1140, citoVsJij: null },
+    totals: { cito: 4500, dia: 3360, jij: 0, saqi: 0 },
+    differences: { citoVsDia: 1140, citoVsJij: null, citoVsSaqi: null },
   };
 
   it('returns unchanged result for annual period', () => {
