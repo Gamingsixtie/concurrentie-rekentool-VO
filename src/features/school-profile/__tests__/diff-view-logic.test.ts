@@ -70,6 +70,10 @@ const existingContacts: Contact[] = [
     lastContactDate: null,
     notes: '',
     isPrimary: true,
+    engagementStatus: 'nog-niet-benaderd',
+    engagementStatusChangedAt: null,
+    waitingForContactId: null,
+    dropOffReason: null,
     createdAt: '',
   },
 ];

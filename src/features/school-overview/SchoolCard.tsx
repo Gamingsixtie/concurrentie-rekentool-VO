@@ -7,6 +7,7 @@ import IncompleteIndicator from '@/components/ui/IncompleteIndicator';
 import PipelineBadge from '@/components/ui/PipelineBadge';
 import { OwnerBadge } from '@/components/ui/OwnerBadge';
 import { UpsellBadge } from '@/components/ui/UpsellBadge';
+import DmuProgressIndicator from './DmuProgressIndicator';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { calculateComparison } from '@/engine/price-comparison';
 import { calculateUpsell } from '@/engine/upsell';
@@ -127,6 +128,7 @@ export default function SchoolCard({ school, onDelete, mode }: SchoolCardProps) 
         </h3>
         <PipelineBadge status={school.pipelineStatus} size="sm" />
         <UpsellBadge count={upsellData.count} hasGreenSignals={upsellData.hasGreenSignals} />
+        <DmuProgressIndicator contacts={school.contacts ?? []} />
         {school.ownerName && (
           <OwnerBadge
             ownerName={school.ownerName}

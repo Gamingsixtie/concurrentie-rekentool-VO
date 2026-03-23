@@ -16,6 +16,8 @@ import type { PipelineStatus, SchoolLevel, Scenario } from '@/models/school';
 import PipelineBadge from '@/components/ui/PipelineBadge';
 import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 import UpsellCard from '../components/UpsellCard';
+import DmuMatrix from '../components/DmuMatrix';
+import { useContacts } from '@/hooks/useContacts';
 
 // Context-smart actions per pipeline status
 const SMART_ACTIONS: Record<
@@ -83,6 +85,9 @@ export default function DashboardTab() {
 
   // School-specific prices for upsell calculation
   const { data: schoolPrices } = useSchoolPrices(activeSchoolId ?? '');
+
+  // Live contacts from DB for DMU matrix (store contacts may be stale)
+  const { data: liveContacts } = useContacts(activeSchoolId ?? '');
 
   // Compute upsell opportunities
   const hasModuleSetups = moduleSetups.some((m) => m.currentProvider !== 'geen');
@@ -362,6 +367,18 @@ export default function DashboardTab() {
           )}
         </div>
       </div>
+
+      {/* DMU-beslissingsoverzicht */}
+      <DmuMatrix
+        schoolId={activeSchoolId ?? ''}
+        contacts={liveContacts ?? contacts}
+        pipelineStatus={pipelineStatus}
+        onNavigateToPipeline={() => {
+          // Scroll to profile header where pipeline dropdown lives
+          const header = document.querySelector('[data-pipeline-select]');
+          if (header) header.scrollIntoView({ behavior: 'smooth' });
+        }}
+      />
 
       {/* Upsell-kansen */}
       <div className="mt-6">

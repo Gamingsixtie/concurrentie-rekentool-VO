@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
-import { addContact, updateContact, deleteContact, mapContactRow } from '@/db/operations';
+import { addContact, updateContact, deleteContact, setEngagementStatus, mapContactRow } from '@/db/operations';
 import type { Contact } from '@/db/types';
+import type { EngagementStatus } from '@/models/school';
 import type { z } from 'zod';
 import type { contactSchema } from '@/features/school-profile/schemas/contact.schema';
 
@@ -51,6 +52,27 @@ export function useDeleteContact() {
       deleteContact(schoolId, contactId),
     onSuccess: (_, { schoolId }) => {
       qc.invalidateQueries({ queryKey: ['contacts', schoolId] });
+    },
+  });
+}
+
+export function useSetEngagementStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      schoolId,
+      contactId,
+      status,
+      options,
+    }: {
+      schoolId: string;
+      contactId: string;
+      status: EngagementStatus;
+      options?: { waitingForContactId?: string | null; dropOffReason?: string };
+    }) => setEngagementStatus(schoolId, contactId, status, options),
+    onSuccess: (_, { schoolId }) => {
+      qc.invalidateQueries({ queryKey: ['contacts', schoolId] });
+      qc.invalidateQueries({ queryKey: ['schools'] });
     },
   });
 }

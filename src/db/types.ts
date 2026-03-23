@@ -1,4 +1,4 @@
-import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus, DMUPosition, PreferredChannel, AuthorityLevel } from '@/models/school';
+import type { SchoolLevel, Scenario, ModuleCurrentSetup, PipelineStatus, DMUPosition, PreferredChannel, AuthorityLevel, EngagementStatus } from '@/models/school';
 import type { SchoolplanOpportunity, AlsoRelevantItem, OpportunityAnnotation } from '@/features/school-profile/schemas/schoolplan-analysis.schema';
 
 export interface PriceOverride {
@@ -20,6 +20,10 @@ export interface Contact {
   lastContactDate: string | null;
   notes: string;
   isPrimary: boolean;
+  engagementStatus: EngagementStatus;
+  engagementStatusChangedAt: string | null;
+  waitingForContactId: string | null;
+  dropOffReason: string | null;
   createdBy?: string;
   createdAt: string;
 }
@@ -41,7 +45,7 @@ export interface SystemEvent {
   id: string;
   schoolId: string;
   timestamp: string;
-  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created';
+  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created' | 'engagement_changed';
   description: string;
   metadata?: Record<string, string>;
   userId?: string;

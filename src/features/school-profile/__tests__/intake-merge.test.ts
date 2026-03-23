@@ -51,6 +51,10 @@ const existingContacts: Contact[] = [
     lastContactDate: null,
     notes: '',
     isPrimary: false,
+    engagementStatus: 'nog-niet-benaderd',
+    engagementStatusChangedAt: null,
+    waitingForContactId: null,
+    dropOffReason: null,
     createdAt: '',
   },
 ];

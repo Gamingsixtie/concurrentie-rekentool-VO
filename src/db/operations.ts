@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase/client';
 import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo } from './types';
-import type { PipelineStatus } from '@/models/school';
+import type { PipelineStatus, EngagementStatus } from '@/models/school';
 import { PIPELINE_STATUS_ORDER } from '@/models/school';
 import { contactSchema } from '@/features/school-profile/schemas/contact.schema';
 import { conversationSchema } from '@/features/school-profile/schemas/conversation.schema';
@@ -79,6 +79,10 @@ function mapContactRow(row: Record<string, unknown>): Contact {
     lastContactDate: (row.last_contact_date as string | null) ?? null,
     notes: (row.notes as string) ?? '',
     isPrimary: (row.is_primary as boolean) ?? false,
+    engagementStatus: (row.engagement_status as Contact['engagementStatus']) ?? 'nog-niet-benaderd',
+    engagementStatusChangedAt: (row.engagement_status_changed_at as string | null) ?? null,
+    waitingForContactId: (row.waiting_for_contact_id as string | null) ?? null,
+    dropOffReason: (row.drop_off_reason as string | null) ?? null,
     createdBy: (row.created_by as string) ?? undefined,
     createdAt: row.created_at as string,
   };
@@ -479,6 +483,71 @@ export async function addSystemEvent(
     description: event.description,
     metadata: event.metadata ?? null,
     user_id: event.userId ?? user.id,
+  });
+}
+
+// --- Engagement status ---
+
+export async function setEngagementStatus(
+  schoolId: string,
+  contactId: string,
+  newStatus: EngagementStatus,
+  options?: {
+    waitingForContactId?: string | null;
+    dropOffReason?: string;
+  },
+): Promise<void> {
+  const user = await getCurrentUser();
+
+  // Get current engagement status for the event log
+  const { data: contactRow, error: fetchError } = await supabase.from('contacts')
+    .select('*')
+    .eq('id', contactId)
+    .single();
+  if (fetchError || !contactRow) throw fetchError ?? new Error('Contact niet gevonden');
+
+  const contact = contactRow as Record<string, unknown>;
+  const oldStatus = (contact.engagement_status as string) ?? 'nog-niet-benaderd';
+  const contactName = contact.name as string;
+
+  // Build update payload
+  const updateData: Record<string, unknown> = {
+    engagement_status: newStatus,
+    engagement_status_changed_at: new Date().toISOString(),
+  };
+
+  // Clear waiting_for when not in "wacht-op-intern"
+  if (newStatus === 'wacht-op-intern') {
+    updateData.waiting_for_contact_id = options?.waitingForContactId ?? null;
+  } else {
+    updateData.waiting_for_contact_id = null;
+  }
+
+  // Set drop-off reason when "afgehaakt"
+  if (newStatus === 'afgehaakt' && options?.dropOffReason) {
+    updateData.drop_off_reason = options.dropOffReason;
+  } else if (newStatus !== 'afgehaakt') {
+    updateData.drop_off_reason = null;
+  }
+
+  const { error: updateError } = await supabase.from('contacts')
+    .update(updateData)
+    .eq('id', contactId);
+  if (updateError) throw updateError;
+
+  // Log system event for timeline
+  await supabase.from('system_events').insert({
+    school_id: schoolId,
+    event_type: 'engagement_changed',
+    description: `${contactName}: ${oldStatus} \u2192 ${newStatus}`,
+    metadata: {
+      contactId,
+      contactName,
+      oldStatus,
+      newStatus,
+      ...(options?.dropOffReason ? { reason: options.dropOffReason } : {}),
+    },
+    user_id: user.id,
   });
 }
 
