@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { updateAction, addAction, deleteAction } from '@/db/operations';
+import { useUpdateAction, useCreateAction, useDeleteAction } from '@/hooks/useActions';
 import type { ActionItem as ActionItemType, Conversation } from '@/db/types';
 import ActionItemCard from '@/features/school-profile/components/ActionItem';
 
@@ -63,6 +63,10 @@ export default function ActionKanban({
   const [addingTitle, setAddingTitle] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
+  const updateActionMutation = useUpdateAction();
+  const createActionMutation = useCreateAction();
+  const deleteActionMutation = useDeleteAction();
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   );
@@ -71,7 +75,7 @@ export default function ActionKanban({
     setActiveId(event.active.id as string);
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
 
@@ -104,21 +108,31 @@ export default function ActionKanban({
     const currentAction = actions.find(a => a.id === actionId);
     if (!currentAction || currentAction.status === targetStatus) return;
 
-    await updateAction(schoolId, actionId, {
-      status: targetStatus,
-      updatedAt: new Date().toISOString(),
+    updateActionMutation.mutate({
+      schoolId,
+      actionId,
+      data: {
+        status: targetStatus,
+        updatedAt: new Date().toISOString(),
+      },
     });
   };
 
-  const handleAddAction = async () => {
+  const handleAddAction = () => {
     if (!addingTitle.trim()) return;
-    await addAction(schoolId, { title: addingTitle.trim() });
-    setAddingTitle('');
-    setShowAddForm(false);
+    createActionMutation.mutate(
+      { schoolId, data: { title: addingTitle.trim() } },
+      {
+        onSuccess: () => {
+          setAddingTitle('');
+          setShowAddForm(false);
+        },
+      },
+    );
   };
 
-  const handleDeleteAction = async (id: string) => {
-    await deleteAction(schoolId, id);
+  const handleDeleteAction = (id: string) => {
+    deleteActionMutation.mutate({ schoolId, actionId: id });
   };
 
   const activeAction = activeId ? actions.find(a => a.id === activeId) : null;
