@@ -67,7 +67,7 @@ Plans:
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
 - [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
-- [ ] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
+- [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing (completed 2026-03-23)
 
 ## Phase Details
 
@@ -287,9 +287,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Data foundation: EngagementStatus types, Supabase migration, setEngagementStatus operation, Zod schema en unit tests
-- [ ] 15-02-PLAN.md — School-profiel UI: EngagementBadge, DropOffReasonDialog, DmuMatrix, DmuMismatchBanner en DashboardTab integratie
-- [ ] 15-03-PLAN.md — School-overzicht UI: DmuProgressIndicator op kaarten, DmuStatusFilter, getAllSchools contacts join en filtering
+- [x] 15-01-PLAN.md — Data foundation: EngagementStatus types, Supabase migration, setEngagementStatus operation, Zod schema en unit tests
+- [x] 15-02-PLAN.md — School-profiel UI: EngagementBadge, DropOffReasonDialog, DmuMatrix, DmuMismatchBanner en DashboardTab integratie
+- [x] 15-03-PLAN.md — School-overzicht UI: DmuProgressIndicator op kaarten, DmuStatusFilter, getAllSchools contacts join en filtering
 
 ## Progress
 
@@ -317,4 +317,4 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
-| 15. DMU Klantreis Registratie | v2.0 | 0/3 | Planning complete | - |
+| 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete   | 2026-03-23 |
