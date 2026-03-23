@@ -3,6 +3,8 @@ import { usePriceComparisonStore } from './store';
 import { PROVIDERS, PROVIDER_LABELS } from '../../engine/price-comparison';
 import type { ProviderKey } from '../../engine/price-comparison';
 import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
+import { getModuleContent } from '../../data/provider-module-content';
+import type { ProviderModuleContent } from '../../data/provider-module-content';
 import { formatCurrency } from '../../lib/format';
 import { PriceBadge } from '../../components/ui/PriceBadge';
 import type { PriceRecord } from '../../models/pricing';
@@ -102,6 +104,7 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
   const differentiators = MODULE_DIFFERENTIATORS.find(
     (d) => d.moduleId === moduleId,
   );
+  const moduleContent = getModuleContent(moduleId);
 
   // DIA package info for this module
   const isInDiaPackage =
@@ -197,6 +200,14 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
         </section>
       )}
 
+      {/* Section: Wat zit erin per aanbieder */}
+      {moduleContent && (
+        <ModuleContentSection
+          moduleId={moduleId}
+          moduleContent={moduleContent}
+        />
+      )}
+
       {/* Section B: Onderscheidend vermogen */}
       <section>
         <h4 className="text-sm font-semibold mb-2">Onderscheidend vermogen</h4>
@@ -290,6 +301,124 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
         )}
       </section>
     </div>
+  );
+}
+
+function ModuleContentSection({
+  moduleContent,
+}: {
+  moduleId: string;
+  moduleContent: { providers: Partial<Record<ProviderKey, ProviderModuleContent>> };
+}) {
+  const [expandedProvider, setExpandedProvider] = useState<ProviderKey | null>(null);
+
+  const providersWithContent = PROVIDERS.filter(
+    (p) => moduleContent.providers[p] != null,
+  );
+
+  if (providersWithContent.length === 0) return null;
+
+  return (
+    <section>
+      <h4 className="text-sm font-semibold mb-2">Wat zit erin per aanbieder?</h4>
+      <div className="space-y-2">
+        {providersWithContent.map((provider) => {
+          const content = moduleContent.providers[provider]!;
+          const isExpanded = expandedProvider === provider;
+
+          return (
+            <div key={provider} className="border border-neutral-200 rounded-lg overflow-hidden">
+              <button
+                type="button"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-left hover:bg-neutral-50"
+                onClick={() => setExpandedProvider(isExpanded ? null : provider)}
+              >
+                <span>
+                  <span className={provider === 'cito' ? 'text-cito-primary' : 'text-neutral-700'}>
+                    {PROVIDER_LABELS[provider]}
+                  </span>
+                  <span className="text-neutral-500 font-normal ml-2">
+                    {content.productName}
+                  </span>
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className={`text-neutral-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {isExpanded && (
+                <div className="px-3 pb-3 text-sm space-y-3 border-t border-neutral-100">
+                  {/* Sub-products */}
+                  <div className="mt-2">
+                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Onderdelen</p>
+                    <ul className="space-y-0.5">
+                      {content.subProducts.map((sp, i) => (
+                        <li key={i} className="flex items-baseline gap-2">
+                          <span className="text-neutral-400">•</span>
+                          <span>
+                            <span className="font-medium">{sp.name}</span>
+                            <span className="text-neutral-500"> — {sp.description}</span>
+                            {sp.separatePrice !== null && (
+                              <span className="text-neutral-400 ml-1">(€{sp.separatePrice.toFixed(2).replace('.', ',')} los)</span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Details grid */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <div>
+                      <span className="text-neutral-500">Afname:</span>{' '}
+                      <span>{content.testFormat}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500">Frequentie:</span>{' '}
+                      <span>{content.measurementFrequency}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500">Doelgroep:</span>{' '}
+                      <span>{content.targetGroup}</span>
+                    </div>
+                    {content.integrations.length > 0 && (
+                      <div>
+                        <span className="text-neutral-500">Koppelingen:</span>{' '}
+                        <span>{content.integrations.join(', ')}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Constructs */}
+                  {content.constructs.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1">Gemeten vaardigheden</p>
+                      <div className="flex flex-wrap gap-1">
+                        {content.constructs.map((c, i) => (
+                          <span key={i} className="inline-block px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded text-xs">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

@@ -37,10 +37,26 @@ export const MODULE_DIFFERENTIATORS: ModuleDifferentiators[] = [
   },
   {
     moduleId: 'sociaal-emotioneel',
-    cito: ['Wetenschappelijk gevalideerd instrument'],
+    cito: [
+      'Breedste constructen: 6 SEF-schalen + 14 LWH-schalen (uniek in markt)',
+      'Signalering op 3 niveaus met Handreiking SEF',
+      'Deelbaar met Inspectie (monitoring sociale veiligheid)',
+      'Onderdeel van LVS — geen apart systeem nodig',
+    ],
     dia: [],
-    jij: ['Zelfevaluaties: leerbenadering, creatief vermogen, sociale context', 'Onderdeel van basislicentie (geen meerprijs)', '21e-eeuwse vaardigheden meeten'],
-    saqi: ['COTAN-gecertificeerd adaptief instrument', 'Specifiek ontworpen voor sociaal-emotioneel VO', 'Onafhankelijk van LVS-aanbieder'],
+    jij: [
+      'Zelfevaluaties: leerbenadering, creatief vermogen, sociale context',
+      'Onderdeel van basislicentie (geen meerprijs)',
+      '21e-eeuwse vaardigheden meten',
+    ],
+    saqi: [
+      'COTAN-gecertificeerd (enige SEF-instrument met COTAN)',
+      'Adaptief: gem. 87 items i.p.v. 144 (~20 min afname)',
+      'Deelbaar met Inspectie (monitoring sociale veiligheid)',
+      'Docentenbeoordeling beschikbaar (18 vragen)',
+      'SO/PRO-variant (SAQI OpMaat)',
+      'Onafhankelijk van LVS-aanbieder',
+    ],
   },
   {
     moduleId: 'cognitieve-capaciteiten',
