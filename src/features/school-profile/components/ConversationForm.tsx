@@ -13,6 +13,7 @@ import StreamingExtraction, { STREAMING_FIELD_LABELS } from '@/features/school-p
 import DiffView, { type DiffSelection } from '@/features/school-profile/components/DiffView';
 import { streamIntakeFromNotes, parseExtractionFromText } from '@/lib/ai-intake';
 import type { IntakeExtractionV2 } from '@/features/school-profile/schemas/intake-extraction.schema';
+import StructuredIntakeForm from '@/features/school-profile/components/StructuredIntakeForm';
 
 type ConversationFormInput = z.input<typeof conversationSchema>;
 
@@ -115,17 +116,19 @@ export default function ConversationForm({
     );
   }, []);
 
-  // Handle AI analysis
-  const handleAnalyze = async () => {
-    if (!aiNotes.trim()) return;
+  // Handle AI analysis — accepts notes string from StructuredIntakeForm
+  const handleAnalyze = async (notesInput?: string) => {
+    const text = notesInput || aiNotes;
+    if (!text.trim()) return;
 
+    setAiNotes(text); // Store for conversation record
     setIsAnalyzing(true);
     setAiError(null);
     setStreamFields(STREAMING_FIELD_LABELS.map(label => ({ label, done: false })));
 
     try {
       let fullText = '';
-      for await (const chunk of streamIntakeFromNotes(aiNotes)) {
+      for await (const chunk of streamIntakeFromNotes(text)) {
         fullText += chunk;
         updateStreamFieldsFromText(fullText);
       }
@@ -362,20 +365,11 @@ export default function ConversationForm({
       ) : (
         /* ─── AI Intake Mode ─── */
         <div className="flex flex-col gap-4">
-          {/* Large textarea for notes */}
-          <div>
-            <label className="block text-[14px] font-semibold text-neutral-700 mb-1">
-              Uw gespreksnotities
-            </label>
-            <textarea
-              value={aiNotes}
-              onChange={e => setAiNotes(e.target.value)}
-              rows={10}
-              disabled={isAnalyzing}
-              placeholder={`Typ uw gespreksnotities in vrije tekst, bijvoorbeeld:\n\nBelde met Jan de Vries (toetscoordinator) van school De Horizon.\n450 leerlingen, havo en vwo.\nGebruiken DIA voor rekenen (€4,50/leerling) en Cito oud voor Nederlands.\nWillen overstappen naar nieuw platform. Volgende week offerte sturen.\n\nDe AI herkent automatisch:\n- Schoolniveaus en leerlingaantallen\n- Modules, aanbieders en prijzen\n- Contactpersonen en hun rol\n- Actiepunten en deadlines\n- Interesse- of twijfelsignalen`}
-              className="w-full border border-neutral-200 rounded-lg px-4 py-3 text-base text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary resize-y disabled:opacity-50"
-            />
-          </div>
+          <StructuredIntakeForm
+            disabled={isAnalyzing}
+            onAnalyze={handleAnalyze}
+            onCancel={onClose}
+          />
 
           {/* Streaming extraction display */}
           {isAnalyzing && <StreamingExtraction fields={streamFields} />}
@@ -386,25 +380,6 @@ export default function ConversationForm({
               {aiError}
             </div>
           )}
-
-          {/* Action buttons */}
-          <div className="flex justify-end gap-4 mt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-[44px] px-4 text-[14px] font-semibold text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
-            >
-              Annuleren
-            </button>
-            <button
-              type="button"
-              onClick={handleAnalyze}
-              disabled={isAnalyzing || !aiNotes.trim()}
-              className="h-[44px] px-6 text-[14px] font-semibold bg-cito-primary text-white rounded-lg hover:bg-blue-900 transition-colors disabled:opacity-50"
-            >
-              {isAnalyzing ? 'AI analyseert...' : 'Analyseer notities'}
-            </button>
-          </div>
         </div>
       )}
     </div>
