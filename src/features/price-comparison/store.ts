@@ -12,6 +12,31 @@ import type { SensitivityResult } from '../../engine/sensitivity';
 import { calculateDiaModuleCosts } from '../../engine/dia-packages';
 import type { DiaPackageResult } from '../../models/dia-packages';
 import { DIA_PACKAGES } from '../../data/dia-packages';
+import { estimateJijCostPerStudent } from '../../data/jij-license-tiers';
+
+/**
+ * Replace static JIJ! prices with dynamically calculated prices
+ * based on actual school size and the tiered license model.
+ */
+function applyDynamicJijPrices(
+  basePrices: PriceRecord[],
+  studentCounts: Partial<Record<string, Record<number, number>>>,
+): PriceRecord[] {
+  const totalStudents = getTotalStudents(studentCounts);
+  if (totalStudents === 0) return basePrices;
+
+  const { costPerStudent, tier } = estimateJijCostPerStudent(totalStudents);
+
+  return basePrices.map((price) => {
+    if (price.provider !== 'jij' || price.amountPerStudent === 0) return price;
+    return {
+      ...price,
+      amountPerStudent: costPerStudent,
+      sourceLabel: `Berekend: ${tier.label}, ${totalStudents} lln, 2 afnames/lln — €${costPerStudent}/lln`,
+      verifiedAt: price.verifiedAt,
+    };
+  });
+}
 
 export interface PriceOverride {
   moduleId: string;
@@ -177,17 +202,18 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     initialize: () => {
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
+      const dynamicPrices = applyDynamicJijPrices(DEFAULT_PRICES, studentCounts);
       const result = calculateComparison(
         selectedModules,
         studentCounts,
-        DEFAULT_PRICES,
+        dynamicPrices,
       );
 
       const extended = computeExtendedResults(
         result,
         selectedModules,
         studentCounts,
-        DEFAULT_PRICES,
+        dynamicPrices,
       );
 
       set({
@@ -240,7 +266,8 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       }
       const mergedOverrides = Array.from(deduped.values());
 
-      const mergedPrices = mergeOverrides(DEFAULT_PRICES, mergedOverrides);
+      const dynamicPrices = applyDynamicJijPrices(DEFAULT_PRICES, studentCounts);
+      const mergedPrices = mergeOverrides(dynamicPrices, mergedOverrides);
       const result = calculateComparison(
         selectedModules,
         studentCounts,
