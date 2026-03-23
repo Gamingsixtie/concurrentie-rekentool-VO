@@ -14,6 +14,7 @@ function getTabs(slug: string): Tab[] {
     { label: 'Contacten', path: `${base}/contacten` },
     { label: 'Gesprekken', path: `${base}/gesprekken` },
     { label: 'Waarde', path: `${base}/waarde` },
+    { label: 'Schoolplan', path: `${base}/schoolplan` },
   ];
 }
 

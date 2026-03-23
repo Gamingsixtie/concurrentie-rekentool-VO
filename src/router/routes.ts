@@ -16,6 +16,7 @@ import ProductsTab from '@/features/school-profile/tabs/ProductsTab';
 import ContactsTab from '@/features/school-profile/tabs/ContactsTab';
 import ConversationsTab from '@/features/school-profile/tabs/ConversationsTab';
 import WaardeTab from '@/features/school-profile/tabs/WaardeTab';
+import SchoolplanTab from '@/features/school-profile/tabs/SchoolplanTab';
 import { LoginPage } from '@/features/auth/LoginPage';
 
 // Root layout (with UserMenu header and migration gate)
@@ -126,6 +127,13 @@ export const waardeRoute = createRoute({
   component: WaardeTab,
 });
 
+// Schoolplan tab
+export const schoolplanRoute = createRoute({
+  getParentRoute: () => schoolRoute,
+  path: '/schoolplan',
+  component: SchoolplanTab,
+});
+
 export const routeTree = rootRoute.addChildren([
   loginRoute,
   indexRoute,
@@ -140,5 +148,6 @@ export const routeTree = rootRoute.addChildren([
     schoolContactsRoute,
     schoolConversationsRoute,
     waardeRoute,
+    schoolplanRoute,
   ]),
 ]);
