@@ -13,6 +13,9 @@ import { calculateDiaModuleCosts, getDiaVolumeDiscountPercent } from '../../engi
 import type { DiaPackageResult } from '../../models/dia-packages';
 import { DIA_PACKAGES } from '../../data/dia-packages';
 import { estimateJijCostPerStudent } from '../../data/jij-license-tiers';
+import type { CitoBundleType, ContractPeriod } from '../../data/cito-bundles';
+import { getCitoBundle } from '../../data/cito-bundles';
+import { applyCitoBundlePrices, applyContractPeriodToResult } from '../../engine/cito-bundles';
 
 /**
  * Apply DIA volume discount (staffelkorting) based on school size.
@@ -82,8 +85,11 @@ interface PriceComparisonState {
   isInternalMode: boolean;
   setInternalMode: (mode: boolean) => void;
   // Contract period toggle (per D-10)
-  contractPeriod: 'annual' | 'three-year';
-  setContractPeriod: (period: 'annual' | 'three-year') => void;
+  contractPeriod: ContractPeriod;
+  setContractPeriod: (period: ContractPeriod) => void;
+  // Cito bundle selector
+  citoBundleType: CitoBundleType;
+  setCitoBundleType: (bundleType: CitoBundleType) => void;
   // Computed results from new engines
   hybridResult: HybridScenarioResult | null;
   sensitivityResult: SensitivityResult | null;
@@ -214,27 +220,46 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
 
     // New state defaults
     isInternalMode: true,
-    contractPeriod: 'annual' as const,
+    contractPeriod: 'annual' as ContractPeriod,
+    citoBundleType: 'individual' as CitoBundleType,
     hybridResult: null,
     sensitivityResult: null,
     diaPackageResult: null,
     activeCompetitor: null,
 
     setInternalMode: (mode) => set({ isInternalMode: mode }),
-    setContractPeriod: (period) => set({ contractPeriod: period }),
+    setContractPeriod: (period) => {
+      set({ contractPeriod: period });
+      get().initialize();
+    },
+    setCitoBundleType: (bundleType) => {
+      set({ citoBundleType: bundleType });
+      get().initialize();
+    },
 
     initialize: () => {
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
-      const dynamicPrices = applyDiaVolumeDiscount(
-        applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
-        studentCounts,
+      const state = get();
+      const bundle = getCitoBundle(state.citoBundleType);
+
+      // Price pipeline: JIJ dynamic → DIA staffel → Cito bundel
+      const dynamicPrices = applyCitoBundlePrices(
+        applyDiaVolumeDiscount(
+          applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
+          studentCounts,
+        ),
+        bundle,
+        selectedModules,
       );
-      const result = calculateComparison(
+      const annualResult = calculateComparison(
         selectedModules,
         studentCounts,
         dynamicPrices,
       );
+
+      // Apply contract period multipliers
+      const result = applyContractPeriodToResult(annualResult, state.contractPeriod);
 
       const extended = computeExtendedResults(
         result,
@@ -283,6 +308,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
       const state = get();
+      const bundle = getCitoBundle(state.citoBundleType);
 
       // Merge: applied overrides first, then draft overrides on top
       const allOverrides = [...state.appliedOverrides, ...state.draftOverrides];
@@ -293,16 +319,24 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       }
       const mergedOverrides = Array.from(deduped.values());
 
-      const dynamicPrices = applyDiaVolumeDiscount(
-        applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
-        studentCounts,
+      // Price pipeline: JIJ dynamic → DIA staffel → Cito bundel → overrides
+      const dynamicPrices = applyCitoBundlePrices(
+        applyDiaVolumeDiscount(
+          applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
+          studentCounts,
+        ),
+        bundle,
+        selectedModules,
       );
       const mergedPrices = mergeOverrides(dynamicPrices, mergedOverrides);
-      const result = calculateComparison(
+      const annualResult = calculateComparison(
         selectedModules,
         studentCounts,
         mergedPrices,
       );
+
+      // Apply contract period multipliers
+      const result = applyContractPeriodToResult(annualResult, state.contractPeriod);
 
       const extended = computeExtendedResults(
         result,

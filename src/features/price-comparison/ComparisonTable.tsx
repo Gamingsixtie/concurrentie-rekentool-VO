@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
-import { PROVIDERS } from '../../engine/price-comparison';
+import { PROVIDERS, getTotalStudents } from '../../engine/price-comparison';
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
 import { PriceBadge } from '../../components/ui/PriceBadge';
 import { ModuleDetailPanel } from './ModuleDetailPanel';
+import { usePriceComparisonStore } from './store';
+import { useSchoolProfileStore } from '../school-profile/store';
 
 interface ComparisonTableProps {
   result: ComparisonResult;
@@ -73,14 +75,7 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
           ))}
 
           {/* Totaalrij */}
-          <tr className="bg-neutral-50 font-semibold text-base">
-            <td className="py-3 px-4">Totaal</td>
-            {PROVIDERS.map((provider) => (
-              <td key={provider} className="py-3 px-4">
-                {formatCurrency(result.totals[provider])}
-              </td>
-            ))}
-          </tr>
+          <TotaalRow result={result} />
 
           {/* Verschil row */}
           <tr className="text-sm text-neutral-700">
@@ -205,6 +200,35 @@ function ModuleRow({
         </tr>
       )}
     </>
+  );
+}
+
+function TotaalRow({ result }: { result: ComparisonResult }) {
+  const diaPackageResult = usePriceComparisonStore((s) => s.diaPackageResult);
+  const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
+  const totalStudents = getTotalStudents(studentCounts);
+
+  const hasPackageDiscount =
+    diaPackageResult?.selectedPackage !== null && (diaPackageResult?.savings ?? 0) > 0;
+  const savingsEuros = hasPackageDiscount
+    ? diaPackageResult!.savings * totalStudents
+    : 0;
+
+  return (
+    <tr className="bg-neutral-50 font-semibold text-base">
+      <td className="py-3 px-4">Totaal</td>
+      {PROVIDERS.map((provider) => (
+        <td key={provider} className="py-3 px-4">
+          <span>{formatCurrency(result.totals[provider])}</span>
+          {provider === 'dia' && hasPackageDiscount && (
+            <div className="text-xs font-normal text-green-700 mt-0.5">
+              Incl. pakketkorting ({diaPackageResult!.selectedPackage!.name}) — besparing{' '}
+              {formatCurrency(savingsEuros)}
+            </div>
+          )}
+        </td>
+      ))}
+    </tr>
   );
 }
 

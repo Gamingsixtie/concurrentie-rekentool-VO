@@ -9,6 +9,8 @@ import { ComparisonChart } from './ComparisonChart';
 import { ComparisonTable } from './ComparisonTable';
 import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
+import { CitoBundleSelector } from './CitoBundleSelector';
+import { PeriodToggle } from './PeriodToggle';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -260,6 +262,12 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
           Vergelijk de kosten van Cito, DIA en JIJ per module op basis van publicatieprijzen
           {totalStudents > 0 && ` · ${totalStudents} leerlingen`}.
         </p>
+      </div>
+
+      {/* Cito bundel + contractperiode keuze */}
+      <div className="flex flex-wrap items-start gap-6 mb-8">
+        <CitoBundleSelector />
+        <PeriodToggle />
       </div>
 
       {/* Grafiek */}

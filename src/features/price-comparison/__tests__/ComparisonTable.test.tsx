@@ -33,6 +33,7 @@ const mockSchoolProfileState = {
   moduleSetups: [
     { moduleId: 'rekenwiskunde', currentProvider: 'jij', pricePerStudent: null },
   ],
+  studentCounts: {} as Partial<Record<string, Record<number, number>>>,
 };
 
 vi.mock('../../school-profile/store', () => ({
