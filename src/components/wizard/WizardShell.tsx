@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSchoolProfileStore } from '../../features/school-profile/store';
 import { updateSchoolData } from '@/db/operations';
 import ProgressBar from './ProgressBar';
@@ -15,6 +16,7 @@ const TOTAL_STEPS = 5;
 export default function WizardShell() {
   const { slug } = useParams({ from: '/scholen/$slug/wizard/$step' });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { currentStep, setCurrentStep } = useSchoolProfileStore();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const stepRef = useRef<WizardStepRef>(null);
@@ -50,6 +52,8 @@ export default function WizardShell() {
         completedSteps: [...new Set([...newCompletedSteps, currentStep])],
         isComplete: currentStep === TOTAL_STEPS - 1,
       });
+      // Invalidate React Query cache so SchoolLayout re-hydrates with fresh data
+      queryClient.invalidateQueries({ queryKey: ['school', slug] });
     }
 
     if (currentStep < TOTAL_STEPS - 1) {
