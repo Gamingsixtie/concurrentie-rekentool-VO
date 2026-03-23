@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '../store';
+import { usePriceComparisonStore } from '@/features/price-comparison/store';
 import { updateSchoolData } from '@/db/operations';
 import { uniqueSlug } from '@/lib/slugify';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
+import { calculateMigration } from '@/engine/migration';
 import { calculateUpsell } from '@/engine/upsell';
 import { DEFAULT_PRICES } from '@/data/default-prices';
+import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
 import { useSchoolPrices } from '@/hooks/useSchoolPrices';
+import { formatCurrency } from '@/lib/format';
 import {
   SCHOOL_LEVELS,
   SCHOOL_LEVEL_LABELS,
@@ -83,6 +87,10 @@ export default function DashboardTab() {
   const scenario = useSchoolProfileStore((s) => s.scenario);
   const region = useSchoolProfileStore((s) => s.region);
 
+  // Migration-specific data from price comparison store
+  const migrationHourlyRate = usePriceComparisonStore((s) => s.migrationHourlyRate);
+  const migrationTimeSavingOverrides = usePriceComparisonStore((s) => s.migrationTimeSavingOverrides);
+
   // School-specific prices for upsell calculation
   const { data: schoolPrices } = useSchoolPrices(activeSchoolId ?? '');
 
@@ -114,6 +122,29 @@ export default function DashboardTab() {
       return [];
     }
   }, [selectedModules, studentCounts, moduleSetups, schoolPrices]);
+
+  // Compute value summary for Waarde-KPI card
+  const valueSummary = useMemo(() => {
+    if (selectedModules.length === 0) return null;
+
+    const migrationResult = calculateMigration(
+      selectedModules,
+      studentCounts,
+      CITO_MIGRATION_PRICES,
+      migrationTimeSavingOverrides,
+      migrationHourlyRate,
+    );
+
+    const hourlyRateKnown = migrationHourlyRate !== null && migrationHourlyRate > 0;
+
+    return {
+      timeSavingsHours: migrationResult.totalTimeSavingsHours,
+      timeSavingsValue: migrationResult.totalTimeSavingsValue,
+      migrationDifference: migrationResult.financialDifference,
+      totalAnnualValue: migrationResult.totalAnnualValue,
+      hourlyRateKnown,
+    };
+  }, [selectedModules, studentCounts, migrationTimeSavingOverrides, migrationHourlyRate]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(schoolName);
@@ -209,6 +240,54 @@ export default function DashboardTab() {
           </div>
         </div>
       </div>
+
+      {/* Waarde-overzicht KPI */}
+      {valueSummary && (
+        <button
+          type="button"
+          onClick={() => navigateToTab('waarde')}
+          className="mt-6 w-full text-left bg-white border border-neutral-200 rounded-lg p-6 hover:border-cito-primary/40 hover:shadow-sm transition-all cursor-pointer"
+        >
+          <h2 className="text-[15px] font-semibold text-cito-primary mb-3">
+            Waarde-overzicht
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <p className="text-[14px] text-neutral-500">Tijdwinst</p>
+              <p className="text-[20px] font-semibold text-neutral-900 mt-1">
+                {valueSummary.timeSavingsHours} uur/jaar
+              </p>
+              {valueSummary.hourlyRateKnown && (
+                <p className="text-[13px] text-neutral-500">
+                  {formatCurrency(valueSummary.timeSavingsValue)}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-[14px] text-neutral-500">Migratie-effect</p>
+              <p className="text-[20px] font-semibold text-neutral-900 mt-1">
+                {formatCurrency(valueSummary.migrationDifference)}
+              </p>
+            </div>
+            <div>
+              <p className="text-[14px] text-neutral-500">Totale jaarwaarde</p>
+              <p className="text-[20px] font-semibold text-cito-accent mt-1">
+                {valueSummary.hourlyRateKnown || valueSummary.migrationDifference !== 0
+                  ? formatCurrency(valueSummary.totalAnnualValue)
+                  : `${valueSummary.timeSavingsHours} uur`}
+              </p>
+              {!valueSummary.hourlyRateKnown && valueSummary.timeSavingsHours > 0 && valueSummary.migrationDifference !== 0 && (
+                <p className="text-[13px] text-neutral-500">
+                  + {valueSummary.timeSavingsHours} uur tijdwinst
+                </p>
+              )}
+            </div>
+          </div>
+          <p className="text-[13px] text-cito-primary mt-3">
+            Bekijk details →
+          </p>
+        </button>
+      )}
 
       {/* Snelle acties */}
       <div className="mt-6">

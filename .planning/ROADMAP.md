@@ -55,10 +55,10 @@ Plans:
 - Integer phases (6, 7, 8...): Planned milestone work
 - Decimal phases (7.1, 7.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 6: Multi-School Data Layer** - IndexedDB persistentie, v1 migratie, navigatie-scaffolding en basisweergave
-- [ ] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
-- [ ] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
-- [ ] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
+- [x] **Phase 6: Multi-School Data Layer** - IndexedDB persistentie, v1 migratie, navigatie-scaffolding en basisweergave
+- [x] **Phase 7: School Intelligence** - Schoolprofielen met CRM-lite functionaliteit: contactpersonen, productgebruik, pipeline, gespreksnotities
+- [x] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
+- [x] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
 - [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
 - [ ] **Phase 10.1: Data Foundation** (INSERTED) - Prijsmodel-types, volledige module-catalogus, provider-configuraties
 - [ ] **Phase 10.2: Engine Refactoring** (INSERTED) - Provider-aware berekeningen met JIJ-tiers, DIA-pakketten, prijsopbouw
@@ -68,6 +68,7 @@ Plans:
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
 - [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
 - [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing (completed 2026-03-23)
+- [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 
 ## Phase Details
 
@@ -214,8 +215,8 @@ Plans:
 **Depends on**: Phase 10 (prijsvergelijking)
 **Requirements**: WAARDE-01, WAARDE-02, WAARDE-03, WAARDE-04, MIGR-01, MIGR-02, MIGR-03, SCHOOL-07
 **Success Criteria** (what must be TRUE):
-  1. Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames, en kan een uurtarief instellen om tijdsbesparing in euro's te zien
-  2. Gebruiker ziet de totale waarde van de overstap: financieel verschil plus tijdsbesparing in euro's, met meerjarenprojectie over 1, 3 en 5 jaar inclusief cumulatieve besparing en break-even punt
+  1. Gebruiker ziet per taak (rechten, resetten, inloggen, planning, koppeling) de concrete uren bespaard met bewerkbare aannames, en kan optioneel een uurtarief instellen om tijdsbesparing in euro's te zien
+  2. Gebruiker ziet de totale waarde van de overstap: financieel verschil plus tijdsbesparing in euro's, met meerjarenprojectie over 1 en 3 jaar inclusief cumulatieve besparing en break-even punt
   3. Gebruiker ziet het financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal, met een gecombineerde businesscase (prijsverschil + tijdwinst + meerjarenprojectie)
   4. Systeem detecteert automatisch upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
 **Plans**: 3 plans
@@ -291,10 +292,19 @@ Plans:
 - [x] 15-02-PLAN.md — School-profiel UI: EngagementBadge, DropOffReasonDialog, DmuMatrix, DmuMismatchBanner en DashboardTab integratie
 - [x] 15-03-PLAN.md — School-overzicht UI: DmuProgressIndicator op kaarten, DmuStatusFilter, getAllSchools contacts join en filtering
 
+### Phase 15.1: Framework-analyse & Samenhang (INSERTED)
+**Goal**: Diepgaande analyse van het complete framework: correctheid engines, koppelingen tussen modules, AI-inzet, logische stappen en verbeterpunten
+**Depends on**: Phase 15 (laatste afgeronde fase)
+**Success Criteria**: Verbeterrapport opgeleverd met must/should/could prioritering
+**Plans**: 1 plan
+
+Plans:
+- [x] FRAMEWORK-ANALYSE.md — Volledige analyse met 4 MUST, 9 SHOULD en 10 COULD verbeterpunten
+
 ## Progress
 
 **Execution Order:**
-Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 → 13 → 12
+Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 → 15.1 → 13 → 12
 (Reprioritized 2026-03-23: Phase 14/15 first for feature value, then go-live, then DMU-export on termijn)
 (Decimal phases, if inserted, execute between their surrounding integers)
 
@@ -305,10 +315,10 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 3. Business Case | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 4. Interne Modus & Doelgroepen | v1.0 | 2/2 | Complete | 2026-03-20 |
 | 5. AI & Polish | v1.0 | 2/2 | Complete | 2026-03-20 |
-| 6. Multi-School Data Layer | v2.0 | 0/3 | Planning complete | - |
+| 6. Multi-School Data Layer | v2.0 | 3/3 | Superseded (absorbed by 7+8) | 2026-03-22 |
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
-| 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
-| 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
+| 8. Supabase & Deploy | v2.0 | 5/5 | Complete | 2026-03-22 |
+| 9. AI Intake & Prijsbeheer | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
 | 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 0/2 | Not started | - |
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 0/2 | Not started | - |
@@ -318,3 +328,4 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
+| 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |

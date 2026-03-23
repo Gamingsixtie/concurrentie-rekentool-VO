@@ -154,7 +154,13 @@ export default function WaardeTab() {
         breakEvenMonth={migrationResult.breakEvenMonth}
         onSwitchingCostsChange={handleSwitchingCostsChange}
       />
-      <DisclaimerFooter showDisclaimer={true} />
+      <DisclaimerFooter
+        showDisclaimer={true}
+        dataSources={[
+          { provider: 'Migratieprijzen', label: 'Intel-rapport 2026-03-23, secties 0 en B4' },
+          { provider: 'Tijdwinst', label: 'Aannames op basis van Cito-implementatiegegevens — bewerkbaar per school' },
+        ]}
+      />
     </div>
   );
 }

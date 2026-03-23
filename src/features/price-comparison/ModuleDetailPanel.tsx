@@ -182,6 +182,11 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
                     </svg>
                   </span>
                 )}
+                {cost.priceRecord.sourceLabel && (
+                  <div className="text-xs text-neutral-400 mt-0.5 ml-4">
+                    Bron: {cost.priceRecord.sourceLabel}
+                  </div>
+                )}
               </div>
             );
           })}

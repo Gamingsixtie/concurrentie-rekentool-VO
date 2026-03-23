@@ -6,7 +6,8 @@ import type { z } from 'zod';
 import { conversationSchema } from '@/features/school-profile/schemas/conversation.schema';
 import { addConversation, updateConversation, addContact, addAction, updateSchoolData } from '@/db/operations';
 import type { Contact, Conversation, ActionItem, SchoolRecord } from '@/db/types';
-import type { DMUPosition } from '@/models/school';
+import type { DMUPosition, Scenario } from '@/models/school';
+import { useSchoolProfileStore } from '@/features/school-profile/store';
 import TagInput from '@/features/school-profile/components/TagInput';
 import IntakeModeToggle from '@/features/school-profile/components/IntakeModeToggle';
 import StreamingExtraction, { STREAMING_FIELD_LABELS } from '@/features/school-profile/components/StreamingExtraction';
@@ -182,12 +183,19 @@ export default function ConversationForm({
 
         // Auto-detect scenario from module setups
         const detection = detectScenario(mergedSetups);
+        const detectedScenario: Scenario = detection.recommended;
 
         await updateSchoolData(schoolId, {
           moduleSetups: mergedSetups,
           selectedModules: mergedModules,
-          scenario: detection.recommended,
+          scenario: detectedScenario,
         });
+
+        // Sync Zustand store immediately so ComparisonTab has data before re-hydrate
+        const store = useSchoolProfileStore.getState();
+        store.setSelectedModules(mergedModules);
+        store.setModuleSetups(mergedSetups);
+        store.setScenario(detectedScenario);
       }
 
       // 2. Add new contacts
@@ -224,7 +232,23 @@ export default function ConversationForm({
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       queryClient.invalidateQueries({ queryKey: ['school'] });
 
-      // 6. Close form and navigate to comparison if modules were saved
+      // 6. Also sync levels/studentCounts to store if available from extraction
+      if (selection.levels?.length > 0) {
+        const storeNow = useSchoolProfileStore.getState();
+        if (storeNow.levels.length === 0) {
+          storeNow.setLevels(selection.levels as any);
+        }
+        if (selection.studentCountsPerLevel && Object.keys(storeNow.studentCounts).length === 0) {
+          // Convert per-level totals to per-year format (year 1 = total)
+          const counts: Record<string, Record<number, number>> = {};
+          for (const [level, total] of Object.entries(selection.studentCountsPerLevel)) {
+            counts[level] = { 1: total as number };
+          }
+          storeNow.setStudentCounts(counts);
+        }
+      }
+
+      // 7. Close form and navigate to comparison if modules were saved
       onSaved();
       if (selection.modules.length > 0 && onNavigateToComparison) {
         onNavigateToComparison();
