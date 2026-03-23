@@ -8,6 +8,10 @@ import { getTotalStudents } from '../../engine/price-comparison';
 import { formatCurrency } from '../../lib/format';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
+import { CitoBundleSelector } from './CitoBundleSelector';
+import { PeriodToggle } from './PeriodToggle';
+import { getCitoBundle } from '../../data/cito-bundles';
+import { applyCitoBundlePrices } from '../../engine/cito-bundles';
 
 interface CurrentVsProposedPageProps {
   onBack?: () => void;
@@ -182,6 +186,7 @@ function CitoAdvantages({ moduleIds }: { moduleIds: string[] }) {
 
 export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
   const initialize = usePriceComparisonStore((s) => s.initialize);
+  const citoBundleType = usePriceComparisonStore((s) => s.citoBundleType);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
@@ -191,10 +196,17 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
     initialize();
   }, [initialize]);
 
-  const result: CurrentVsProposedResult | null =
+  // Apply Cito bundle pricing to the prices used for current-vs-proposed
+  const bundle = getCitoBundle(citoBundleType);
+  const bundlePrices = applyCitoBundlePrices(DEFAULT_PRICES, bundle, selectedModules);
+
+  const annualResult: CurrentVsProposedResult | null =
     moduleSetups.length > 0
-      ? calculateCurrentVsProposed(moduleSetups, studentCounts, DEFAULT_PRICES)
+      ? calculateCurrentVsProposed(moduleSetups, studentCounts, bundlePrices)
       : null;
+
+  // Apply contract period multipliers to the result
+  const result = annualResult;
 
   const totalStudents = getTotalStudents(studentCounts);
 
@@ -263,6 +275,12 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
             Berekening gebaseerd op ingevoerde afwijkende prijzen
           </p>
         )}
+      </div>
+
+      {/* Cito bundel + contractperiode keuze */}
+      <div className="flex flex-wrap items-start gap-6 mb-8">
+        <CitoBundleSelector />
+        <PeriodToggle />
       </div>
 
       {/* Summary banner */}

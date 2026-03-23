@@ -53,7 +53,9 @@ export default function WizardShell() {
         isComplete: currentStep === TOTAL_STEPS - 1,
       });
       // Invalidate React Query cache so SchoolLayout re-hydrates with fresh data
-      queryClient.invalidateQueries({ queryKey: ['school', slug] });
+      await queryClient.invalidateQueries({ queryKey: ['school', slug] });
+      // Also invalidate schools list (fire-and-forget) for overview page
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
     }
 
     if (currentStep < TOTAL_STEPS - 1) {

@@ -1,4 +1,5 @@
 import { Link, useParams, useRouterState } from '@tanstack/react-router';
+import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 
 interface Tab {
   label: string;
@@ -6,15 +7,15 @@ interface Tab {
 }
 
 function getTabs(slug: string): Tab[] {
-  const base = `/scholen/${slug}`;
+  const r = (route: string) => route.replace('$slug', slug);
   return [
-    { label: 'Overzicht', path: base },
-    { label: 'Vergelijking', path: `${base}/vergelijking` },
-    { label: 'Producten', path: `${base}/producten` },
-    { label: 'Contacten', path: `${base}/contacten` },
-    { label: 'Gesprekken', path: `${base}/gesprekken` },
-    { label: 'Waarde', path: `${base}/waarde` },
-    { label: 'Schoolplan', path: `${base}/schoolplan` },
+    { label: 'Overzicht', path: r(SCHOOL_TAB_ROUTES.overzicht) },
+    { label: 'Vergelijking', path: r(SCHOOL_TAB_ROUTES.vergelijking) },
+    { label: 'Producten', path: r(SCHOOL_TAB_ROUTES.producten) },
+    { label: 'Contacten', path: r(SCHOOL_TAB_ROUTES.contacten) },
+    { label: 'Gesprekken', path: r(SCHOOL_TAB_ROUTES.gesprekken) },
+    { label: 'Waarde', path: r(SCHOOL_TAB_ROUTES.waarde) },
+    { label: 'Schoolplan', path: r(SCHOOL_TAB_ROUTES.schoolplan) },
   ];
 }
 

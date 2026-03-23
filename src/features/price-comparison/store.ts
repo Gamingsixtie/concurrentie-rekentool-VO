@@ -209,6 +209,23 @@ function computeExtendedResults(
   };
 }
 
+/**
+ * Adjust DIA total in result to reflect package discount.
+ * The comparison engine sums individual module prices, but the DIA package
+ * may be cheaper. Mutates result in place.
+ */
+function applyDiaPackageToResult(
+  result: ComparisonResult,
+  diaPackageResult: DiaPackageResult | null,
+  studentCounts: Partial<Record<string, Record<number, number>>>,
+): void {
+  if (!diaPackageResult?.selectedPackage || diaPackageResult.savings <= 0) return;
+  const totalStudents = getTotalStudents(studentCounts);
+  result.totals.dia = diaPackageResult.totalCost * totalStudents;
+  const hasAnyDia = result.modules.some((m) => m.providers.dia !== null);
+  result.differences.citoVsDia = hasAnyDia ? result.totals.cito - result.totals.dia : null;
+}
+
 export const usePriceComparisonStore = create<PriceComparisonState>()(
   (set, get) => ({
     result: null,
@@ -267,6 +284,9 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         studentCounts,
         dynamicPrices,
       );
+
+      // Correct DIA total to reflect package discount
+      applyDiaPackageToResult(result, extended.diaPackageResult, studentCounts);
 
       set({
         result,
@@ -344,6 +364,9 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         studentCounts,
         mergedPrices,
       );
+
+      // Correct DIA total to reflect package discount
+      applyDiaPackageToResult(result, extended.diaPackageResult, studentCounts);
 
       set({
         result,

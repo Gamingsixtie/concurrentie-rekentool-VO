@@ -12,6 +12,7 @@ import type { LostDealInfo } from '@/db/types';
 import LostDealDialog from './LostDealDialog';
 import PipelineReasonDialog from './PipelineReasonDialog';
 import { AuditMeta } from '@/components/ui/AuditMeta';
+import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 
 // Context-smart CTA configuration per pipeline status
 const SMART_CTA: Record<PipelineStatus, { label: string; tab: string }> = {
@@ -91,13 +92,7 @@ export default function ProfileHeader() {
       dropdownRef.current?.focus();
       return;
     }
-    // Navigate to the appropriate tab using type-safe route paths
-    const tabRoutes: Record<string, string> = {
-      vergelijking: '/scholen/$slug/vergelijking',
-      producten: '/scholen/$slug/producten',
-      gesprekken: '/scholen/$slug/gesprekken',
-    };
-    const to = tabRoutes[cta.tab] ?? '/scholen/$slug';
+    const to = SCHOOL_TAB_ROUTES[cta.tab as keyof typeof SCHOOL_TAB_ROUTES] ?? SCHOOL_TAB_ROUTES.overzicht;
     navigate({ to, params: { slug } });
   };
 

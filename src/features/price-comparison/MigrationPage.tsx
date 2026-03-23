@@ -9,6 +9,8 @@ import { formatCurrency } from '../../lib/format';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { EditableField } from '@/features/school-profile/components/EditableField';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { CitoBundleSelector } from './CitoBundleSelector';
+import { PeriodToggle } from './PeriodToggle';
 
 interface MigrationPageProps {
   onBack?: () => void;
@@ -118,6 +120,12 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
           {totalStudents > 0 && ` · ${totalStudents} leerlingen`}
           {levels.length > 0 && ` · ${levels.map((l) => l.toUpperCase()).join(', ')}`}.
         </p>
+      </div>
+
+      {/* Cito bundel + contractperiode keuze */}
+      <div className="flex flex-wrap items-start gap-6 mb-8">
+        <CitoBundleSelector />
+        <PeriodToggle />
       </div>
 
       {/* Financial overview */}

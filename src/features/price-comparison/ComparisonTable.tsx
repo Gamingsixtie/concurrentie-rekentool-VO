@@ -222,7 +222,7 @@ function TotaalRow({ result }: { result: ComparisonResult }) {
           <span>{formatCurrency(result.totals[provider])}</span>
           {provider === 'dia' && hasPackageDiscount && (
             <div className="text-xs font-normal text-green-700 mt-0.5">
-              Incl. pakketkorting ({diaPackageResult!.selectedPackage!.name}) — besparing{' '}
+              Pakketkorting ({diaPackageResult!.selectedPackage!.name}): besparing{' '}
               {formatCurrency(savingsEuros)}
             </div>
           )}

@@ -14,6 +14,7 @@ import {
 } from '@/models/school';
 import type { PipelineStatus, SchoolLevel, Scenario } from '@/models/school';
 import PipelineBadge from '@/components/ui/PipelineBadge';
+import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 import UpsellCard from '../components/UpsellCard';
 
 // Context-smart actions per pipeline status
@@ -121,13 +122,8 @@ export default function DashboardTab() {
     .sort((a, b) => (b.lastContactDate! > a.lastContactDate! ? 1 : -1))[0]?.lastContactDate;
 
   const navigateToTab = (tab: string) => {
-    const paths: Record<string, string> = {
-      vergelijking: '/scholen/$slug/vergelijking',
-      producten: '/scholen/$slug/producten',
-      contacten: '/scholen/$slug/contacten',
-      gesprekken: '/scholen/$slug/gesprekken',
-    };
-    navigate({ to: paths[tab] ?? '/scholen/$slug', params: { slug } });
+    const to = SCHOOL_TAB_ROUTES[tab as keyof typeof SCHOOL_TAB_ROUTES] ?? SCHOOL_TAB_ROUTES.overzicht;
+    navigate({ to, params: { slug } });
   };
 
   const handleStartEdit = () => {

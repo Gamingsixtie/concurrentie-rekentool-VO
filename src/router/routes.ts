@@ -134,6 +134,19 @@ export const schoolplanRoute = createRoute({
   component: SchoolplanTab,
 });
 
+// Centralised route paths — import these instead of hardcoding strings
+export const SCHOOL_TAB_ROUTES = {
+  overzicht: '/scholen/$slug',
+  vergelijking: '/scholen/$slug/vergelijking',
+  'huidig-vs-cito': '/scholen/$slug/huidig-vs-cito',
+  migratie: '/scholen/$slug/migratie',
+  producten: '/scholen/$slug/producten',
+  contacten: '/scholen/$slug/contacten',
+  gesprekken: '/scholen/$slug/gesprekken',
+  waarde: '/scholen/$slug/waarde',
+  schoolplan: '/scholen/$slug/schoolplan',
+} as const;
+
 export const routeTree = rootRoute.addChildren([
   loginRoute,
   indexRoute,
