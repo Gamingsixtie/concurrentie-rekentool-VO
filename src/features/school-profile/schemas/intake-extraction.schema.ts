@@ -26,15 +26,17 @@ export const PROVIDERS = ['cito-oud', 'cito-nieuw', 'dia', 'jij', 'overig', 'gee
 
 // ---- Helpers: accept AI quirks (null, string numbers) and normalize ----
 
-// Accepts number or numeric string → coerces to number
-const coerceNumber = z.union([z.number(), z.string().transform(Number)]).pipe(z.number());
+// Accepts number, numeric string, or null → coerces to number (null → 0)
+const coerceNumber = z.preprocess(
+  (v) => (v === null ? 0 : typeof v === 'string' ? Number(v) : v),
+  z.number(),
+);
 
 // Accepts number, numeric string, or null → number | null
-const coerceNumberNullable = z.union([
-  z.number(),
-  z.string().transform(Number),
-  z.null(),
-]).pipe(z.number().nullable());
+const coerceNumberNullable = z.preprocess(
+  (v) => (typeof v === 'string' ? Number(v) : v),
+  z.number().nullable(),
+);
 
 // Accepts string, null, or undefined → strips null before passing through
 const optStr = z.preprocess((v) => v === null ? undefined : v, z.string().optional());
