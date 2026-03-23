@@ -223,10 +223,13 @@ export async function getSchoolBySlug(
 
 export async function getAllSchools(): Promise<SchoolRecord[]> {
   const { data, error } = await supabase.from('schools')
-    .select('*, owner:users!owner_id(name)')
+    .select('*, owner:users!owner_id(name), contacts(*)')
     .order('updated_at', { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(mapSchoolRow);
+  return (data ?? []).map((row) => ({
+    ...mapSchoolRow(row),
+    contacts: ((row as Record<string, unknown>).contacts as Record<string, unknown>[] ?? []).map(mapContactRow),
+  }));
 }
 
 // --- Contact CRUD ---
