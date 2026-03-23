@@ -260,19 +260,19 @@ Plans:
 ### Phase 14: Schoolplan Upload & Kansen-analyse
 **Goal**: Accountmanager kan een schoolplan (PDF/Word) uploaden dat door AI wordt geanalyseerd om Cito-kansen te identificeren, concurrentie-verdwijning te signaleren en strategische inzichten per school te genereren
 **Depends on**: Phase 9 (document upload infra), Phase 7 (schoolprofielen)
-**Requirements**: TBD
+**Requirements**: SC-01, SC-02, SC-03, SC-04, SC-05
 **Success Criteria** (what must be TRUE):
   1. Gebruiker kan een schoolplan-document (PDF/Word) uploaden per school
   2. AI extraheert relevante thema's, doelen en prioriteiten uit het schoolplan
   3. Systeem matcht schoolplan-thema's met Cito-productaanbod en toont concrete kansen (bijv. "school focust op adaptief toetsen → Cito Volgsysteem is relevant")
   4. Systeem signaleert waar concurrenten kwetsbaar zijn op basis van schoolplan-prioriteiten (bijv. "school wil meer data-inzicht → DIA biedt dit beperkt")
   5. Kansen en inzichten worden opgeslagen bij het schoolprofiel en zijn zichtbaar in het school-dashboard
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
-- [ ] 14-03: TBD
+- [ ] 14-01-PLAN.md — Data foundation: Zod schemas, model config, Supabase migration, React Query hooks en client orchestrator
+- [ ] 14-02-PLAN.md — Serverless analyse: twee-stappen AI pipeline (samenvatting + kansen-matching) met SSE streaming
+- [ ] 14-03-PLAN.md — Schoolplan-tab UI: route, componenten (KansCard, KansCardList, streaming progress), SchoolplanTab container en visuele verificatie
 
 ### Phase 15: DMU Klantreis Registratie
 **Goal**: Accountmanager kan per school de DMU-contactpersonen volgen door de klantreis — van eerste contact via oriëntatie, evaluatie en onderhandeling tot aan beslissing — met tijdlijn en status per persoon
