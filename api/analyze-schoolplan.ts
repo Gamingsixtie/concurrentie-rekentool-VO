@@ -351,11 +351,13 @@ export async function POST(request: Request): Promise<Response> {
             encoder.encode(`data: ${JSON.stringify({ type: 'result', data: validated })}\n\n`),
           );
           controller.close();
-        } catch {
-          // Send SSE error event
+        } catch (streamError) {
+          // Send SSE error event with actual error details
+          const errMsg = streamError instanceof Error ? streamError.message : String(streamError);
+          console.error('Schoolplan analysis SSE error:', errMsg);
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: 'error', message: 'Analyse mislukt. Probeer het opnieuw.' })}\n\n`,
+              `data: ${JSON.stringify({ type: 'error', message: `Analyse mislukt: ${errMsg}` })}\n\n`,
             ),
           );
           controller.close();
@@ -370,7 +372,9 @@ export async function POST(request: Request): Promise<Response> {
         Connection: 'keep-alive',
       },
     });
-  } catch {
-    return new Response('Analyse mislukt. Probeer het opnieuw.', { status: 500 });
+  } catch (outerError) {
+    const errMsg = outerError instanceof Error ? outerError.message : String(outerError);
+    console.error('Schoolplan analysis outer error:', errMsg);
+    return new Response(`Analyse mislukt: ${errMsg}`, { status: 500 });
   }
 }

@@ -124,15 +124,16 @@ export async function uploadAndAnalyzeSchoolplan(
   });
 
   if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
     // Update status to failed
     await supabase
       .from('schoolplan_analyses')
       .update({
         analysis_status: 'failed',
-        error_message: `Server fout: ${response.status}`,
+        error_message: `Server fout: ${response.status} — ${errorBody}`,
       })
       .eq('school_id', schoolId);
-    throw new Error('Analyse mislukt. Probeer opnieuw.');
+    throw new Error(`Analyse mislukt: ${errorBody || `HTTP ${response.status}`}`);
   }
 
   // 5. Parse SSE stream
