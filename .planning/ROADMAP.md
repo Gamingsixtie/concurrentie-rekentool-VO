@@ -60,6 +60,9 @@ Plans:
 - [ ] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
 - [ ] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
 - [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
+- [ ] **Phase 10.1: Data Foundation** (INSERTED) - Prijsmodel-types, volledige module-catalogus, provider-configuraties
+- [ ] **Phase 10.2: Engine Refactoring** (INSERTED) - Provider-aware berekeningen met JIJ-tiers, DIA-pakketten, prijsopbouw
+- [ ] **Phase 10.3: UX Overhaul** (INSERTED) - Wizard redesign, dynamische vergelijkingstabel, prijsmodel-uitleg
 - [x] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie (completed 2026-03-23)
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
@@ -156,6 +159,55 @@ Plans:
 - [x] 10-01-PLAN.md — TDD engine: DIA-pakketprijzen, hybride scenario, gevoeligheidsanalyse met break-even en sales-signalen (4 engine files + 4 test files)
 - [x] 10-02-PLAN.md — Store uitbreiding en UI-componenten: ModeToggle, PeriodToggle, SalesSignalBadge, SensitivitySection + wiring in ComparisonTable, Chart, DetailPanel en Page
 - [x] 10-03-PLAN.md — Visuele verificatie van alle Phase 10 features goedgekeurd door gebruiker; DiaPackageManager UI uitgesteld naar post-Vercel deployment
+
+### Phase 10.1: Data Foundation — Prijsmodel & Module-uitbreiding (INSERTED)
+**Goal**: Correcte datastructuren die de werkelijke prijsmodellen van alle aanbieders weerspiegelen, met volledige productcatalogus
+**Depends on**: Phase 10, User input (prijsstructuur-informatie via ops-competitor-intel)
+**Requirements**: PRIJS-01, PRIJS-06
+**Success Criteria** (what must be TRUE):
+  1. MODULE_CATALOG bevat de volledige VO-productcatalogus per aanbieder (niet slechts 6 modules) met categorien, provider-beschikbaarheid en aliassen
+  2. Prijsmodel-types zijn gedefinieerd als discriminated union (flat / tiered-license / package-bundle / platform+module) in een PricingStrategy type
+  3. Provider-specifieke configuratiebestanden (src/data/providers/cito.ts, dia.ts, jij.ts) bevatten het volledige prijsmodel inclusief tiers, pakketten en platformkosten
+  4. Bestaande default-prices.ts, dia-packages.ts en jij-license-tiers.ts data is gemigreerd naar de provider-configuraties
+  5. Differentiators zijn uitgebreid voor alle nieuwe modules
+**Plans**: TBD
+
+Plans:
+- [ ] 10.1-01: TBD
+- [ ] 10.1-02: TBD
+
+### Phase 10.2: Engine Refactoring — Provider-aware berekeningen (INSERTED)
+**Goal**: De rekenmotor begrijpt de werkelijke prijsmodellen per aanbieder en rekent correct op basis van schoolgrootte
+**Depends on**: Phase 10.1
+**Requirements**: PRIJS-01, PRIJS-06, PRIJS-08
+**Success Criteria** (what must be TRUE):
+  1. Per aanbieder bestaat een pure ProviderPriceCalculator die het prijsmodel van die aanbieder implementeert (flat, tiers, pakketten)
+  2. calculateComparison() gebruikt de provider-calculators en produceert per module een prijsopbouw (breakdown) die uitlegt HOE de prijs tot stand komt
+  3. JIJ-prijs varieert daadwerkelijk met schoolgrootte (tier-selectie op basis van leerlingaantal), niet meer een flat schatting
+  4. DIA-pakketoptimalisatie werkt automatisch in de vergelijking (bestaande dia-packages engine geintegreerd)
+  5. Schoolspecifieke prijsoverschrijvingen (Supabase) gaan boven de provider-calculator
+**Plans**: TBD
+
+Plans:
+- [ ] 10.2-01: TBD
+- [ ] 10.2-02: TBD
+
+### Phase 10.3: UX Overhaul — Wizard & Vergelijking (INSERTED)
+**Goal**: Overzichtelijke, flexibele wizard en vergelijkingsweergave met dynamische provider-kolommen, prijsmodel-uitleg en prijsopbouw
+**Depends on**: Phase 10.2
+**Requirements**: PRIJS-01, PRIJS-03, PRIJS-05, UX-01
+**Success Criteria** (what must be TRUE):
+  1. Module-selectie wizard toont de uitgebreide catalogus gegroepeerd per categorie, met provider-beschikbaarheid badges en quick-pick combinaties
+  2. Vergelijkingstabel heeft dynamische provider-kolommen (gebruiker kiest welke aanbieders te vergelijken)
+  3. Per aanbieder is een uitklapbare prijsmodel-uitleg zichtbaar die uitlegt HOE die aanbieder prijst (pakketten, tiers, flat)
+  4. Module detail-panel toont de volledige prijsopbouw per aanbieder (hoe het bedrag is berekend)
+  5. Schoolgrootte-impact is visueel: gebruiker ziet welke JIJ-tier en welk DIA-pakket actief is bij deze schoolgrootte
+**Plans**: TBD
+
+Plans:
+- [ ] 10.3-01: TBD
+- [ ] 10.3-02: TBD
+- [ ] 10.3-03: TBD
 
 ### Phase 11: Waarde-engine & Migratie
 **Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
@@ -256,8 +308,11 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 | 7. School Intelligence | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 8. Supabase & Deploy | v2.0 | 1/5 | In Progress|  |
 | 9. AI Intake & Prijsbeheer | v2.0 | 0/5 | Planning complete | - |
-| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete    | 2026-03-22 |
-| 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete   | 2026-03-23 |
+| 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
+| 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 0/2 | Not started | - |
+| 10.2 Engine Refactoring: Provider-aware | v2.0 | 0/2 | Not started | - |
+| 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 0/3 | Not started | - |
+| 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 0/3 | Not started | - |
