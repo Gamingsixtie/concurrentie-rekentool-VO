@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock external dependencies before importing the module
-vi.mock('pdf-parse', () => ({
-  default: vi.fn(),
-}));
+const mockGetText = vi.fn();
+const mockDestroy = vi.fn();
+vi.mock('pdf-parse', () => {
+  const MockPDFParse = vi.fn(function (this: Record<string, unknown>) {
+    this.getText = mockGetText;
+    this.destroy = mockDestroy;
+  }) as unknown;
+  return { PDFParse: MockPDFParse };
+});
 
 vi.mock('mammoth', () => ({
   default: {
@@ -43,7 +49,7 @@ import {
   buildMatchingPrompt,
   POST,
 } from '../analyze-schoolplan';
-import pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 
 describe('extractTextFromFile', () => {
@@ -52,15 +58,15 @@ describe('extractTextFromFile', () => {
   });
 
   it('returns text for PDF buffer', async () => {
-    const mockPdfParse = vi.mocked(pdfParse);
-    mockPdfParse.mockResolvedValue({ text: 'PDF text content', numpages: 5 } as never);
+    mockGetText.mockResolvedValue({ text: 'PDF text content', total: 5, pages: [] });
+    mockDestroy.mockResolvedValue(undefined);
 
     const buffer = Buffer.from('fake pdf');
     const result = await extractTextFromFile(buffer, 'schoolplan.pdf');
 
     expect(result.text).toBe('PDF text content');
     expect(result.pageCount).toBe(5);
-    expect(mockPdfParse).toHaveBeenCalledWith(buffer);
+    expect(PDFParse).toHaveBeenCalledWith({ data: buffer });
   });
 
   it('returns text for DOCX buffer', async () => {
