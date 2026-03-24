@@ -67,6 +67,56 @@ describe('IntakeExtractionSchemaV2', () => {
     expect(result.pipelineSignaal).toBeUndefined();
   });
 
+  it('accepts moduleId leer-werkhouding', () => {
+    const data = {
+      ...baseV1Data,
+      selectedModules: ['leer-werkhouding'] as const,
+      moduleSetups: [
+        {
+          moduleId: 'leer-werkhouding' as const,
+          currentProvider: 'geen' as const,
+          pricePerStudent: null,
+        },
+      ],
+    };
+    const result = IntakeExtractionSchemaV2.parse(data);
+    expect(result.selectedModules).toContain('leer-werkhouding');
+    expect(result.moduleSetups[0].moduleId).toBe('leer-werkhouding');
+  });
+
+  it('accepts moduleIds frans, duits, spaans', () => {
+    const taalModules = ['frans', 'duits', 'spaans'] as const;
+    const data = {
+      ...baseV1Data,
+      selectedModules: [...taalModules],
+      moduleSetups: taalModules.map((moduleId) => ({
+        moduleId,
+        currentProvider: 'geen' as const,
+        pricePerStudent: null,
+      })),
+    };
+    const result = IntakeExtractionSchemaV2.parse(data);
+    for (const moduleId of taalModules) {
+      expect(result.selectedModules).toContain(moduleId);
+    }
+    expect(result.moduleSetups).toHaveLength(3);
+  });
+
+  it('rejects unknown moduleId (e.g. biologie)', () => {
+    const data = {
+      ...baseV1Data,
+      selectedModules: ['biologie'],
+      moduleSetups: [
+        {
+          moduleId: 'biologie',
+          currentProvider: 'geen',
+          pricePerStudent: null,
+        },
+      ],
+    };
+    expect(() => IntakeExtractionSchemaV2.parse(data)).toThrow();
+  });
+
   it('handles optional fields gracefully (no contactPersonen, no pipelineSignaal)', () => {
     const data = {
       ...baseV1Data,

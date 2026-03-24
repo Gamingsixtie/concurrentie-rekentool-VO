@@ -341,6 +341,150 @@ describe('CitoCalculator', () => {
   });
 });
 
+describe('JijCalculator — multi-module edge cases', () => {
+  it('1 module × 100 lln → 200 afnames → Tier 3', () => {
+    // 100*2*1 = 200 administrations → Tier 3 (166-2500)
+    // license = 975/100/1 = 9.75, test = 2*3.75 = 7.50, magister = 500/100/1 = 5.00
+    // total = round((9.75 + 7.50 + 5.00)*100)/100 = 22.25
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
+    const result = calc.calculateModule('rekenwiskunde', 100);
+    expect(result).not.toBeNull();
+    expect(result!.pricePerStudent).toBe(22.25);
+    expect(result!.tierId).toBe(3);
+    expect(result!.totalCost).toBe(2225);
+  });
+
+  it('1 module × 80 lln → 160 afnames → Tier 4 (zeer klein)', () => {
+    // 80*2*1 = 160 administrations → Tier 4 (0-165)
+    // license = 290/80/1 = 3.625, test = 2*7.90 = 15.80, magister = 195/80/1 = 2.4375
+    // total = round((3.625 + 15.80 + 2.4375)*100)/100 = round(21.8625*100)/100 = 21.86
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
+    const result = calc.calculateModule('rekenwiskunde', 80);
+    expect(result).not.toBeNull();
+    expect(result!.pricePerStudent).toBe(21.86);
+    expect(result!.tierId).toBe(4);
+    expect(result!.totalCost).toBe(Math.round(21.86 * 80 * 100) / 100);
+  });
+
+  it('5 modules × 500 lln → 5000 afnames → Tier 1, full price calculation', () => {
+    // 500*2*5 = 5000 administrations → Tier 1 (4001-13000)
+    // license = 5330/500/5 = 2.132, test = 2*2.40 = 4.80, magister = 500/500/5 = 0.20
+    // total = round((2.132 + 4.80 + 0.20)*100)/100 = round(7.132*100)/100 = 7.13
+    const modules = ['rekenwiskunde', 'nederlands', 'engels', 'frans', 'duits'];
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: modules });
+    const results = calc.calculateAll(modules, 500);
+    expect(results.size).toBe(5);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.tierId).toBe(1);
+    expect(reken.pricePerStudent).toBe(7.13);
+    expect(reken.totalCost).toBe(Math.round(7.13 * 500 * 100) / 100);
+
+    // All paid modules should have the same price
+    for (const [, result] of results) {
+      expect(result.pricePerStudent).toBe(7.13);
+    }
+  });
+
+  it('sociaal-emotioneel (€0) does NOT count as paid module', () => {
+    // Selected: [rekenwiskunde, sociaal-emotioneel]
+    // SEF has amountPerStudent = 0, so paidModuleCount = 1
+    // 800*2*1 = 1600 → Tier 3 (166-2500)
+    // license = 975/800/1 = 1.21875, test = 2*3.75 = 7.50, magister = 500/800/1 = 0.625
+    // total = round((1.21875 + 7.50 + 0.625)*100)/100 = round(9.34375*100)/100 = 9.34
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'sociaal-emotioneel'],
+    });
+    const results = calc.calculateAll(['rekenwiskunde', 'sociaal-emotioneel'], 800);
+
+    const sef = results.get('sociaal-emotioneel')!;
+    expect(sef.pricePerStudent).toBe(0);
+    expect(sef.totalCost).toBe(0);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.pricePerStudent).toBe(9.34);
+    expect(reken.tierId).toBe(3);
+  });
+
+  it('override price takes over regardless of tier calculation', () => {
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'nederlands'],
+    });
+    const overrides = new Map([['rekenwiskunde', 4.50]]);
+    const results = calc.calculateAll(['rekenwiskunde', 'nederlands'], 800, overrides);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.pricePerStudent).toBe(4.50);
+    expect(reken.totalCost).toBe(4.50 * 800);
+    expect(reken.isPackagePrice).toBe(false);
+
+    // Nederlands should still use tier calculation (2 paid modules: 800*2*2=3200 → Tier 2)
+    const nl = results.get('nederlands')!;
+    expect(nl.tierId).toBe(2);
+  });
+
+  it('all 7 modules (RE,NL,EN,FR,DE,ES,SEF) → SEF free, 6 paid, 9600 afnames → Tier 1', () => {
+    // 800*2*6 = 9600 administrations → Tier 1 (4001-13000)
+    // license = 5330/800/6 = 1.11041667, test = 2*2.40 = 4.80, magister = 500/800/6 = 0.10416667
+    // total = round((1.11041667 + 4.80 + 0.10416667)*100)/100 = round(6.01458333*100)/100 = 6.01
+    const allModules = [
+      'rekenwiskunde', 'nederlands', 'engels', 'frans', 'duits', 'spaans', 'sociaal-emotioneel',
+    ];
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: allModules });
+    const results = calc.calculateAll(allModules, 800);
+    expect(results.size).toBe(7);
+
+    const sef = results.get('sociaal-emotioneel')!;
+    expect(sef.pricePerStudent).toBe(0);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.tierId).toBe(1);
+    expect(reken.pricePerStudent).toBe(6.01);
+
+    // All 6 paid modules should have the same price
+    const paidModules = allModules.filter((m) => m !== 'sociaal-emotioneel');
+    for (const moduleId of paidModules) {
+      expect(results.get(moduleId)!.pricePerStudent).toBe(6.01);
+    }
+
+    // Total across all paid modules: 6 * 6.01 = 36.06
+    let totalPerStudent = 0;
+    for (const [, result] of results) {
+      totalPerStudent += result.pricePerStudent;
+    }
+    expect(totalPerStudent).toBeCloseTo(36.06, 1);
+  });
+});
+
+describe('DiaCalculator — variatie tests', () => {
+  let calc: ProviderPriceCalculator;
+
+  beforeEach(() => {
+    calc = createCalculator(DIA_CONFIG);
+  });
+
+  it('cognitieve capaciteiten → €9,75/lln (NSCCT prijs, niet €3,36)', () => {
+    // NSCCT digitaal: €9.75/leerling (different from standard €3.36 modules)
+    const result = calc.calculateModule('cognitieve-capaciteiten', 400);
+    expect(result).not.toBeNull();
+    expect(result!.pricePerStudent).toBe(9.75);
+    expect(result!.totalCost).toBe(9.75 * 400);
+  });
+
+  it('override price takes over for cognitieve capaciteiten', () => {
+    const result = calc.calculateModule('cognitieve-capaciteiten', 400, 7.00);
+    expect(result).not.toBeNull();
+    expect(result!.pricePerStudent).toBe(7.00);
+    expect(result!.totalCost).toBe(7.00 * 400);
+    expect(result!.isPackagePrice).toBe(false);
+  });
+
+  it('nonexistent module returns null', () => {
+    const result = calc.calculateModule('doesnotexist', 400);
+    expect(result).toBeNull();
+  });
+});
+
 describe('createCalculator factory', () => {
   it('creates CitoCalculator for CITO_CONFIG', () => {
     const calc = createCalculator(CITO_CONFIG);
