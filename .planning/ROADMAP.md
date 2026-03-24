@@ -204,12 +204,11 @@ Plans:
   3. Per aanbieder is een uitklapbare prijsmodel-uitleg zichtbaar die uitlegt HOE die aanbieder prijst (pakketten, tiers, flat)
   4. Module detail-panel toont de volledige prijsopbouw per aanbieder (hoe het bedrag is berekend)
   5. Schoolgrootte-impact is visueel: gebruiker ziet welke JIJ-tier en welk DIA-pakket actief is bij deze schoolgrootte
-**Plans**: 2 plans
+**Plans**: 3 plans
 
-Plans:
-- [ ] 10.3-01: TBD
-- [ ] 10.3-02: TBD
-- [ ] 10.3-03: TBD
+- [ ] 10.3-01-PLAN.md — Wizard Step 3 provider badges, quick-picks, MVT subcategorie + store visibleProviders
+- [ ] 10.3-02-PLAN.md — ComparisonTable dynamische kolommen, ModuleDetailPanel prijsopbouw per aanbieder
+- [ ] 10.3-03-PLAN.md — ProviderSelector, PricingModelCards, inline CitoBundleSelector en visuele verificatie
 
 ### Phase 11: Waarde-engine & Migratie
 **Goal**: Accountmanager kan de totale waarde van Cito onderbouwen: prijsverschil plus tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en automatische upsell-detectie
