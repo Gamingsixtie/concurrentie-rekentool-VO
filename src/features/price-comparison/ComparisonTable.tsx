@@ -8,6 +8,7 @@ import { PriceBadge } from '../../components/ui/PriceBadge';
 import { ModuleDetailPanel } from './ModuleDetailPanel';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
+import { CitoBundleSelector } from './CitoBundleSelector';
 
 interface ComparisonTableProps {
   result: ComparisonResult;
@@ -82,7 +83,8 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
               return (
                 <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
                   <div>{PROVIDER_LABELS[provider]}</div>
-                  {tierBadge && (
+                  {provider === 'cito' && <CitoBundleSelector compact />}
+                  {tierBadge && provider !== 'cito' && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
                       {tierBadge}
                     </span>

@@ -3,7 +3,7 @@ import { useSchoolProfileStore } from '../school-profile/store';
 import { CITO_BUNDLES } from '../../data/cito-bundles';
 import { formatCurrency } from '../../lib/format';
 
-export function CitoBundleSelector() {
+export function CitoBundleSelector({ compact = false }: { compact?: boolean }) {
   const bundleType = usePriceComparisonStore((s) => s.citoBundleType);
   const setBundleType = usePriceComparisonStore((s) => s.setCitoBundleType);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
@@ -17,6 +17,28 @@ export function CitoBundleSelector() {
 
   // Don't render if only "individual" is available
   if (availableBundles.length <= 1) return null;
+
+  if (compact) {
+    return (
+      <div className="flex mt-1 bg-white/10 rounded-md overflow-hidden">
+        {availableBundles.map(bundle => (
+          <button
+            key={bundle.id}
+            type="button"
+            onClick={() => setBundleType(bundle.id)}
+            className={`px-2 py-0.5 text-[10px] font-medium transition-colors ${
+              bundleType === bundle.id
+                ? 'bg-white text-cito-primary'
+                : 'text-white/70 hover:text-white'
+            }`}
+            title={bundle.description}
+          >
+            {bundle.name}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2">
