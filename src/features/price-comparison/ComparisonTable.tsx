@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
-import { PROVIDERS, PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
+import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
@@ -49,8 +49,9 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
     }))
     .filter((group) => group.modules.length > 0);
 
-  // Determine which providers have any module data (hide empty columns)
-  const activeProviders = PROVIDERS.filter((provider) =>
+  // Use visibleProviders from store, filtered to only those with data
+  const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
+  const activeProviders = visibleProviders.filter((provider) =>
     result.modules.some((m) => m.providers[provider] !== null),
   );
   const providerWidth = `${Math.floor(70 / activeProviders.length)}%`;
@@ -69,11 +70,26 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
         <thead>
           <tr className="bg-cito-primary text-white text-sm font-semibold">
             <th className="w-[30%] text-left py-3 px-4">Module</th>
-            {activeProviders.map((provider) => (
-              <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
-                {PROVIDER_LABELS[provider]}
-              </th>
-            ))}
+            {activeProviders.map((provider) => {
+              // Find first module with data for this provider to get tier/package info
+              const sampleCost = result.modules.find(m => m.providers[provider])?.providers[provider];
+              const tierBadge = provider === 'jij' && sampleCost?.tierId
+                ? `Licentie ${sampleCost.tierId}`
+                : provider === 'dia' && sampleCost?.packageId
+                ? sampleCost.packageId
+                : null;
+
+              return (
+                <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
+                  <div>{PROVIDER_LABELS[provider]}</div>
+                  {tierBadge && (
+                    <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
+                      {tierBadge}
+                    </span>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
 
