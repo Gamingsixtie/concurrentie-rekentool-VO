@@ -55,7 +55,7 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             // For updates: check if server record was modified after our mutation was queued
             if (mutation.operation === 'update' && mutation.payload.id) {
               const { data: serverRow } = await supabase
-                .from(mutation.table)
+                .from(mutation.table as 'schools')
                 .select('updated_at')
                 .eq('id', mutation.payload.id as string)
                 .single();
@@ -80,15 +80,15 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             // --- APPLY MUTATION ---
             switch (mutation.operation) {
               case 'insert':
-                await supabase.from(mutation.table).insert(mutation.payload);
+                await supabase.from(mutation.table as 'schools').insert(mutation.payload as never);
                 break;
               case 'update': {
                 const { id: rowId, ...rest } = mutation.payload;
-                await supabase.from(mutation.table).update(rest).eq('id', rowId as string);
+                await supabase.from(mutation.table as 'schools').update(rest as never).eq('id', rowId as string);
                 break;
               }
               case 'delete':
-                await supabase.from(mutation.table).delete().eq('id', mutation.payload.id as string);
+                await supabase.from(mutation.table as 'schools').delete().eq('id', mutation.payload.id as string);
                 break;
             }
             // Remove successful mutation
