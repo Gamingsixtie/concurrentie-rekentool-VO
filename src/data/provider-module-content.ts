@@ -393,6 +393,93 @@ export const PROVIDER_MODULE_CONTENT: ModuleContentMap[] = [
       // JIJ! biedt geen cognitieve capaciteitentoets
     },
   },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // LEER-WERKHOUDING
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    moduleId: 'leer-werkhouding',
+    providers: {
+      cito: {
+        productName: 'Leer-werkhouding (LWH)',
+        subProducts: [
+          { name: 'LWH Leerlingvragenlijst', description: '14 schalen: motivatie, concentratie, taakgerichtheid, zelfvertrouwen, faalangst, etc.', separatePrice: null },
+        ],
+        testFormat: 'Digitaal, zelfrapportage leerling',
+        measurementFrequency: '1-2x per jaar',
+        targetGroup: 'Leerjaar 1-3 VO',
+        integrations: ['Cito LVS platform', 'Magister', 'SomToday'],
+        keyFeatures: ['14 schalen voor breed welzijnsbeeld', 'Combineerbaar met SEF in Plus-bundel', 'Signalering op individueel en groepsniveau'],
+        constructs: ['motivatie', 'concentratie', 'taakgerichtheid', 'zelfvertrouwen', 'faalangst', 'welbevinden'],
+      },
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // FRANS
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    moduleId: 'frans',
+    providers: {
+      jij: {
+        productName: 'JIJ! Frans',
+        subProducts: [
+          { name: 'Lezen Frans', description: 'ERK-geijkte leestoets A1-B2', separatePrice: null },
+          { name: 'Luisteren Frans', description: 'ERK-geijkte luistertoets A1-B2', separatePrice: null },
+        ],
+        testFormat: 'Digitaal, adaptief',
+        measurementFrequency: '2x per jaar (nul- en volgmeting)',
+        targetGroup: 'Leerjaar 1-6 VO',
+        integrations: ['Magister', 'SomToday'],
+        keyFeatures: ['ERK-niveaus A1-B2', 'Kijk-/luistertoetsen als SE-alternatief', 'Formatief en summatief'],
+        constructs: ['leesvaardigheid Frans', 'luistervaardigheid Frans'],
+      },
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // DUITS
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    moduleId: 'duits',
+    providers: {
+      jij: {
+        productName: 'JIJ! Duits',
+        subProducts: [
+          { name: 'Lezen Duits', description: 'ERK-geijkte leestoets A1-B2', separatePrice: null },
+          { name: 'Luisteren Duits', description: 'ERK-geijkte luistertoets A1-B2', separatePrice: null },
+        ],
+        testFormat: 'Digitaal, adaptief',
+        measurementFrequency: '2x per jaar (nul- en volgmeting)',
+        targetGroup: 'Leerjaar 1-6 VO',
+        integrations: ['Magister', 'SomToday'],
+        keyFeatures: ['ERK-niveaus A1-B2', 'Kijk-/luistertoetsen als SE-alternatief', 'Formatief en summatief'],
+        constructs: ['leesvaardigheid Duits', 'luistervaardigheid Duits'],
+      },
+    },
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // SPAANS
+  // ═══════════════════════════════════════════════════════════════════
+  {
+    moduleId: 'spaans',
+    providers: {
+      jij: {
+        productName: 'JIJ! Spaans',
+        subProducts: [
+          { name: 'Lezen Spaans', description: 'ERK-geijkte leestoets A1-B2', separatePrice: null },
+          { name: 'Luisteren Spaans', description: 'ERK-geijkte luistertoets A1-B2', separatePrice: null },
+        ],
+        testFormat: 'Digitaal, adaptief',
+        measurementFrequency: '2x per jaar (nul- en volgmeting)',
+        targetGroup: 'Leerjaar 1-6 VO',
+        integrations: ['Magister', 'SomToday'],
+        keyFeatures: ['ERK-niveaus A1-B2', 'Kijk-/luistertoetsen als SE-alternatief', 'Formatief en summatief'],
+        constructs: ['leesvaardigheid Spaans', 'luistervaardigheid Spaans'],
+      },
+    },
+  },
 ];
 
 /**

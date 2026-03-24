@@ -65,4 +65,48 @@ export const MODULE_DIFFERENTIATORS: ModuleDifferentiators[] = [
     jij: [],
     saqi: [],
   },
+  {
+    moduleId: 'leer-werkhouding',
+    cito: [
+      '14 LWH-schalen: motivatie, concentratie, taakgerichtheid, zelfvertrouwen',
+      'Gecombineerd met SEF in Plus-bundel voor breed welzijnsbeeld',
+      'Onderdeel van LVS — geen apart systeem nodig',
+    ],
+    dia: [],
+    jij: [],
+    saqi: [],
+  },
+  {
+    moduleId: 'frans',
+    cito: [],
+    dia: [],
+    jij: [
+      'ERK-geijkt A1-B2 (lezen + luisteren)',
+      'Kijk-/luistertoetsen als schoolexamen-alternatief',
+      'Formatief en summatief inzetbaar',
+    ],
+    saqi: [],
+  },
+  {
+    moduleId: 'duits',
+    cito: [],
+    dia: [],
+    jij: [
+      'ERK-geijkt A1-B2 (lezen + luisteren)',
+      'Kijk-/luistertoetsen als schoolexamen-alternatief',
+      'Formatief en summatief inzetbaar',
+    ],
+    saqi: [],
+  },
+  {
+    moduleId: 'spaans',
+    cito: [],
+    dia: [],
+    jij: [
+      'ERK-geijkt A1-B2 (lezen + luisteren)',
+      'Kijk-/luistertoetsen als schoolexamen-alternatief',
+      'Formatief en summatief inzetbaar',
+    ],
+    saqi: [],
+  },
 ];
