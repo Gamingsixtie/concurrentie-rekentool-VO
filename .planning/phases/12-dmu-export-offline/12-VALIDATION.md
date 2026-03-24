@@ -38,11 +38,12 @@ created: 2026-03-24
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 12-01-01 | 01 | 1 | EXPORT-01 | unit | `npx vitest run src/features/export` | ❌ W0 | ⬜ pending |
-| 12-01-02 | 01 | 1 | EXPORT-02 | unit | `npx vitest run src/features/export` | ❌ W0 | ⬜ pending |
-| 12-01-03 | 01 | 1 | EXPORT-04 | unit | `npx vitest run src/features/export` | ❌ W0 | ⬜ pending |
-| 12-02-01 | 02 | 1 | EXPORT-05 | unit | `npx vitest run src/features/export` | ❌ W0 | ⬜ pending |
-| 12-03-01 | 03 | 2 | ARCH-05 | integration | `npx vitest run src/__tests__/sw` | ❌ W0 | ⬜ pending |
+| 12-01-01 | 01 | 1 | EXPORT-01,02,03 | unit | `npx vitest run src/features/export/pdf/__tests__/` | ❌ W0 | ⬜ pending |
+| 12-01-02 | 01 | 1 | EXPORT-04 | build | `npx vitest run src/features/export/pdf/__tests__/ && npm run build` | ❌ W0 | ⬜ pending |
+| 12-02-01 | 02 | 2 | EXPORT-05 | unit | `npx vitest run src/lib/__tests__/clipboard.test.ts` | ❌ W0 | ⬜ pending |
+| 12-02-02 | 02 | 2 | EXPORT-05 | build | `npx vitest run src/lib/__tests__/clipboard.test.ts && npm run build` | ❌ W0 | ⬜ pending |
+| 12-03-01 | 03 | 1 | ARCH-05 | build | `npm run build` | ✅ | ⬜ pending |
+| 12-03-02 | 03 | 1 | ARCH-05 | unit | `npx vitest run src/lib/__tests__/offline-queue.test.ts && npm run build` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,9 +51,10 @@ created: 2026-03-24
 
 ## Wave 0 Requirements
 
-- [ ] `src/features/export/__tests__/dmu-filters.test.ts` — test DMU section filtering and reordering
-- [ ] `src/features/export/__tests__/clipboard.test.ts` — test clipboard formatting
-- [ ] `src/features/export/__tests__/pdf-charts.test.ts` — test SVG chart data generation
+- [ ] `src/features/export/pdf/__tests__/dmu-filters.test.ts` — test DMU section filtering and reordering
+- [ ] `src/features/export/pdf/__tests__/pdf-bar-chart.test.ts` — test SVG chart data generation
+- [ ] `src/lib/__tests__/clipboard.test.ts` — test clipboard formatting
+- [ ] `src/lib/__tests__/offline-queue.test.ts` — test offline mutation queue and sync
 
 *Existing vitest infrastructure covers framework requirements.*
 
