@@ -75,7 +75,8 @@ export const CITO_BUNDLES: CitoBundle[] = [
     pricePerStudent: 23.93,
     contractPrices: {
       annual: 23.93,
-      // TODO: 3-jarig en 3-jarig+DUO prijzen nog invullen
+      'three-year': 22.05,
+      'three-year-duo': 21.05,
     },
   },
   {
@@ -86,7 +87,8 @@ export const CITO_BUNDLES: CitoBundle[] = [
     pricePerStudent: 34.93,
     contractPrices: {
       annual: 34.93,
-      // TODO: 3-jarig en 3-jarig+DUO prijzen nog invullen
+      'three-year': 28.30,
+      'three-year-duo': 27.30,
     },
   },
 ];
