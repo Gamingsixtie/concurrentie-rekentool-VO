@@ -47,6 +47,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
  */
 export async function uploadAndExtract(
   schoolId: string,
+  teamId: string,
   file: File,
 ): Promise<ExtractedDocumentPrice[]> {
   // Validate file type
@@ -58,7 +59,7 @@ export async function uploadAndExtract(
   }
 
   // Upload to Supabase Storage
-  const path = `${schoolId}/${Date.now()}-${file.name}`;
+  const path = `${teamId}/${schoolId}/${Date.now()}-${file.name}`;
   const { error: uploadError } = await supabase.storage
     .from('documents')
     .upload(path, file, {

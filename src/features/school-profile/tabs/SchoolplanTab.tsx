@@ -13,9 +13,11 @@ import SchoolplanSummary from '../components/SchoolplanSummary';
 import KansCardList from '../components/KansCardList';
 import SchoolplanStreamingProgress from '../components/SchoolplanStreamingProgress';
 import type { OpportunityAnnotation } from '../schemas/schoolplan-analysis.schema';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 export default function SchoolplanTab() {
   const schoolId = useSchoolProfileStore((s) => s.activeSchoolId) ?? '';
+  const { userProfile } = useAuth();
   const queryClient = useQueryClient();
 
   // Analysis data from DB
@@ -39,7 +41,7 @@ export default function SchoolplanTab() {
       setStreamingStep(1);
 
       try {
-        await uploadAndAnalyzeSchoolplan(schoolId, file, (step) => {
+        await uploadAndAnalyzeSchoolplan(schoolId, userProfile?.teamId ?? '', file, (step) => {
           setStreamingStep(step);
         });
         setStreamingStep(3);

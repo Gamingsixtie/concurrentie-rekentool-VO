@@ -63,6 +63,7 @@ type SSEEvent = SSEStepEvent | SSEResultEvent | SSEErrorEvent;
  */
 export async function uploadAndAnalyzeSchoolplan(
   schoolId: string,
+  teamId: string,
   file: File,
   onProgress: (step: number, label: string) => void,
 ): Promise<void> {
@@ -75,7 +76,7 @@ export async function uploadAndAnalyzeSchoolplan(
   }
 
   // 2. Upload to Supabase Storage
-  const storagePath = `schoolplans/${schoolId}/${Date.now()}-${file.name}`;
+  const storagePath = `${teamId}/schoolplans/${schoolId}/${Date.now()}-${file.name}`;
   const { error: uploadError } = await supabase.storage
     .from('documents')
     .upload(storagePath, file, {

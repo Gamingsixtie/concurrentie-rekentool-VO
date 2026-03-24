@@ -10,9 +10,11 @@ import { PriceManager } from '../components/PriceManager';
 import DocumentDropzone from '../components/DocumentDropzone';
 import DocumentExtractionPreview from '../components/DocumentExtractionPreview';
 import { uploadAndExtract, type ExtractedDocumentPrice } from '@/lib/document-parser';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 export default function ProductsTab() {
   const { slug } = useParams({ from: '/scholen/$slug' });
+  const { userProfile } = useAuth();
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
@@ -49,7 +51,7 @@ export default function ProductsTab() {
       setIsDocProcessing(true);
       setDocError(null);
       try {
-        const prices = await uploadAndExtract(activeSchoolId, file);
+        const prices = await uploadAndExtract(activeSchoolId, userProfile?.teamId ?? '', file);
         setExtractedPrices(prices);
         setUploadedFileName(file.name);
       } catch (err) {
