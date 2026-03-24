@@ -107,3 +107,35 @@ export function checkPriceDeviation(
     percentDiff,
   };
 }
+
+// ---- Pricing Strategy (discriminated union) ----
+
+export interface FlatPricing {
+  type: 'flat';
+  pricePerStudent: number;
+}
+
+export interface TieredLicensePricing {
+  type: 'tiered-license';
+  tiers: import('../data/jij-license-tiers').JijLicenseTier[];
+  defaultTestsPerStudent: number;
+}
+
+export interface PackageBundlePricing {
+  type: 'package-bundle';
+  packages: import('../models/dia-packages').DiaPackage[];
+  individualPrices: Record<string, number>;
+}
+
+export interface PlatformModulePricing {
+  type: 'platform+module';
+  bundles: import('../data/cito-bundles').CitoBundle[];
+  contractPeriods: import('../data/cito-bundles').ContractPeriodConfig[];
+  individualPrices: Record<string, number>;
+}
+
+export type PricingStrategy =
+  | FlatPricing
+  | TieredLicensePricing
+  | PackageBundlePricing
+  | PlatformModulePricing;
