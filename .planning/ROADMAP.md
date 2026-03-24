@@ -252,11 +252,12 @@ Plans:
   3. Security review: geen API keys in frontend, RLS policies getest, auth flow veilig, CORS correct
   4. Data-integriteit: migratie van IndexedDB naar Supabase is volledig en correct, geen dataverlies
   5. Team kan de app gebruiken via de productie-URL met stabiele performance
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Security hardening: SKIP_AUTH productie-guard, schoolplan_analyses RLS fix, VITE_ANTHROPIC_API_KEY verwijderd
+- [ ] 13-01-PLAN.md — Security hardening: SKIP_AUTH productie-guard, schoolplan_analyses RLS fix, storage bucket RLS fix, VITE_ANTHROPIC_API_KEY verwijderd
 - [ ] 13-02-PLAN.md — Build fix: offline-queue.ts TypeScript error, bundle verificatie, productie build
+- [ ] 13-03-PLAN.md — Productie-readiness: performance audit, data-integriteit verificatie, deployment check
 ### Phase 14: Schoolplan Upload & Kansen-analyse
 **Goal**: Accountmanager kan een schoolplan (PDF/Word) uploaden dat door AI wordt geanalyseerd om Cito-kansen te identificeren, concurrentie-verdwijning te signaleren en strategische inzichten per school te genereren
 **Depends on**: Phase 9 (document upload infra), Phase 7 (schoolprofielen)
@@ -324,7 +325,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 2/3 | Complete    | 2026-03-24 |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 3/3 | Complete    | 2026-03-24 |
-| 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
+| 13. Architectuur Review & Go-Live | v2.0 | 0/3 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
