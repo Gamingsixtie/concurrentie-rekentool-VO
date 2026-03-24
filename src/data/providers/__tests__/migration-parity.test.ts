@@ -10,26 +10,26 @@ describe('DEFAULT_PRICES migration parity', () => {
   // Original 16 records (must remain bit-identical after restructuring)
   const originalPrices: Array<{ moduleId: string; provider: string; amountPerStudent: number }> = [
     // Rekenwiskunde
-    { moduleId: 'rekenwiskunde', provider: 'cito', amountPerStudent: 7.82 },
+    { moduleId: 'rekenwiskunde', provider: 'cito', amountPerStudent: 7.98 },
     { moduleId: 'rekenwiskunde', provider: 'dia', amountPerStudent: 3.36 },
     { moduleId: 'rekenwiskunde', provider: 'jij', amountPerStudent: 9.34 },
     // Nederlands
-    { moduleId: 'nederlands', provider: 'cito', amountPerStudent: 7.82 },
+    { moduleId: 'nederlands', provider: 'cito', amountPerStudent: 7.98 },
     { moduleId: 'nederlands', provider: 'dia', amountPerStudent: 3.36 },
     { moduleId: 'nederlands', provider: 'jij', amountPerStudent: 9.34 },
     // Engels
-    { moduleId: 'engels', provider: 'cito', amountPerStudent: 7.82 },
+    { moduleId: 'engels', provider: 'cito', amountPerStudent: 7.98 },
     { moduleId: 'engels', provider: 'dia', amountPerStudent: 5.84 },
     { moduleId: 'engels', provider: 'jij', amountPerStudent: 9.34 },
     // Taalverzorging
-    { moduleId: 'taalverzorging', provider: 'cito', amountPerStudent: 3.75 },
+    { moduleId: 'taalverzorging', provider: 'cito', amountPerStudent: 5.00 },
     { moduleId: 'taalverzorging', provider: 'dia', amountPerStudent: 3.36 },
     // Sociaal-emotioneel
     { moduleId: 'sociaal-emotioneel', provider: 'cito', amountPerStudent: 3.00 },
     { moduleId: 'sociaal-emotioneel', provider: 'saqi', amountPerStudent: 3.50 },
     { moduleId: 'sociaal-emotioneel', provider: 'jij', amountPerStudent: 0 },
     // Cognitieve capaciteiten
-    { moduleId: 'cognitieve-capaciteiten', provider: 'cito', amountPerStudent: 6.50 },
+    { moduleId: 'cognitieve-capaciteiten', provider: 'cito', amountPerStudent: 19.90 },
     { moduleId: 'cognitieve-capaciteiten', provider: 'dia', amountPerStudent: 9.75 },
   ];
 

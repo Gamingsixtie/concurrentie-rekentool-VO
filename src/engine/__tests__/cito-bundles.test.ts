@@ -27,12 +27,13 @@ const basePrices: PriceRecord[] = [
   makePriceRecord('engels', 'dia', 5.84),
   makePriceRecord('taalverzorging', 'cito', 1.6),
   makePriceRecord('sociaal-emotioneel', 'cito', 3.0),
-  makePriceRecord('cognitieve-capaciteiten', 'cito', 6.5),
+  makePriceRecord('leer-werkhouding', 'cito', 3.0),
+  makePriceRecord('cognitieve-capaciteiten', 'cito', 19.9),
 ];
 
 const allModules = [
   'rekenwiskunde', 'nederlands', 'engels',
-  'taalverzorging', 'sociaal-emotioneel', 'cognitieve-capaciteiten',
+  'taalverzorging', 'sociaal-emotioneel', 'leer-werkhouding', 'cognitieve-capaciteiten',
 ];
 
 describe('applyCitoBundlePrices', () => {
@@ -47,13 +48,13 @@ describe('applyCitoBundlePrices', () => {
     const result = applyCitoBundlePrices(basePrices, basis, allModules);
 
     // Kern modules should have bundle price spread across 3
-    const expectedPerModule = Math.round((23.45 / 3) * 100) / 100; // 7.82
+    const expectedPerModule = Math.round((23.93 / 3) * 100) / 100; // 7.98
     const rekenCito = result.find((p) => p.moduleId === 'rekenwiskunde' && p.provider === 'cito');
     expect(rekenCito?.amountPerStudent).toBe(expectedPerModule);
 
     // Non-kern Cito prices should be unchanged
     const cogCito = result.find((p) => p.moduleId === 'cognitieve-capaciteiten' && p.provider === 'cito');
-    expect(cogCito?.amountPerStudent).toBe(6.5);
+    expect(cogCito?.amountPerStudent).toBe(19.9);
 
     // DIA prices should be unchanged
     const rekenDia = result.find((p) => p.moduleId === 'rekenwiskunde' && p.provider === 'dia');
@@ -64,13 +65,13 @@ describe('applyCitoBundlePrices', () => {
     const plus = getCitoBundle('plus');
     const result = applyCitoBundlePrices(basePrices, plus, allModules);
 
-    const expectedPerModule = Math.round((31.44 / 5) * 100) / 100; // 6.29
+    const expectedPerModule = Math.round((34.93 / 6) * 100) / 100; // 5.82
     const tvzCito = result.find((p) => p.moduleId === 'taalverzorging' && p.provider === 'cito');
     expect(tvzCito?.amountPerStudent).toBe(expectedPerModule);
 
     // Cognitieve-capaciteiten is NOT in Plus bundle
     const cogCito = result.find((p) => p.moduleId === 'cognitieve-capaciteiten' && p.provider === 'cito');
-    expect(cogCito?.amountPerStudent).toBe(6.5);
+    expect(cogCito?.amountPerStudent).toBe(19.9);
   });
 
   it('does not apply bundle if not all required modules are selected', () => {
@@ -176,13 +177,13 @@ describe('cito-bundles data', () => {
   it('basis bundle includes 3 kern modules', () => {
     const basis = getCitoBundle('basis');
     expect(basis.includedModuleIds).toEqual(['rekenwiskunde', 'nederlands', 'engels']);
-    expect(basis.pricePerStudent).toBe(23.45);
+    expect(basis.pricePerStudent).toBe(23.93);
   });
 
   it('plus bundle includes 5 modules', () => {
     const plus = getCitoBundle('plus');
-    expect(plus.includedModuleIds).toHaveLength(5);
-    expect(plus.pricePerStudent).toBe(31.44);
+    expect(plus.includedModuleIds).toHaveLength(6);
+    expect(plus.pricePerStudent).toBe(34.93);
   });
 
   it('getContractPeriodConfig returns correct factors', () => {

@@ -60,8 +60,8 @@ describe('usePriceComparisonStore', () => {
     expect(state.result!.totals).toHaveProperty('jij');
 
     // 450 students total (havo: 300 + vwo: 150)
-    // rekenwiskunde cito: 7.82 * 450 = 3519
-    expect(state.result!.modules[0].providers.cito?.totalCost).toBe(3519);
+    // rekenwiskunde cito: 7.98 * 450 = 3591
+    expect(state.result!.modules[0].providers.cito?.totalCost).toBe(3591);
   });
 
   it('setDraftOverride adds override and sets hasPendingChanges=true', () => {

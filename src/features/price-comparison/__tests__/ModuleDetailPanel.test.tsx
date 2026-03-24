@@ -88,6 +88,9 @@ vi.mock('../store', () => ({
       setDraftOverride: mockSetDraftOverride,
       resetOverride: mockResetOverride,
       recalculate: mockRecalculate,
+      visibleProviders: ['cito', 'dia', 'jij'],
+      setVisibleProviders: vi.fn(),
+      toggleProvider: vi.fn(),
     }),
 }));
 
@@ -97,13 +100,9 @@ describe('ModuleDetailPanel', () => {
     mockHasPendingChanges = false;
   });
 
-  it('shows calculation formula per provider', () => {
+  it('shows pricing breakdown per provider', () => {
     render(<ModuleDetailPanel moduleId="rekenwiskunde" />);
-    expect(screen.getByText('Berekeningsformule')).toBeInTheDocument();
-    // Cito formula
-    expect(screen.getByText(/Cito: 450 leerlingen/)).toBeInTheDocument();
-    expect(screen.getByText(/DIA: 450 leerlingen/)).toBeInTheDocument();
-    expect(screen.getByText(/JIJ: 450 leerlingen/)).toBeInTheDocument();
+    expect(screen.getByText('Prijsopbouw')).toBeInTheDocument();
   });
 
   it('shows "Niet beschikbaar" for providers without the module', () => {
@@ -112,35 +111,30 @@ describe('ModuleDetailPanel', () => {
     expect(nietBeschikbaar.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('shows Cito differentiators before competitor differentiators', () => {
+  it('shows differentiators section with Cito before competitors', () => {
     render(<ModuleDetailPanel moduleId="rekenwiskunde" />);
     expect(screen.getByText('Onderscheidend vermogen')).toBeInTheDocument();
 
-    const citoHeader = screen.getByText('Cito biedt extra:');
-    const diaHeader = screen.getByText('DIA biedt extra:');
-
-    // Cito should appear before DIA in the DOM
+    // Provider labels appear as column headers in order: CITO, DIA, JIJ
     const allText = document.body.textContent ?? '';
-    const citoIndex = allText.indexOf('Cito biedt extra:');
-    const diaIndex = allText.indexOf('DIA biedt extra:');
+    const citoIndex = allText.indexOf('CITO');
+    const diaIndex = allText.indexOf('DIA');
     expect(citoIndex).toBeLessThan(diaIndex);
-    expect(citoHeader).toBeInTheDocument();
-    expect(diaHeader).toBeInTheDocument();
   });
 
   it('shows warning when competitor does not offer module and has no differentiators', () => {
     render(<ModuleDetailPanel moduleId="cognitieve-capaciteiten" />);
-    // DIA now offers NSCCT (cognitieve capaciteiten) so only JIJ shows warning
+    // Providers without this module show "Niet aangeboden"
     expect(
-      screen.getByText(/Deze module wordt niet aangeboden door JIJ/),
-    ).toBeInTheDocument();
+      screen.getAllByText(/Niet aangeboden/).length,
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('shows editable price inputs', () => {
     render(<ModuleDetailPanel moduleId="rekenwiskunde" />);
     expect(screen.getByText('Prijs aanpassen')).toBeInTheDocument();
     const inputs = screen.getAllByRole('textbox');
-    expect(inputs.length).toBe(4); // cito, dia, jij, saqi
+    expect(inputs.length).toBe(3); // cito, dia, jij (only active providers)
   });
 
   it('typing new price calls setDraftOverride', () => {

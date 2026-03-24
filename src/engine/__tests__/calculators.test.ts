@@ -280,7 +280,7 @@ describe('CitoCalculator', () => {
     });
     const result = calc.calculateModule('rekenwiskunde', 800);
     expect(result).not.toBeNull();
-    expect(result!.pricePerStudent).toBe(7.82);
+    expect(result!.pricePerStudent).toBe(7.98);
   });
 
   it('calculates basis bundle price when all 3 core modules selected', () => {
@@ -290,8 +290,8 @@ describe('CitoCalculator', () => {
     });
     const result = calc.calculateModule('rekenwiskunde', 800);
     expect(result).not.toBeNull();
-    // basis bundle: 23.45 / 3 = 7.8166... rounded = 7.82
-    const bundlePrice = Math.round((23.45 / 3) * 100) / 100;
+    // basis bundle: 23.93 / 3 = 7.9766... rounded = 7.98
+    const bundlePrice = Math.round((23.93 / 3) * 100) / 100;
     expect(result!.pricePerStudent).toBe(bundlePrice);
   });
 

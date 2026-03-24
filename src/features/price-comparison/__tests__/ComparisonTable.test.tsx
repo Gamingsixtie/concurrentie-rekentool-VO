@@ -16,6 +16,11 @@ const storeState = {
   activeCompetitor: null as string | null,
   sensitivityResult: null,
   contractPeriod: 'annual' as const,
+  visibleProviders: ['cito', 'dia', 'jij'] as string[],
+  setVisibleProviders: vi.fn(),
+  toggleProvider: vi.fn(),
+  citoBundleType: 'individual' as string,
+  setCitoBundleType: vi.fn(),
   setDraftOverride: vi.fn(),
   resetOverride: vi.fn(),
   recalculate: vi.fn(),
@@ -34,6 +39,7 @@ const mockSchoolProfileState = {
     { moduleId: 'rekenwiskunde', currentProvider: 'jij', pricePerStudent: null },
   ],
   studentCounts: {} as Partial<Record<string, Record<number, number>>>,
+  selectedModules: ['rekenwiskunde', 'cognitieve-capaciteiten'] as string[],
 };
 
 vi.mock('../../school-profile/store', () => ({
