@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { DEFAULT_PRICES } from '../../default-prices';
 
 /**
- * Migration parity test: snapshot of all 16 current DEFAULT_PRICES records.
- * This must PASS before Plan 02 restructuring and continue to pass after.
+ * Migration parity test: ensures all original DEFAULT_PRICES records survive restructuring,
+ * plus validates new module prices added in Plan 02.
  * Guards against accidental price data corruption during refactoring.
  */
 describe('DEFAULT_PRICES migration parity', () => {
-  const expectedPrices: Array<{ moduleId: string; provider: string; amountPerStudent: number }> = [
+  // Original 16 records (must remain bit-identical after restructuring)
+  const originalPrices: Array<{ moduleId: string; provider: string; amountPerStudent: number }> = [
     // Rekenwiskunde
     { moduleId: 'rekenwiskunde', provider: 'cito', amountPerStudent: 7.82 },
     { moduleId: 'rekenwiskunde', provider: 'dia', amountPerStudent: 3.36 },
@@ -32,11 +33,31 @@ describe('DEFAULT_PRICES migration parity', () => {
     { moduleId: 'cognitieve-capaciteiten', provider: 'dia', amountPerStudent: 9.75 },
   ];
 
-  it('has exactly 16 price records', () => {
-    expect(DEFAULT_PRICES).toHaveLength(16);
+  // New module prices added in Plan 02
+  const newPrices: Array<{ moduleId: string; provider: string; amountPerStudent: number }> = [
+    { moduleId: 'leer-werkhouding', provider: 'cito', amountPerStudent: 3.00 },
+    { moduleId: 'frans', provider: 'jij', amountPerStudent: 9.34 },
+    { moduleId: 'duits', provider: 'jij', amountPerStudent: 9.34 },
+    { moduleId: 'spaans', provider: 'jij', amountPerStudent: 9.34 },
+  ];
+
+  const allPrices = [...originalPrices, ...newPrices];
+
+  it('has exactly 20 price records (16 original + 4 new modules)', () => {
+    expect(DEFAULT_PRICES).toHaveLength(20);
   });
 
-  for (const expected of expectedPrices) {
+  it('contains all 16 original price records with exact values', () => {
+    for (const expected of originalPrices) {
+      const actual = DEFAULT_PRICES.find(
+        (p) => p.moduleId === expected.moduleId && p.provider === expected.provider,
+      );
+      expect(actual, `Missing original: ${expected.moduleId}/${expected.provider}`).toBeDefined();
+      expect(actual!.amountPerStudent).toBe(expected.amountPerStudent);
+    }
+  });
+
+  for (const expected of allPrices) {
     it(`${expected.moduleId}/${expected.provider} = ${expected.amountPerStudent}`, () => {
       const actual = DEFAULT_PRICES.find(
         (p) => p.moduleId === expected.moduleId && p.provider === expected.provider,
