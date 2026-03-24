@@ -12,6 +12,7 @@ import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
 import { AdvicePanel } from './AdvicePanel';
+import { AnalysisPanel } from './AnalysisPanel';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -281,6 +282,9 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
 
       {/* AI Gespreksadvies */}
       <AdvicePanel />
+
+      {/* AI Concurrentieanalyse */}
+      <AnalysisPanel mode="comparison" />
 
       {/* Tabel met detail-panels */}
       <div className="mb-8">

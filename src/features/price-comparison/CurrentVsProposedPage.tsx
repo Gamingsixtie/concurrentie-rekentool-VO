@@ -14,6 +14,7 @@ import { PeriodToggle } from './PeriodToggle';
 import { getCitoBundle } from '../../data/cito-bundles';
 import { applyCitoBundlePrices } from '../../engine/cito-bundles';
 import { detectScenario } from '../../engine/scenario-detection';
+import { AnalysisPanel } from './AnalysisPanel';
 
 interface CurrentVsProposedPageProps {
   onBack?: () => void;
@@ -431,6 +432,13 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
           </tfoot>
         </table>
       </div>
+
+      {/* AI Concurrentieanalyse */}
+      <AnalysisPanel
+        mode="current-vs-proposed"
+        schoolId={slug}
+        currentVsProposedResult={result}
+      />
 
       {/* Migration CTA for mixed scenarios */}
       {detection.hasMigrationModules && (
