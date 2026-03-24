@@ -13,6 +13,7 @@ import { MODULE_CATALOG } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
 
 interface IntakePanelProps {
+  schoolId: string | null;
   onComplete: () => void;
   onSkip: () => void;
 }
@@ -160,17 +161,59 @@ function ExtractionPreview({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const PLACEHOLDER = `Voorbeeldnotities:
+// ─── Section definitions ────────────────────────────────────────────────────
 
-"School heeft HAVO en VWO, totaal zo'n 350 leerlingen.
-Ze gebruiken nu DIA voor rekenwiskunde, betalen €5,20 per leerling.
-Voor Nederlands ook DIA maar ze twijfelen.
-Sociaal-emotioneel doen ze via Boom Toetsing, weet de prijs niet.
-Cognitieve capaciteiten gebruiken ze nog niet.
-Willen graag vergelijken met Cito."`;
+const SECTIONS = [
+  {
+    key: 'school',
+    label: 'Schoolgegevens',
+    sublabel: 'Schoolnaam, niveaus, leerlingaantallen',
+    placeholder: 'Maartenscollege Groningen, havo en vwo, 180 lln/jaar havo, 120 vwo...',
+    rows: 3,
+  },
+  {
+    key: 'modules',
+    label: 'Modules & aanbieders',
+    sublabel: 'Welke modules, huidige aanbieder per module',
+    placeholder: 'Rekenwiskunde via DIA, Nederlands via Cito oud platform, Engels niks...',
+    rows: 3,
+  },
+  {
+    key: 'pricing',
+    label: 'Prijzen & contract',
+    sublabel: 'Bekende prijzen, contractlooptijd, budget',
+    placeholder: 'DIA reken €4,20/lln, contract loopt tot aug 2026...',
+    rows: 2,
+  },
+  {
+    key: 'other',
+    label: 'Overig',
+    sublabel: 'Contactpersonen, vervolgacties, sfeer gesprek',
+    placeholder: 'Mevr. Van der Berg (toetscoördinator), dhr. Janssen (schoolleider), stuur offerte volgende week...',
+    rows: 3,
+  },
+] as const;
 
-export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
-  const [notes, setNotes] = useState('');
+type SectionKey = typeof SECTIONS[number]['key'];
+type SectionState = Record<SectionKey, string>;
+
+const EMPTY_SECTIONS: SectionState = { school: '', modules: '', pricing: '', other: '' };
+
+function combineNotes(sections: SectionState): string {
+  const parts: string[] = [];
+  if (sections.school.trim()) parts.push(`=== SCHOOLGEGEVENS ===\n${sections.school.trim()}`);
+  if (sections.modules.trim()) parts.push(`=== MODULES & AANBIEDERS ===\n${sections.modules.trim()}`);
+  if (sections.pricing.trim()) parts.push(`=== PRIJZEN & CONTRACT ===\n${sections.pricing.trim()}`);
+  if (sections.other.trim()) parts.push(`=== OVERIG ===\n${sections.other.trim()}`);
+  return parts.join('\n\n');
+}
+
+function hasAnyContent(sections: SectionState): boolean {
+  return Object.values(sections).some((v) => v.trim().length > 0);
+}
+
+export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakePanelProps) {
+  const [sections, setSections] = useState<SectionState>(EMPTY_SECTIONS);
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [extraction, setExtraction] = useState<IntakeExtraction | null>(null);
   const [enrichedSetups, setEnrichedSetups] = useState<EnrichedModuleSetup[]>([]);
@@ -178,7 +221,12 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
 
   const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep, setScenario } = useSchoolProfileStore();
 
+  const updateSection = (key: SectionKey, value: string) => {
+    setSections((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleAnalyse = async () => {
+    const notes = combineNotes(sections);
     if (!notes.trim()) return;
     setStatus('loading');
     setErrorMsg('');
@@ -196,40 +244,77 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
     }
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!extraction) return;
+    setIsSaving(true);
+    setErrorMsg('');
 
-    // Populate school profile store
-    const levels = extraction.levels as SchoolLevel[];
-    setLevels(levels);
+    try {
+      // Populate school profile store
+      const levels = extraction.levels as SchoolLevel[];
+      setLevels(levels);
 
-    // Resolve student counts: prefer per-year, fallback to per-level distribution
-    const studentCounts = resolveStudentCounts(levels, extraction);
-    setStudentCounts(studentCounts);
+      const studentCounts = resolveStudentCounts(levels, extraction);
+      setStudentCounts(studentCounts);
+      setSelectedModules(extraction.selectedModules);
 
-    setSelectedModules(extraction.selectedModules);
+      const mappedSetups = enrichedSetups.map((s) => ({
+        moduleId: s.moduleId,
+        currentProvider: s.currentProvider,
+        pricePerStudent: s.pricePerStudent,
+        customProviderName: s.customProviderName,
+      }));
 
-    // Use enriched setups (with auto-filled default prices)
-    const mappedSetups = enrichedSetups.map((s) => ({
-      moduleId: s.moduleId,
-      currentProvider: s.currentProvider,
-      pricePerStudent: s.pricePerStudent,
-      customProviderName: s.customProviderName,
-    }));
+      if (mappedSetups.length > 0) {
+        setModuleSetups(mappedSetups);
+        const detection = detectScenario(mappedSetups);
+        setScenario(detection.recommended);
+      }
 
-    if (mappedSetups.length > 0) {
-      setModuleSetups(mappedSetups);
+      // Persist contacts, actions, and conversation to Supabase
+      if (schoolId) {
+        for (const cp of extraction.contactPersonen) {
+          if (cp.naam) {
+            await addContact(schoolId, {
+              name: cp.naam,
+              dmuPosition: mapDmuPosition(cp.dmuPositie),
+              jobTitle: cp.rol || '',
+              email: cp.email || '',
+              phone: cp.telefoon || '',
+            });
+          }
+        }
 
-      // Auto-detect and set scenario from module setups
-      const detection = detectScenario(mappedSetups);
-      setScenario(detection.recommended);
+        for (const ap of extraction.actiePunten) {
+          if (ap.wat) {
+            await addAction(schoolId, {
+              title: [ap.wat, ap.wanneer, ap.verantwoordelijke].filter(Boolean).join(' - '),
+            });
+          }
+        }
+
+        // Audit trail: save notes as conversation record
+        const storeContacts = useSchoolProfileStore.getState().contacts;
+        const firstContact = storeContacts[0];
+        await addConversation(schoolId, {
+          date: new Date().toISOString().slice(0, 10),
+          contactId: firstContact?.id ?? '',
+          content: combineNotes(sections),
+          tags: ['ai-intake-wizard'],
+        });
+
+        queryClient.invalidateQueries({ queryKey: ['contacts', schoolId] });
+        queryClient.invalidateQueries({ queryKey: ['actions', schoolId] });
+        queryClient.invalidateQueries({ queryKey: ['conversations', schoolId] });
+      }
+
+      const jumpStep = levels.length > 0 ? 3 : 0;
+      setCurrentStep(jumpStep);
+      onComplete();
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Opslaan mislukt. Probeer het opnieuw.');
+      setIsSaving(false);
     }
-
-    // Jump to step 4 (Situatie) or 0 depending on what was extracted
-    const jumpStep = levels.length > 0 ? 3 : 0;
-    setCurrentStep(jumpStep);
-
-    onComplete();
   };
 
   const hasApiKey = !!import.meta.env.VITE_ANTHROPIC_API_KEY;
@@ -253,7 +338,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
           Noteer wat u hoort — AI vult de wizard in
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Typ uw aantekeningen in vrije tekst. De AI extraheert automatisch niveaus,
+          Vul per sectie uw aantekeningen in. De AI extraheert automatisch niveaus,
           leerlingaantallen, modules en huidige aanbieders.
         </p>
       </div>
@@ -266,19 +351,24 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
         </div>
       )}
 
-      {/* Notes textarea */}
-      <div className="mb-4">
-        <label htmlFor="intake-notes" className="block text-sm font-semibold text-neutral-700 mb-1">
-          Uw aantekeningen
-        </label>
-        <textarea
-          id="intake-notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder={PLACEHOLDER}
-          rows={10}
-          className="w-full rounded-lg border border-neutral-200 px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-cito-primary focus:border-2 focus:outline-none resize-y leading-relaxed"
-        />
+      {/* Sectioned notes */}
+      <div className="space-y-4 mb-4">
+        {SECTIONS.map((section) => (
+          <div key={section.key}>
+            <label htmlFor={`intake-${section.key}`} className="block text-sm font-semibold text-neutral-700 mb-0.5">
+              {section.label}
+            </label>
+            <p className="text-xs text-neutral-400 mb-1">{section.sublabel}</p>
+            <textarea
+              id={`intake-${section.key}`}
+              value={sections[section.key]}
+              onChange={(e) => updateSection(section.key, e.target.value)}
+              placeholder={section.placeholder}
+              rows={section.rows}
+              className="w-full rounded-lg border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-cito-primary focus:border-2 focus:outline-none resize-y leading-relaxed"
+            />
+          </div>
+        ))}
       </div>
 
       {/* Analyse button */}
@@ -286,7 +376,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
         <button
           type="button"
           onClick={handleAnalyse}
-          disabled={!notes.trim() || status === 'loading' || !hasApiKey}
+          disabled={!hasAnyContent(sections) || status === 'loading' || !hasApiKey}
           className="inline-flex items-center gap-2 bg-cito-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {status === 'loading' ? (
@@ -350,7 +440,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
             </button>
             <button
               type="button"
-              onClick={() => { setExtraction(null); setStatus('idle'); }}
+              onClick={() => { setExtraction(null); setEnrichedSetups([]); setStatus('idle'); }}
               className="text-sm text-neutral-500 hover:text-neutral-700 py-2.5 px-4 rounded-lg border border-neutral-200 hover:border-neutral-300"
             >
               Pas notities aan

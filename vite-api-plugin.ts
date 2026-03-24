@@ -25,6 +25,14 @@ Beschikbare aanbieders (exacte waarden):
 Beschikbare levels (exacte waarden):
 - vmbo-b, vmbo-k, vmbo-gt, havo, vwo
 
+De input is opgedeeld in secties met === headers ===.
+Gebruik de sectiestructuur om informatie correct te categoriseren:
+- SCHOOLGEGEVENS → levels en leerlingaantallen (studentCountsPerYear of studentCountsPerLevel)
+- MODULES & AANBIEDERS → selectedModules en moduleSetups
+- PRIJZEN & CONTRACT → pricePerStudent waarden in moduleSetups
+- OVERIG → contactPersonen, actiePunten, pipelineSignaal
+Als secties leeg zijn of ontbreken, extraheer wat je kunt uit de beschikbare tekst.
+
 Regels:
 - Neem alleen levels op die expliciet worden genoemd of duidelijk zijn.
 - Neem alleen modules op die de school gebruikt of wil vergelijken.
@@ -32,7 +40,7 @@ Regels:
 - Als een prijs wordt genoemd als totaal per jaar, deel door het leerlingaantal (als bekend).
 - Leerlingaantallen: als aantallen per leerjaar bekend zijn (bijv. "leerjaar 1: 150, leerjaar 2: 140"), gebruik studentCountsPerYear. Als alleen totalen per niveau bekend zijn (bijv. "350 HAVO leerlingen"), gebruik studentCountsPerLevel. Gebruik bij voorkeur studentCountsPerYear als de data beschikbaar is — dit is het meest flexibel voor prijsberekeningen.
 - unsureAbout: maximaal 3 punten, in het Nederlands.
-- contactPersonen: extraheer naam, rol, dmuPositie (coordinator/mt/finance/it/onbekend), email, telefoon.
+- contactPersonen: extraheer naam, rol, dmuPositie (coordinator/mt/finance/it/onbekend), email, telefoon. Als een naam onbekend is, gebruik een lege string voor naam.
 - actiePunten: extraheer wat, wanneer, verantwoordelijke.
 - pipelineSignaal: interesse/twijfel/afwijzing/concurrent-switch/verlenging/neutraal. Laat weg als onduidelijk.
 
@@ -125,7 +133,7 @@ export function devApiPlugin(apiKey: string): Plugin {
           res.setHeader('Connection', 'keep-alive');
 
           const stream = anthropic.messages.stream({
-            model: 'claude-haiku-4-5',
+            model: 'claude-sonnet-4-6',
             max_tokens: 4096,
             system: INTAKE_SYSTEM_PROMPT,
             messages: [
