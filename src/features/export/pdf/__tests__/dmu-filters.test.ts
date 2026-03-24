@@ -60,6 +60,7 @@ describe('getReportSections', () => {
         'migration',
         'multiYear',
         'differentiators',
+        'schoolplan',
       ]);
     });
   });

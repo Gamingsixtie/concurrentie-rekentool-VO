@@ -4,6 +4,7 @@ import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
 import { useSchool } from '@/hooks/useSchools';
 import { useSchoolPrices } from '@/hooks/useSchoolPrices';
+import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
 import { calculateMigration } from '@/engine/migration';
 import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
@@ -31,6 +32,7 @@ export default function ExportTab() {
 
   const { data: school } = useSchool(slug);
   const { data: schoolPrices } = useSchoolPrices(activeSchoolId ?? '');
+  const { data: schoolplanAnalysis } = useSchoolplanAnalysis(school?.id ?? '');
   const switchingCosts = school?.switchingCosts ?? 0;
 
   // Compute comparison result
@@ -75,6 +77,19 @@ export default function ExportTab() {
     day: 'numeric',
   });
 
+  // Map schoolplan opportunities + annotations to PDF-friendly format
+  const schoolplanOpportunities = schoolplanAnalysis?.opportunities?.length
+    ? schoolplanAnalysis.opportunities.map((opp, idx) => {
+        const annotation = schoolplanAnalysis.opportunity_annotations?.[String(idx)];
+        return {
+          theme: opp.theme,
+          citoProduct: opp.citoProduct,
+          explanation: opp.explanation,
+          status: (annotation?.status ?? 'open') as 'open' | 'besproken' | 'niet-relevant',
+        };
+      })
+    : undefined;
+
   const reportData: ReportData = {
     schoolName: schoolName || 'School',
     date: today,
@@ -83,6 +98,7 @@ export default function ExportTab() {
     comparison,
     migration,
     priceDifference,
+    schoolplanOpportunities,
   };
 
   const hasData = comparison !== null || (migration && migration.modules.length > 0);

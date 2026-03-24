@@ -6,16 +6,17 @@ export type SectionId =
   | 'timeSavings'
   | 'migration'
   | 'multiYear'
-  | 'differentiators';
+  | 'differentiators'
+  | 'schoolplan';
 
 export interface ReportSections {
   sections: SectionId[];
   summaryFocus: 'practical' | 'strategic' | 'financial' | 'balanced';
 }
 
-const PRICE_SECTIONS: SectionId[] = ['summary', 'priceComparison', 'differentiators'];
-const VALUE_SECTIONS: SectionId[] = ['summary', 'timeSavings', 'migration', 'multiYear'];
-const ALL_SECTIONS: SectionId[] = ['summary', 'priceComparison', 'timeSavings', 'migration', 'multiYear', 'differentiators'];
+const PRICE_SECTIONS: SectionId[] = ['summary', 'priceComparison', 'differentiators', 'schoolplan'];
+const VALUE_SECTIONS: SectionId[] = ['summary', 'timeSavings', 'migration', 'multiYear', 'schoolplan'];
+const ALL_SECTIONS: SectionId[] = ['summary', 'priceComparison', 'timeSavings', 'migration', 'multiYear', 'differentiators', 'schoolplan'];
 
 function getBaseSections(reportType: ReportType): SectionId[] {
   switch (reportType) {
@@ -35,17 +36,17 @@ export function getReportSections(reportType: ReportType, dmuTarget: DmuTarget):
   switch (dmuTarget) {
     case 'coordinator':
       return {
-        sections: reorder(available, ['summary', 'timeSavings', 'differentiators', 'priceComparison', 'migration', 'multiYear']),
+        sections: reorder(available, ['summary', 'timeSavings', 'differentiators', 'priceComparison', 'migration', 'multiYear', 'schoolplan']),
         summaryFocus: 'practical',
       };
     case 'mt':
       return {
-        sections: reorder(available, ['summary', 'multiYear', 'priceComparison', 'timeSavings', 'migration', 'differentiators']),
+        sections: reorder(available, ['summary', 'multiYear', 'priceComparison', 'timeSavings', 'migration', 'differentiators', 'schoolplan']),
         summaryFocus: 'strategic',
       };
     case 'finance':
       return {
-        sections: reorder(available, ['summary', 'priceComparison', 'migration', 'multiYear', 'timeSavings', 'differentiators']),
+        sections: reorder(available, ['summary', 'priceComparison', 'migration', 'multiYear', 'timeSavings', 'differentiators', 'schoolplan']),
         summaryFocus: 'financial',
       };
     case 'generiek':
