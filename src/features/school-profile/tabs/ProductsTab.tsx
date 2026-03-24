@@ -16,6 +16,20 @@ export default function ProductsTab() {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
+  const setModuleSetups = useSchoolProfileStore((s) => s.setModuleSetups);
+
+  // Update pricePerStudent for a single module
+  const handlePriceChange = useCallback(
+    (moduleId: string, value: string) => {
+      const numValue = value === '' ? null : parseFloat(value);
+      if (value !== '' && isNaN(numValue!)) return;
+      const updated = moduleSetups.map((s) =>
+        s.moduleId === moduleId ? { ...s, pricePerStudent: numValue } : s,
+      );
+      setModuleSetups(updated);
+    },
+    [moduleSetups, setModuleSetups],
+  );
 
   // Fetch school-specific prices from school_prices table
   const { data: schoolPrices = [] } = useSchoolPrices(activeSchoolId ?? '');
@@ -111,12 +125,6 @@ export default function ProductsTab() {
     )?.amountPerStudent ?? null;
   };
 
-  // Find active school price for a module and provider
-  const getActiveSchoolPrice = (moduleId: string, provider: string) => {
-    return schoolPrices.find(
-      (p) => p.moduleId === moduleId && p.provider === provider && p.isActive,
-    ) ?? null;
-  };
 
   return (
     <div className="p-8 max-sm:p-4">
@@ -181,9 +189,8 @@ export default function ProductsTab() {
           const currentProvider = setup?.currentProvider ?? 'geen';
           const providerLabel = CURRENT_PROVIDER_LABELS[currentProvider];
 
-          // Determine display price: active school price > publication price
+          // Determine publication price for discount calculation
           const priceProvider = toPriceProvider(currentProvider);
-          const activeSchoolPrice = priceProvider ? getActiveSchoolPrice(moduleId, priceProvider) : null;
           const citoPublicationPrice = priceProvider ? getPublicationPrice(moduleId, priceProvider) : null;
 
           return (
@@ -202,42 +209,49 @@ export default function ProductsTab() {
                   </p>
                 </div>
 
-                <div className="text-right">
-                  {activeSchoolPrice ? (
-                    <div>
-                      <p className="text-[16px] font-semibold text-neutral-900">
-                        {formatCurrency(activeSchoolPrice.amount)}{' '}
-                        <span className="text-[14px] font-normal text-neutral-500">
-                          per leerling
-                        </span>
-                      </p>
-                      <p className="text-[12px] text-cito-accent font-semibold mt-0.5">
-                        Schoolspecifieke prijs
-                      </p>
-                      {citoPublicationPrice !== null && citoPublicationPrice > 0 && activeSchoolPrice.amount !== citoPublicationPrice && (
-                        <p className={`text-[12px] mt-0.5 font-semibold ${activeSchoolPrice.amount < citoPublicationPrice ? 'text-green-600' : 'text-red-600'}`}>
-                          {activeSchoolPrice.amount < citoPublicationPrice ? '-' : '+'}
-                          {Math.abs(Math.round(((activeSchoolPrice.amount - citoPublicationPrice) / citoPublicationPrice) * 100))}% t.o.v. publicatieprijs
+                <div className="text-right flex flex-col items-end gap-1">
+                  {/* Inline price input */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[14px] text-neutral-500">&euro;</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder={citoPublicationPrice !== null ? citoPublicationPrice.toFixed(2) : '0.00'}
+                      value={setup?.pricePerStudent ?? ''}
+                      onChange={(e) => handlePriceChange(moduleId, e.target.value)}
+                      className="w-[90px] h-[36px] px-2 text-right text-[14px] font-semibold border border-neutral-200 rounded-lg focus:border-cito-primary focus:ring-1 focus:ring-cito-primary outline-none"
+                    />
+                    <span className="text-[13px] text-neutral-500">per leerling</span>
+                  </div>
+
+                  {/* Discount/markup indicator */}
+                  {(() => {
+                    const enteredPrice = setup?.pricePerStudent;
+                    if (enteredPrice !== null && enteredPrice !== undefined && citoPublicationPrice !== null && citoPublicationPrice > 0) {
+                      const diff = Math.round(((enteredPrice - citoPublicationPrice) / citoPublicationPrice) * 100);
+                      if (diff !== 0) {
+                        return (
+                          <p className={`text-[12px] font-semibold ${diff < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {diff < 0 ? '' : '+'}{diff}% t.o.v. publicatieprijs ({formatCurrency(citoPublicationPrice)})
+                          </p>
+                        );
+                      }
+                      return (
+                        <p className="text-[12px] text-neutral-400">
+                          Gelijk aan publicatieprijs
                         </p>
-                      )}
-                    </div>
-                  ) : citoPublicationPrice !== null ? (
-                    <div>
-                      <p className="text-[16px] font-semibold text-neutral-900">
-                        {formatCurrency(citoPublicationPrice)}{' '}
-                        <span className="text-[14px] font-normal text-neutral-500">
-                          per leerling
-                        </span>
-                      </p>
-                      <p className="text-[12px] text-neutral-400 mt-0.5">
-                        Publicatieprijs
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-[14px] text-neutral-400">
-                      Geen prijs bekend
-                    </p>
-                  )}
+                      );
+                    }
+                    if (citoPublicationPrice !== null) {
+                      return (
+                        <p className="text-[12px] text-neutral-400">
+                          Publicatieprijs: {formatCurrency(citoPublicationPrice)}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
 
