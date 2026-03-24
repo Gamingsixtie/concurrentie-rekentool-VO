@@ -191,7 +191,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10.2-01-PLAN.md — TDD: ProviderPriceCalculator interface, 4 calculators (Cito/DIA/JIJ/Flat), factory, refactored calculateComparison() met breakdowns
+- [x] 10.2-01-PLAN.md — TDD: ProviderPriceCalculator interface, 4 calculators (Cito/DIA/JIJ/Flat), factory, refactored calculateComparison() met breakdowns
 - [ ] 10.2-02-PLAN.md — Store simplificatie: provider-logica verwijderd, nieuwe engine-signature, parity-verificatie en cleanup
 
 ### Phase 10.3: UX Overhaul — Wizard & Vergelijking (INSERTED)
@@ -322,7 +322,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 9. AI Intake & Prijsbeheer | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
 | 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 2/2 | Complete    | 2026-03-24 |
-| 10.2 Engine Refactoring: Provider-aware | v2.0 | 0/2 | Not started | - |
+| 10.2 Engine Refactoring: Provider-aware | v2.0 | 1/2 | In Progress|  |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |

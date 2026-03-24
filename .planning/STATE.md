@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Completed 10.1-02-PLAN.md
-last_updated: "2026-03-24T19:36:52.433Z"
+status: Ready to execute
+stopped_at: Completed 10.2-01-PLAN.md
+last_updated: "2026-03-24T20:03:21.824Z"
 progress:
   total_phases: 14
   completed_phases: 8
-  total_plans: 31
-  completed_plans: 28
+  total_plans: 33
+  completed_plans: 29
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 10.1 — data-foundation-prijsmodel-module-uitbreiding
+**Current focus:** Phase 10.2 — engine-refactoring-provider-aware-berekeningen
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
+Phase: 10.2 (engine-refactoring-provider-aware-berekeningen) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -96,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 10.1]: aliases field on ModuleDefinition for AI intake fuzzy matching
 - [Phase 10.1]: Provider configs as typed objects with key, label, pricingStrategy, defaultPrices fields
 - [Phase 10.1]: Re-export wrappers preserve all original import paths for zero consumer changes
+- [Phase 10.2]: Overloaded calculateComparison signature: PriceRecord[] routes to legacy, options object routes to new calculators
+- [Phase 10.2]: calculateComparisonLegacy kept as deprecated for parity testing and backward compat during store migration
 
 ### Pending Todos
 
@@ -113,6 +115,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T19:32:27.046Z
-Stopped at: Completed 10.1-02-PLAN.md
+Last session: 2026-03-24T20:03:21.820Z
+Stopped at: Completed 10.2-01-PLAN.md
 Resume file: None
