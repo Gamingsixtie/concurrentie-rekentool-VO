@@ -16,7 +16,7 @@ function formatEuro(amount: number): string {
   }).format(amount);
 }
 
-function getSummaryBullets(data: ReportData, focus: ReportSections['summaryFocus']): string[] {
+export function getSummaryBullets(data: ReportData, focus: ReportSections['summaryFocus']): string[] {
   const bullets: string[] = [];
 
   switch (focus) {

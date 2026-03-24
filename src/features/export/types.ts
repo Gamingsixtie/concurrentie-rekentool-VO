@@ -18,4 +18,10 @@ export interface ReportData {
   comparison: ComparisonResult | null;
   migration: MigrationResult | null;
   priceDifference: number | null;
+  schoolplanOpportunities?: Array<{
+    theme: string;
+    citoProduct: string;
+    explanation: string;
+    status: 'open' | 'besproken' | 'niet-relevant';
+  }>;
 }

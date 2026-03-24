@@ -136,6 +136,18 @@ export const styles = StyleSheet.create({
     color: CITO_COLORS.textMuted,
     textAlign: 'right',
   },
+  // Chart
+  chartContainer: {
+    marginTop: 12,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  chartTitle: {
+    fontSize: 9,
+    color: CITO_COLORS.textMuted,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
   // Disclaimer
   disclaimer: {
     marginTop: 24,
