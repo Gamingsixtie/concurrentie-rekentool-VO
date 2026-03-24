@@ -9,8 +9,11 @@
  * - Helper functions for bundle/contract lookups
  *
  * Pricing derived from:
- * - Intel-rapport 2026-03-23, secties 0 en B2/B4
- * - Cito nieuw platform prijslijst 2026-2027
+ * - Cito Leerling in beeld VO — Prijzen losse modules 2026-2027
+ * - Basistoets: 4 toetsen × €17,95 = €71,80 / 3 jr = €23,93/lln/jr
+ * - SEF/LWH: 3 leerjaren × €6 = €18 / 3 jr = €6,00/lln/jr
+ * - TVZ: 4 toetsen × €3,75 = €15 / 3 jr = €5,00/lln/jr
+ * - Cognitieve capaciteiten: €19,90/lln
  */
 
 import type { PriceRecord } from '@/models/pricing';
@@ -69,23 +72,21 @@ export const CITO_BUNDLES: CitoBundle[] = [
     name: 'Basis',
     description: 'Kernpakket: Rekenwiskunde, Nederlands en Engels',
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels'],
-    pricePerStudent: 23.45,
+    pricePerStudent: 23.93,
     contractPrices: {
-      annual: 23.45,
-      'three-year': 22.05,
-      'three-year-duo': 21.05,
+      annual: 23.93,
+      // TODO: 3-jarig en 3-jarig+DUO prijzen nog invullen
     },
   },
   {
     id: 'plus',
     name: 'Plus',
-    description: 'Kern + Taalverzorging en Sociaal-emotioneel',
-    includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging', 'sociaal-emotioneel'],
-    pricePerStudent: 31.44,
+    description: 'Kern + TVZ + SEF/LWH',
+    includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging', 'sociaal-emotioneel', 'leer-werkhouding'],
+    pricePerStudent: 34.93,
     contractPrices: {
-      annual: 31.44,
-      'three-year': 28.30,
-      'three-year-duo': 27.30,
+      annual: 34.93,
+      // TODO: 3-jarig en 3-jarig+DUO prijzen nog invullen
     },
   },
 ];
@@ -170,59 +171,59 @@ const CITO_DEFAULT_PRICES: PriceRecord[] = [
   {
     moduleId: 'rekenwiskunde',
     provider: 'cito',
-    amountPerStudent: 7.82,
+    amountPerStudent: 7.98,
     source: 'publication',
-    sourceLabel: 'Nieuw platform — Basis bundel \u20AC23,45 \u00F7 3 kern = \u20AC7,82/module',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — Basis €23,93 ÷ 3 = €7,98/module',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
-    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is \u20AC23,45 \u00F7 3.',
+    note: 'Basistoets: 4 toetsen × €17,95 = €71,80 over 3 leerjaren = €23,93/lln/jr voor RE+NL+EN samen.',
   },
   {
     moduleId: 'nederlands',
     provider: 'cito',
-    amountPerStudent: 7.82,
+    amountPerStudent: 7.98,
     source: 'publication',
-    sourceLabel: 'Nieuw platform — Basis bundel \u20AC23,45 \u00F7 3 kern = \u20AC7,82/module',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — Basis €23,93 ÷ 3 = €7,98/module',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
-    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is \u20AC23,45 \u00F7 3.',
+    note: 'Basistoets: 4 toetsen × €17,95 = €71,80 over 3 leerjaren = €23,93/lln/jr voor RE+NL+EN samen.',
   },
   {
     moduleId: 'engels',
     provider: 'cito',
-    amountPerStudent: 7.82,
+    amountPerStudent: 7.98,
     source: 'publication',
-    sourceLabel: 'Nieuw platform — Basis bundel \u20AC23,45 \u00F7 3 kern = \u20AC7,82/module',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — Basis €23,93 ÷ 3 = €7,98/module',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
-    note: 'Op het nieuwe Cito-platform zijn kernvaardigheden (NL/RE/EN) alleen als bundel beschikbaar. Individuele prijs is \u20AC23,45 \u00F7 3.',
+    note: 'Basistoets: 4 toetsen × €17,95 = €71,80 over 3 leerjaren = €23,93/lln/jr voor RE+NL+EN samen.',
   },
   {
     moduleId: 'taalverzorging',
     provider: 'cito',
-    amountPerStudent: 3.75,
+    amountPerStudent: 5.00,
     source: 'publication',
-    sourceLabel: 'Nieuw platform — Taalverzorging los \u20AC3,75/lln (of in Plus-bundel)',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — TVZ 4 toetsen × €3,75 = €15 / 3 jr = €5,00/lln/jr',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
-    note: 'Taalverzorging is op het nieuwe platform apart beschikbaar voor \u20AC3,75, of onderdeel van de Plus-bundel (\u20AC31,44 incl. SEF + LWH).',
   },
   {
     moduleId: 'sociaal-emotioneel',
     provider: 'cito',
     amountPerStudent: 3.00,
     source: 'publication',
-    sourceLabel: 'Nieuw platform — SEF los (excl. Leer-werkhouding), o.b.v. PowerPoint/Excel uitsplitsing',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — SEF/LWH €6/leerjaar, helft toegekend aan SEF',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
+    note: 'SEF en LWH worden samen aangeboden voor €6/leerjaar (€18 totaal over 3 jr = €6/lln/jr).',
   },
   {
     moduleId: 'cognitieve-capaciteiten',
     provider: 'cito',
-    amountPerStudent: 6.50,
+    amountPerStudent: 19.90,
     source: 'publication',
-    sourceLabel: 'Publicatielijst 2025-2026',
-    verifiedAt: new Date('2026-01-15'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — Cognitieve capaciteitentoets €19,90/lln',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
   },
   {
@@ -230,10 +231,10 @@ const CITO_DEFAULT_PRICES: PriceRecord[] = [
     provider: 'cito',
     amountPerStudent: 3.00,
     source: 'publication',
-    sourceLabel: 'Nieuw platform -- LWH los EUR 3,00/lln (of in Plus-bundel)',
-    verifiedAt: new Date('2026-03-23'),
+    sourceLabel: 'Leerling in beeld VO 2026-2027 — SEF/LWH €6/leerjaar, helft toegekend aan LWH',
+    verifiedAt: new Date('2026-03-24'),
     isPublicationPrice: true,
-    note: 'Leer-werkhouding apart beschikbaar voor EUR 3,00, of onderdeel van de Plus-bundel.',
+    note: 'SEF en LWH worden samen aangeboden voor €6/leerjaar (€18 totaal over 3 jr = €6/lln/jr).',
   },
 ];
 
@@ -254,13 +255,13 @@ export const CITO_CONFIG: CitoProviderConfig = {
     bundles: CITO_BUNDLES,
     contractPeriods: CONTRACT_PERIODS,
     individualPrices: {
-      'rekenwiskunde': 7.82,
-      'nederlands': 7.82,
-      'engels': 7.82,
-      'taalverzorging': 3.75,
+      'rekenwiskunde': 7.98,
+      'nederlands': 7.98,
+      'engels': 7.98,
+      'taalverzorging': 5.00,
       'sociaal-emotioneel': 3.00,
       'leer-werkhouding': 3.00,
-      'cognitieve-capaciteiten': 6.50,
+      'cognitieve-capaciteiten': 19.90,
     },
   },
   defaultPrices: CITO_DEFAULT_PRICES,
