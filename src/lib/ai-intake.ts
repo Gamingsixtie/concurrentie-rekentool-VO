@@ -4,7 +4,7 @@
  * Calls the Vercel serverless proxy at /api/ai-intake with SSE streaming.
  */
 
-import { YEARS_PER_LEVEL, type SchoolLevel, type CurrentProvider } from '../models/school';
+import { YEARS_PER_LEVEL, toPriceProvider, type SchoolLevel, type CurrentProvider } from '../models/school';
 import {
   IntakeExtractionSchemaV2,
   type IntakeExtractionV2,
@@ -84,13 +84,7 @@ export function resolveStudentCounts(
 
 // ─── Auto-enrich module setups with default prices ───────────────────────────
 
-/** Provider mapping from intake provider IDs to default-prices provider keys */
-const INTAKE_TO_PRICE_PROVIDER: Record<string, string> = {
-  'cito-oud': 'cito',
-  'cito-nieuw': 'cito',
-  'dia': 'dia',
-  'jij': 'jij',
-};
+// Provider mapping now uses shared toPriceProvider() from models/school.ts
 
 export type IntakePriceSource = 'intake' | 'default';
 
@@ -116,7 +110,7 @@ export function enrichModuleSetupsWithDefaultPrices(
     }
 
     // Look up default price for this provider + module
-    const priceProvider = INTAKE_TO_PRICE_PROVIDER[setup.currentProvider];
+    const priceProvider = toPriceProvider(setup.currentProvider as CurrentProvider);
     if (!priceProvider) {
       return { ...setup, priceSource: 'intake' as IntakePriceSource };
     }

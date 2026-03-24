@@ -3,7 +3,7 @@ import { Link, useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '../store';
 import { useSchoolPrices, useCreateSchoolPrice } from '@/hooks/useSchoolPrices';
 import { MODULE_CATALOG } from '@/models/modules';
-import { CURRENT_PROVIDER_LABELS } from '@/models/school';
+import { CURRENT_PROVIDER_LABELS, toPriceProvider } from '@/models/school';
 import { DEFAULT_PRICES } from '@/data/default-prices';
 import { formatCurrency } from '@/lib/format';
 import { PriceManager } from '../components/PriceManager';
@@ -182,8 +182,9 @@ export default function ProductsTab() {
           const providerLabel = CURRENT_PROVIDER_LABELS[currentProvider];
 
           // Determine display price: active school price > publication price
-          const activeSchoolPrice = getActiveSchoolPrice(moduleId, currentProvider);
-          const citoPublicationPrice = getPublicationPrice(moduleId, currentProvider);
+          const priceProvider = toPriceProvider(currentProvider);
+          const activeSchoolPrice = priceProvider ? getActiveSchoolPrice(moduleId, priceProvider) : null;
+          const citoPublicationPrice = priceProvider ? getPublicationPrice(moduleId, priceProvider) : null;
 
           return (
             <div
@@ -235,11 +236,11 @@ export default function ProductsTab() {
               </div>
 
               {/* PriceManager collapsible section */}
-              {activeSchoolId && (
+              {activeSchoolId && priceProvider && (
                 <PriceManager
                   schoolId={activeSchoolId}
                   moduleId={moduleId}
-                  provider={currentProvider}
+                  provider={priceProvider}
                   moduleName={moduleName}
                 />
               )}

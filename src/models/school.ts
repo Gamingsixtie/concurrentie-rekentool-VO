@@ -36,6 +36,27 @@ export interface ModuleCurrentSetup {
 
 export type Scenario = 'A' | 'B';
 
+/**
+ * Maps a CurrentProvider value to the provider key used in DEFAULT_PRICES.
+ * Returns null for providers without publication pricing ('geen', 'overig').
+ */
+export function toPriceProvider(provider: CurrentProvider): string | null {
+  switch (provider) {
+    case 'cito-oud':
+    case 'cito-nieuw':
+      return 'cito';
+    case 'dia':
+      return 'dia';
+    case 'jij':
+      return 'jij';
+    case 'saqi':
+      return 'saqi';
+    case 'geen':
+    case 'overig':
+      return null;
+  }
+}
+
 export const CURRENT_PROVIDER_LABELS: Record<CurrentProvider, string> = {
   'cito-oud':   'Cito (huidig platform)',
   'cito-nieuw': 'Cito (nieuw platform)',
