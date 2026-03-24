@@ -174,7 +174,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
+- [x] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
 - [ ] 10.1-02-PLAN.md — Provider config files (cito.ts, dia.ts, jij.ts, saqi.ts), re-export wrappers, backward compatibility, migratie-verificatie
 
 ### Phase 10.2: Engine Refactoring — Provider-aware berekeningen (INSERTED)
@@ -320,7 +320,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 8. Supabase & Deploy | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 9. AI Intake & Prijsbeheer | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
-| 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 0/2 | Not started | - |
+| 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 1/2 | In Progress|  |
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 0/2 | Not started | - |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |

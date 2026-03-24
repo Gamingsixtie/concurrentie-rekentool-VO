@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Milestone complete
-stopped_at: Phase 15.1 complete. Phase 12 discuss starting (not yet begun)
-last_updated: "2026-03-23T22:54:32.483Z"
+status: Ready to execute
+stopped_at: Completed 10.1-01-PLAN.md
+last_updated: "2026-03-24T19:21:08.574Z"
 progress:
   total_phases: 14
   completed_phases: 7
-  total_plans: 29
-  completed_plans: 26
+  total_plans: 31
+  completed_plans: 27
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 15 — dmu-klantreis-registratie
+**Current focus:** Phase 10.1 — data-foundation-prijsmodel-module-uitbreiding
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
+Phase: 10.1 (data-foundation-prijsmodel-module-uitbreiding) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -92,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 14]: Reused exact auth/Supabase pattern from extract-document.ts for API consistency
 - [Phase 14]: Exported pure functions (extractTextFromFile, buildSummarizePrompt, buildMatchingPrompt) for testability
 - [Phase 14]: KansCard compact variant maps AlsoRelevantItem to SchoolplanOpportunity shape for component reuse
+- [Phase 10.1]: import() type references in PricingStrategy to avoid circular imports
+- [Phase 10.1]: aliases field on ModuleDefinition for AI intake fuzzy matching
 
 ### Pending Todos
 
@@ -109,6 +111,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T22:54:32.479Z
-Stopped at: Phase 15.1 complete. Phase 12 discuss starting (not yet begun)
-Resume file: .planning/phases/15.1-framework-analyse/FRAMEWORK-ANALYSE.md
+Last session: 2026-03-24T19:21:08.570Z
+Stopped at: Completed 10.1-01-PLAN.md
+Resume file: None
