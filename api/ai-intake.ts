@@ -19,9 +19,29 @@ BELANGRIJK: Antwoord UITSLUITEND met geldig JSON. Geen uitleg, geen markdown, ge
 
 Beschikbare modules (exacte moduleId waarden):
 - rekenwiskunde, nederlands, engels, taalverzorging, sociaal-emotioneel, cognitieve-capaciteiten
+- frans, duits, spaans (alleen bij JIJ! beschikbaar)
 
 Beschikbare aanbieders (exacte waarden):
 - cito-oud, cito-nieuw, dia, jij, overig, geen
+
+DIA-context (belangrijk voor prijsherkenning):
+- DIA verkoopt modules los (\u20AC3,36/stuk) of als pakketten:
+  - Pakket NE (Diatekst + Diawoord = lezen + woordenschat): \u20AC5,84/lln
+  - Pakket EN (Diatekst EN + Diawoord EN): \u20AC5,84/lln
+  - Pakket NE compleet (lezen + woordenschat + spelling): \u20AC8,58/lln
+  - Pakket compleet (alle 7 modules): \u20AC18,13/lln
+- Als school "\u20AC5,84 voor Nederlands" noemt \u2192 waarschijnlijk Pakket NE (lezen + woordenschat)
+- Als school "\u20AC3,36 voor Nederlands" noemt \u2192 waarschijnlijk alleen Diatekst (begrijpend lezen)
+- Staffelkorting: 500+ leerlingen = 5%, 1000+ = 10%
+- LAS-koppeling (Magister/Somtoday) is GRATIS bij DIA
+
+JIJ!-context (belangrijk voor prijsherkenning):
+- JIJ! (Bureau ICE) hanteert een licentie + toetsprijs-model:
+  - E\u00E9n jaarlijkse licentie per school, 4 niveaus op basis van totaal afnames
+  - Alle modules (RE, NL, EN, MVT, SEF) vallen onder dezelfde licentie
+- Als school JIJ! noemt, vraag niet per module de prijs maar het totaalbedrag per jaar
+- Magister/Somtoday-koppeling is BETAALD bij JIJ! (\u20AC500 voor L1-3, \u20AC195 voor L4)
+- Sociaal-emotioneel (Hart & Handen) zit in de basislicentie (geen meerprijs)
 
 Beschikbare levels (exacte waarden):
 - vmbo-b, vmbo-k, vmbo-gt, havo, vwo

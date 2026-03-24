@@ -16,6 +16,25 @@ import { checkPriceDeviation } from '../../../models/pricing.ts';
 // Providers for which a price input is relevant
 const PRICE_RELEVANT_PROVIDERS: CurrentProvider[] = ['dia', 'jij', 'saqi', 'overig'];
 
+// Provider-specific context hints shown when a provider is selected
+const PROVIDER_HINTS: Partial<Record<CurrentProvider, (moduleId: string) => string | null>> = {
+  dia: (moduleId) => {
+    if (moduleId === 'nederlands') {
+      return 'DIA verkoopt Nederlands als Pakket NE (lezen + woordenschat) voor \u20AC5,84 of alleen Diatekst (lezen) voor \u20AC3,36. De meeste scholen nemen het pakket af. LAS-koppeling (Magister/Somtoday) is gratis bij DIA.';
+    }
+    if (moduleId === 'engels') {
+      return 'DIA Pakket EN compleet (lezen + woordenschat): \u20AC5,84/lln. LAS-koppeling gratis.';
+    }
+    if (moduleId === 'taalverzorging') {
+      return 'DIA Diaspel (spelling): \u20AC3,36 los, of in Pakket NE compleet (\u20AC8,58 incl. lezen + woordenschat). LAS-koppeling gratis.';
+    }
+    return 'LAS-koppeling (Magister/Somtoday) is gratis bij DIA. Staffelkorting: 500+ = 5%, 1000+ = 10%.';
+  },
+  jij: () => {
+    return 'JIJ! werkt met \u00E9\u00E9n licentie + toetsprijs-model. De prijs per leerling hangt af van het totaal afnames en de schoolgrootte. Magister/Somtoday-koppeling is betaald (\u20AC195-\u20AC500/jaar).';
+  },
+};
+
 // Publication price lookup helper
 function getPublicationPrice(moduleId: string, provider: CurrentProvider): number | null {
   const providerKey = provider === 'dia' ? 'dia' : provider === 'jij' ? 'jij' : provider === 'saqi' ? 'saqi' : null;
@@ -135,6 +154,19 @@ const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) 
                     )}
                   />
                 </div>
+
+                {/* Provider context hint */}
+                {provider && PROVIDER_HINTS[provider] && (() => {
+                  const hint = PROVIDER_HINTS[provider]!(moduleId);
+                  if (!hint) return null;
+                  return (
+                    <div className="col-span-full">
+                      <div className="text-xs bg-blue-50 text-blue-700 border border-blue-100 rounded px-2 py-1.5">
+                        {hint}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Prijs per leerling */}
                 {showPrice && (
