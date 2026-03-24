@@ -171,11 +171,11 @@ Plans:
   3. Provider-specifieke configuratiebestanden (src/data/providers/cito.ts, dia.ts, jij.ts) bevatten het volledige prijsmodel inclusief tiers, pakketten en platformkosten
   4. Bestaande default-prices.ts, dia-packages.ts en jij-license-tiers.ts data is gemigreerd naar de provider-configuraties
   5. Differentiators zijn uitgebreid voor alle nieuwe modules
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 10.1-01: TBD
-- [ ] 10.1-02: TBD
+- [ ] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
+- [ ] 10.1-02-PLAN.md — Provider config files (cito.ts, dia.ts, jij.ts, saqi.ts), re-export wrappers, backward compatibility, migratie-verificatie
 
 ### Phase 10.2: Engine Refactoring — Provider-aware berekeningen (INSERTED)
 **Goal**: De rekenmotor begrijpt de werkelijke prijsmodellen per aanbieder en rekent correct op basis van schoolgrootte
@@ -187,7 +187,7 @@ Plans:
   3. JIJ-prijs varieert daadwerkelijk met schoolgrootte (tier-selectie op basis van leerlingaantal), niet meer een flat schatting
   4. DIA-pakketoptimalisatie werkt automatisch in de vergelijking (bestaande dia-packages engine geintegreerd)
   5. Schoolspecifieke prijsoverschrijvingen (Supabase) gaan boven de provider-calculator
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 10.2-01: TBD
@@ -203,7 +203,7 @@ Plans:
   3. Per aanbieder is een uitklapbare prijsmodel-uitleg zichtbaar die uitlegt HOE die aanbieder prijst (pakketten, tiers, flat)
   4. Module detail-panel toont de volledige prijsopbouw per aanbieder (hoe het bedrag is berekend)
   5. Schoolgrootte-impact is visueel: gebruiker ziet welke JIJ-tier en welk DIA-pakket actief is bij deze schoolgrootte
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 10.3-01: TBD
@@ -235,7 +235,7 @@ Plans:
   2. PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl (Primary #003082, Accent #FF6600), bronvermelding en disclaimer
   3. Gebruiker kan de vergelijking kopiëren naar clipboard als geformatteerde samenvatting
   4. Applicatie werkt offline op tablet na eerste laden — service worker cacht assets en data
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 12-01: TBD
@@ -252,7 +252,7 @@ Plans:
   3. Security review: geen API keys in frontend, RLS policies getest, auth flow veilig, CORS correct
   4. Data-integriteit: migratie van IndexedDB naar Supabase is volledig en correct, geen dataverlies
   5. Team kan de app gebruiken via de productie-URL met stabiele performance
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 13-01: TBD
