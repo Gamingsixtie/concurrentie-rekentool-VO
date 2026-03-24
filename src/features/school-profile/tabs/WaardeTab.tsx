@@ -8,7 +8,6 @@ import { calculateMigration } from '@/engine/migration';
 import { calculateComparison } from '@/engine/price-comparison';
 import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
 import { updateSchoolData } from '@/db/operations';
-import { DEFAULT_PRICES } from '@/data/default-prices';
 import { ValueHeroCard } from '../components/ValueHeroCard';
 import { TimeSavingsSection } from '../components/TimeSavingsSection';
 import { MigrationSection } from '../components/MigrationSection';
@@ -49,20 +48,8 @@ export default function WaardeTab() {
   const priceDifference = useMemo(() => {
     if (selectedModules.length === 0) return null;
 
-    // Build prices array: active school prices override defaults
-    const activePrices = (schoolPrices ?? []).filter((p) => p.isActive);
-    const prices = DEFAULT_PRICES.map((dp) => {
-      const schoolPrice = activePrices.find(
-        (sp) => sp.moduleId === dp.moduleId && sp.provider === dp.provider,
-      );
-      if (schoolPrice) {
-        return { ...dp, amountPerStudent: schoolPrice.amount };
-      }
-      return dp;
-    });
-
     try {
-      const comparison = calculateComparison(selectedModules, studentCounts, prices);
+      const comparison = calculateComparison(selectedModules, studentCounts);
       // Price difference: how much cheaper Cito is vs cheapest competitor
       const citoTotal = comparison.totals.cito;
       const diaTotal = comparison.totals.dia;

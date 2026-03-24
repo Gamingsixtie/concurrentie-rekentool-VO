@@ -11,7 +11,6 @@ import DmuProgressIndicator from './DmuProgressIndicator';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { calculateComparison } from '@/engine/price-comparison';
 import { calculateUpsell } from '@/engine/upsell';
-import { DEFAULT_PRICES } from '@/data/default-prices';
 
 interface SchoolCardProps {
   school: SchoolRecord;
@@ -88,7 +87,6 @@ export default function SchoolCard({
       const comparisonResult = calculateComparison(
         school.selectedModules,
         school.studentCounts,
-        DEFAULT_PRICES,
       );
       const opportunities = calculateUpsell(
         school.moduleSetups,

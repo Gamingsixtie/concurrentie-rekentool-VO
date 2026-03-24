@@ -3,7 +3,6 @@ import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
 import { detectSchijnvoordelen, type SchijnvoordeelWarning } from '@/engine/schijnvoordeel';
 import { calculateUpsell, type UpsellOpportunity } from '@/engine/upsell';
-import { DEFAULT_PRICES } from '@/data/default-prices';
 
 export function useWizardInsights() {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
@@ -13,7 +12,7 @@ export function useWizardInsights() {
   const totalStudents = getTotalStudents(studentCounts);
 
   const comparisonPreview = useMemo(
-    () => calculateComparison(selectedModules, studentCounts, DEFAULT_PRICES),
+    () => calculateComparison(selectedModules, studentCounts),
     [selectedModules, studentCounts],
   );
 

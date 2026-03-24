@@ -104,12 +104,14 @@ describe('applyContractPeriodToResult', () => {
             totalCost: 4500,
             studentCount: 1000,
             priceRecord: makePriceRecord('rekenwiskunde', 'cito', 4.5),
+            breakdown: [],
           },
           dia: {
             pricePerStudent: 3.36,
             totalCost: 3360,
             studentCount: 1000,
             priceRecord: makePriceRecord('rekenwiskunde', 'dia', 3.36),
+            breakdown: [],
           },
           jij: null,
           saqi: null,
@@ -118,6 +120,7 @@ describe('applyContractPeriodToResult', () => {
     ],
     totals: { cito: 4500, dia: 3360, jij: 0, saqi: 0 },
     differences: { citoVsDia: 1140, citoVsJij: null, citoVsSaqi: null },
+    diaPackageResult: null,
   };
 
   it('returns unchanged result for annual period', () => {

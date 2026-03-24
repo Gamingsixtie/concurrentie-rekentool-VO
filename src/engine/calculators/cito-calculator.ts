@@ -12,14 +12,17 @@ import { getCitoBundle } from '@/data/providers/cito';
  * Stateless: pure functions wrapped in a class for the interface.
  */
 export class CitoCalculator implements ProviderPriceCalculator {
-  private readonly citoBundleType: CitoBundleType;
-  private readonly allSelectedModules: string[];
+  readonly citoBundleType: CitoBundleType;
+  readonly allSelectedModules: string[];
+
+  readonly config: CitoProviderConfig;
 
   constructor(
-    private readonly config: CitoProviderConfig,
+    config: CitoProviderConfig,
     citoBundleType: CitoBundleType = 'individual',
     allSelectedModules: string[] = [],
   ) {
+    this.config = config;
     this.citoBundleType = citoBundleType;
     this.allSelectedModules = allSelectedModules;
   }

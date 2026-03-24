@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import type { ModulePriceResult, ProviderPriceCalculator } from '../calculators/types';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { ProviderPriceCalculator } from '../calculators/types';
 import { createCalculator } from '../calculators/index';
 import { CITO_CONFIG } from '@/data/providers/cito';
 import { DIA_CONFIG } from '@/data/providers/dia';

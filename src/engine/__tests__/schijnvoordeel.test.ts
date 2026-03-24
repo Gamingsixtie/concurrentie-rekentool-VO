@@ -9,7 +9,6 @@ import {
   detectFunctioneleGap,
 } from '../schijnvoordeel';
 import { calculateComparison } from '../price-comparison';
-import { DEFAULT_PRICES } from '../../data/default-prices';
 import type { SchoolLevel } from '../../models/school';
 
 // Helper: create student counts for a given total (spread across havo year 3)
@@ -20,7 +19,7 @@ function makeStudentCounts(total: number): Partial<Record<SchoolLevel, Record<nu
 
 // Helper: get a comparison result for given modules and student count
 function getComparison(modules: string[], totalStudents: number) {
-  return calculateComparison(modules, makeStudentCounts(totalStudents), DEFAULT_PRICES);
+  return calculateComparison(modules, makeStudentCounts(totalStudents));
 }
 
 describe('detectSchijnvoordelen (main)', () => {

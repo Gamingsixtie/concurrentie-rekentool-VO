@@ -2,12 +2,11 @@ import { useMemo, useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
-import { useSchoolPrices } from '@/hooks/useSchoolPrices';
 import { useSchool } from '@/hooks/useSchools';
+import { useSchoolPrices } from '@/hooks/useSchoolPrices';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
 import { calculateMigration } from '@/engine/migration';
 import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
-import { DEFAULT_PRICES } from '@/data/default-prices';
 import type { ExportConfig, ReportData } from './types';
 import { ExportConfigPanel } from './components/ExportConfigPanel';
 import { ExportPreview } from './components/ExportPreview';
@@ -37,15 +36,8 @@ export default function ExportTab() {
   // Compute comparison result
   const comparison = useMemo(() => {
     if (selectedModules.length === 0) return null;
-    const activePrices = (schoolPrices ?? []).filter((p) => p.isActive);
-    const prices = DEFAULT_PRICES.map((dp) => {
-      const sp = activePrices.find(
-        (sp) => sp.moduleId === dp.moduleId && sp.provider === dp.provider,
-      );
-      return sp ? { ...dp, amountPerStudent: sp.amount } : dp;
-    });
     try {
-      return calculateComparison(selectedModules, studentCounts, prices);
+      return calculateComparison(selectedModules, studentCounts);
     } catch {
       return null;
     }

@@ -10,7 +10,11 @@ import type { JijProviderConfig } from '@/data/providers/jij';
  * Stateless: pure functions wrapped in a class for the interface.
  */
 export class JijCalculator implements ProviderPriceCalculator {
-  constructor(private readonly config: JijProviderConfig) {}
+  private readonly config: JijProviderConfig;
+
+  constructor(config: JijProviderConfig) {
+    this.config = config;
+  }
 
   calculateModule(
     moduleId: string,

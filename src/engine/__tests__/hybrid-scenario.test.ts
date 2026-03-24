@@ -36,13 +36,13 @@ function makeModuleComparison(
     moduleCategory: 'leerlingvolgsysteem',
     providers: {
       cito: citoCost !== null
-        ? { pricePerStudent: citoCost / studentCount, totalCost: citoCost, studentCount, priceRecord: makePrice(moduleId, 'cito', citoCost / studentCount) }
+        ? { pricePerStudent: citoCost / studentCount, totalCost: citoCost, studentCount, priceRecord: makePrice(moduleId, 'cito', citoCost / studentCount), breakdown: [] }
         : null,
       dia: diaCost !== null
-        ? { pricePerStudent: diaCost / studentCount, totalCost: diaCost, studentCount, priceRecord: makePrice(moduleId, 'dia', diaCost / studentCount) }
+        ? { pricePerStudent: diaCost / studentCount, totalCost: diaCost, studentCount, priceRecord: makePrice(moduleId, 'dia', diaCost / studentCount), breakdown: [] }
         : null,
       jij: jijCost !== null
-        ? { pricePerStudent: jijCost / studentCount, totalCost: jijCost, studentCount, priceRecord: makePrice(moduleId, 'jij', jijCost / studentCount) }
+        ? { pricePerStudent: jijCost / studentCount, totalCost: jijCost, studentCount, priceRecord: makePrice(moduleId, 'jij', jijCost / studentCount), breakdown: [] }
         : null,
       saqi: null,
     },
@@ -57,6 +57,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
       differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -80,6 +81,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
       differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -104,6 +106,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 1350, dia: 1040, jij: 480, saqi: 0 },
       differences: { citoVsDia: 310, citoVsJij: 870, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -127,6 +130,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
       differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -146,6 +150,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 450, dia: 520, jij: 480, saqi: 0 },
       differences: { citoVsDia: -70, citoVsJij: -30, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [
@@ -165,6 +170,7 @@ describe('calculateHybridScenario', () => {
       ],
       totals: { cito: 900, dia: 1040, jij: 960, saqi: 0 },
       differences: { citoVsDia: -140, citoVsJij: -60, citoVsSaqi: null },
+      diaPackageResult: null,
     };
 
     const moduleSetups: ModuleCurrentSetup[] = [

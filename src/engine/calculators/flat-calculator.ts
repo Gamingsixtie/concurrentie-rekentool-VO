@@ -8,7 +8,11 @@ import type { SaqiProviderConfig } from '@/data/providers/saqi';
  * Stateless: pure functions wrapped in a class for the interface.
  */
 export class FlatCalculator implements ProviderPriceCalculator {
-  constructor(private readonly config: SaqiProviderConfig) {}
+  private readonly config: SaqiProviderConfig;
+
+  constructor(config: SaqiProviderConfig) {
+    this.config = config;
+  }
 
   calculateModule(
     moduleId: string,

@@ -178,7 +178,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       // Step 4: Compute default visible providers from school profile moduleSetups
       const productProviders = moduleSetups
         ?.map(s => s.currentProvider)
-        .filter((p): p is ProviderKey => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey)) ?? [];
+        .filter((p) => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey)) as ProviderKey[] ?? [];
       const defaultVisible: ProviderKey[] = ['cito', ...new Set(productProviders)];
       // Sort non-cito providers alphabetically, keep cito first
       const visibleProviders: ProviderKey[] = ['cito', ...defaultVisible.filter(p => p !== 'cito').sort()];
@@ -269,7 +269,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const moduleSetups = record.moduleSetups ?? [];
       const productProviders = moduleSetups
         .map(s => s.currentProvider)
-        .filter((p): p is ProviderKey => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey));
+        .filter((p) => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey)) as ProviderKey[];
       const defaultVisible: ProviderKey[] = ['cito', ...new Set(productProviders)];
       const visibleProviders: ProviderKey[] = ['cito', ...defaultVisible.filter(p => p !== 'cito').sort()];
 

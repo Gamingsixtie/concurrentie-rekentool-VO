@@ -7,7 +7,6 @@ import { uniqueSlug } from '@/lib/slugify';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
 import { calculateMigration } from '@/engine/migration';
 import { calculateUpsell } from '@/engine/upsell';
-import { DEFAULT_PRICES } from '@/data/default-prices';
 import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
 import { useSchoolPrices } from '@/hooks/useSchoolPrices';
 import { formatCurrency } from '@/lib/format';
@@ -103,20 +102,8 @@ export default function DashboardTab() {
   const upsellOpportunities = useMemo(() => {
     if (selectedModules.length === 0 || moduleSetups.length === 0) return [];
 
-    // Build prices array: active school prices override defaults
-    const activePrices = (schoolPrices ?? []).filter((p) => p.isActive);
-    const prices = DEFAULT_PRICES.map((dp) => {
-      const schoolPrice = activePrices.find(
-        (sp) => sp.moduleId === dp.moduleId && sp.provider === dp.provider,
-      );
-      if (schoolPrice) {
-        return { ...dp, amountPerStudent: schoolPrice.amount };
-      }
-      return dp;
-    });
-
     try {
-      const comparisonResult = calculateComparison(selectedModules, studentCounts, prices);
+      const comparisonResult = calculateComparison(selectedModules, studentCounts);
       return calculateUpsell(moduleSetups, comparisonResult);
     } catch {
       return [];

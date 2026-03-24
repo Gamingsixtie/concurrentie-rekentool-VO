@@ -24,6 +24,7 @@ function makeProviderCost(pricePerStudent: number, moduleId: string, provider: s
     totalCost: pricePerStudent * 100,
     studentCount: 100,
     priceRecord: makePriceRecord(moduleId, provider, pricePerStudent),
+    breakdown: [],
   };
 }
 
@@ -33,6 +34,7 @@ function makeComparisonResult(modules: ModuleComparison[]): ComparisonResult {
     modules,
     totals: { cito: 0, dia: 0, jij: 0, saqi: 0 },
     differences: { citoVsDia: null, citoVsJij: null, citoVsSaqi: null },
+    diaPackageResult: null,
   };
 }
 

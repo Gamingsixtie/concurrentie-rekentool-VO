@@ -14,7 +14,11 @@ import {
  * Stateless: pure functions wrapped in a class for the interface.
  */
 export class DiaCalculator implements ProviderPriceCalculator {
-  constructor(private readonly config: DiaProviderConfig) {}
+  private readonly config: DiaProviderConfig;
+
+  constructor(config: DiaProviderConfig) {
+    this.config = config;
+  }
 
   calculateModule(
     moduleId: string,
