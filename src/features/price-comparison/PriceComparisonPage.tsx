@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
-import type { ComparisonResult } from '../../engine/price-comparison';
+import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
 import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
+import { MODULE_CATALOG } from '../../models/modules';
+import { PROVIDER_CONFIGS } from '../../data/providers';
 import { formatCurrency } from '../../lib/format';
 import { ComparisonChart } from './ComparisonChart';
 import { ComparisonTable } from './ComparisonTable';
 import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
-import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
 import { AdvicePanel } from './AdvicePanel';
 import { AnalysisPanel } from './AnalysisPanel';
@@ -122,6 +123,78 @@ function ComparisonSummary({ result }: { result: ComparisonResult }) {
           </ul>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Provider kleuren ────────────────────────────────────────────────────────
+
+const PROVIDER_COLORS: Record<ProviderKey, string> = {
+  cito: 'bg-[#003082]',
+  dia: 'bg-[#FF6600]',
+  jij: 'bg-[#22C55E]',
+  saqi: 'bg-[#8B5CF6]',
+};
+
+// ─── Provider selector (checkbox rij) ────────────────────────────────────────
+
+function ProviderSelector() {
+  const { visibleProviders, toggleProvider } = usePriceComparisonStore();
+  const allProviders: ProviderKey[] = ['cito', 'dia', 'jij', 'saqi'];
+
+  return (
+    <div className="flex flex-wrap gap-3 mb-4">
+      <span className="text-sm font-medium text-neutral-600 mr-1">Vergelijk:</span>
+      {allProviders.map(p => {
+        const moduleCount = MODULE_CATALOG.filter(m => m.availableFrom.includes(p)).length;
+        return (
+          <label key={p} className="flex items-center gap-1.5 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={visibleProviders.includes(p)}
+              onChange={() => toggleProvider(p)}
+              disabled={p === 'cito'}
+              className="accent-[#003082]"
+            />
+            <span className={`w-2.5 h-2.5 rounded-full ${PROVIDER_COLORS[p]}`} />
+            <span>{PROVIDER_LABELS[p]}</span>
+            <span className="text-neutral-400 text-xs">({moduleCount})</span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Prijsmodel kaarten (inklapbaar per aanbieder) ───────────────────────────
+
+const PRICING_STRATEGY_DESCRIPTIONS: Record<string, string> = {
+  'platform+module': 'Platform + module-prijzen per leerling. Bundels (Basis, Plus) bieden korting bij meerdere modules. Meerjarencontracten verlagen de prijs verder.',
+  'package-bundle': 'Pakketprijzen per leerling. Modules zijn gebundeld in vaste pakketten — het goedkoopste kwalificerende pakket wordt automatisch geselecteerd.',
+  'tiered-license': 'Staffellicentie op basis van schoolgrootte. Eenmalige licentie + kosten per afname. Grotere scholen betalen meer licentie maar minder per leerling.',
+  'flat': 'Vaste prijs per leerling, onafhankelijk van schoolgrootte of combinatie met andere modules.',
+};
+
+function PricingModelCards() {
+  const visibleProviders = usePriceComparisonStore(s => s.visibleProviders);
+
+  return (
+    <div className="mb-6 space-y-2">
+      {visibleProviders.map(provider => {
+        const config = PROVIDER_CONFIGS[provider];
+        const description = PRICING_STRATEGY_DESCRIPTIONS[config.pricingStrategy.type] ?? config.pricingStrategy.type;
+        return (
+          <details key={provider} className="border border-neutral-200 rounded-lg overflow-hidden">
+            <summary className="px-4 py-3 text-sm font-medium cursor-pointer hover:bg-neutral-50 flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${PROVIDER_COLORS[provider]}`} />
+              {PROVIDER_LABELS[provider]} — Prijsmodel
+            </summary>
+            <div className="px-4 pb-3 text-sm text-neutral-600">
+              {description}
+            </div>
+          </details>
+        );
+      })}
     </div>
   );
 }
@@ -266,19 +339,24 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         </p>
       </div>
 
-      {/* Cito bundel + contractperiode keuze */}
+      {/* Contractperiode keuze */}
       <div className="flex flex-wrap items-start gap-6 mb-8">
-        <CitoBundleSelector />
         <PeriodToggle />
       </div>
+
+      {/* Samenvatting: totalen + Cito-voordelen */}
+      <ComparisonSummary result={result} />
+
+      {/* Provider selectie */}
+      <ProviderSelector />
+
+      {/* Prijsmodel uitleg per aanbieder */}
+      <PricingModelCards />
 
       {/* Grafiek */}
       <div className="mb-10">
         <ComparisonChart result={result} onBarClick={handleBarClick} />
       </div>
-
-      {/* Samenvatting: totalen + Cito-voordelen */}
-      <ComparisonSummary result={result} />
 
       {/* AI Gespreksadvies */}
       <AdvicePanel />
