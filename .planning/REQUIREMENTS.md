@@ -112,7 +112,7 @@
 
 ### Architectuur Review
 
-- [ ] **REVIEW-01**: Architectuur-check, performance audit, security review en productie-readiness voordat de app live gaat
+- [x] **REVIEW-01**: Architectuur-check, performance audit, security review en productie-readiness voordat de app live gaat
 
 ## Traceability
 
@@ -169,7 +169,7 @@
 | MODE-01 | Phase 6 | Pending |
 | MODE-02 | Phase 10 | Complete |
 | MODE-03 | Phase 6 | Pending |
-| REVIEW-01 | Phase 13 | Pending |
+| REVIEW-01 | Phase 13 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 52 total
