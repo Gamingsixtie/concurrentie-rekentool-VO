@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Completed 10.3-02-PLAN.md
-last_updated: "2026-03-24T20:47:14.825Z"
+status: Ready to execute
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-03-24T21:30:10.619Z"
 progress:
   total_phases: 14
   completed_phases: 10
-  total_plans: 36
-  completed_plans: 33
+  total_plans: 39
+  completed_plans: 34
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 10.3 — ux-overhaul-wizard-vergelijking
+**Current focus:** Phase 12 — dmu-export-offline
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
+Phase: 12 (dmu-export-offline) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -103,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 10.3]: Provider color map as constant in WizardStep3; visibleProviders always includes cito first with min 2 providers
 - [Phase 10.3]: visibleProviders from store replaces hard-coded PROVIDERS for dynamic column rendering
 - [Phase 10.3]: Prijsopbouw section replaces Berekeningsformule with step-by-step breakdown per provider
+- [Phase 12]: Pure calculateBarLayout function extracted from PdfBarChart for unit testing without react-pdf renderer
+- [Phase 12]: Schoolplan section placed last in all DMU reorder arrays as supplementary context
+- [Phase 12]: View wrap on content container for multi-page overflow instead of fixed page breaks
 
 ### Pending Todos
 
@@ -120,6 +123,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T20:41:02.962Z
-Stopped at: Completed 10.3-02-PLAN.md
+Last session: 2026-03-24T21:30:10.615Z
+Stopped at: Completed 12-01-PLAN.md
 Resume file: None

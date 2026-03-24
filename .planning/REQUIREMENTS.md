@@ -63,10 +63,10 @@
 
 ### DMU-Export
 
-- [ ] **EXPORT-01**: Gebruiker kan een PDF-rapport genereren afgestemd op de coordinator (focus: tijdwinst, dagelijks gebruik)
-- [ ] **EXPORT-02**: Gebruiker kan een PDF-rapport genereren afgestemd op MT/directie (focus: overzicht, onderbouwing, strategische waarde)
-- [ ] **EXPORT-03**: Gebruiker kan een PDF-rapport genereren afgestemd op finance (focus: euro's, meerjarenprojectie, terugverdientijd)
-- [ ] **EXPORT-04**: PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl, bronvermelding en disclaimer
+- [x] **EXPORT-01**: Gebruiker kan een PDF-rapport genereren afgestemd op de coordinator (focus: tijdwinst, dagelijks gebruik)
+- [x] **EXPORT-02**: Gebruiker kan een PDF-rapport genereren afgestemd op MT/directie (focus: overzicht, onderbouwing, strategische waarde)
+- [x] **EXPORT-03**: Gebruiker kan een PDF-rapport genereren afgestemd op finance (focus: euro's, meerjarenprojectie, terugverdientijd)
+- [x] **EXPORT-04**: PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl, bronvermelding en disclaimer
 - [ ] **EXPORT-05**: Gebruiker kan vergelijking kopiëren naar clipboard als geformatteerde samenvatting
 
 ### Prijsbeheer
@@ -157,10 +157,10 @@
 | MIGR-01 | Phase 11 | Complete |
 | MIGR-02 | Phase 11 | Complete |
 | MIGR-03 | Phase 11 | Complete |
-| EXPORT-01 | Phase 12 | Pending |
-| EXPORT-02 | Phase 12 | Pending |
-| EXPORT-03 | Phase 12 | Pending |
-| EXPORT-04 | Phase 12 | Pending |
+| EXPORT-01 | Phase 12 | Complete |
+| EXPORT-02 | Phase 12 | Complete |
+| EXPORT-03 | Phase 12 | Complete |
+| EXPORT-04 | Phase 12 | Complete |
 | EXPORT-05 | Phase 12 | Pending |
 | PRIJSMGT-01 | Phase 9 | Complete |
 | PRIJSMGT-02 | Phase 9 | Complete |
