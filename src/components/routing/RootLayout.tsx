@@ -5,6 +5,8 @@ import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { UserMenu } from '@/features/auth/UserMenu';
 import { CloudMigrationWizard } from '@/features/migration/CloudMigrationWizard';
 import { hasLocalData, isMigrationComplete } from '@/db/migrations';
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { useOfflineQueue } from '@/lib/offline-queue';
 
 // Skip auth in development when VITE_SKIP_AUTH is set
 const SKIP_AUTH = import.meta.env.VITE_SKIP_AUTH === 'true';
@@ -21,6 +23,21 @@ export default function RootLayout() {
   const isLoginPage = routerState.location.pathname === '/login';
 
   const [needsMigration, setNeedsMigration] = useState<boolean | null>(null);
+
+  // Sync offline mutation queue when coming back online
+  useEffect(() => {
+    const handleOnline = async () => {
+      const { mutations, syncAll } = useOfflineQueue.getState();
+      if (mutations.length > 0) {
+        const result = await syncAll();
+        if (result.conflicts > 0) {
+          console.warn(`${result.conflicts} wijziging(en) hadden een conflict (server-versie behouden)`);
+        }
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   // Check for local data migration after auth completes
   useEffect(() => {
@@ -51,6 +68,7 @@ export default function RootLayout() {
   if (SKIP_AUTH) {
     return (
       <>
+        <OfflineBanner />
         <header className="bg-white border-b border-neutral-200 px-8 max-sm:px-4 h-12 flex items-center justify-between">
           <span className="text-sm font-medium text-cito-primary">Cito Rekentool</span>
           <span className="text-xs text-orange-500 font-medium">DEV MODE — auth uitgeschakeld</span>
@@ -63,6 +81,7 @@ export default function RootLayout() {
   // All other routes require auth
   return (
     <ProtectedRoute>
+      <OfflineBanner />
       {/* Header with UserMenu */}
       <header className="bg-white border-b border-neutral-200 px-8 max-sm:px-4 h-12 flex items-center justify-between">
         <span className="text-sm font-medium text-cito-primary">Cito Rekentool</span>

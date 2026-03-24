@@ -11,6 +11,25 @@ type ContactFormInput = z.input<typeof contactSchema>;
 type ConversationFormInput = z.input<typeof conversationSchema>;
 type ActionFormInput = z.input<typeof actionSchema>;
 import { uniqueSlug } from '@/lib/slugify';
+import { useOfflineQueue } from '@/lib/offline-queue';
+
+// --- Offline queue helper ---
+
+/**
+ * Queue a mutation for later sync if the browser is offline.
+ * Returns true if queued (caller should return early), false if online.
+ */
+function queueIfOffline(
+  table: string,
+  operation: 'insert' | 'update' | 'delete',
+  payload: Record<string, unknown>,
+): boolean {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    useOfflineQueue.getState().addMutation({ table, operation, payload });
+    return true;
+  }
+  return false;
+}
 
 // --- Auth helpers ---
 
@@ -197,8 +216,9 @@ export async function updateSchoolData(
   id: string,
   data: Partial<SchoolRecord>,
 ): Promise<void> {
-  const user = await getCurrentUser();
   const snakeData = mapSchoolUpdateToSnakeCase(data);
+  if (queueIfOffline('schools', 'update', { id, ...snakeData })) return;
+  const user = await getCurrentUser();
   const { error } = await supabase.from('schools')
     .update({ ...snakeData, updated_by: user.id })
     .eq('id', id);
@@ -238,6 +258,39 @@ export async function addContact(
   schoolId: string,
   data: ContactFormInput,
 ): Promise<Contact> {
+  if (queueIfOffline('contacts', 'insert', {
+    school_id: schoolId,
+    name: data.name,
+    dmu_position: data.dmuPosition,
+    job_title: data.jobTitle ?? '',
+    email: data.email ?? '',
+    phone: data.phone ?? '',
+    preferred_channel: data.preferredChannel ?? 'email',
+    authority: data.authority ?? 'adviserend',
+    notes: data.notes ?? '',
+    is_primary: data.isPrimary ?? false,
+  })) {
+    // Return a temporary Contact object for optimistic UI
+    return {
+      id: crypto.randomUUID(),
+      schoolId,
+      name: data.name,
+      dmuPosition: data.dmuPosition,
+      jobTitle: data.jobTitle ?? '',
+      email: data.email ?? '',
+      phone: data.phone ?? '',
+      preferredChannel: data.preferredChannel ?? 'email',
+      authority: data.authority ?? 'adviserend',
+      lastContactDate: null,
+      notes: data.notes ?? '',
+      isPrimary: data.isPrimary ?? false,
+      engagementStatus: 'nog-niet-benaderd',
+      engagementStatusChangedAt: null,
+      waitingForContactId: null,
+      dropOffReason: null,
+      createdAt: new Date().toISOString(),
+    };
+  }
   const user = await getCurrentUser();
 
   // If this contact is primary, unset all others first
@@ -273,6 +326,7 @@ export async function updateContact(
   contactId: string,
   data: Partial<Contact>,
 ): Promise<void> {
+  if (queueIfOffline('contacts', 'update', { id: contactId, school_id: schoolId, ...data })) return;
   // If setting as primary, unset all others first
   if (data.isPrimary === true) {
     await supabase.from('contacts')
@@ -319,6 +373,7 @@ export async function deleteContact(
   schoolId: string,
   contactId: string,
 ): Promise<void> {
+  if (queueIfOffline('contacts', 'delete', { id: contactId, school_id: schoolId })) return;
   const { error } = await supabase.from('contacts')
     .delete()
     .eq('id', contactId)
@@ -332,6 +387,25 @@ export async function addConversation(
   schoolId: string,
   data: ConversationFormInput,
 ): Promise<Conversation> {
+  if (queueIfOffline('conversations', 'insert', {
+    school_id: schoolId,
+    date: data.date,
+    contact_id: data.contactId,
+    content: data.content,
+    tags: data.tags ?? [],
+  })) {
+    const now = new Date().toISOString();
+    return {
+      id: crypto.randomUUID(),
+      schoolId,
+      date: data.date,
+      contactId: data.contactId,
+      content: data.content,
+      tags: data.tags ?? [],
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
   const user = await getCurrentUser();
 
   const { data: row, error } = await supabase.from('conversations')
@@ -363,6 +437,7 @@ export async function updateConversation(
   conversationId: string,
   data: Partial<Conversation>,
 ): Promise<void> {
+  if (queueIfOffline('conversations', 'update', { id: conversationId, school_id: schoolId, ...data })) return;
   const user = await getCurrentUser();
 
   const updateData: Record<string, unknown> = { updated_by: user.id };
@@ -384,6 +459,23 @@ export async function addAction(
   schoolId: string,
   data: ActionFormInput,
 ): Promise<ActionItem> {
+  if (queueIfOffline('actions', 'insert', {
+    school_id: schoolId,
+    title: data.title,
+    status: data.status ?? 'todo',
+    conversation_id: data.conversationId ?? null,
+  })) {
+    const now = new Date().toISOString();
+    return {
+      id: crypto.randomUUID(),
+      schoolId,
+      title: data.title,
+      status: data.status ?? 'todo',
+      conversationId: data.conversationId ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
   const user = await getCurrentUser();
 
   const { data: row, error } = await supabase.from('actions')
@@ -407,6 +499,7 @@ export async function updateAction(
   actionId: string,
   data: Partial<ActionItem>,
 ): Promise<void> {
+  if (queueIfOffline('actions', 'update', { id: actionId, school_id: schoolId, ...data })) return;
   const user = await getCurrentUser();
 
   const updateData: Record<string, unknown> = { updated_by: user.id };
@@ -425,6 +518,7 @@ export async function deleteAction(
   schoolId: string,
   actionId: string,
 ): Promise<void> {
+  if (queueIfOffline('actions', 'delete', { id: actionId, school_id: schoolId })) return;
   const { error } = await supabase.from('actions')
     .delete()
     .eq('id', actionId)
@@ -440,6 +534,11 @@ export async function setPipelineStatus(
   reason?: string,
   lostDealInfo?: LostDealInfo,
 ): Promise<void> {
+  const updatePayload: Record<string, unknown> = { id: schoolId, pipeline_status: newStatus };
+  if (newStatus === 'verloren' && lostDealInfo) {
+    updatePayload.lost_deal_info = lostDealInfo;
+  }
+  if (queueIfOffline('schools', 'update', updatePayload)) return;
   const user = await getCurrentUser();
 
   // Get current school to read old status
@@ -500,6 +599,14 @@ export async function setEngagementStatus(
     dropOffReason?: string;
   },
 ): Promise<void> {
+  if (queueIfOffline('contacts', 'update', {
+    id: contactId,
+    school_id: schoolId,
+    engagement_status: newStatus,
+    engagement_status_changed_at: new Date().toISOString(),
+    ...(newStatus === 'wacht-op-intern' ? { waiting_for_contact_id: options?.waitingForContactId ?? null } : { waiting_for_contact_id: null }),
+    ...(newStatus === 'afgehaakt' && options?.dropOffReason ? { drop_off_reason: options.dropOffReason } : newStatus !== 'afgehaakt' ? { drop_off_reason: null } : {}),
+  })) return;
   const user = await getCurrentUser();
 
   // Get current engagement status for the event log
