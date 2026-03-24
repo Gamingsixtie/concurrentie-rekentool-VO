@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   extractIntakeFromNotes,
   resolveStudentCounts,
@@ -7,15 +8,70 @@ import {
 } from '../../lib/ai-intake';
 import type { IntakeExtraction } from '../../lib/ai-intake';
 import { useSchoolProfileStore } from '../school-profile/store';
-import { SCHOOL_LEVEL_LABELS, CURRENT_PROVIDER_LABELS, type SchoolLevel } from '../../models/school';
+import { SCHOOL_LEVEL_LABELS, CURRENT_PROVIDER_LABELS, type SchoolLevel, type DMUPosition } from '../../models/school';
 import { detectScenario } from '../../engine/scenario-detection';
 import { MODULE_CATALOG } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
+import { addContact, addAction, addConversation } from '../../db/operations';
+import { useConversations } from '../../hooks/useConversations';
 
 interface IntakePanelProps {
-  schoolId: string | null;
   onComplete: () => void;
   onSkip: () => void;
+}
+
+// ─── 4-section notes structure ──────────────────────────────────────────────
+
+const SECTIONS = [
+  {
+    key: 'school',
+    label: 'School & Niveaus',
+    placeholder:
+      'Bijv. "HAVO en VWO, totaal 350 leerlingen. Leerjaar 1: 150, leerjaar 2: 140..."',
+  },
+  {
+    key: 'modules',
+    label: 'Modules & Aanbieders',
+    placeholder:
+      'Bijv. "Rekenwiskunde via DIA, €5,20/lln. Nederlands ook DIA maar twijfelen. Sociaal-emotioneel via Boom."',
+  },
+  {
+    key: 'contacts',
+    label: 'Contactpersonen',
+    placeholder:
+      'Bijv. "Jan de Vries, toetscoördinator, jan@school.nl. Lisa Bakker, MT-lid."',
+  },
+  {
+    key: 'actions',
+    label: 'Actiepunten & Overig',
+    placeholder:
+      'Bijv. "Offerte sturen volgende week. School wil overstappen van DIA. Interesse in Cito Nieuw."',
+  },
+] as const;
+
+type SectionKey = (typeof SECTIONS)[number]['key'];
+
+function combineNotes(sections: Record<SectionKey, string>): string {
+  return SECTIONS.map((s) => {
+    const text = sections[s.key].trim();
+    if (!text) return '';
+    return `## ${s.label}\n${text}`;
+  })
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+function hasAnyContent(sections: Record<SectionKey, string>): boolean {
+  return SECTIONS.some((s) => sections[s.key].trim().length > 0);
+}
+
+// ─── DMU position mapping ───────────────────────────────────────────────────
+
+function mapDmuPosition(dmuPos?: string): DMUPosition {
+  if (dmuPos === 'coordinator' || dmuPos === 'mt' || dmuPos === 'finance') {
+    return dmuPos;
+  }
+  return 'overig';
 }
 
 // ─── Extracted data preview ───────────────────────────────────────────────────
@@ -137,6 +193,41 @@ function ExtractionPreview({
         </div>
       )}
 
+      {/* Contact persons */}
+      {extraction.contactPersonen.length > 0 && (
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+            Contactpersonen
+          </div>
+          <div className="space-y-1">
+            {extraction.contactPersonen.map((cp, i) => (
+              <div key={i} className="text-sm text-neutral-700">
+                <span className="font-medium">{cp.naam}</span>
+                {cp.rol && <span className="text-neutral-500"> — {cp.rol}</span>}
+                {cp.email && <span className="text-neutral-500"> ({cp.email})</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Action items */}
+      {extraction.actiePunten.length > 0 && (
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+            Actiepunten
+          </div>
+          <ul className="space-y-1">
+            {extraction.actiePunten.map((ap, i) => (
+              <li key={i} className="text-sm text-neutral-700">
+                • <span className="font-medium">{ap.wat}</span>
+                {ap.wanneer && <span className="text-neutral-500"> — {ap.wanneer}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Unsure about */}
       {unsureAbout.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -161,80 +252,37 @@ function ExtractionPreview({
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-// ─── Section definitions ────────────────────────────────────────────────────
-
-const SECTIONS = [
-  {
-    key: 'school',
-    label: 'Schoolgegevens',
-    sublabel: 'Schoolnaam, niveaus, leerlingaantallen',
-    placeholder: 'Maartenscollege Groningen, havo en vwo, 180 lln/jaar havo, 120 vwo...',
-    rows: 3,
-  },
-  {
-    key: 'modules',
-    label: 'Modules & aanbieders',
-    sublabel: 'Welke modules, huidige aanbieder per module',
-    placeholder: 'Rekenwiskunde via DIA, Nederlands via Cito oud platform, Engels niks...',
-    rows: 3,
-  },
-  {
-    key: 'pricing',
-    label: 'Prijzen & contract',
-    sublabel: 'Bekende prijzen, contractlooptijd, budget',
-    placeholder: 'DIA reken €4,20/lln, contract loopt tot aug 2026...',
-    rows: 2,
-  },
-  {
-    key: 'other',
-    label: 'Overig',
-    sublabel: 'Contactpersonen, vervolgacties, sfeer gesprek',
-    placeholder: 'Mevr. Van der Berg (toetscoördinator), dhr. Janssen (schoolleider), stuur offerte volgende week...',
-    rows: 3,
-  },
-] as const;
-
-type SectionKey = typeof SECTIONS[number]['key'];
-type SectionState = Record<SectionKey, string>;
-
-const EMPTY_SECTIONS: SectionState = { school: '', modules: '', pricing: '', other: '' };
-
-function combineNotes(sections: SectionState): string {
-  const parts: string[] = [];
-  if (sections.school.trim()) parts.push(`=== SCHOOLGEGEVENS ===\n${sections.school.trim()}`);
-  if (sections.modules.trim()) parts.push(`=== MODULES & AANBIEDERS ===\n${sections.modules.trim()}`);
-  if (sections.pricing.trim()) parts.push(`=== PRIJZEN & CONTRACT ===\n${sections.pricing.trim()}`);
-  if (sections.other.trim()) parts.push(`=== OVERIG ===\n${sections.other.trim()}`);
-  return parts.join('\n\n');
-}
-
-function hasAnyContent(sections: SectionState): boolean {
-  return Object.values(sections).some((v) => v.trim().length > 0);
-}
-
-export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakePanelProps) {
-  const [sections, setSections] = useState<SectionState>(EMPTY_SECTIONS);
+export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
+  const [sections, setSections] = useState<Record<SectionKey, string>>({
+    school: '',
+    modules: '',
+    contacts: '',
+    actions: '',
+  });
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [extraction, setExtraction] = useState<IntakeExtraction | null>(null);
   const [enrichedSetups, setEnrichedSetups] = useState<EnrichedModuleSetup[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep, setScenario } = useSchoolProfileStore();
+  const { setLevels, setStudentCounts, setSelectedModules, setModuleSetups, setCurrentStep, setScenario, activeSchoolId } = useSchoolProfileStore();
+  const queryClient = useQueryClient();
+  const { data: conversations } = useConversations(activeSchoolId ?? '');
 
   const updateSection = (key: SectionKey, value: string) => {
     setSections((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleAnalyse = async () => {
-    const notes = combineNotes(sections);
-    if (!notes.trim()) return;
+    if (!hasAnyContent(sections)) return;
     setStatus('loading');
     setErrorMsg('');
     setExtraction(null);
     setEnrichedSetups([]);
 
     try {
-      const result = await extractIntakeFromNotes(notes);
+      const combinedNotes = combineNotes(sections);
+      const result = await extractIntakeFromNotes(combinedNotes);
       setExtraction(result);
       setEnrichedSetups(enrichModuleSetupsWithDefaultPrices(result.moduleSetups));
       setStatus('done');
@@ -246,18 +294,20 @@ export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakeP
 
   const handleConfirm = async () => {
     if (!extraction) return;
-    setIsSaving(true);
-    setErrorMsg('');
 
+    setIsSaving(true);
     try {
       // Populate school profile store
       const levels = extraction.levels as SchoolLevel[];
       setLevels(levels);
 
+      // Resolve student counts: prefer per-year, fallback to per-level distribution
       const studentCounts = resolveStudentCounts(levels, extraction);
       setStudentCounts(studentCounts);
+
       setSelectedModules(extraction.selectedModules);
 
+      // Use enriched setups (with auto-filled default prices)
       const mappedSetups = enrichedSetups.map((s) => ({
         moduleId: s.moduleId,
         currentProvider: s.currentProvider,
@@ -267,52 +317,61 @@ export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakeP
 
       if (mappedSetups.length > 0) {
         setModuleSetups(mappedSetups);
+
+        // Auto-detect and set scenario from module setups
         const detection = detectScenario(mappedSetups);
         setScenario(detection.recommended);
       }
 
-      // Persist contacts, actions, and conversation to Supabase
+      // Save to Supabase if we have a school context
+      const schoolId = activeSchoolId;
       if (schoolId) {
+        // Save extracted contacts
         for (const cp of extraction.contactPersonen) {
-          if (cp.naam) {
-            await addContact(schoolId, {
-              name: cp.naam,
-              dmuPosition: mapDmuPosition(cp.dmuPositie),
-              jobTitle: cp.rol || '',
-              email: cp.email || '',
-              phone: cp.telefoon || '',
-            });
-          }
+          if (!cp.naam) continue;
+          await addContact(schoolId, {
+            name: cp.naam,
+            dmuPosition: mapDmuPosition(cp.dmuPositie),
+            jobTitle: cp.rol || '',
+            email: cp.email || '',
+            phone: cp.telefoon || '',
+          });
         }
 
+        // Save extracted action items
         for (const ap of extraction.actiePunten) {
-          if (ap.wat) {
-            await addAction(schoolId, {
-              title: [ap.wat, ap.wanneer, ap.verantwoordelijke].filter(Boolean).join(' - '),
-            });
-          }
+          if (!ap.wat) continue;
+          await addAction(schoolId, {
+            title: [ap.wat, ap.wanneer, ap.verantwoordelijke].filter(Boolean).join(' — '),
+          });
         }
 
-        // Audit trail: save notes as conversation record
-        const storeContacts = useSchoolProfileStore.getState().contacts;
-        const firstContact = storeContacts[0];
+        // Save conversation record with combined notes
+        const combinedNotes = combineNotes(sections);
         await addConversation(schoolId, {
           date: new Date().toISOString().slice(0, 10),
-          contactId: firstContact?.id ?? '',
-          content: combineNotes(sections),
-          tags: ['ai-intake-wizard'],
+          contactId: conversations?.[0]?.contactId ?? '',
+          content: combinedNotes,
+          tags: ['ai-intake'],
         });
 
+        // Invalidate React Query caches
         queryClient.invalidateQueries({ queryKey: ['contacts', schoolId] });
         queryClient.invalidateQueries({ queryKey: ['actions', schoolId] });
         queryClient.invalidateQueries({ queryKey: ['conversations', schoolId] });
+        queryClient.invalidateQueries({ queryKey: ['schools'] });
+        queryClient.invalidateQueries({ queryKey: ['school'] });
       }
 
+      // Jump to step 4 (Situatie) or 0 depending on what was extracted
       const jumpStep = levels.length > 0 ? 3 : 0;
       setCurrentStep(jumpStep);
+
       onComplete();
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Opslaan mislukt. Probeer het opnieuw.');
+      setStatus('error');
+    } finally {
       setIsSaving(false);
     }
   };
@@ -339,7 +398,7 @@ export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakeP
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
           Vul per sectie uw aantekeningen in. De AI extraheert automatisch niveaus,
-          leerlingaantallen, modules en huidige aanbieders.
+          leerlingaantallen, modules, contactpersonen en actiepunten.
         </p>
       </div>
 
@@ -351,21 +410,23 @@ export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakeP
         </div>
       )}
 
-      {/* Sectioned notes */}
+      {/* Section textareas */}
       <div className="space-y-4 mb-4">
         {SECTIONS.map((section) => (
           <div key={section.key}>
-            <label htmlFor={`intake-${section.key}`} className="block text-sm font-semibold text-neutral-700 mb-0.5">
+            <label
+              htmlFor={`intake-${section.key}`}
+              className="block text-sm font-semibold text-neutral-700 mb-1"
+            >
               {section.label}
             </label>
-            <p className="text-xs text-neutral-400 mb-1">{section.sublabel}</p>
             <textarea
               id={`intake-${section.key}`}
               value={sections[section.key]}
               onChange={(e) => updateSection(section.key, e.target.value)}
               placeholder={section.placeholder}
-              rows={section.rows}
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-cito-primary focus:border-2 focus:outline-none resize-y leading-relaxed"
+              rows={3}
+              className="w-full rounded-lg border border-neutral-200 px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-cito-primary focus:border-2 focus:outline-none resize-y leading-relaxed"
             />
           </div>
         ))}
@@ -431,16 +492,29 @@ export function IntakePanel({ schoolId: _schoolId, onComplete, onSkip }: IntakeP
             <button
               type="button"
               onClick={handleConfirm}
-              className="inline-flex items-center gap-2 bg-cito-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:opacity-90"
+              disabled={isSaving}
+              className="inline-flex items-center gap-2 bg-cito-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:opacity-90 disabled:opacity-50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Overnemen en doorgaan
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Opslaan...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Overnemen en doorgaan
+                </>
+              )}
             </button>
             <button
               type="button"
-              onClick={() => { setExtraction(null); setEnrichedSetups([]); setStatus('idle'); }}
+              onClick={() => { setExtraction(null); setStatus('idle'); }}
               className="text-sm text-neutral-500 hover:text-neutral-700 py-2.5 px-4 rounded-lg border border-neutral-200 hover:border-neutral-300"
             >
               Pas notities aan

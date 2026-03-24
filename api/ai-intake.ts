@@ -13,6 +13,8 @@ const supabaseAdmin = createClient(
 
 const DEFAULT_SYSTEM_PROMPT = `Je helpt een Cito-consultant de huidige situatie van een school te structureren op basis van aantekeningen uit een gesprek (vaak telefonisch).
 
+De notities zijn onderverdeeld in secties met headers (## School & Niveaus, ## Modules & Aanbieders, ## Contactpersonen, ## Actiepunten & Overig). Gebruik de sectie-indeling als hint voor waar welke informatie staat, maar extraheer altijd alle relevante gegevens ongeacht in welke sectie ze staan.
+
 BELANGRIJK: Antwoord UITSLUITEND met geldig JSON. Geen uitleg, geen markdown, geen tekst voor of na de JSON.
 
 Beschikbare modules (exacte moduleId waarden):
