@@ -13,7 +13,7 @@
 ### Phase 1: Fundament
 **Goal**: Schoolprofiel-invoer, datastructuren, Cito-huisstijl en app-skelet
 **Requirements**: PROF-01, PROF-02, PROF-03, PROF-04, DATA-01, DATA-02, DATA-03, DATA-05, DATA-06, UX-03, UX-04
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold, Tailwind CSS 4 theming, TypeScript data models, zustand store en zod schemas
@@ -23,7 +23,7 @@ Plans:
 ### Phase 2: Prijsvergelijking
 **Goal**: Modulaire Cito vs. DIA vs. JIJ vergelijking met staafdiagram en transparante bronvermelding
 **Requirements**: PRIJS-01, PRIJS-02, PRIJS-03, PRIJS-04, PRIJS-05, PRIJS-06, DATA-04, INPUT-01, MODE-01
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 02-01-PLAN.md — Rekenmotor: pure calculateComparison functie, uitgebreide prijsdata, differentiator-data en nl-NL formatting (TDD)
@@ -33,17 +33,17 @@ Plans:
 ### Phase 3: Business Case
 **Goal**: Migratie huidig → nieuw Cito-platform met financieel verschil, tijdswinst en meerjarenprojectie
 **Requirements**: BCASE-01, BCASE-02, BCASE-03, BCASE-04, BCASE-05, BCASE-06, BCASE-07
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 ### Phase 4: Interne Modus & Doelgroepen
 **Goal**: Sales-signalen, gevoeligheidsanalyse, doelgroep-perspectieven, print en clipboard-export
 **Requirements**: MODE-02, MODE-03, MODE-04, MODE-05, DOELGR-01, DOELGR-02, DOELGR-03, EXPORT-01, EXPORT-02
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 ### Phase 5: AI & Polish
 **Goal**: AI-validatie, prijsinvoer en tablet-optimalisatie
 **Requirements**: INPUT-02, INPUT-03, AI-01, AI-02, AI-03, UX-01, UX-02
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 </details>
 
@@ -82,7 +82,7 @@ Plans:
   2. Bestaande v1-data (wizard inputs, prijsoverschrijvingen) is automatisch beschikbaar als schoolprofiel in de v2-interface zonder handmatige actie
   3. Gebruiker kan via browser-back-button terug navigeren naar vorige view en via URL direct naar een specifieke school/view gaan
   4. Alle UI-tekst is in formeel Nederlands (u-vorm) en de interface is bruikbaar op tablet met touch
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [ ] 06-01-PLAN.md — Dexie database, SchoolRecord types, CRUD operations, slug utility en v1 localStorage migratie (TDD)
@@ -155,7 +155,7 @@ Plans:
   3. Gebruiker ziet per module wat Cito biedt dat de concurrent niet biedt (en omgekeerd) als onderscheidend vermogen
   4. Hybride scenario berekent per module apart de besparingen waar een school van aanbieder wisselt
   5. In interne modus ziet de gebruiker gevoeligheidsanalyse met 10%/20% kortingsscenario's, het effect per module, en het break-even kortingspercentage — plus sales-signalen per module
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 10-01-PLAN.md — TDD engine: DIA-pakketprijzen, hybride scenario, gevoeligheidsanalyse met break-even en sales-signalen (4 engine files + 4 test files)
@@ -172,7 +172,7 @@ Plans:
   3. Provider-specifieke configuratiebestanden (src/data/providers/cito.ts, dia.ts, jij.ts) bevatten het volledige prijsmodel inclusief tiers, pakketten en platformkosten
   4. Bestaande default-prices.ts, dia-packages.ts en jij-license-tiers.ts data is gemigreerd naar de provider-configuraties
   5. Differentiators zijn uitgebreid voor alle nieuwe modules
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
@@ -188,7 +188,7 @@ Plans:
   3. JIJ-prijs varieert daadwerkelijk met schoolgrootte (tier-selectie op basis van leerlingaantal), niet meer een flat schatting
   4. DIA-pakketoptimalisatie werkt automatisch in de vergelijking (bestaande dia-packages engine geintegreerd)
   5. Schoolspecifieke prijsoverschrijvingen (Supabase) gaan boven de provider-calculator
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 10.2-01-PLAN.md — TDD: ProviderPriceCalculator interface, 4 calculators (Cito/DIA/JIJ/Flat), factory, refactored calculateComparison() met breakdowns
@@ -204,7 +204,7 @@ Plans:
   3. Per aanbieder is een uitklapbare prijsmodel-uitleg zichtbaar die uitlegt HOE die aanbieder prijst (pakketten, tiers, flat)
   4. Module detail-panel toont de volledige prijsopbouw per aanbieder (hoe het bedrag is berekend)
   5. Schoolgrootte-impact is visueel: gebruiker ziet welke JIJ-tier en welk DIA-pakket actief is bij deze schoolgrootte
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 - [x] 10.3-01-PLAN.md � Wizard Step 3 provider badges, quick-picks, MVT subcategorie + store visibleProviders
 - [x] 10.3-02-PLAN.md � ComparisonTable dynamische kolommen, ModuleDetailPanel prijsopbouw per aanbieder
@@ -219,7 +219,7 @@ Plans:
   2. Gebruiker ziet de totale waarde van de overstap: financieel verschil plus tijdsbesparing in euro's, met meerjarenprojectie over 1 en 3 jaar inclusief cumulatieve besparing en break-even punt
   3. Gebruiker ziet het financieel verschil tussen huidig en nieuw Cito-platform per module en als totaal, met een gecombineerde businesscase (prijsverschil + tijdwinst + meerjarenprojectie)
   4. Systeem detecteert automatisch upsell-kansen: modules waar school een concurrent gebruikt en overstap naar Cito voordelig is
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 11-01-PLAN.md — TDD engines: migratie-engine uitbreiden met switchingCosts en break-even, nieuwe upsell-detectie engine, data layer uitbreiding (SchoolRecord + Supabase)
@@ -235,7 +235,7 @@ Plans:
   2. PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl (Primary #003082, Accent #FF6600), bronvermelding en disclaimer
   3. Gebruiker kan de vergelijking kopiëren naar clipboard als geformatteerde samenvatting
   4. Applicatie werkt offline op tablet na eerste laden — service worker cacht assets en data
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 12-01-PLAN.md — PDF verbetering: SVG staafdiagram, SchoolplanSection, multi-page, DMU-samenvatting
@@ -252,12 +252,11 @@ Plans:
   3. Security review: geen API keys in frontend, RLS policies getest, auth flow veilig, CORS correct
   4. Data-integriteit: migratie van IndexedDB naar Supabase is volledig en correct, geen dataverlies
   5. Team kan de app gebruiken via de productie-URL met stabiele performance
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
-
+- [ ] 13-01-PLAN.md — Security hardening: SKIP_AUTH productie-guard, schoolplan_analyses RLS fix, VITE_ANTHROPIC_API_KEY verwijderd
+- [ ] 13-02-PLAN.md — Build fix: offline-queue.ts TypeScript error, bundle verificatie, productie build
 ### Phase 14: Schoolplan Upload & Kansen-analyse
 **Goal**: Accountmanager kan een schoolplan (PDF/Word) uploaden dat door AI wordt geanalyseerd om Cito-kansen te identificeren, concurrentie-verdwijning te signaleren en strategische inzichten per school te genereren
 **Depends on**: Phase 9 (document upload infra), Phase 7 (schoolprofielen)
@@ -268,7 +267,7 @@ Plans:
   3. Systeem matcht schoolplan-thema's met Cito-productaanbod en toont concrete kansen (bijv. "school focust op adaptief toetsen → Cito Volgsysteem is relevant")
   4. Systeem signaleert waar concurrenten kwetsbaar zijn op basis van schoolplan-prioriteiten (bijv. "school wil meer data-inzicht → DIA biedt dit beperkt")
   5. Kansen en inzichten worden opgeslagen bij het schoolprofiel en zijn zichtbaar in het school-dashboard
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 14-01-PLAN.md — Data foundation: Zod schemas, model config, Supabase migration, React Query hooks en client orchestrator
@@ -285,7 +284,7 @@ Plans:
   3. School-dashboard toont een DMU-beslissingsoverzicht (matrix) van alle DMU-leden en hun huidige status, zodat de accountmanager in een oogopslag ziet wie waar staat
   4. Gebruiker kan filteren op engagement-status in het schooloverzicht (bijv. "toon alle scholen met DMU in positief-fase")
   5. Systeem toont hoelang een contactpersoon al in de huidige fase zit en signaleert stagnatie (>30 dagen in dezelfde fase)
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 15-01-PLAN.md — Data foundation: EngagementStatus types, Supabase migration, setEngagementStatus operation, Zod schema en unit tests
