@@ -54,14 +54,17 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             // --- CONFLICT DETECTION ---
             // For updates: check if server record was modified after our mutation was queued
             if (mutation.operation === 'update' && mutation.payload.id) {
-              const { data: serverRow } = await supabase
-                .from(mutation.table as 'schools')
+              // Use generic query — table name is dynamic, not all tables have updated_at
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { data: serverRow } = await (supabase as any)
+                .from(mutation.table)
                 .select('updated_at')
                 .eq('id', mutation.payload.id as string)
                 .single();
 
-              if (serverRow?.updated_at) {
-                const serverUpdatedAt = new Date(serverRow.updated_at).getTime();
+              const updatedAt = (serverRow as Record<string, unknown> | null)?.updated_at;
+              if (updatedAt) {
+                const serverUpdatedAt = new Date(updatedAt as string).getTime();
                 if (serverUpdatedAt > mutation.timestamp) {
                   // SERVER WINS: mark as conflicted, do NOT apply the mutation
                   set((state) => ({
@@ -78,17 +81,20 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             }
 
             // --- APPLY MUTATION ---
+            // Table name is dynamic — use generic Supabase calls
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const table = (supabase as any).from(mutation.table);
             switch (mutation.operation) {
               case 'insert':
-                await supabase.from(mutation.table as 'schools').insert(mutation.payload as never);
+                await table.insert(mutation.payload as never);
                 break;
               case 'update': {
                 const { id: rowId, ...rest } = mutation.payload;
-                await supabase.from(mutation.table as 'schools').update(rest as never).eq('id', rowId as string);
+                await table.update(rest as never).eq('id', rowId as string);
                 break;
               }
               case 'delete':
-                await supabase.from(mutation.table as 'schools').delete().eq('id', mutation.payload.id as string);
+                await table.delete().eq('id', mutation.payload.id as string);
                 break;
             }
             // Remove successful mutation
