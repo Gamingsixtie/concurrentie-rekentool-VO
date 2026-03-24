@@ -65,6 +65,19 @@ Regels:
 - actiePunten: extraheer wat, wanneer, verantwoordelijke.
 - pipelineSignaal: interesse/twijfel/afwijzing/concurrent-switch/verlenging/neutraal. Laat weg als onduidelijk.
 
+DIA-specifieke extractieregels:
+- Als school DIA + Nederlands noemt zonder specifiek product: ga uit van Pakket NE (\u20AC5,84), niet Diatekst los (\u20AC3,36). De meeste DIA-scholen nemen het pakket.
+- Als school "\u20AC8,58 voor Nederlands" noemt: dat is Pakket NE compleet (lezen + woordenschat + spelling). Extraheer dan ook module "taalverzorging" met provider "dia".
+- Als school "\u20AC18,13" of "pakket compleet" noemt: extraheer alle 4 modules (rekenwiskunde, nederlands, engels, taalverzorging) met provider "dia".
+- Als school staffelkorting noemt (bijv. "5% korting"): pas de prijs per leerling aan en noteer korting in unsureAbout.
+
+JIJ!-specifieke extractieregels:
+- Als school JIJ! of Bureau ICE noemt: zet pricePerStudent op null per module — het systeem berekent dit o.b.v. het licentiemodel.
+- Als school een totaalbedrag noemt (bijv. "\u20AC5.330 per jaar"): zet dit NIET als pricePerStudent. Noteer het in unsureAbout als "JIJ!-licentiekosten: \u20AC5.330/jaar — wordt per leerling berekend door het systeem".
+- Als school "IEP" noemt: dat is JIJ! (IEP = merknaam van Bureau ICE). Gebruik "jij" als provider.
+- Als school sociaal-emotioneel bij JIJ! noemt: zet pricePerStudent op 0 (zit in basislicentie).
+- Als school Frans, Duits of Spaans noemt bij JIJ!: gebruik moduleId "frans", "duits" of "spaans".
+
 Verplicht JSON-formaat (voorbeeld met per-leerjaar aantallen):
 {
   "levels": ["havo", "vwo"],

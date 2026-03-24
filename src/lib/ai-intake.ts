@@ -94,11 +94,25 @@ export interface EnrichedModuleSetup {
   pricePerStudent: number | null;
   customProviderName?: string;
   priceSource: IntakePriceSource;
+  priceContext?: string;
 }
+
+/**
+ * DIA realistic package prices — what schools actually pay.
+ * Most DIA schools buy packages, not individual modules.
+ * Used during enrichment when AI didn't extract a specific price.
+ */
+const DIA_PACKAGE_PRICES: Record<string, { price: number; label: string }> = {
+  'nederlands': { price: 5.84, label: 'Pakket NE (lezen + woordenschat)' },
+  'engels': { price: 5.84, label: 'Pakket EN (lezen + woordenschat)' },
+};
 
 /**
  * Enrich module setups with default publication prices when the intake
  * extracted a provider but no price. The user can always override in the wizard.
+ *
+ * For DIA, uses realistic package prices (what most schools pay) instead of
+ * individual module prices for Nederlands and Engels.
  */
 export function enrichModuleSetupsWithDefaultPrices(
   moduleSetups: IntakeExtractionV2['moduleSetups'],
@@ -113,6 +127,17 @@ export function enrichModuleSetupsWithDefaultPrices(
     const priceProvider = toPriceProvider(setup.currentProvider as CurrentProvider);
     if (!priceProvider) {
       return { ...setup, priceSource: 'intake' as IntakePriceSource };
+    }
+
+    // DIA: use package prices for modules most schools buy as a package
+    if (priceProvider === 'dia' && DIA_PACKAGE_PRICES[setup.moduleId]) {
+      const pkg = DIA_PACKAGE_PRICES[setup.moduleId];
+      return {
+        ...setup,
+        pricePerStudent: pkg.price,
+        priceSource: 'default' as IntakePriceSource,
+        priceContext: pkg.label,
+      };
     }
 
     const defaultPrice = DEFAULT_PRICES.find(

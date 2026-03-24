@@ -33,7 +33,7 @@ const SECTIONS = [
     key: 'modules',
     label: 'Modules & Aanbieders',
     placeholder:
-      'Bijv. "Rekenwiskunde via DIA, €5,20/lln. Nederlands ook DIA maar twijfelen. Sociaal-emotioneel via Boom."',
+      'Bijv. "Rekenwiskunde en Nederlands via DIA, pakket NE voor €5,84. Engels ook DIA. JIJ! voor sociaal-emotioneel (zit in licentie). Of: IEP voor alles."',
   },
   {
     key: 'contacts',
@@ -180,10 +180,16 @@ function ExtractionPreview({
                     {setup.pricePerStudent !== null && (
                       <span className="text-neutral-500 text-xs">
                         {formatCurrency(setup.pricePerStudent)}/lln
-                        {setup.priceSource === 'default' && (
+                        {setup.priceSource === 'default' && setup.priceContext && (
+                          <span className="ml-1 text-neutral-400">({setup.priceContext})</span>
+                        )}
+                        {setup.priceSource === 'default' && !setup.priceContext && (
                           <span className="ml-1 text-neutral-400">(publicatieprijs)</span>
                         )}
                       </span>
+                    )}
+                    {setup.currentProvider === 'jij' && setup.pricePerStudent === null && (
+                      <span className="text-blue-600 text-xs">licentiemodel — prijs wordt berekend</span>
                     )}
                   </div>
                 </div>

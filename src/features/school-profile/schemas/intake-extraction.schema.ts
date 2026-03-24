@@ -21,6 +21,9 @@ export const MODULE_IDS = [
   'taalverzorging',
   'sociaal-emotioneel',
   'cognitieve-capaciteiten',
+  'frans',
+  'duits',
+  'spaans',
 ] as const;
 
 export const SCHOOL_LEVELS = ['vmbo-b', 'vmbo-k', 'vmbo-gt', 'havo', 'vwo'] as const;
