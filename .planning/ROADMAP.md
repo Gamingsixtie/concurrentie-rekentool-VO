@@ -60,7 +60,7 @@ Plans:
 - [x] **Phase 8: Supabase & Deploy** - Migratie naar Supabase (Postgres), Vercel hosting, auth met team-model, serverless AI-proxy
 - [x] **Phase 9: AI Intake & Prijsbeheer** - AI-gestuurde gespreksverwerking, prijsbeheer met actieve selectie, document-upload extractie
 - [x] **Phase 10: Prijsvergelijking & Gevoeligheid** - Uitgebreide vergelijkingsengine met DIA-pakketten, hybride scenario, differentiators en gevoeligheidsanalyse (completed 2026-03-22)
-- [ ] **Phase 10.1: Data Foundation** (INSERTED) - Prijsmodel-types, volledige module-catalogus, provider-configuraties
+- [x] **Phase 10.1: Data Foundation** (INSERTED) - Prijsmodel-types, volledige module-catalogus, provider-configuraties (completed 2026-03-24)
 - [ ] **Phase 10.2: Engine Refactoring** (INSERTED) - Provider-aware berekeningen met JIJ-tiers, DIA-pakketten, prijsopbouw
 - [ ] **Phase 10.3: UX Overhaul** (INSERTED) - Wizard redesign, dynamische vergelijkingstabel, prijsmodel-uitleg
 - [x] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie (completed 2026-03-23)
@@ -175,7 +175,7 @@ Plans:
 
 Plans:
 - [x] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
-- [ ] 10.1-02-PLAN.md — Provider config files (cito.ts, dia.ts, jij.ts, saqi.ts), re-export wrappers, backward compatibility, migratie-verificatie
+- [x] 10.1-02-PLAN.md — Provider config files (cito.ts, dia.ts, jij.ts, saqi.ts), re-export wrappers, backward compatibility, migratie-verificatie
 
 ### Phase 10.2: Engine Refactoring — Provider-aware berekeningen (INSERTED)
 **Goal**: De rekenmotor begrijpt de werkelijke prijsmodellen per aanbieder en rekent correct op basis van schoolgrootte
@@ -320,7 +320,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 8. Supabase & Deploy | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 9. AI Intake & Prijsbeheer | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
-| 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 1/2 | In Progress|  |
+| 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 2/2 | Complete   | 2026-03-24 |
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 0/2 | Not started | - |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
