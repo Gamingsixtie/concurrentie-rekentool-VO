@@ -20,8 +20,9 @@ export interface TimeSavingResult {
   taskLabel: string;
   oldMethodLabel: string;
   newMethodLabel: string;
-  hoursPerYear: number;
-  valuePerYear: number; // hoursPerYear × hourlyRate
+  /** null = unknown/skipped by consultant */
+  hoursPerYear: number | null;
+  valuePerYear: number; // hoursPerYear × hourlyRate (0 when hours is null)
 }
 
 export interface MultiYearProjectionEntry {
@@ -62,7 +63,7 @@ function computeBreakEvenMonth(totalAnnualValue: number, switchingCosts: number)
  * @param selectedModules   Module IDs selected by the user
  * @param studentCounts     Student counts per level/year
  * @param migrationPrices   Old vs new Cito prices per module
- * @param timeSavingOverrides  taskId → hours/year override (consultant-entered)
+ * @param timeSavingOverrides  taskId → hours/year override (consultant-entered). null = task skipped/unknown.
  * @param hourlyRate        Value per hour saved (null = unknown)
  * @param switchingCosts    One-time switching costs (default: 0)
  */
@@ -70,7 +71,7 @@ export function calculateMigration(
   selectedModules: string[],
   studentCounts: Partial<Record<string, Record<number, number>>>,
   migrationPrices: CitoMigrationPriceRecord[],
-  timeSavingOverrides: Record<string, number>,
+  timeSavingOverrides: Record<string, number | null>,
   hourlyRate: number | null,
   switchingCosts: number = 0,
 ): MigrationResult {
@@ -106,18 +107,21 @@ export function calculateMigration(
   const effectiveRate = hourlyRate ?? 0;
 
   const timeSavings: TimeSavingResult[] = TIME_SAVING_TASKS.map((task) => {
-    const hoursPerYear = timeSavingOverrides[task.id] ?? task.defaultHoursPerYear;
+    // If the task has an explicit override, use it (including null = skipped).
+    // If no override exists for this task, use the default hours.
+    const hasOverride = task.id in timeSavingOverrides;
+    const hoursPerYear = hasOverride ? timeSavingOverrides[task.id] : task.defaultHoursPerYear;
     return {
       taskId: task.id,
       taskLabel: task.label,
       oldMethodLabel: task.oldMethodLabel,
       newMethodLabel: task.newMethodLabel,
       hoursPerYear,
-      valuePerYear: hoursPerYear * effectiveRate,
+      valuePerYear: (hoursPerYear ?? 0) * effectiveRate,
     };
   });
 
-  const totalTimeSavingsHours = timeSavings.reduce((sum, t) => sum + t.hoursPerYear, 0);
+  const totalTimeSavingsHours = timeSavings.reduce((sum, t) => sum + (t.hoursPerYear ?? 0), 0);
   const totalTimeSavingsValue = timeSavings.reduce((sum, t) => sum + t.valuePerYear, 0);
   const totalAnnualValue = financialDifference + totalTimeSavingsValue;
 

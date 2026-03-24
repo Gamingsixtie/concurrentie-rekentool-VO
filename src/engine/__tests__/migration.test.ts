@@ -138,6 +138,67 @@ describe('calculateMigration', () => {
     expect(result.modules[0].annualDifference).toBe(0);
   });
 
+  describe('null time saving overrides', () => {
+    it('excludes tasks with null override from totals', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        { rechten: null },
+        50,
+      );
+      // rechten=null (excluded), resetten=12, inloggen=8, planning=10, koppeling=8 → total=38
+      expect(result.totalTimeSavingsHours).toBe(38);
+      expect(result.totalTimeSavingsValue).toBe(38 * 50);
+      // The null task should have hoursPerYear=null and valuePerYear=0
+      const rechtenTask = result.timeSavings.find((t) => t.taskId === 'rechten');
+      expect(rechtenTask?.hoursPerYear).toBeNull();
+      expect(rechtenTask?.valuePerYear).toBe(0);
+    });
+
+    it('handles mix of null and number overrides', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        { rechten: null, resetten: 5, planning: null },
+        50,
+      );
+      // rechten=null, resetten=5, inloggen=8 (default), planning=null, koppeling=8 (default) → total=21
+      expect(result.totalTimeSavingsHours).toBe(21);
+    });
+
+    it('returns 0 time savings when all tasks are null', () => {
+      const allNull: Record<string, number | null> = {
+        rechten: null,
+        resetten: null,
+        inloggen: null,
+        planning: null,
+        koppeling: null,
+      };
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        allNull,
+        50,
+      );
+      expect(result.totalTimeSavingsHours).toBe(0);
+      expect(result.totalTimeSavingsValue).toBe(0);
+    });
+
+    it('uses defaults when overrides object is empty (backward compat)', () => {
+      const result = calculateMigration(
+        ['rekenwiskunde'],
+        studentCounts,
+        mockMigrationPrices,
+        {},
+        50,
+      );
+      expect(result.totalTimeSavingsHours).toBe(48);
+    });
+  });
+
   describe('breakEvenMonth', () => {
     it('calculates breakEvenMonth with switchingCosts and positive totalAnnualValue', () => {
       // rekenwiskunde: financialDifference = 50, timeSavingsValue = 48 * 50 = 2400

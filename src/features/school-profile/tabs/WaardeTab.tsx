@@ -13,7 +13,9 @@ import { ValueHeroCard } from '../components/ValueHeroCard';
 import { TimeSavingsSection } from '../components/TimeSavingsSection';
 import { MigrationSection } from '../components/MigrationSection';
 import { MultiYearSection } from '../components/MultiYearSection';
+import { ValueAIPanel } from '../components/ValueAIPanel';
 import { DisclaimerFooter } from '@/components/ui/DisclaimerFooter';
+import type { SchoolLevel } from '@/models/school';
 
 export default function WaardeTab() {
   const { slug } = useParams({ from: '/scholen/$slug' });
@@ -22,6 +24,7 @@ export default function WaardeTab() {
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
+  const levels = useSchoolProfileStore((s) => s.levels);
 
   // Migration-specific data from price comparison store
   const migrationHourlyRate = usePriceComparisonStore((s) => s.migrationHourlyRate);
@@ -100,6 +103,8 @@ export default function WaardeTab() {
     (p) => p.oldPricePerStudent === p.newPricePerStudent,
   );
 
+  const hourlyRateKnown = migrationHourlyRate !== null && migrationHourlyRate > 0;
+
   // Handlers that persist to Supabase
   const handleHourlyRateChange = (rate: number | null) => {
     setMigrationHourlyRate(rate);
@@ -108,7 +113,7 @@ export default function WaardeTab() {
     }
   };
 
-  const handleHoursChange = (taskId: string, hours: number) => {
+  const handleHoursChange = (taskId: string, hours: number | null) => {
     setMigrationTimeSavingOverride(taskId, hours);
     if (activeSchoolId) {
       const updated = { ...migrationTimeSavingOverrides, [taskId]: hours };
@@ -125,12 +130,19 @@ export default function WaardeTab() {
 
   return (
     <div className="space-y-12 pb-8 p-8 max-sm:p-4">
+      {/* Intro */}
+      <div className="text-sm text-neutral-500">
+        Dit overzicht helpt u de totale meerwaarde van het nieuwe Cito-platform inzichtelijk
+        te maken. Combineer financiele besparingen, tijdwinst en kwalitatieve voordelen tot
+        een overtuigende business case voor de school.
+      </div>
+
       <ValueHeroCard
         priceDifference={priceDifference}
         timeSavingsValue={migrationResult.totalTimeSavingsValue}
         timeSavingsHours={migrationResult.totalTimeSavingsHours}
         migrationDifference={migrationResult.financialDifference}
-        hourlyRateKnown={migrationHourlyRate !== null && migrationHourlyRate > 0}
+        hourlyRateKnown={hourlyRateKnown}
       />
       <TimeSavingsSection
         timeSavings={migrationResult.timeSavings}
@@ -154,11 +166,20 @@ export default function WaardeTab() {
         breakEvenMonth={migrationResult.breakEvenMonth}
         onSwitchingCostsChange={handleSwitchingCostsChange}
       />
+      <ValueAIPanel
+        migrationResult={migrationResult}
+        levels={levels as SchoolLevel[]}
+        studentCounts={studentCounts}
+        selectedModules={selectedModules}
+        priceDifference={priceDifference}
+        hourlyRateKnown={hourlyRateKnown}
+      />
       <DisclaimerFooter
         showDisclaimer={true}
         dataSources={[
           { provider: 'Migratieprijzen', label: 'Intel-rapport 2026-03-23, secties 0 en B4' },
           { provider: 'Tijdwinst', label: 'Aannames op basis van Cito-implementatiegegevens — bewerkbaar per school' },
+          { provider: 'AI-waardepropositie', label: 'Automatisch gegenereerd — altijd controleren voor gebruik' },
         ]}
       />
     </div>

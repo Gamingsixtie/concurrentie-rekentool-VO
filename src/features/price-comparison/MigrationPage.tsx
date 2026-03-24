@@ -207,7 +207,7 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
                 <td className="py-3 px-4 text-right">
                   <EditableField
                     label=""
-                    value={task.hoursPerYear}
+                    value={task.hoursPerYear ?? 0}
                     unit="uur"
                     onChange={(h) => setMigrationTimeSavingOverride(task.taskId, h)}
                   />

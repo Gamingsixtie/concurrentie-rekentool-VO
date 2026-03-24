@@ -1,4 +1,5 @@
 import type { TimeSavingResult } from '@/engine/migration';
+import { TIME_SAVING_TASKS } from '@/models/migration';
 import { EditableField } from './EditableField';
 import { formatCurrency } from '@/lib/format';
 
@@ -7,7 +8,7 @@ interface TimeSavingsSectionProps {
   totalHours: number;
   totalValue: number;
   hourlyRate: number | null;
-  onHoursChange: (taskId: string, hours: number) => void;
+  onHoursChange: (taskId: string, hours: number | null) => void;
   onHourlyRateChange: (rate: number | null) => void;
 }
 
@@ -20,6 +21,12 @@ export function TimeSavingsSection({
   onHourlyRateChange,
 }: TimeSavingsSectionProps) {
   const hasRate = hourlyRate !== null && hourlyRate > 0;
+  const filledCount = timeSavings.filter((t) => t.hoursPerYear !== null).length;
+  const totalCount = timeSavings.length;
+
+  // Look up description from model
+  const getDescription = (taskId: string) =>
+    TIME_SAVING_TASKS.find((t) => t.id === taskId)?.description ?? '';
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
@@ -73,20 +80,48 @@ export function TimeSavingsSection({
           <tbody>
             {timeSavings.map((task, index) => (
               <tr key={task.taskId} className={index % 2 === 1 ? 'bg-neutral-50' : ''}>
-                <td className="py-2 px-3 text-sm">{task.taskLabel}</td>
+                <td className="py-2 px-3">
+                  <div className="text-sm">{task.taskLabel}</div>
+                  <div className="text-xs text-neutral-400 mt-0.5">{getDescription(task.taskId)}</div>
+                </td>
                 <td className="py-2 px-3 text-sm text-neutral-500">{task.oldMethodLabel}</td>
                 <td className="py-2 px-3 text-sm text-neutral-500">{task.newMethodLabel}</td>
                 <td className="py-2 px-3 text-right">
-                  <EditableField
-                    label=""
-                    value={task.hoursPerYear}
-                    unit="uur"
-                    onChange={(h) => onHoursChange(task.taskId, h)}
-                  />
+                  {task.hoursPerYear !== null ? (
+                    <div className="flex items-center justify-end gap-1">
+                      <EditableField
+                        label=""
+                        value={task.hoursPerYear}
+                        unit="uur"
+                        onChange={(h) => onHoursChange(task.taskId, h)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onHoursChange(task.taskId, null)}
+                        className="text-xs text-neutral-300 hover:text-neutral-500 ml-1"
+                        title="Uren wissen"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const defaultHours = TIME_SAVING_TASKS.find((t) => t.id === task.taskId)?.defaultHoursPerYear ?? 8;
+                        onHoursChange(task.taskId, defaultHours);
+                      }}
+                      className="text-sm text-cito-primary underline decoration-dashed underline-offset-2 hover:text-cito-accent"
+                    >
+                      Invullen
+                    </button>
+                  )}
                 </td>
                 {hasRate && (
                   <td className="py-2 px-3 text-sm text-right">
-                    {formatCurrency(task.valuePerYear)}
+                    {task.hoursPerYear !== null ? formatCurrency(task.valuePerYear) : (
+                      <span className="text-neutral-300">—</span>
+                    )}
                   </td>
                 )}
               </tr>
@@ -94,7 +129,12 @@ export function TimeSavingsSection({
           </tbody>
           <tfoot>
             <tr className="font-semibold border-t-2 border-neutral-300">
-              <td colSpan={3} className="py-2 px-3 text-sm">Totaal</td>
+              <td colSpan={3} className="py-2 px-3 text-sm">
+                Totaal
+                <span className="font-normal text-xs text-neutral-400 ml-2">
+                  ({filledCount} van {totalCount} taken)
+                </span>
+              </td>
               <td className="py-2 px-3 text-sm text-right">{totalHours} uur</td>
               {hasRate && (
                 <td className="py-2 px-3 text-sm text-right">{formatCurrency(totalValue)}</td>

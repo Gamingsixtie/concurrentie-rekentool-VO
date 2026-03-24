@@ -79,7 +79,7 @@ interface PriceComparisonState {
 
   // Migration (Scenario B)
   migrationHourlyRate: number | null;
-  migrationTimeSavingOverrides: Record<string, number>;
+  migrationTimeSavingOverrides: Record<string, number | null>;
 
   // Mode toggle (per D-19, D-20)
   isInternalMode: boolean;
@@ -104,7 +104,7 @@ interface PriceComparisonState {
   recalculate: () => void;
   hydrate: (record: SchoolRecord) => void;
   setMigrationHourlyRate: (rate: number | null) => void;
-  setMigrationTimeSavingOverride: (taskId: string, hours: number) => void;
+  setMigrationTimeSavingOverride: (taskId: string, hours: number | null) => void;
 }
 
 /**
