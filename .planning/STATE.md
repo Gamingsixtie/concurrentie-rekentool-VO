@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Milestone complete
-stopped_at: Phase 15 UI-SPEC approved
-last_updated: "2026-03-23T21:38:19.077Z"
+stopped_at: Phase 15.1 complete. Phase 12 discuss starting (not yet begun)
+last_updated: "2026-03-23T22:54:32.483Z"
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 7
   total_plans: 29
   completed_plans: 26
@@ -109,6 +109,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-23T20:57:33.552Z
-Stopped at: Phase 15 UI-SPEC approved
-Resume file: .planning/phases/15-dmu-klantreis-registratie/15-UI-SPEC.md
+Last session: 2026-03-23T22:54:32.479Z
+Stopped at: Phase 15.1 complete. Phase 12 discuss starting (not yet begun)
+Resume file: .planning/phases/15.1-framework-analyse/FRAMEWORK-ANALYSE.md

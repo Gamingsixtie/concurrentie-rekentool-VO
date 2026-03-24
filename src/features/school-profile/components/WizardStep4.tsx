@@ -18,7 +18,7 @@ const PRICE_RELEVANT_PROVIDERS: CurrentProvider[] = ['dia', 'jij', 'saqi', 'over
 
 // Publication price lookup helper
 function getPublicationPrice(moduleId: string, provider: CurrentProvider): number | null {
-  const providerKey = provider === 'dia' ? 'dia' : provider === 'jij' ? 'jij' : null;
+  const providerKey = provider === 'dia' ? 'dia' : provider === 'jij' ? 'jij' : provider === 'saqi' ? 'saqi' : null;
   if (!providerKey) return null;
   const record = DEFAULT_PRICES.find((p) => p.moduleId === moduleId && p.provider === providerKey);
   return record?.amountPerStudent ?? null;
