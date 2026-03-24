@@ -322,7 +322,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 9. AI Intake & Prijsbeheer | v2.0 | 5/5 | Complete | 2026-03-22 |
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
 | 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 2/2 | Complete    | 2026-03-24 |
-| 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete   | 2026-03-24 |
+| 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete    | 2026-03-24 |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 0/3 | Not started | - |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
