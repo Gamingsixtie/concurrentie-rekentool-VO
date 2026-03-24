@@ -11,6 +11,7 @@ import { EditableField } from '@/features/school-profile/components/EditableFiel
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
+import { AnalysisPanel } from './AnalysisPanel';
 
 interface MigrationPageProps {
   onBack?: () => void;
@@ -259,6 +260,9 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
           Cumulatieve waarde over 1 en 3 jaar (financieel + tijdswinst)
         </p>
       </div>
+
+      {/* AI Migration Analysis */}
+      <AnalysisPanel mode="migration" migrationResult={result} />
 
       <DisclaimerFooter showDisclaimer={true} />
     </div>

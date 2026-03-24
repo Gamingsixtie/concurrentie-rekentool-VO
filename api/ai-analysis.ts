@@ -45,6 +45,7 @@ JIJ! PRIJSMODEL:
 MODUS:
 - Bij mode "comparison": focus op marktvergelijking Cito vs. DIA vs. JIJ op publicatieprijzen.
 - Bij mode "current-vs-proposed": focus op huidige situatie vs. overstap naar Cito. Benoem besparingen, maar ook waar de school mogelijk meer gaat betalen en waarom dat gerechtvaardigd is.
+- Bij mode "migration": focus op de business case voor migratie van het HUIDIGE Cito-platform naar het NIEUWE Cito-platform (Woots). Dit is GEEN concurrentievergelijking — het gaat om dezelfde leverancier, een nieuw platform. Focus op: prijsverschillen oud→nieuw, platformverbeteringen (adaptief toetsen, Entree-federatie, automatische sync, zelf resetten), tijdswinst per taak, en waarom nu migreren slim is ondanks eventuele prijsstijging. concurrentieVergelijking moet leeg zijn bij migration mode. citoSterkePunten worden "platformverbeteringen" — voordelen van het nieuwe platform t.o.v. het oude.
 
 EERLIJKHEID:
 - Wees eerlijk over concurrentievoordelen. Als een concurrent goedkoper is, erken dat.
@@ -62,7 +63,7 @@ REGELS:
 - Geen generieke one-liners — elk argument moet specifiek zijn voor deze school
 - Gebruik concrete bedragen en percentages waar mogelijk
 - Schrijf in het Nederlands, professioneel maar toegankelijk
-- concurrentieVergelijking: vul ALTIJD voor beide concurrenten in (dia en jij), ook als er geen directe vergelijking is voor alle modules
+- concurrentieVergelijking: vul ALTIJD voor beide concurrenten in (dia en jij) bij comparison/current-vs-proposed modes. Bij migration mode: laat dit een lege array
 
 Gebruik de analyse_result tool om je analyse te structureren.`;
 
@@ -136,7 +137,7 @@ const ANALYSIS_TOOL: Anthropic.Tool = {
 };
 
 interface AnalysisRequest {
-  mode: 'comparison' | 'current-vs-proposed';
+  mode: 'comparison' | 'current-vs-proposed' | 'migration';
   comparisonData: {
     modules: Array<{
       moduleId: string;
@@ -204,12 +205,46 @@ interface AnalysisRequest {
       competitorVulnerabilities: Array<{ provider: string; description: string }>;
     }>;
   } | null;
+  migrationData?: {
+    modules: Array<{
+      moduleId: string;
+      moduleName: string;
+      oldPricePerStudent: number;
+      newPricePerStudent: number;
+      oldTotalCost: number;
+      newTotalCost: number;
+      annualDifference: number;
+    }>;
+    totalOldCost: number;
+    totalNewCost: number;
+    financialDifference: number;
+    timeSavings: Array<{
+      taskLabel: string;
+      oldMethod: string;
+      newMethod: string;
+      hoursPerYear: number | null;
+      description: string;
+      benefit: string;
+    }>;
+    totalTimeSavingsHours: number;
+    totalAnnualValue: number;
+    moduleBenefits: Array<{
+      moduleId: string;
+      toelichting: string;
+      voordelen: string[];
+    }>;
+  };
 }
 
 function buildUserMessage(body: AnalysisRequest): string {
   const parts: string[] = [];
 
-  parts.push(`MODUS: ${body.mode === 'comparison' ? 'Marktvergelijking (Cito vs. DIA vs. JIJ)' : 'Huidig vs. Cito (overstapsituatie)'}`);
+  const modeLabels: Record<string, string> = {
+    comparison: 'Marktvergelijking (Cito vs. DIA vs. JIJ)',
+    'current-vs-proposed': 'Huidig vs. Cito (overstapsituatie)',
+    migration: 'Migratie huidig Cito-platform → nieuw Cito-platform (Woots)',
+  };
+  parts.push(`MODUS: ${modeLabels[body.mode] || body.mode}`);
 
   parts.push(`\nSCHOOLPROFIEL:
 - Niveaus: ${body.schoolProfile.levels.join(', ')}
@@ -277,6 +312,31 @@ ${body.differentiators.map((d) => {
     ].filter(Boolean).join('\n');
     return `- ${d.moduleId}:\n${lines}`;
   }).join('\n')}`);
+
+  // Migration data
+  if (body.migrationData) {
+    parts.push(`\nMIGRATIE HUIDIG → NIEUW CITO-PLATFORM:
+- Totale kosten huidig platform: €${body.migrationData.totalOldCost.toFixed(2)}/jaar
+- Totale kosten nieuw platform: €${body.migrationData.totalNewCost.toFixed(2)}/jaar
+- Financieel verschil: €${body.migrationData.financialDifference.toFixed(2)}/jaar (positief = nieuw goedkoper)
+- Totale jaarwaarde (incl. tijdswinst): €${body.migrationData.totalAnnualValue.toFixed(2)}/jaar
+- Totale tijdsbesparing: ${body.migrationData.totalTimeSavingsHours} uur/jaar
+
+Per module (oud → nieuw):
+${body.migrationData.modules.map((m) =>
+  `- ${m.moduleName}: €${m.oldPricePerStudent.toFixed(2)}/lln → €${m.newPricePerStudent.toFixed(2)}/lln (verschil €${m.annualDifference.toFixed(2)}/jaar totaal)`
+).join('\n')}
+
+Tijdswinst per taak:
+${body.migrationData.timeSavings.map((t) =>
+  `- ${t.taskLabel}: ${t.oldMethod} → ${t.newMethod} (${t.hoursPerYear ?? '?'} uur/jaar) — ${t.benefit}`
+).join('\n')}
+
+Platformverbeteringen per module:
+${body.migrationData.moduleBenefits.map((b) =>
+  `- ${b.moduleId}: ${b.toelichting}\n  Voordelen: ${b.voordelen.join('; ')}`
+).join('\n')}`);
+  }
 
   // Schoolplan
   if (body.schoolplanData) {

@@ -5,6 +5,7 @@ import { getTotalStudents } from '../../engine/price-comparison';
 import { generateAnalysis, type AnalysisResult, type ConcurrentDetail, type PrijsAnalyseItem } from '../../lib/ai-analysis';
 import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import type { CurrentVsProposedResult } from '../../engine/current-vs-proposed';
+import type { MigrationResult } from '../../engine/migration';
 
 // ─── Position chip ──────────────────────────────────────────────────────────
 
@@ -91,12 +92,13 @@ function ConcurrentCard({ detail }: { detail: ConcurrentDetail }) {
 // ─── Main component ─────────────────────────────────────────────────────────
 
 interface AnalysisPanelProps {
-  mode: 'comparison' | 'current-vs-proposed';
+  mode: 'comparison' | 'current-vs-proposed' | 'migration';
   schoolId?: string;
   currentVsProposedResult?: CurrentVsProposedResult | null;
+  migrationResult?: MigrationResult | null;
 }
 
-export function AnalysisPanel({ mode, schoolId, currentVsProposedResult }: AnalysisPanelProps) {
+export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrationResult }: AnalysisPanelProps) {
   const result = usePriceComparisonStore((s) => s.result);
   const diaPackageResult = usePriceComparisonStore((s) => s.diaPackageResult);
   const levels = useSchoolProfileStore((s) => s.levels);
@@ -130,6 +132,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult }: Analy
         diaPackageResult,
         currentVsProposedResult,
         schoolplanData,
+        migrationResult,
       );
       setAnalysis(analysisResult);
     } catch (err) {
@@ -137,7 +140,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult }: Analy
     } finally {
       setLoading(false);
     }
-  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData]);
+  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult]);
 
   if (!result || selectedModules.length === 0 || totalStudents === 0) {
     return null;
@@ -166,10 +169,12 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult }: Analy
           </div>
           <div>
             <h2 className="text-[15px] font-semibold text-indigo-700">
-              AI Concurrentieanalyse
+              {mode === 'migration' ? 'AI Migratie-analyse' : 'AI Concurrentieanalyse'}
             </h2>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Diepgaande analyse van prijsverschillen, sterke punten en gespreksargumenten
+              {mode === 'migration'
+                ? 'Business case analyse voor de overstap naar het nieuwe Cito-platform'
+                : 'Diepgaande analyse van prijsverschillen, sterke punten en gespreksargumenten'}
               {schoolId && schoolplanData ? ' · inclusief schoolplan' : ''}
             </p>
           </div>
@@ -266,7 +271,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult }: Analy
           {analysis.citoSterkePunten.length > 0 && (
             <div>
               <h3 className="text-sm font-semibold text-neutral-900 mb-3">
-                Cito sterke punten
+                {mode === 'migration' ? 'Platformverbeteringen' : 'Cito sterke punten'}
               </h3>
               <div className="space-y-3">
                 {analysis.citoSterkePunten.map((item, i) => (

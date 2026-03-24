@@ -13,7 +13,10 @@ import { estimateJijCostPerStudent } from '../data/jij-license-tiers';
 import type { DiaPackageResult } from '../models/dia-packages';
 import type { ModuleCurrentSetup, SchoolLevel } from '../models/school';
 import type { CurrentVsProposedResult } from '../engine/current-vs-proposed';
+import type { MigrationResult } from '../engine/migration';
 import type { SchoolplanAnalysisRow } from '@/db/types';
+import { MIGRATION_MODULE_BENEFITS } from '../models/migration';
+import { TIME_SAVING_TASKS } from '../models/migration';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -67,7 +70,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 // ─── Build request payload ──────────────────────────────────────────────────
 
 export function buildAnalysisPayload(
-  mode: 'comparison' | 'current-vs-proposed',
+  mode: 'comparison' | 'current-vs-proposed' | 'migration',
   result: ComparisonResult,
   levels: SchoolLevel[],
   studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>,
@@ -76,6 +79,7 @@ export function buildAnalysisPayload(
   diaPackageResult: DiaPackageResult | null,
   currentVsProposedResult?: CurrentVsProposedResult | null,
   schoolplanData?: SchoolplanAnalysisRow | null,
+  migrationResult?: MigrationResult | null,
 ) {
   const totalStudents = getTotalStudents(studentCounts);
 
@@ -152,6 +156,41 @@ export function buildAnalysisPayload(
     };
   }
 
+  // Build migration payload
+  let migrationPayload = undefined;
+  if (mode === 'migration' && migrationResult) {
+    migrationPayload = {
+      modules: migrationResult.modules.map((m) => ({
+        moduleId: m.moduleId,
+        moduleName: m.moduleName,
+        oldPricePerStudent: m.oldPricePerStudent,
+        newPricePerStudent: m.newPricePerStudent,
+        oldTotalCost: m.oldTotalCost,
+        newTotalCost: m.newTotalCost,
+        annualDifference: m.annualDifference,
+      })),
+      totalOldCost: migrationResult.totalOldCost,
+      totalNewCost: migrationResult.totalNewCost,
+      financialDifference: migrationResult.financialDifference,
+      timeSavings: migrationResult.timeSavings.map((t) => {
+        const task = TIME_SAVING_TASKS.find((ts) => ts.id === t.taskId);
+        return {
+          taskLabel: t.taskLabel,
+          oldMethod: t.oldMethodLabel,
+          newMethod: t.newMethodLabel,
+          hoursPerYear: t.hoursPerYear,
+          description: task?.description ?? '',
+          benefit: task?.benefit ?? '',
+        };
+      }),
+      totalTimeSavingsHours: migrationResult.totalTimeSavingsHours,
+      totalAnnualValue: migrationResult.totalAnnualValue,
+      moduleBenefits: MIGRATION_MODULE_BENEFITS.filter((b) =>
+        selectedModules.includes(b.moduleId),
+      ),
+    };
+  }
+
   return {
     mode,
     comparisonData: {
@@ -177,13 +216,14 @@ export function buildAnalysisPayload(
     jijContext,
     currentVsProposedData,
     schoolplanData: schoolplanPayload ?? null,
+    migrationData: migrationPayload,
   };
 }
 
 // ─── Main analysis function ─────────────────────────────────────────────────
 
 export async function generateAnalysis(
-  mode: 'comparison' | 'current-vs-proposed',
+  mode: 'comparison' | 'current-vs-proposed' | 'migration',
   result: ComparisonResult,
   levels: SchoolLevel[],
   studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>,
@@ -192,6 +232,7 @@ export async function generateAnalysis(
   diaPackageResult: DiaPackageResult | null,
   currentVsProposedResult?: CurrentVsProposedResult | null,
   schoolplanData?: SchoolplanAnalysisRow | null,
+  migrationResult?: MigrationResult | null,
 ): Promise<AnalysisResult> {
   const headers = await getAuthHeaders();
   const payload = buildAnalysisPayload(
@@ -204,6 +245,7 @@ export async function generateAnalysis(
     diaPackageResult,
     currentVsProposedResult,
     schoolplanData,
+    migrationResult,
   );
 
   const response = await fetch('/api/ai-analysis', {
