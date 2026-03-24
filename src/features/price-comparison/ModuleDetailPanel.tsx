@@ -90,6 +90,7 @@ const ResetIcon = () => (
 
 export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
   const result = usePriceComparisonStore((s) => s.result);
+  const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
   const draftOverrides = usePriceComparisonStore((s) => s.draftOverrides);
   const appliedOverrides = usePriceComparisonStore((s) => s.appliedOverrides);
   const hasPendingChanges = usePriceComparisonStore((s) => s.hasPendingChanges);
@@ -105,6 +106,11 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
     (d) => d.moduleId === moduleId,
   );
   const moduleContent = getModuleContent(moduleId);
+
+  // Active providers: visible AND have data for this module's result set
+  const activeProviders = visibleProviders.filter((p) =>
+    result?.modules.some((m) => m.providers[p] !== null),
+  );
 
   // DIA package info for this module
   const isInDiaPackage =
@@ -123,67 +129,44 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Section A: Berekeningsformule */}
+      {/* Section A: Prijsopbouw — step-by-step breakdown per provider */}
       <section>
-        <h4 className="text-sm font-semibold mb-2">Berekeningsformule</h4>
-        <div className="space-y-1 tabular-nums">
-          {PROVIDERS.map((provider) => {
+        <h4 className="text-sm font-semibold text-neutral-700 mb-3">Prijsopbouw</h4>
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${activeProviders.length}, 1fr)` }}>
+          {activeProviders.map((provider) => {
             const cost = moduleData.providers[provider];
-            if (cost === null) {
+            if (!cost) {
               return (
-                <div key={provider} className="text-sm text-neutral-500">
-                  {PROVIDER_LABELS[provider]}: Niet beschikbaar
-                </div>
+                <div key={provider} className="text-sm text-neutral-400">Niet beschikbaar</div>
               );
             }
 
-            // DIA package formula (per D-03)
-            if (provider === 'dia' && isInDiaPackage && diaPackageDef) {
-              const coveredModuleNames = diaPackageDef.includedModuleIds
-                .map((id) => result?.modules.find((m) => m.moduleId === id)?.moduleName ?? id)
-                .join(', ');
-
-              return (
-                <div key={provider} className="text-sm">
-                  <span>
-                    DIA (Pakketprijs -- {diaPackageDef.name}):{' '}
-                    {cost.studentCount} leerlingen x{' '}
-                    {formatCurrency(diaPackageDef.pricePerStudent)} ={' '}
-                    {formatCurrency(cost.totalCost)}
-                  </span>
-                  <div className="text-xs text-neutral-500 mt-0.5 ml-4">
-                    Dit pakket omvat: {coveredModuleNames}.
-                    {diaPackageResult && diaPackageResult.savings > 0 && (
-                      <> Losse prijs zou{' '}
-                        {formatCurrency(diaPackageResult.individualTotal * cost.studentCount)} zijn
-                        (besparing: {formatCurrency(diaPackageResult.savings * cost.studentCount)}).
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            }
+            // DIA package annotation
+            const isDiaPackage = provider === 'dia' && isInDiaPackage && diaPackageDef;
 
             return (
-              <div key={provider} className="text-sm">
-                <span>
-                  {PROVIDER_LABELS[provider]}: {cost.studentCount} leerlingen x{' '}
-                  {formatCurrency(cost.pricePerStudent)} ={' '}
-                  {formatCurrency(cost.totalCost)}
-                </span>
-                {cost.priceRecord.note && (
-                  <span
-                    className="inline-flex items-center ml-1.5 cursor-help align-middle"
-                    title={cost.priceRecord.note}
-                    aria-label={cost.priceRecord.note}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500" aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                  </span>
+              <div key={provider}>
+                <div className="text-xs font-semibold text-neutral-500 uppercase mb-2">
+                  {PROVIDER_LABELS[provider]}
+                </div>
+                {cost.breakdown.map((step, i) => (
+                  <div key={i} className="flex justify-between text-sm py-1 border-b border-neutral-100 last:border-0">
+                    <span className="text-neutral-600">{step.label}</span>
+                    <span className="font-mono text-neutral-900">{formatCurrency(step.amount)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm font-semibold pt-2 mt-1 border-t border-neutral-300">
+                  <span>Totaal</span>
+                  <span className="font-mono">{formatCurrency(cost.totalCost)}</span>
+                </div>
+                {isDiaPackage && diaPackageResult && diaPackageResult.savings > 0 && (
+                  <div className="text-xs text-green-700 mt-1">
+                    Pakketkorting ({diaPackageDef!.name}): besparing{' '}
+                    {formatCurrency(diaPackageResult.savings * cost.studentCount)}
+                  </div>
                 )}
                 {cost.priceRecord.sourceLabel && (
-                  <div className="text-xs text-neutral-400 mt-0.5 ml-4">
+                  <div className="text-xs text-neutral-400 mt-1">
                     Bron: {cost.priceRecord.sourceLabel}
                   </div>
                 )}
@@ -213,72 +196,47 @@ export function ModuleDetailPanel({ moduleId }: ModuleDetailPanelProps) {
         />
       )}
 
-      {/* Section B: Onderscheidend vermogen */}
+      {/* Section B: Onderscheidend vermogen — per-provider columnar */}
       <section>
-        <h4 className="text-sm font-semibold mb-2">Onderscheidend vermogen</h4>
+        <h4 className="text-sm font-semibold mb-3">Onderscheidend vermogen</h4>
+        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${activeProviders.length}, 1fr)` }}>
+          {activeProviders.map((provider) => {
+            const diffs = differentiators?.[provider] ?? [];
+            const cost = moduleData.providers[provider];
 
-        {/* Cito advantages first */}
-        {differentiators && differentiators.cito.length > 0 && (
-          <div className="mb-3">
-            <p className="text-sm font-semibold text-cito-primary mb-1">
-              Cito biedt extra:
-            </p>
-            <ul className="space-y-1">
-              {differentiators.cito.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <CheckmarkIcon />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Competitor advantages */}
-        {(['dia', 'jij', 'saqi'] as const).map((provider) => {
-          const cost = moduleData.providers[provider];
-          const diffs = differentiators?.[provider] ?? [];
-
-          if (cost === null && diffs.length === 0) {
             return (
-              <div
-                key={provider}
-                className="flex items-start gap-2 text-sm text-neutral-500 mb-2"
-              >
-                <WarningIcon />
-                <span>
-                  Deze module wordt niet aangeboden door{' '}
-                  {PROVIDER_LABELS[provider]}.
-                </span>
+              <div key={provider}>
+                <div className="text-xs font-semibold text-neutral-500 uppercase mb-2">
+                  {PROVIDER_LABELS[provider]}
+                </div>
+                {cost === null && diffs.length === 0 ? (
+                  <div className="flex items-start gap-2 text-sm text-neutral-500">
+                    <WarningIcon />
+                    <span>Niet aangeboden</span>
+                  </div>
+                ) : diffs.length > 0 ? (
+                  <ul className="space-y-1">
+                    {diffs.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        {provider === 'cito' ? <CheckmarkIcon /> : <InfoCircleIcon />}
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-neutral-400">Geen differentiators</p>
+                )}
               </div>
             );
-          }
-
-          if (diffs.length === 0) return null;
-
-          return (
-            <div key={provider} className="mb-3">
-              <p className="text-sm font-semibold text-neutral-700 mb-1">
-                {PROVIDER_LABELS[provider]} biedt extra:
-              </p>
-              <ul className="space-y-1">
-                {diffs.map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <InfoCircleIcon />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
+          })}
+        </div>
       </section>
 
       {/* Section C: Prijs aanpassen */}
       <section>
         <h4 className="text-sm font-semibold mb-2">Prijs aanpassen</h4>
         <div className="space-y-3">
-          {PROVIDERS.map((provider) => (
+          {activeProviders.map((provider) => (
             <PriceOverrideRow
               key={provider}
               moduleId={moduleId}
