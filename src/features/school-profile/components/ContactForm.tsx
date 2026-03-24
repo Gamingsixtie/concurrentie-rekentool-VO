@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { contactSchema } from '@/features/school-profile/schemas/contact.schema';
-import { addContact, updateContact } from '@/db/operations';
+import { useCreateContact, useUpdateContact } from '@/hooks/useContacts';
 import type { Contact } from '@/db/types';
 import { DMU_POSITIONS, DMU_POSITION_LABELS, PREFERRED_CHANNELS, AUTHORITY_LEVELS } from '@/models/school';
 
@@ -30,6 +30,8 @@ const AUTHORITY_LABELS: Record<string, string> = {
 
 export default function ContactForm({ contact, schoolId, onClose, onSaved }: ContactFormProps) {
   const isEditing = !!contact;
+  const createContact = useCreateContact();
+  const updateContact = useUpdateContact();
 
   const {
     register,
@@ -64,9 +66,9 @@ export default function ContactForm({ contact, schoolId, onClose, onSaved }: Con
 
   const onSubmit = async (data: ContactFormInput) => {
     if (isEditing && contact) {
-      await updateContact(schoolId, contact.id, data);
+      await updateContact.mutateAsync({ schoolId, contactId: contact.id, data });
     } else {
-      await addContact(schoolId, data);
+      await createContact.mutateAsync({ schoolId, data });
     }
     onSaved();
   };
