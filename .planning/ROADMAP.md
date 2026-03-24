@@ -67,7 +67,8 @@ Plans:
 - [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
 - [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
-- [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing (completed 2026-03-23)
+- [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
+ (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 
 ## Phase Details
@@ -190,8 +191,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10.2-01: TBD
-- [ ] 10.2-02: TBD
+- [ ] 10.2-01-PLAN.md — TDD: ProviderPriceCalculator interface, 4 calculators (Cito/DIA/JIJ/Flat), factory, refactored calculateComparison() met breakdowns
+- [ ] 10.2-02-PLAN.md — Store simplificatie: provider-logica verwijderd, nieuwe engine-signature, parity-verificatie en cleanup
 
 ### Phase 10.3: UX Overhaul — Wizard & Vergelijking (INSERTED)
 **Goal**: Overzichtelijke, flexibele wizard en vergelijkingsweergave met dynamische provider-kolommen, prijsmodel-uitleg en prijsopbouw
