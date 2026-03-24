@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { calculateComparison } from '../../engine/price-comparison';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
+import { PROVIDERS } from '../../engine/price-comparison';
 import { useSchoolProfileStore } from '../school-profile/store';
 import type { SchoolRecord } from '@/db/types';
 import { calculateHybridScenario } from '../../engine/hybrid-scenario';
@@ -43,6 +44,11 @@ interface PriceComparisonState {
   diaPackageResult: DiaPackageResult | null;
   // Active competitor for sensitivity (per D-14)
   activeCompetitor: ProviderKey | null;
+
+  // Visible providers for dynamic comparison columns
+  visibleProviders: ProviderKey[];
+  setVisibleProviders: (providers: ProviderKey[]) => void;
+  toggleProvider: (provider: ProviderKey) => void;
 
   initialize: () => void;
   setDraftOverride: (override: PriceOverride) => void;
@@ -115,6 +121,28 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     sensitivityResult: null,
     diaPackageResult: null,
     activeCompetitor: null,
+    visibleProviders: ['cito'] as ProviderKey[],
+
+    setVisibleProviders: (providers) => {
+      // Ensure 'cito' is always included
+      const withCito: ProviderKey[] = providers.includes('cito')
+        ? providers
+        : ['cito', ...providers];
+      set({ visibleProviders: withCito });
+    },
+
+    toggleProvider: (provider) => {
+      // Cito is always visible — cannot toggle off
+      if (provider === 'cito') return;
+      const current = get().visibleProviders;
+      if (current.includes(provider)) {
+        // Don't remove if it would leave only cito
+        if (current.length <= 2) return;
+        set({ visibleProviders: current.filter(p => p !== provider) });
+      } else {
+        set({ visibleProviders: [...current, provider] });
+      }
+    },
 
     setInternalMode: (mode) => set({ isInternalMode: mode }),
     setContractPeriod: (period) => {
@@ -127,7 +155,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     },
 
     initialize: () => {
-      const { selectedModules, studentCounts } =
+      const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
 
@@ -147,9 +175,18 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       // Step 3: Extended results (hybrid + sensitivity only)
       const extended = computeExtendedResults(result);
 
+      // Step 4: Compute default visible providers from school profile moduleSetups
+      const productProviders = moduleSetups
+        ?.map(s => s.currentProvider)
+        .filter((p): p is ProviderKey => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey)) ?? [];
+      const defaultVisible: ProviderKey[] = ['cito', ...new Set(productProviders)];
+      // Sort non-cito providers alphabetically, keep cito first
+      const visibleProviders: ProviderKey[] = ['cito', ...defaultVisible.filter(p => p !== 'cito').sort()];
+
       set({
         result,
         diaPackageResult,
+        visibleProviders,
         ...extended,
       });
     },
@@ -228,12 +265,21 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     },
 
     hydrate: (record: SchoolRecord) => {
+      // Compute visible providers from hydrated record's moduleSetups
+      const moduleSetups = record.moduleSetups ?? [];
+      const productProviders = moduleSetups
+        .map(s => s.currentProvider)
+        .filter((p): p is ProviderKey => p !== 'geen' && p !== undefined && PROVIDERS.includes(p as ProviderKey));
+      const defaultVisible: ProviderKey[] = ['cito', ...new Set(productProviders)];
+      const visibleProviders: ProviderKey[] = ['cito', ...defaultVisible.filter(p => p !== 'cito').sort()];
+
       set({
         appliedOverrides: record.appliedOverrides,
         migrationHourlyRate: record.migrationHourlyRate ?? null,
         migrationTimeSavingOverrides: record.migrationTimeSavingOverrides,
         draftOverrides: [],
         hasPendingChanges: false,
+        visibleProviders,
       });
       // Recalculate after hydrating to get fresh result
       get().initialize();
