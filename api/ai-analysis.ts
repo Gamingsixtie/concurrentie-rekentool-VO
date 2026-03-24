@@ -307,7 +307,10 @@ export async function POST(request: Request): Promise<Response> {
       model: 'claude-sonnet-4-6',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [
+        { role: 'user', content: userMessage },
+        { role: 'assistant', content: '{' },
+      ],
     });
 
     const encoder = new TextEncoder();

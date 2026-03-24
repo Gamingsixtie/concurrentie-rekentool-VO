@@ -290,5 +290,6 @@ export async function generateAnalysis(
 
   if (!fullText) throw new Error('Onverwacht lege AI-analyse');
 
-  return parseAnalysisFromText(fullText);
+  // Prepend '{' to match the assistant prefill in the API endpoint
+  return parseAnalysisFromText('{' + fullText);
 }

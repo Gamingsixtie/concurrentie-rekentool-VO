@@ -71,7 +71,7 @@ export function applyContractPeriodToResult(
 
   const citoFactor = customCitoFactor ?? config.citoFactor;
 
-  // Adjust per-module totals
+  // Adjust per-module totals AND per-student prices
   const modules = result.modules.map((mod) => {
     const providers = { ...mod.providers };
     for (const [provider, cost] of Object.entries(providers) as Array<[string, typeof mod.providers[keyof typeof mod.providers]]>) {
@@ -79,6 +79,7 @@ export function applyContractPeriodToResult(
       const factor = provider === 'cito' ? citoFactor : config.otherFactor;
       (providers as Record<string, typeof cost>)[provider] = {
         ...cost,
+        pricePerStudent: Math.round(cost.pricePerStudent * factor * 100) / 100,
         totalCost: Math.round(cost.totalCost * factor * 100) / 100,
       };
     }
