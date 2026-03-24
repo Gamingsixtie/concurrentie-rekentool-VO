@@ -93,11 +93,11 @@ export function applyContractPeriodToResult(
     totals[provider] = Math.round(totals[provider] * factor * 100) / 100;
   }
 
-  // Recalculate differences
+  // Recalculate differences — preserve null from original result (means provider has no matching modules)
   const differences = {
-    citoVsDia: totals.dia !== undefined ? totals.cito - totals.dia : null,
-    citoVsJij: totals.jij !== undefined ? totals.cito - totals.jij : null,
-    citoVsSaqi: totals.saqi !== undefined ? totals.cito - totals.saqi : null,
+    citoVsDia: result.differences.citoVsDia !== null ? totals.cito - totals.dia : null,
+    citoVsJij: result.differences.citoVsJij !== null ? totals.cito - totals.jij : null,
+    citoVsSaqi: result.differences.citoVsSaqi !== null ? totals.cito - totals.saqi : null,
   };
 
   return { modules, totals, differences, diaPackageResult: result.diaPackageResult ?? null };

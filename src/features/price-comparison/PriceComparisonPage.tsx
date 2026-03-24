@@ -12,6 +12,7 @@ import { ComparisonTable } from './ComparisonTable';
 import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
+import { CitoBundleSelector } from './CitoBundleSelector';
 import { AdvicePanel } from './AdvicePanel';
 import { AnalysisPanel } from './AnalysisPanel';
 
@@ -23,6 +24,11 @@ interface PriceComparisonPageProps {
 
 function ComparisonSummary({ result }: { result: ComparisonResult }) {
   const { citoVsDia, citoVsJij } = result.differences;
+  const citoBundleType = usePriceComparisonStore((s) => s.citoBundleType);
+  const contractPeriod = usePriceComparisonStore((s) => s.contractPeriod);
+
+  const bundleLabel = citoBundleType === 'individual' ? 'Per module' : citoBundleType === 'basis' ? 'Basis' : 'Plus';
+  const periodLabel = contractPeriod === 'annual' ? 'per jaar' : contractPeriod === 'three-year' ? '3-jarig contract' : '3-jarig + DUO';
 
   // Collect unique Cito differentiators across all selected modules
   const citoAdvantages = result.modules
@@ -45,7 +51,7 @@ function ComparisonSummary({ result }: { result: ComparisonResult }) {
           <div className="text-[22px] font-semibold leading-none">
             {formatCurrency(result.totals.cito)}
           </div>
-          <div className="text-xs opacity-60 mt-1">per jaar · referentieprijs</div>
+          <div className="text-xs opacity-60 mt-1">{periodLabel} · {bundleLabel}</div>
         </div>
 
         {/* DIA */}
@@ -339,8 +345,9 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         </p>
       </div>
 
-      {/* Contractperiode keuze */}
+      {/* Bundel + Contractperiode keuze */}
       <div className="flex flex-wrap items-start gap-6 mb-8">
+        <CitoBundleSelector />
         <PeriodToggle />
       </div>
 
