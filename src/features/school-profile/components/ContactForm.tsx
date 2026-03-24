@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
@@ -32,6 +33,7 @@ export default function ContactForm({ contact, schoolId, onClose, onSaved }: Con
   const isEditing = !!contact;
   const createContact = useCreateContact();
   const updateContact = useUpdateContact();
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const {
     register,
@@ -65,12 +67,19 @@ export default function ContactForm({ contact, schoolId, onClose, onSaved }: Con
   });
 
   const onSubmit = async (data: ContactFormInput) => {
-    if (isEditing && contact) {
-      await updateContact.mutateAsync({ schoolId, contactId: contact.id, data });
-    } else {
-      await createContact.mutateAsync({ schoolId, data });
+    setSaveError(null);
+    try {
+      if (isEditing && contact) {
+        await updateContact.mutateAsync({ schoolId, contactId: contact.id, data });
+      } else {
+        await createContact.mutateAsync({ schoolId, data });
+      }
+      onSaved();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Onbekende fout';
+      console.error('Contact opslaan mislukt:', err);
+      setSaveError(`Opslaan mislukt: ${message}`);
     }
-    onSaved();
   };
 
   return (
@@ -228,6 +237,13 @@ export default function ContactForm({ contact, schoolId, onClose, onSaved }: Con
               Primair contactpersoon
             </label>
           </div>
+
+          {/* Error message */}
+          {saveError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-[14px] text-red-700">
+              {saveError}
+            </div>
+          )}
 
           {/* Buttons */}
           <div className="flex justify-end gap-4 mt-6">
