@@ -100,5 +100,5 @@ export function applyContractPeriodToResult(
     citoVsSaqi: totals.saqi !== undefined ? totals.cito - totals.saqi : null,
   };
 
-  return { modules, totals, differences };
+  return { modules, totals, differences, diaPackageResult: result.diaPackageResult ?? null };
 }

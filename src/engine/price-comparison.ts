@@ -219,19 +219,24 @@ export function calculateComparison(
           (p) => p.moduleId === moduleId,
         );
 
+        // Check if this module+provider had an override applied
+        const overrideKey = `${moduleId}:${providerKey}`;
+        const hasOverride = options.overridePrices?.has(overrideKey) ?? false;
+
         const priceRecord: PriceRecord = defaultPriceRecord
           ? {
               ...defaultPriceRecord,
               amountPerStudent: calcResult.pricePerStudent,
+              ...(hasOverride ? { source: 'manual' as const, sourceLabel: 'Handmatig ingevoerd', isPublicationPrice: false } : {}),
             }
           : {
               moduleId,
               provider: providerKey,
               amountPerStudent: calcResult.pricePerStudent,
-              source: 'publication',
-              sourceLabel: `${PROVIDER_LABELS[providerKey]} — berekend`,
+              source: hasOverride ? 'manual' : 'publication',
+              sourceLabel: hasOverride ? 'Handmatig ingevoerd' : `${PROVIDER_LABELS[providerKey]} — berekend`,
               verifiedAt: new Date(),
-              isPublicationPrice: true,
+              isPublicationPrice: !hasOverride,
             };
 
         providers[providerKey] = {

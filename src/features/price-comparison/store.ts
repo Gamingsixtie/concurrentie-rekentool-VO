@@ -1,69 +1,16 @@
 import { create } from 'zustand';
-import { calculateComparison, getTotalStudents } from '../../engine/price-comparison';
+import { calculateComparison } from '../../engine/price-comparison';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
-import type { PriceRecord } from '../../models/pricing';
-import { DEFAULT_PRICES } from '../../data/default-prices';
 import { useSchoolProfileStore } from '../school-profile/store';
 import type { SchoolRecord } from '@/db/types';
 import { calculateHybridScenario } from '../../engine/hybrid-scenario';
 import type { HybridScenarioResult } from '../../engine/hybrid-scenario';
 import { calculateSensitivity } from '../../engine/sensitivity';
 import type { SensitivityResult } from '../../engine/sensitivity';
-import { calculateDiaModuleCosts, getDiaVolumeDiscountPercent } from '../../engine/dia-packages';
 import type { DiaPackageResult } from '../../models/dia-packages';
-import { DIA_PACKAGES } from '../../data/dia-packages';
-import { estimateJijCostPerStudent } from '../../data/jij-license-tiers';
 import type { CitoBundleType, ContractPeriod } from '../../data/cito-bundles';
 import { getCitoBundle, getCitoFactorForBundle } from '../../data/cito-bundles';
-import { applyCitoBundlePrices, applyContractPeriodToResult } from '../../engine/cito-bundles';
-
-/**
- * Apply DIA volume discount (staffelkorting) based on school size.
- * 500+ students = 5%, 1000+ students = 10%.
- */
-function applyDiaVolumeDiscount(
-  basePrices: PriceRecord[],
-  studentCounts: Partial<Record<string, Record<number, number>>>,
-): PriceRecord[] {
-  const totalStudents = getTotalStudents(studentCounts);
-  const discountPercent = getDiaVolumeDiscountPercent(totalStudents);
-  if (discountPercent === 0) return basePrices;
-
-  const factor = 1 - discountPercent / 100;
-  return basePrices.map((price) => {
-    if (price.provider !== 'dia') return price;
-    const discounted = Math.round(price.amountPerStudent * factor * 100) / 100;
-    return {
-      ...price,
-      amountPerStudent: discounted,
-      sourceLabel: `${price.sourceLabel} (staffelkorting -${discountPercent}% bij ${totalStudents} lln)`,
-    };
-  });
-}
-
-/**
- * Replace static JIJ! prices with dynamically calculated prices
- * based on actual school size and the tiered license model.
- */
-function applyDynamicJijPrices(
-  basePrices: PriceRecord[],
-  studentCounts: Partial<Record<string, Record<number, number>>>,
-): PriceRecord[] {
-  const totalStudents = getTotalStudents(studentCounts);
-  if (totalStudents === 0) return basePrices;
-
-  const { costPerStudent, tier } = estimateJijCostPerStudent(totalStudents);
-
-  return basePrices.map((price) => {
-    if (price.provider !== 'jij' || price.amountPerStudent === 0) return price;
-    return {
-      ...price,
-      amountPerStudent: costPerStudent,
-      sourceLabel: `Berekend: ${tier.label}, ${totalStudents} lln, 2 afnames/lln — €${costPerStudent}/lln`,
-      verifiedAt: price.verifiedAt,
-    };
-  });
-}
+import { applyContractPeriodToResult } from '../../engine/cito-bundles';
 
 export interface PriceOverride {
   moduleId: string;
@@ -108,34 +55,6 @@ interface PriceComparisonState {
 }
 
 /**
- * Merge overrides into the default price array.
- * For each override, find the matching PriceRecord (by moduleId + provider)
- * and replace amountPerStudent, setting source to 'manual'.
- */
-function mergeOverrides(
-  basePrices: PriceRecord[],
-  overrides: PriceOverride[],
-): PriceRecord[] {
-  if (overrides.length === 0) return basePrices;
-
-  return basePrices.map((price) => {
-    const override = overrides.find(
-      (o) => o.moduleId === price.moduleId && o.provider === price.provider,
-    );
-    if (override) {
-      return {
-        ...price,
-        amountPerStudent: override.amount,
-        source: 'manual' as const,
-        sourceLabel: 'Handmatig ingevoerd',
-        isPublicationPrice: false,
-      };
-    }
-    return price;
-  });
-}
-
-/**
  * Determine the active competitor from moduleSetups using DETERMINISTIC ordering:
  * iterate moduleSetups sorted alphabetically by moduleId, find the first entry
  * where currentProvider is 'dia' or 'jij'.
@@ -154,17 +73,11 @@ function determineActiveCompetitor(
 }
 
 /**
- * Compute extended results (hybrid, sensitivity, DIA packages)
- * from a base comparison result.
+ * Compute extended results (hybrid, sensitivity) from a base comparison result.
+ * DIA package result now comes from ComparisonResult.diaPackageResult directly.
  */
-function computeExtendedResults(
-  result: ComparisonResult,
-  selectedModules: string[],
-  studentCounts: Partial<Record<string, Record<number, number>>>,
-  mergedPrices: PriceRecord[],
-) {
+function computeExtendedResults(result: ComparisonResult) {
   const { moduleSetups } = useSchoolProfileStore.getState();
-  const totalStudents = getTotalStudents(studentCounts);
 
   // Determine active competitor deterministically
   const activeCompetitor = determineActiveCompetitor(moduleSetups);
@@ -178,52 +91,11 @@ function computeExtendedResults(
     sensitivityResult = calculateSensitivity(result, activeCompetitor, [0, 10, 20]);
   }
 
-  // DIA package calculation
-  const diaModuleIds = selectedModules.filter((modId) => {
-    const price = mergedPrices.find(
-      (p) => p.moduleId === modId && p.provider === 'dia',
-    );
-    return price !== undefined;
-  });
-  const diaMap = new Map<string, number>();
-  for (const modId of diaModuleIds) {
-    const price = mergedPrices.find(
-      (p) => p.moduleId === modId && p.provider === 'dia',
-    );
-    if (price) {
-      diaMap.set(modId, price.amountPerStudent);
-    }
-  }
-  const diaResult = calculateDiaModuleCosts(
-    diaModuleIds,
-    totalStudents,
-    diaMap,
-    DIA_PACKAGES,
-  );
-
   return {
     activeCompetitor,
     hybridResult,
     sensitivityResult,
-    diaPackageResult: diaResult.packageResult,
   };
-}
-
-/**
- * Adjust DIA total in result to reflect package discount.
- * The comparison engine sums individual module prices, but the DIA package
- * may be cheaper. Mutates result in place.
- */
-function applyDiaPackageToResult(
-  result: ComparisonResult,
-  diaPackageResult: DiaPackageResult | null,
-  studentCounts: Partial<Record<string, Record<number, number>>>,
-): void {
-  if (!diaPackageResult?.selectedPackage || diaPackageResult.savings <= 0) return;
-  const totalStudents = getTotalStudents(studentCounts);
-  result.totals.dia = diaPackageResult.totalCost * totalStudents;
-  const hasAnyDia = result.modules.some((m) => m.providers.dia !== null);
-  result.differences.citoVsDia = hasAnyDia ? result.totals.cito - result.totals.dia : null;
 }
 
 export const usePriceComparisonStore = create<PriceComparisonState>()(
@@ -258,39 +130,26 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
       const state = get();
+
+      // Step 1: Engine computes everything (provider calculators + breakdown + DIA packages)
+      const annualResult = calculateComparison(selectedModules, studentCounts, {
+        citoBundleType: state.citoBundleType,
+      });
+
+      // Step 2: Contract period multipliers (post-processing, stays in store)
       const bundle = getCitoBundle(state.citoBundleType);
-
-      // Price pipeline: JIJ dynamic → DIA staffel → Cito bundel
-      const dynamicPrices = applyCitoBundlePrices(
-        applyDiaVolumeDiscount(
-          applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
-          studentCounts,
-        ),
-        bundle,
-        selectedModules,
-      );
-      const annualResult = calculateComparison(
-        selectedModules,
-        studentCounts,
-        dynamicPrices,
-      );
-
-      // Apply contract period multipliers (bundle-aware factor)
       const citoFactor = getCitoFactorForBundle(bundle, state.contractPeriod);
       const result = applyContractPeriodToResult(annualResult, state.contractPeriod, citoFactor);
 
-      const extended = computeExtendedResults(
-        result,
-        selectedModules,
-        studentCounts,
-        dynamicPrices,
-      );
+      // Preserve diaPackageResult from annual result (applyContractPeriodToResult doesn't carry it)
+      const diaPackageResult = annualResult.diaPackageResult ?? null;
 
-      // Correct DIA total to reflect package discount
-      applyDiaPackageToResult(result, extended.diaPackageResult, studentCounts);
+      // Step 3: Extended results (hybrid + sensitivity only)
+      const extended = computeExtendedResults(result);
 
       set({
         result,
+        diaPackageResult,
         ...extended,
       });
     },
@@ -329,52 +188,41 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts } =
         useSchoolProfileStore.getState();
       const state = get();
-      const bundle = getCitoBundle(state.citoBundleType);
 
-      // Merge: applied overrides first, then draft overrides on top
+      // Merge overrides into a Map for the engine
       const allOverrides = [...state.appliedOverrides, ...state.draftOverrides];
-      // Deduplicate: later entries (draft) win over earlier (applied)
       const deduped = new Map<string, PriceOverride>();
       for (const o of allOverrides) {
         deduped.set(`${o.moduleId}:${o.provider}`, o);
       }
-      const mergedOverrides = Array.from(deduped.values());
+      const overridePrices = new Map<string, number>();
+      for (const [key, o] of deduped) {
+        overridePrices.set(key, o.amount);
+      }
 
-      // Price pipeline: JIJ dynamic → DIA staffel → Cito bundel → overrides
-      const dynamicPrices = applyCitoBundlePrices(
-        applyDiaVolumeDiscount(
-          applyDynamicJijPrices(DEFAULT_PRICES, studentCounts),
-          studentCounts,
-        ),
-        bundle,
-        selectedModules,
-      );
-      const mergedPrices = mergeOverrides(dynamicPrices, mergedOverrides);
-      const annualResult = calculateComparison(
-        selectedModules,
-        studentCounts,
-        mergedPrices,
-      );
+      // Step 1: Engine with overrides
+      const annualResult = calculateComparison(selectedModules, studentCounts, {
+        citoBundleType: state.citoBundleType,
+        overridePrices,
+      });
 
-      // Apply contract period multipliers (bundle-aware factor)
+      // Step 2: Contract period
+      const bundle = getCitoBundle(state.citoBundleType);
       const citoFactor = getCitoFactorForBundle(bundle, state.contractPeriod);
       const result = applyContractPeriodToResult(annualResult, state.contractPeriod, citoFactor);
 
-      const extended = computeExtendedResults(
-        result,
-        selectedModules,
-        studentCounts,
-        mergedPrices,
-      );
+      // Preserve diaPackageResult from annual result
+      const diaPackageResult = annualResult.diaPackageResult ?? null;
 
-      // Correct DIA total to reflect package discount
-      applyDiaPackageToResult(result, extended.diaPackageResult, studentCounts);
+      // Step 3: Extended
+      const extended = computeExtendedResults(result);
 
       set({
         result,
-        appliedOverrides: mergedOverrides,
+        appliedOverrides: Array.from(deduped.values()),
         draftOverrides: [],
         hasPendingChanges: false,
+        diaPackageResult,
         ...extended,
       });
     },
