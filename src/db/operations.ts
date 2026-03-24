@@ -12,6 +12,7 @@ type ConversationFormInput = z.input<typeof conversationSchema>;
 type ActionFormInput = z.input<typeof actionSchema>;
 import { uniqueSlug } from '@/lib/slugify';
 import { useOfflineQueue } from '@/lib/offline-queue';
+import type { OfflineQueueTable } from '@/lib/offline-queue';
 
 // --- Offline queue helper ---
 
@@ -20,7 +21,7 @@ import { useOfflineQueue } from '@/lib/offline-queue';
  * Returns true if queued (caller should return early), false if online.
  */
 function queueIfOffline(
-  table: string,
+  table: OfflineQueueTable,
   operation: 'insert' | 'update' | 'delete',
   payload: Record<string, unknown>,
 ): boolean {

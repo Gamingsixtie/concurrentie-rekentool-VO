@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+/** Tables that can be queued for offline mutation sync */
+export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses';
+
 export interface PendingMutation {
   id: string;
-  table: string;
+  table: OfflineQueueTable;
   operation: 'insert' | 'update' | 'delete';
   payload: Record<string, unknown>;
   timestamp: number;
@@ -53,18 +56,18 @@ export const useOfflineQueue = create<OfflineQueueState>()(
           try {
             // --- CONFLICT DETECTION ---
             // For updates: check if server record was modified after our mutation was queued
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic table from queue
+            const tbl = mutation.table as any;
             if (mutation.operation === 'update' && mutation.payload.id) {
-              // Use generic query — table name is dynamic, not all tables have updated_at
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const { data: serverRow } = await (supabase as any)
-                .from(mutation.table)
+              const { data: serverRow } = await supabase
+                .from(tbl)
                 .select('updated_at')
                 .eq('id', mutation.payload.id as string)
                 .single();
 
-              const updatedAt = (serverRow as Record<string, unknown> | null)?.updated_at;
-              if (updatedAt) {
-                const serverUpdatedAt = new Date(updatedAt as string).getTime();
+              const row = serverRow as Record<string, unknown> | null;
+              if (row?.updated_at) {
+                const serverUpdatedAt = new Date(row.updated_at as string).getTime();
                 if (serverUpdatedAt > mutation.timestamp) {
                   // SERVER WINS: mark as conflicted, do NOT apply the mutation
                   set((state) => ({
@@ -81,20 +84,18 @@ export const useOfflineQueue = create<OfflineQueueState>()(
             }
 
             // --- APPLY MUTATION ---
-            // Table name is dynamic — use generic Supabase calls
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const table = (supabase as any).from(mutation.table);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- payload is dynamic from queue
             switch (mutation.operation) {
               case 'insert':
-                await table.insert(mutation.payload as never);
+                await supabase.from(tbl).insert(mutation.payload as any);
                 break;
               case 'update': {
                 const { id: rowId, ...rest } = mutation.payload;
-                await table.update(rest as never).eq('id', rowId as string);
+                await supabase.from(tbl).update(rest as any).eq('id', rowId as string);
                 break;
               }
               case 'delete':
-                await table.delete().eq('id', mutation.payload.id as string);
+                await supabase.from(tbl).delete().eq('id', mutation.payload.id as string);
                 break;
             }
             // Remove successful mutation
