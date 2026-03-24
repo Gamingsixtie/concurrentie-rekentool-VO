@@ -10,7 +10,6 @@ import { formatCurrency } from '../../lib/format';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
 import { CitoBundleSelector } from './CitoBundleSelector';
-import { PeriodToggle } from './PeriodToggle';
 import { getCitoBundle } from '../../data/cito-bundles';
 import { applyCitoBundlePrices } from '../../engine/cito-bundles';
 import { detectScenario } from '../../engine/scenario-detection';
@@ -363,10 +362,9 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
         )}
       </div>
 
-      {/* Cito bundel + contractperiode keuze */}
+      {/* Cito bundel keuze (contractperiode niet van toepassing — altijd jaarbasis) */}
       <div className="flex flex-wrap items-start gap-6 mb-8">
         <CitoBundleSelector />
-        <PeriodToggle />
       </div>
 
       {/* Summary banner */}
