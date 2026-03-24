@@ -67,6 +67,7 @@ Intake/Wizard → `useSchoolProfileStore` → `usePriceComparisonStore.initializ
 
 # Workflow
 
+- IMPORTANT: Na elke goedgekeurde wijziging (bugfix, feature, verbetering): automatisch committen EN pushen naar remote. Niet wachten tot de gebruiker erom vraagt. Build moet eerst slagen.
 - IMPORTANT: Run `npm run build` voordat je klaar bent — moet slagen zonder errors
 - Bij engine-wijzigingen: run `npx vitest run` en controleer dat alle tests slagen
 - Nieuwe wizard step? Maak component + Zod schema + test — alle drie

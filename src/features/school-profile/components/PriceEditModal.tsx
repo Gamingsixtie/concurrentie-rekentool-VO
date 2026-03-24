@@ -1,9 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { priceEntrySchema, type PriceEntryFormInput } from '../schemas/price-entry.schema';
 import { useCreateSchoolPrice, useUpdateSchoolPrice } from '@/hooks/useSchoolPrices';
 import { PriceDeviationWarning } from '@/components/ui/PriceDeviationWarning';
+import { DEFAULT_PRICES } from '@/data/default-prices';
 import type { SchoolPriceEntry } from '@/db/types';
 
 interface PriceEditModalProps {
@@ -34,6 +35,7 @@ export function PriceEditModal({
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PriceEntryFormInput>({
     resolver: zodResolver(priceEntrySchema),
@@ -61,6 +63,20 @@ export function PriceEditModal({
 
   const priceType = watch('priceType');
   const watchedAmount = watch('amount');
+
+  // Look up publication price for this module/provider
+  const publicationPrice = useMemo(() => {
+    return DEFAULT_PRICES.find(
+      (p) => p.moduleId === moduleId && p.provider === provider,
+    )?.amountPerStudent ?? null;
+  }, [moduleId, provider]);
+
+  // Auto-calculate discount percentage based on publication price
+  const calculatedDiscount = useMemo(() => {
+    if (!publicationPrice || publicationPrice <= 0 || !watchedAmount || watchedAmount <= 0) return null;
+    if (watchedAmount >= publicationPrice) return null;
+    return Math.round(((publicationPrice - watchedAmount) / publicationPrice) * 1000) / 10;
+  }, [publicationPrice, watchedAmount]);
 
   // Reset form when modal opens with different data
   useEffect(() => {
@@ -172,6 +188,19 @@ export function PriceEditModal({
             {errors.amount && (
               <p className="text-[14px] text-red-600 mt-1">{errors.amount.message}</p>
             )}
+            {watchedAmount > 0 && publicationPrice !== null && publicationPrice > 0 && (
+              <div className="mt-1.5 flex items-center gap-2 text-[13px]">
+                <span className="text-neutral-500">
+                  Publicatieprijs: {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(publicationPrice)}
+                </span>
+                {watchedAmount !== publicationPrice && (
+                  <span className={`font-semibold ${watchedAmount < publicationPrice ? 'text-green-600' : 'text-red-600'}`}>
+                    ({watchedAmount < publicationPrice ? '-' : '+'}
+                    {Math.abs(Math.round(((watchedAmount - publicationPrice) / publicationPrice) * 1000) / 10)}%)
+                  </span>
+                )}
+              </div>
+            )}
             {watchedAmount > 0 && (
               <div className="mt-1">
                 <PriceDeviationWarning
@@ -216,16 +245,27 @@ export function PriceEditModal({
               <label className="block text-[14px] font-semibold text-neutral-700 mb-1">
                 Kortingspercentage
               </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                className={`w-full h-[44px] px-3 border rounded-lg text-[16px] focus:outline-none focus:ring-2 focus:ring-cito-primary ${
-                  errors.discountPercentage ? 'border-red-500' : 'border-neutral-300'
-                }`}
-                {...register('discountPercentage', { valueAsNumber: true })}
-              />
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  className={`w-full h-[44px] px-3 border rounded-lg text-[16px] focus:outline-none focus:ring-2 focus:ring-cito-primary ${
+                    errors.discountPercentage ? 'border-red-500' : 'border-neutral-300'
+                  }`}
+                  {...register('discountPercentage', { valueAsNumber: true })}
+                />
+                {calculatedDiscount !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setValue('discountPercentage', calculatedDiscount)}
+                    className="flex-shrink-0 text-[13px] text-cito-primary hover:underline whitespace-nowrap"
+                  >
+                    Bereken ({calculatedDiscount}%)
+                  </button>
+                )}
+              </div>
               {errors.discountPercentage && (
                 <p className="text-[14px] text-red-600 mt-1">
                   {errors.discountPercentage.message}

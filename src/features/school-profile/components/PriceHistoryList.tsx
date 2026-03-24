@@ -126,6 +126,12 @@ export function PriceHistoryList({
                   <span className="text-[14px] text-neutral-500">
                     per leerling
                   </span>
+                  {publicationPrice !== null && publicationPrice > 0 && entry.amount !== publicationPrice && (
+                    <span className={`text-[12px] font-semibold ${entry.amount < publicationPrice ? 'text-green-600' : 'text-red-600'}`}>
+                      ({entry.amount < publicationPrice ? '-' : '+'}
+                      {Math.abs(Math.round(((entry.amount - publicationPrice) / publicationPrice) * 100))}%)
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="text-[14px] text-neutral-600">

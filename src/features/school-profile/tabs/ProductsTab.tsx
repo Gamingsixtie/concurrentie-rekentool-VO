@@ -214,6 +214,12 @@ export default function ProductsTab() {
                       <p className="text-[12px] text-cito-accent font-semibold mt-0.5">
                         Schoolspecifieke prijs
                       </p>
+                      {citoPublicationPrice !== null && citoPublicationPrice > 0 && activeSchoolPrice.amount !== citoPublicationPrice && (
+                        <p className={`text-[12px] mt-0.5 font-semibold ${activeSchoolPrice.amount < citoPublicationPrice ? 'text-green-600' : 'text-red-600'}`}>
+                          {activeSchoolPrice.amount < citoPublicationPrice ? '-' : '+'}
+                          {Math.abs(Math.round(((activeSchoolPrice.amount - citoPublicationPrice) / citoPublicationPrice) * 100))}% t.o.v. publicatieprijs
+                        </p>
+                      )}
                     </div>
                   ) : citoPublicationPrice !== null ? (
                     <div>
