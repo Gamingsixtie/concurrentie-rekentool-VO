@@ -1,37 +1,43 @@
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { CITO_BUNDLES } from '../../data/cito-bundles';
+import type { ContractPeriod } from '../../data/cito-bundles';
 import { formatCurrency } from '../../lib/format';
 
 export function CitoBundleSelector({ compact = false }: { compact?: boolean }) {
   const bundleType = usePriceComparisonStore((s) => s.citoBundleType);
   const setBundleType = usePriceComparisonStore((s) => s.setCitoBundleType);
+  const contractPeriod = usePriceComparisonStore((s) => s.contractPeriod);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
 
-  // Only show bundles that the school's selected modules can use
-  const availableBundles = CITO_BUNDLES.filter((bundle) => {
-    if (bundle.id === 'individual') return true;
-    // Bundle requires ALL its modules to be selected
-    return bundle.includedModuleIds.every((id) => selectedModules.includes(id));
+  // Show all bundles, but mark unavailable ones as disabled
+  const bundlesWithAvailability = CITO_BUNDLES.map((bundle) => {
+    if (bundle.id === 'individual') return { bundle, available: true, missingModules: [] as string[] };
+    const missing = bundle.includedModuleIds.filter((id) => !selectedModules.includes(id));
+    return { bundle, available: missing.length === 0, missingModules: missing };
   });
 
-  // Don't render if only "individual" is available
-  if (availableBundles.length <= 1) return null;
+  // Always show if there are bundles defined (Individual is always there + Basis/Plus)
+  const hasBundles = bundlesWithAvailability.length > 1;
+  if (!hasBundles) return null;
 
   if (compact) {
     return (
       <div className="flex mt-1 bg-white/10 rounded-md overflow-hidden">
-        {availableBundles.map(bundle => (
+        {bundlesWithAvailability.map(({ bundle, available }) => (
           <button
             key={bundle.id}
             type="button"
-            onClick={() => setBundleType(bundle.id)}
+            onClick={() => available && setBundleType(bundle.id)}
+            disabled={!available}
             className={`px-2 py-0.5 text-[10px] font-medium transition-colors ${
-              bundleType === bundle.id
-                ? 'bg-white text-cito-primary'
-                : 'text-white/70 hover:text-white'
+              !available
+                ? 'text-white/30 cursor-not-allowed'
+                : bundleType === bundle.id
+                  ? 'bg-white text-cito-primary'
+                  : 'text-white/70 hover:text-white'
             }`}
-            title={bundle.description}
+            title={available ? bundle.description : `Selecteer eerst alle modules: ${bundle.includedModuleIds.join(', ')}`}
           >
             {bundle.name}
           </button>
@@ -46,14 +52,18 @@ export function CitoBundleSelector({ compact = false }: { compact?: boolean }) {
         Cito prijsmodel
       </label>
       <div className="flex flex-wrap gap-2">
-        {availableBundles.map((bundle) => (
+        {bundlesWithAvailability.map(({ bundle, available, missingModules }) => (
           <BundleOption
             key={bundle.id}
             name={bundle.name}
             description={bundle.description}
             price={bundle.pricePerStudent}
+            contractPrice={bundle.contractPrices?.[contractPeriod] ?? null}
+            contractPeriod={contractPeriod}
             isActive={bundleType === bundle.id}
-            onClick={() => setBundleType(bundle.id)}
+            available={available}
+            missingModules={missingModules}
+            onClick={() => available && setBundleType(bundle.id)}
           />
         ))}
       </div>
@@ -65,33 +75,59 @@ function BundleOption({
   name,
   description,
   price,
+  contractPrice,
+  contractPeriod,
   isActive,
+  available,
+  missingModules,
   onClick,
 }: {
   name: string;
   description: string;
   price: number | null;
+  contractPrice: number | null;
+  contractPeriod: ContractPeriod;
   isActive: boolean;
+  available: boolean;
+  missingModules: string[];
   onClick: () => void;
 }) {
+  const showContractPrice = contractPeriod !== 'annual' && contractPrice !== null && price !== null && contractPrice !== price;
+  const periodLabel = contractPeriod === 'three-year' ? '3-jarig' : '3-jarig + DUO';
+
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={!available}
       className={`flex flex-col items-start text-left rounded-lg border px-4 py-3 transition-colors min-w-[160px] ${
-        isActive
-          ? 'border-cito-primary bg-cito-primary/5 ring-1 ring-cito-primary'
-          : 'border-neutral-200 bg-white hover:bg-neutral-50'
+        !available
+          ? 'border-neutral-100 bg-neutral-50 opacity-60 cursor-not-allowed'
+          : isActive
+            ? 'border-cito-primary bg-cito-primary/5 ring-1 ring-cito-primary'
+            : 'border-neutral-200 bg-white hover:bg-neutral-50'
       }`}
       aria-pressed={isActive}
     >
-      <span className={`text-sm font-semibold ${isActive ? 'text-cito-primary' : 'text-neutral-900'}`}>
+      <span className={`text-sm font-semibold ${!available ? 'text-neutral-400' : isActive ? 'text-cito-primary' : 'text-neutral-900'}`}>
         {name}
       </span>
       <span className="text-xs text-neutral-500 mt-0.5">{description}</span>
       {price !== null && (
-        <span className="text-xs font-medium text-neutral-700 mt-1">
-          {formatCurrency(price)}/leerling
+        <div className="mt-1">
+          <span className={`text-xs font-medium ${showContractPrice ? 'line-through text-neutral-400' : 'text-neutral-700'}`}>
+            {formatCurrency(price)}/leerling/jr
+          </span>
+          {showContractPrice && (
+            <span className="text-xs font-semibold text-green-700 ml-1.5">
+              {formatCurrency(contractPrice!)}/lln/jr ({periodLabel})
+            </span>
+          )}
+        </div>
+      )}
+      {!available && missingModules.length > 0 && (
+        <span className="text-[10px] text-neutral-400 mt-1">
+          Selecteer nog: {missingModules.join(', ')}
         </span>
       )}
     </button>
