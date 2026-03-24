@@ -66,7 +66,13 @@ export function detectDiaPakketIllusie(
     type: 'dia-pakket-illusie',
     severity: 'warning',
     title: 'DIA pakketprijs-illusie',
-    explanation: `DIA lijkt goedkoop per module (€${individualTotal.toFixed(2)} voor ${diaModules.length} modules individueel), maar het pakket "${bestPkg.name}" kost €${bestPkg.pricePerStudent.toFixed(2)}/lln — slechts ${((1 - bestPkg.pricePerStudent / individualTotal) * 100).toFixed(0)}% korting. Het Cito Basis-pakket biedt 3 kernmodules voor €23,45/lln.`,
+    explanation: (() => {
+      const savingsPct = (1 - bestPkg.pricePerStudent / individualTotal) * 100;
+      const savingsText = savingsPct >= 0
+        ? `slechts ${savingsPct.toFixed(0)}% korting`
+        : `${Math.abs(savingsPct).toFixed(0)}% duurder dan individueel`;
+      return `DIA lijkt goedkoop per module (€${individualTotal.toFixed(2)} voor ${diaModules.length} modules individueel), maar het pakket "${bestPkg.name}" kost €${bestPkg.pricePerStudent.toFixed(2)}/lln — ${savingsText}. Het Cito Basis-pakket biedt 3 kernmodules voor €23,45/lln.`;
+    })(),
     affectedModules: diaModules,
     citoAdvantage: 'Cito Basis bundel biedt 3 kernmodules met adaptieve toetsing en remediëring in één pakket.',
   };

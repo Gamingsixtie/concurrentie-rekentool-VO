@@ -186,17 +186,20 @@ const WizardStep4 = forwardRef<WizardStepRef>(function WizardStep4(_props, ref) 
                   (() => {
                     const providerKey = provider === 'dia' ? 'dia' : provider === 'jij' ? 'jij' : provider === 'saqi' ? 'saqi' : null;
                     if (!providerKey) return null;
-                    const deviation = checkPriceDeviation(moduleId, providerKey, currentSetup.pricePerStudent ?? 0);
+                    const actualPrice = currentSetup.pricePerStudent ?? 0;
+                    const deviation = checkPriceDeviation(moduleId, providerKey, actualPrice);
                     if (!deviation.hasDeviation || deviation.publicationPrice === null) return null;
+                    const isMoreExpensive = actualPrice > deviation.publicationPrice;
+                    const pctDisplay = Math.round(deviation.percentDiff * 100);
                     return (
                       <div className="col-span-full">
                         <div className="text-xs text-neutral-500 flex items-center gap-2">
                           <span>Publicatieprijs: {formatCurrency(deviation.publicationPrice)}</span>
                           <span>|</span>
-                          <span>Uw prijs: {formatCurrency(currentSetup.pricePerStudent ?? 0)}</span>
+                          <span>Uw prijs: {formatCurrency(actualPrice)}</span>
                           <span>|</span>
-                          <span className={deviation.percentDiff > 0 ? 'text-red-600' : 'text-green-600'}>
-                            {deviation.percentDiff > 0 ? '+' : ''}{deviation.percentDiff.toFixed(0)}%
+                          <span className={isMoreExpensive ? 'text-red-600' : 'text-green-600'}>
+                            {isMoreExpensive ? '+' : '-'}{pctDisplay}%
                           </span>
                         </div>
                       </div>
