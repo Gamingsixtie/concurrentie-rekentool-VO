@@ -33,17 +33,17 @@ Plans:
 ### Phase 3: Business Case
 **Goal**: Migratie huidig → nieuw Cito-platform met financieel verschil, tijdswinst en meerjarenprojectie
 **Requirements**: BCASE-01, BCASE-02, BCASE-03, BCASE-04, BCASE-05, BCASE-06, BCASE-07
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 ### Phase 4: Interne Modus & Doelgroepen
 **Goal**: Sales-signalen, gevoeligheidsanalyse, doelgroep-perspectieven, print en clipboard-export
 **Requirements**: MODE-02, MODE-03, MODE-04, MODE-05, DOELGR-01, DOELGR-02, DOELGR-03, EXPORT-01, EXPORT-02
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 ### Phase 5: AI & Polish
 **Goal**: AI-validatie, prijsinvoer en tablet-optimalisatie
 **Requirements**: INPUT-02, INPUT-03, AI-01, AI-02, AI-03, UX-01, UX-02
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 </details>
 
@@ -172,7 +172,7 @@ Plans:
   3. Provider-specifieke configuratiebestanden (src/data/providers/cito.ts, dia.ts, jij.ts) bevatten het volledige prijsmodel inclusief tiers, pakketten en platformkosten
   4. Bestaande default-prices.ts, dia-packages.ts en jij-license-tiers.ts data is gemigreerd naar de provider-configuraties
   5. Differentiators zijn uitgebreid voor alle nieuwe modules
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [x] 10.1-01-PLAN.md — Types (PricingStrategy union), MODULE_CATALOG uitbreiding (10 modules), differentiators, test scaffolds
@@ -188,7 +188,7 @@ Plans:
   3. JIJ-prijs varieert daadwerkelijk met schoolgrootte (tier-selectie op basis van leerlingaantal), niet meer een flat schatting
   4. DIA-pakketoptimalisatie werkt automatisch in de vergelijking (bestaande dia-packages engine geintegreerd)
   5. Schoolspecifieke prijsoverschrijvingen (Supabase) gaan boven de provider-calculator
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [x] 10.2-01-PLAN.md — TDD: ProviderPriceCalculator interface, 4 calculators (Cito/DIA/JIJ/Flat), factory, refactored calculateComparison() met breakdowns
@@ -235,12 +235,12 @@ Plans:
   2. PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl (Primary #003082, Accent #FF6600), bronvermelding en disclaimer
   3. Gebruiker kan de vergelijking kopiëren naar clipboard als geformatteerde samenvatting
   4. Applicatie werkt offline op tablet na eerste laden — service worker cacht assets en data
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 12-01: TBD
-- [ ] 12-02: TBD
-- [ ] 12-03: TBD
+- [ ] 12-01-PLAN.md — PDF verbetering: SVG staafdiagram, SchoolplanSection, multi-page, DMU-samenvatting
+- [ ] 12-02-PLAN.md — Clipboard export: geformatteerde kopieer-functionaliteit voor email/Teams
+- [ ] 12-03-PLAN.md — PWA/Offline: service worker, offline-banner, mutatie-queue
 
 ### Phase 13: Architectuur Review & Go-Live
 **Goal**: Volledige architectuur-check, performance audit, security review en productie-readiness verificatie voordat de app live gaat voor het team
@@ -252,7 +252,7 @@ Plans:
   3. Security review: geen API keys in frontend, RLS policies getest, auth flow veilig, CORS correct
   4. Data-integriteit: migratie van IndexedDB naar Supabase is volledig en correct, geen dataverlies
   5. Team kan de app gebruiken via de productie-URL met stabiele performance
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [ ] 13-01: TBD
