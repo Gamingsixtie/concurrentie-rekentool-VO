@@ -2,10 +2,9 @@
  * AI-powered competitive analysis.
  * Generates a structured 6-section analysis of Cito vs. competitors,
  * optionally enriched with schoolplan data. Calls /api/ai-analysis
- * with SSE streaming.
+ * which uses tool_use for guaranteed structured output.
  */
 
-import { parseSSEChunk } from './ai-intake';
 import type { ComparisonResult } from '../engine/price-comparison';
 import { getTotalStudents } from '../engine/price-comparison';
 import { MODULE_DIFFERENTIATORS } from '../data/differentiators';
@@ -181,61 +180,6 @@ export function buildAnalysisPayload(
   };
 }
 
-// ─── Parse analysis from accumulated text ───────────────────────────────────
-
-function parseAnalysisFromText(fullText: string): AnalysisResult {
-  const cleaned = fullText.trim();
-
-  let parsed: unknown;
-
-  // Strategy 1: Direct JSON.parse
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    // Strategy 2: Strip markdown code fences
-    const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
-    if (fenceMatch) {
-      try {
-        parsed = JSON.parse(fenceMatch[1].trim());
-      } catch {
-        // Continue to strategy 3
-      }
-    }
-
-    // Strategy 3: Extract first {...} JSON block
-    if (!parsed) {
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace > firstBrace) {
-        try {
-          parsed = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
-        } catch {
-          // All strategies failed
-        }
-      }
-    }
-
-    if (!parsed) {
-      throw new Error('AI-analyse kon niet worden verwerkt als JSON.');
-    }
-  }
-
-  // Basic validation
-  const obj = parsed as Record<string, unknown>;
-  if (typeof obj.samenvatting !== 'string' || !Array.isArray(obj.gespreksargumenten)) {
-    throw new Error('AI-analyse heeft een onverwacht formaat.');
-  }
-
-  return {
-    samenvatting: obj.samenvatting as string,
-    prijsanalyse: (obj.prijsanalyse as PrijsAnalyseItem[]) ?? [],
-    citoSterkePunten: (obj.citoSterkePunten as AnalysisResult['citoSterkePunten']) ?? [],
-    concurrentieVergelijking: (obj.concurrentieVergelijking as ConcurrentDetail[]) ?? [],
-    schoolplanKoppeling: (obj.schoolplanKoppeling as SchoolplanKoppeling[] | null) ?? null,
-    gespreksargumenten: (obj.gespreksargumenten as string[]).slice(0, 8),
-  };
-}
-
 // ─── Main analysis function ─────────────────────────────────────────────────
 
 export async function generateAnalysis(
@@ -273,23 +217,19 @@ export async function generateAnalysis(
     throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
   }
 
-  const reader = response.body!.getReader();
-  const decoder = new TextDecoder();
-  let fullText = '';
+  const data = await response.json();
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    const chunk = decoder.decode(value, { stream: true });
-    const { texts, error } = parseSSEChunk(chunk);
-
-    if (error) throw new Error(error);
-    fullText += texts.join('');
+  // Validate essential fields
+  if (typeof data.samenvatting !== 'string' || !Array.isArray(data.gespreksargumenten)) {
+    throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
   }
 
-  if (!fullText) throw new Error('Onverwacht lege AI-analyse');
-
-  // Prepend '{' to match the assistant prefill in the API endpoint
-  return parseAnalysisFromText('{' + fullText);
+  return {
+    samenvatting: data.samenvatting,
+    prijsanalyse: data.prijsanalyse ?? [],
+    citoSterkePunten: data.citoSterkePunten ?? [],
+    concurrentieVergelijking: data.concurrentieVergelijking ?? [],
+    schoolplanKoppeling: data.schoolplanKoppeling?.length > 0 ? data.schoolplanKoppeling : null,
+    gespreksargumenten: data.gespreksargumenten.slice(0, 8),
+  };
 }

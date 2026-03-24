@@ -56,62 +56,84 @@ SCHOOLPLAN (indien beschikbaar):
 - Gebruik citaten uit het schoolplan om de koppeling te onderbouwen.
 - Benoem waar concurrenten tekortschieten op deze thema's (competitorVulnerabilities).
 
-Antwoord UITSLUITEND in dit JSON-formaat:
-{
-  "samenvatting": "Een alinea (3-5 zinnen) met strategisch overzicht: wat is de kern van de vergelijking, waar staat Cito sterk, wat zijn de risico's.",
-
-  "prijsanalyse": [
-    {
-      "module": "Modulenaam",
-      "vergelijking": "Uitleg WAAROM de prijzen verschillen — bundel-effecten, volumekorting, licentiemodel. Noem concrete bedragen.",
-      "citoPositie": "goedkoper | duurder | vergelijkbaar"
-    }
-  ],
-
-  "citoSterkePunten": [
-    {
-      "module": "Modulenaam",
-      "argumenten": ["Concreet argument 1 met onderbouwing", "Concreet argument 2"]
-    }
-  ],
-
-  "concurrentieVergelijking": [
-    {
-      "provider": "dia",
-      "citoBeter": ["Waar Cito beter scoort dan DIA + waarom"],
-      "concurrentBeter": ["Eerlijk: waar DIA sterker is"],
-      "weerlegging": ["Hoe de consultant DIA-voordelen kan counteren"]
-    },
-    {
-      "provider": "jij",
-      "citoBeter": ["Waar Cito beter scoort dan JIJ! + waarom"],
-      "concurrentBeter": ["Eerlijk: waar JIJ! sterker is"],
-      "weerlegging": ["Hoe de consultant JIJ!-voordelen kan counteren"]
-    }
-  ],
-
-  "schoolplanKoppeling": [
-    {
-      "thema": "Strategisch thema uit schoolplan",
-      "citoAansluiting": "Hoe Cito hierop aansluit",
-      "citaat": "Letterlijk citaat uit het schoolplan (indien beschikbaar)"
-    }
-  ],
-
-  "gespreksargumenten": [
-    "Kant-en-klaar argument 1 dat de consultant letterlijk kan gebruiken",
-    "Kant-en-klaar argument 2",
-    "..."
-  ]
-}
-
 REGELS:
-- schoolplanKoppeling is null als er geen schoolplandata is meegegeven
+- schoolplanKoppeling is een lege array als er geen schoolplandata is meegegeven
 - Maximaal 5-8 gespreksargumenten, gerangschikt van sterkst naar zwakst
 - Geen generieke one-liners — elk argument moet specifiek zijn voor deze school
 - Gebruik concrete bedragen en percentages waar mogelijk
 - Schrijf in het Nederlands, professioneel maar toegankelijk
-- concurrentieVergelijking: vul ALTIJD voor beide concurrenten in (dia en jij), ook als er geen directe vergelijking is voor alle modules`;
+- concurrentieVergelijking: vul ALTIJD voor beide concurrenten in (dia en jij), ook als er geen directe vergelijking is voor alle modules
+
+Gebruik de analyse_result tool om je analyse te structureren.`;
+
+// Tool definition for structured output — guarantees valid schema
+const ANALYSIS_TOOL: Anthropic.Tool = {
+  name: 'analyse_result',
+  description: 'Gestructureerde concurrentieanalyse met alle secties.',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      samenvatting: {
+        type: 'string',
+        description: 'Een alinea (3-5 zinnen) met strategisch overzicht: wat is de kern van de vergelijking, waar staat Cito sterk, wat zijn de risico\'s.',
+      },
+      prijsanalyse: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            module: { type: 'string', description: 'Modulenaam' },
+            vergelijking: { type: 'string', description: 'Uitleg WAAROM de prijzen verschillen — bundel-effecten, volumekorting, licentiemodel. Noem concrete bedragen.' },
+            citoPositie: { type: 'string', enum: ['goedkoper', 'duurder', 'vergelijkbaar'] },
+          },
+          required: ['module', 'vergelijking', 'citoPositie'],
+        },
+      },
+      citoSterkePunten: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            module: { type: 'string' },
+            argumenten: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['module', 'argumenten'],
+        },
+      },
+      concurrentieVergelijking: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            provider: { type: 'string', enum: ['dia', 'jij'] },
+            citoBeter: { type: 'array', items: { type: 'string' } },
+            concurrentBeter: { type: 'array', items: { type: 'string' } },
+            weerlegging: { type: 'array', items: { type: 'string' } },
+          },
+          required: ['provider', 'citoBeter', 'concurrentBeter', 'weerlegging'],
+        },
+      },
+      schoolplanKoppeling: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            thema: { type: 'string' },
+            citoAansluiting: { type: 'string' },
+            citaat: { type: 'string' },
+          },
+          required: ['thema', 'citoAansluiting'],
+        },
+      },
+      gespreksargumenten: {
+        type: 'array',
+        items: { type: 'string' },
+        description: 'Kant-en-klare gespreksargumenten (5-8), gerangschikt van sterkst naar zwakst.',
+      },
+    },
+    required: ['samenvatting', 'prijsanalyse', 'citoSterkePunten', 'concurrentieVergelijking', 'schoolplanKoppeling', 'gespreksargumenten'],
+  },
+};
 
 interface AnalysisRequest {
   mode: 'comparison' | 'current-vs-proposed';
@@ -270,7 +292,7 @@ ${body.schoolplanData.opportunities.map((opp) => {
     Concurrentzwaktes: ${vulns || 'geen'}`;
     }).join('\n')}`);
   } else {
-    parts.push('\nSCHOOLPLAN: Niet beschikbaar. Sla schoolplanKoppeling sectie over (null).');
+    parts.push('\nSCHOOLPLAN: Niet beschikbaar. Laat schoolplanKoppeling leeg.');
   }
 
   return parts.join('\n');
@@ -303,54 +325,27 @@ export async function POST(request: Request): Promise<Response> {
 
     const userMessage = buildUserMessage(body);
 
-    const stream = getAnthropic().messages.stream({
+    // Use tool_use for guaranteed structured output — no JSON parsing needed
+    const message = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
-      messages: [
-        { role: 'user', content: userMessage },
-        { role: 'assistant', content: '{' },
-      ],
+      tools: [ANALYSIS_TOOL],
+      tool_choice: { type: 'tool', name: 'analyse_result' },
+      messages: [{ role: 'user', content: userMessage }],
     });
 
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          stream.on('text', (text) => {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: 'content_block_delta', text })}\n\n`),
-            );
-          });
+    // Extract tool input from the response
+    const toolBlock = message.content.find(
+      (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+    );
 
-          stream.on('message', (message) => {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: 'message_stop', message })}\n\n`),
-            );
-            controller.close();
-          });
+    if (!toolBlock) {
+      return new Response('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.', { status: 500 });
+    }
 
-          stream.on('error', (error) => {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: 'error', error: String(error) })}\n\n`),
-            );
-            controller.close();
-          });
-        } catch (err) {
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ type: 'error', error: String(err) })}\n\n`),
-          );
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(readable, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+    return new Response(JSON.stringify(toolBlock.input), {
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch {
     return new Response('Er is een fout opgetreden bij de AI-analyse', { status: 500 });
