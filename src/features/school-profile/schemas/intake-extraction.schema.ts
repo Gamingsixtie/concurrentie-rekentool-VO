@@ -21,6 +21,7 @@ export const MODULE_IDS = [
   'taalverzorging',
   'sociaal-emotioneel',
   'cognitieve-capaciteiten',
+  'leer-werkhouding',
   'frans',
   'duits',
   'spaans',

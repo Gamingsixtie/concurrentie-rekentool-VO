@@ -45,7 +45,7 @@ const SECTIONS = [
     key: 'actions',
     label: 'Actiepunten & Overig',
     placeholder:
-      'Bijv. "Offerte sturen volgende week. School wil overstappen van DIA. Interesse in Cito Nieuw."',
+      'Bijv. "Offerte sturen volgende week. School wil overstappen van DIA naar Leerling in Beeld. Interesse in Plus-bundel. Staffelkorting 10% bij DIA."',
   },
 ] as const;
 
