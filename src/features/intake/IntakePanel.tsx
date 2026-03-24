@@ -382,8 +382,6 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
     }
   };
 
-  const hasApiKey = !!import.meta.env.VITE_ANTHROPIC_API_KEY;
-
   return (
     <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-12">
       {/* Header */}
@@ -407,14 +405,6 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
           leerlingaantallen, modules, contactpersonen en actiepunten.
         </p>
       </div>
-
-      {!hasApiKey && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">
-          <strong>API-sleutel ontbreekt.</strong> Maak een bestand <code>.env.local</code> aan in de projectmap
-          (op basis van <code>.env.local.example</code>) en vul uw Anthropic API-sleutel in.
-          Herstart daarna de dev-server.
-        </div>
-      )}
 
       {/* Section textareas */}
       <div className="space-y-4 mb-4">
@@ -443,7 +433,7 @@ export function IntakePanel({ onComplete, onSkip }: IntakePanelProps) {
         <button
           type="button"
           onClick={handleAnalyse}
-          disabled={!hasAnyContent(sections) || status === 'loading' || !hasApiKey}
+          disabled={!hasAnyContent(sections) || status === 'loading'}
           className="inline-flex items-center gap-2 bg-cito-primary text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {status === 'loading' ? (

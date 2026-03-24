@@ -80,7 +80,7 @@ async function extractTextFromFile(buffer: Buffer, fileName: string): Promise<st
 export async function POST(request: Request): Promise<Response> {
   try {
     // Skip auth in dev mode (SKIP_AUTH=true in .env.local)
-    const skipAuth = process.env.SKIP_AUTH === 'true';
+    const skipAuth = process.env.SKIP_AUTH === 'true' && process.env.VERCEL_ENV !== 'production';
 
     if (!skipAuth) {
       // Extract and verify Bearer token

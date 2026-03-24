@@ -78,7 +78,7 @@ interface AdviceRequest {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const skipAuth = process.env.SKIP_AUTH === 'true';
+    const skipAuth = process.env.SKIP_AUTH === 'true' && process.env.VERCEL_ENV !== 'production';
 
     if (!skipAuth) {
       const authHeader = request.headers.get('Authorization');

@@ -152,10 +152,27 @@ describe('POST handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     delete process.env.SKIP_AUTH;
+    delete process.env.VERCEL_ENV;
   });
 
   it('returns 401 without auth header when SKIP_AUTH is not true', async () => {
     process.env.SKIP_AUTH = 'false';
+
+    const request = new Request('http://localhost/api/analyze-schoolplan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ storagePath: 'test/path', fileName: 'test.pdf' }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 401 when SKIP_AUTH is true but VERCEL_ENV is production (auth enforced)', async () => {
+    process.env.SKIP_AUTH = 'true';
+    process.env.VERCEL_ENV = 'production';
 
     const request = new Request('http://localhost/api/analyze-schoolplan', {
       method: 'POST',
