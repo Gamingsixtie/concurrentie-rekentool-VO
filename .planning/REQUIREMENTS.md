@@ -67,7 +67,7 @@
 - [x] **EXPORT-02**: Gebruiker kan een PDF-rapport genereren afgestemd op MT/directie (focus: overzicht, onderbouwing, strategische waarde)
 - [x] **EXPORT-03**: Gebruiker kan een PDF-rapport genereren afgestemd op finance (focus: euro's, meerjarenprojectie, terugverdientijd)
 - [x] **EXPORT-04**: PDF-rapporten bevatten schoolspecifieke data, Cito-huisstijl, bronvermelding en disclaimer
-- [ ] **EXPORT-05**: Gebruiker kan vergelijking kopiëren naar clipboard als geformatteerde samenvatting
+- [x] **EXPORT-05**: Gebruiker kan vergelijking kopiëren naar clipboard als geformatteerde samenvatting
 
 ### Prijsbeheer
 
@@ -161,7 +161,7 @@
 | EXPORT-02 | Phase 12 | Complete |
 | EXPORT-03 | Phase 12 | Complete |
 | EXPORT-04 | Phase 12 | Complete |
-| EXPORT-05 | Phase 12 | Pending |
+| EXPORT-05 | Phase 12 | Complete |
 | PRIJSMGT-01 | Phase 9 | Complete |
 | PRIJSMGT-02 | Phase 9 | Complete |
 | PRIJSMGT-03 | Phase 9 | Complete |

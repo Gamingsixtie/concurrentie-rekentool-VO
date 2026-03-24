@@ -64,7 +64,7 @@ Plans:
 - [x] **Phase 10.2: Engine Refactoring** (INSERTED) - Provider-aware berekeningen met JIJ-tiers, DIA-pakketten, prijsopbouw (completed 2026-03-24)
 - [x] **Phase 10.3: UX Overhaul** (INSERTED) - Wizard redesign, dynamische vergelijkingstabel, prijsmodel-uitleg (completed 2026-03-24)
 - [x] **Phase 11: Waarde-engine & Migratie** - Tijdwinst in euro's, meerjarenprojectie, migratie-businesscase en upsell-detectie (completed 2026-03-23)
-- [ ] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking
+- [x] **Phase 12: DMU-Export & Offline** - PDF-rapporten per DMU-rol, clipboard-export en offline werking (completed 2026-03-24)
 - [ ] **Phase 13: Architectuur Review & Go-Live** - Architectuur-check, performance audit, security review en productie-readiness voor online deployment
 - [x] **Phase 14: Schoolplan Upload & Kansen-analyse** - AI-analyse van geüpload schoolplan om Cito-kansen en concurrentie-verdwijning inzichtelijk te maken (completed 2026-03-23)
 - [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
@@ -239,7 +239,7 @@ Plans:
 
 Plans:
 - [x] 12-01-PLAN.md — PDF verbetering: SVG staafdiagram, SchoolplanSection, multi-page, DMU-samenvatting
-- [ ] 12-02-PLAN.md — Clipboard export: geformatteerde kopieer-functionaliteit voor email/Teams
+- [x] 12-02-PLAN.md — Clipboard export: geformatteerde kopieer-functionaliteit voor email/Teams
 - [x] 12-03-PLAN.md — PWA/Offline: service worker, offline-banner, mutatie-queue
 
 ### Phase 13: Architectuur Review & Go-Live
@@ -324,7 +324,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete    | 2026-03-24 |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 2/3 | Complete    | 2026-03-24 |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
-| 12. DMU-Export & Offline | v2.0 | 2/3 | In Progress|  |
+| 12. DMU-Export & Offline | v2.0 | 3/3 | Complete   | 2026-03-24 |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
