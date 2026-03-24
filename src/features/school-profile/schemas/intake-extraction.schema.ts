@@ -86,7 +86,7 @@ export const IntakeExtractionSchemaV2 = z.object({
 
   // --- V2 additions ---
   contactPersonen: safeArray(z.object({
-    naam: z.string(),
+    naam: z.preprocess((v) => (v === null || v === undefined ? '' : v), z.string()),
     rol: optStr,
     dmuPositie: optEnum(['coordinator', 'mt', 'finance', 'it', 'onbekend'] as const),
     email: optStr,
@@ -94,7 +94,7 @@ export const IntakeExtractionSchemaV2 = z.object({
   })).default([]),
 
   actiePunten: safeArray(z.object({
-    wat: z.string(),
+    wat: z.preprocess((v) => (v === null || v === undefined ? '' : v), z.string()),
     wanneer: optStr,
     verantwoordelijke: optStr,
   })).default([]),
