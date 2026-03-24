@@ -12,6 +12,7 @@ import type { ExportConfig, ReportData } from './types';
 import { ExportConfigPanel } from './components/ExportConfigPanel';
 import { ExportPreview } from './components/ExportPreview';
 import { PdfDownloadButton } from './components/PdfDownloadButton';
+import { ClipboardButton } from './components/ClipboardButton';
 
 export default function ExportTab() {
   const { slug } = useParams({ from: '/scholen/$slug' });
@@ -117,6 +118,7 @@ export default function ExportTab() {
         <div className="space-y-6">
           <ExportConfigPanel config={config} onChange={setConfig} />
           <PdfDownloadButton config={config} data={reportData} disabled={!hasData} />
+          <ClipboardButton config={config} data={reportData} disabled={!hasData} />
         </div>
 
         {/* Right: preview */}

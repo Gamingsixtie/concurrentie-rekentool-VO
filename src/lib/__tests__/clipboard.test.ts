@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildClipboardContent } from '../clipboard';
-import type { ReportData, DmuTarget } from '@/features/export/types';
+import type { ReportData } from '@/features/export/types';
 
 // Helper to create mock ReportData
 function createMockReportData(

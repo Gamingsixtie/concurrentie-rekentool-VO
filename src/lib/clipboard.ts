@@ -105,7 +105,7 @@ function buildConclusion(data: ReportData, dmuTarget: DmuTarget): string {
     case 'finance': {
       const diff = data.priceDifference;
       const breakEven = data.migration?.breakEvenMonth;
-      if (diff !== null && diff > 0 && breakEven !== null && breakEven > 0) {
+      if (diff !== null && diff > 0 && breakEven != null && breakEven > 0) {
         return `Conclusie: Financieel voordeel van ${formatEuro(diff)} per jaar met break-even na ${breakEven} maanden.`;
       }
       return generic;
