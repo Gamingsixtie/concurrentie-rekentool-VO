@@ -169,6 +169,76 @@ describe('formatNumber', () => {
   });
 });
 
+describe('calculateComparison (new calculator-based signature)', () => {
+  const studentCounts: Record<string, Record<number, number>> = {
+    'havo': { 1: 400, 2: 400 },
+  };
+
+  it('breakdown is present on each non-null provider', () => {
+    const result = calculateComparison(
+      ['rekenwiskunde', 'nederlands'],
+      studentCounts,
+      { citoBundleType: 'individual' },
+    );
+
+    for (const mod of result.modules) {
+      for (const provider of ['cito', 'dia', 'jij'] as const) {
+        const cost = mod.providers[provider];
+        if (cost !== null) {
+          expect(cost.breakdown).toBeDefined();
+          expect(cost.breakdown.length).toBeGreaterThanOrEqual(1);
+        }
+      }
+    }
+  });
+
+  it('diaPackageResult is returned in ComparisonResult', () => {
+    const result = calculateComparison(
+      ['rekenwiskunde', 'nederlands', 'engels'],
+      studentCounts,
+      { citoBundleType: 'individual' },
+    );
+    // diaPackageResult should be present (null or populated depending on package optimization)
+    expect('diaPackageResult' in result).toBe(true);
+  });
+
+  it('differences are correctly computed with calculator-based totals', () => {
+    const result = calculateComparison(
+      ['rekenwiskunde'],
+      studentCounts,
+      { citoBundleType: 'individual' },
+    );
+
+    // Both DIA and JIJ have prices for rekenwiskunde
+    expect(result.differences.citoVsDia).not.toBeNull();
+    expect(result.differences.citoVsJij).not.toBeNull();
+    // citoVsDia = cito total - dia total
+    expect(result.differences.citoVsDia).toBe(
+      result.totals.cito - result.totals.dia,
+    );
+    expect(result.differences.citoVsJij).toBe(
+      result.totals.cito - result.totals.jij,
+    );
+  });
+
+  it('uses override prices when provided', () => {
+    const overrides = new Map([['rekenwiskunde:cito', 5.00]]);
+    const result = calculateComparison(
+      ['rekenwiskunde'],
+      studentCounts,
+      { citoBundleType: 'individual', overridePrices: overrides },
+    );
+
+    expect(result.modules[0].providers.cito!.pricePerStudent).toBe(5.00);
+  });
+
+  it('returns empty modules array for 0 selected modules with new signature', () => {
+    const result = calculateComparison([], studentCounts, {});
+    expect(result.modules).toHaveLength(0);
+    expect(result.totals.cito).toBe(0);
+  });
+});
+
 describe('exports', () => {
   it('exports PROVIDERS array with all three provider keys', () => {
     expect(PROVIDERS).toEqual(['cito', 'dia', 'jij', 'saqi']);
