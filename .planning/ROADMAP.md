@@ -324,7 +324,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete    | 2026-03-24 |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 2/3 | Complete    | 2026-03-24 |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
-| 12. DMU-Export & Offline | v2.0 | 3/3 | Complete   | 2026-03-24 |
+| 12. DMU-Export & Offline | v2.0 | 3/3 | Complete    | 2026-03-24 |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
