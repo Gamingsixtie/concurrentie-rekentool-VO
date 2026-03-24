@@ -207,7 +207,7 @@ Plans:
 **Plans**: 3 plans
 
 - [x] 10.3-01-PLAN.md � Wizard Step 3 provider badges, quick-picks, MVT subcategorie + store visibleProviders
-- [ ] 10.3-02-PLAN.md � ComparisonTable dynamische kolommen, ModuleDetailPanel prijsopbouw per aanbieder
+- [x] 10.3-02-PLAN.md � ComparisonTable dynamische kolommen, ModuleDetailPanel prijsopbouw per aanbieder
 - [ ] 10.3-03-PLAN.md � ProviderSelector, PricingModelCards, inline CitoBundleSelector en visuele verificatie
 
 ### Phase 11: Waarde-engine & Migratie
@@ -322,7 +322,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 10. Prijsvergelijking & Gevoeligheid | v2.0 | 3/3 | Complete | 2026-03-22 |
 | 10.1 Data Foundation: Prijsmodel & Modules | v2.0 | 2/2 | Complete    | 2026-03-24 |
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete    | 2026-03-24 |
-| 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 1/3 | In Progress|  |
+| 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 2/3 | In Progress|  |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 12. DMU-Export & Offline | v2.0 | 0/3 | Not started | - |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
