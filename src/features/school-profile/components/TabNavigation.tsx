@@ -39,7 +39,7 @@ export default function TabNavigation() {
 
   return (
     <div className="border-b border-neutral-200 overflow-x-auto">
-      <nav className="flex px-8 max-sm:px-4 gap-0" aria-label="Schoolprofiel tabs">
+      <nav className="flex px-8 max-sm:px-4 gap-0 w-max min-w-full" aria-label="Schoolprofiel tabs">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           return (
