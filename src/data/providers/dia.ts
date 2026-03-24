@@ -99,7 +99,7 @@ const DIA_DEFAULT_PRICES: PriceRecord[] = [
     sourceLabel: 'DIA Webshop — VO Diatekst NE 2025-2026',
     verifiedAt: new Date('2026-03-21'),
     isPublicationPrice: true,
-    note: 'Diatekst NE (begrijpend lezen) los. Diawoord NE (woordenschat) apart \u20AC3,36. Pakket NE (beide): \u20AC5,84.',
+    note: 'Let op: dit is alleen Diatekst NE (begrijpend lezen). Diawoord NE (woordenschat) kost apart \u20AC3,36. Pakket NE (lezen + woordenschat samen): \u20AC5,84/lln. De meeste DIA-scholen nemen het pakket af.',
   },
   {
     moduleId: 'engels',

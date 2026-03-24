@@ -45,46 +45,40 @@ describe('FlatCalculator (SAQI)', () => {
 });
 
 describe('JijCalculator', () => {
-  let calc: ProviderPriceCalculator;
-
-  beforeEach(() => {
-    calc = createCalculator(JIJ_CONFIG);
-  });
-
-  it('calculates rekenwiskunde for 800 students (Licentie 3)', () => {
-    // 800*2=1600 administrations -> tier 3 (166-2500)
-    // licenseCost = 975/800 = 1.21875
+  it('calculates single module for 800 students (Licentie 3)', () => {
+    // Single module context: 800*2*1=1600 administrations -> tier 3 (166-2500)
+    // licenseCost = 975/800/1 = 1.21875
     // testCost = 2*3.75 = 7.50
-    // total = round(8.71875*100)/100 = 8.72
+    // magisterCost = 500/800/1 = 0.625
+    // total = round(9.34375*100)/100 = 9.34
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
     const result = calc.calculateModule('rekenwiskunde', 800);
     expect(result).not.toBeNull();
-    expect(result!.pricePerStudent).toBe(8.72);
-    expect(result!.totalCost).toBe(8.72 * 800);
+    expect(result!.pricePerStudent).toBe(9.34);
   });
 
-  it('calculates rekenwiskunde for 100 students (Licentie 3)', () => {
-    // 100*2=200 administrations -> tier 3 (166-2500)
-    // licenseCost = 975/100 = 9.75
-    // testCost = 2*3.75 = 7.50
-    // total = round(17.25*100)/100 = 17.25
+  it('calculates single module for 100 students (Licentie 3)', () => {
+    // 100*2*1=200 -> tier 3
+    // license = 975/100 = 9.75, magister = 500/100 = 5.00, test = 7.50
+    // total = round(22.25*100)/100 = 22.25
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
     const result = calc.calculateModule('rekenwiskunde', 100);
     expect(result).not.toBeNull();
-    expect(result!.pricePerStudent).toBe(17.25);
-    expect(result!.totalCost).toBe(1725);
+    expect(result!.pricePerStudent).toBe(22.25);
   });
 
-  it('calculates rekenwiskunde for 2500 students (Licentie 1)', () => {
-    // 2500*2=5000 administrations -> tier 1 (4001-13000)
-    // licenseCost = 5330/2500 = 2.132
-    // testCost = 2*2.40 = 4.80
-    // total = round(6.932*100)/100 = 6.93
+  it('calculates single module for 2500 students (Licentie 1)', () => {
+    // 2500*2*1=5000 -> tier 1 (4001-13000)
+    // license = 5330/2500 = 2.132, magister = 500/2500 = 0.20, test = 2*2.40 = 4.80
+    // total = round(7.132*100)/100 = 7.13
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
     const result = calc.calculateModule('rekenwiskunde', 2500);
     expect(result).not.toBeNull();
-    expect(result!.pricePerStudent).toBe(6.93);
-    expect(result!.totalCost).toBe(6.93 * 2500);
+    expect(result!.pricePerStudent).toBe(7.13);
   });
 
   it('returns zero cost for sociaal-emotioneel (included in license)', () => {
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['sociaal-emotioneel'] });
     const result = calc.calculateModule('sociaal-emotioneel', 800);
     expect(result).not.toBeNull();
     expect(result!.pricePerStudent).toBe(0);
@@ -92,16 +86,102 @@ describe('JijCalculator', () => {
   });
 
   it('includes tierId matching the selected tier', () => {
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
     const result = calc.calculateModule('rekenwiskunde', 800);
     expect(result).not.toBeNull();
     expect(result!.tierId).toBe(3); // Licentie 3
   });
 
   it('override price takes precedence over tier calculation', () => {
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
     const result = calc.calculateModule('rekenwiskunde', 800, 5.00);
     expect(result).not.toBeNull();
     expect(result!.pricePerStudent).toBe(5.00);
     expect(result!.totalCost).toBe(4000);
+  });
+
+  // --- Multi-module: license + Magister charged ONCE, tier based on TOTAL administrations ---
+
+  it('multi-module: 3 modules × 800 students → tier based on 4800 administrations (Tier 1)', () => {
+    // 800 * 2 * 3 = 4800 administrations → Tier 1 (4001-13000)
+    // license = 5330/800/3 = 2.2208, magister = 500/800/3 = 0.2083
+    // test = 2 * 2.40 = 4.80
+    // per module = round((2.2208 + 4.80 + 0.2083)*100)/100 = 7.23
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'nederlands', 'engels'],
+    });
+    const results = calc.calculateAll(['rekenwiskunde', 'nederlands', 'engels'], 800);
+    expect(results.size).toBe(3);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.tierId).toBe(1); // Tier 1 because 4800 total administrations
+    expect(reken.pricePerStudent).toBe(7.23);
+
+    // All three modules should have the same price (same tier, same distribution)
+    const nl = results.get('nederlands')!;
+    const en = results.get('engels')!;
+    expect(nl.pricePerStudent).toBe(reken.pricePerStudent);
+    expect(en.pricePerStudent).toBe(reken.pricePerStudent);
+  });
+
+  it('multi-module: total cost is correct (license + magister counted once)', () => {
+    // 800 students, 3 paid modules
+    // Tier 1: license €5330 + magister €500 + tests 4800 * €2.40 = €11520
+    // Total = €5330 + €500 + €11520 = €17350
+    // Per student = €17350 / 800 = €21.6875 ≈ 3 × €7.23 = €21.69
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'nederlands', 'engels'],
+    });
+    const results = calc.calculateAll(['rekenwiskunde', 'nederlands', 'engels'], 800);
+
+    let totalPerStudent = 0;
+    for (const [, result] of results) {
+      totalPerStudent += result.pricePerStudent;
+    }
+    // 3 * 7.23 = 21.69
+    expect(totalPerStudent).toBeCloseTo(21.69, 1);
+  });
+
+  it('multi-module: 2 modules × 800 students stays Tier 3 (3200 administrations)', () => {
+    // 800 * 2 * 2 = 3200 administrations → Tier 2 (2501-4000)
+    // license = 2815/800/2, magister = 500/800/2, test = 2*3.05
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'nederlands'],
+    });
+    const results = calc.calculateAll(['rekenwiskunde', 'nederlands'], 800);
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.tierId).toBe(2); // Tier 2 because 3200 administrations
+  });
+
+  it('multi-module: free modules (sociaal-emotioneel) do not count toward tier/license split', () => {
+    // 3 selected: rekenwiskunde, nederlands, sociaal-emotioneel
+    // sociaal-emotioneel is free (amountPerStudent = 0)
+    // Paid modules: 2 (rekenwiskunde, nederlands)
+    // 800 * 2 * 2 = 3200 administrations → Tier 2
+    const calc = createCalculator(JIJ_CONFIG, {
+      selectedModules: ['rekenwiskunde', 'nederlands', 'sociaal-emotioneel'],
+    });
+    const results = calc.calculateAll(
+      ['rekenwiskunde', 'nederlands', 'sociaal-emotioneel'],
+      800,
+    );
+
+    const sef = results.get('sociaal-emotioneel')!;
+    expect(sef.pricePerStudent).toBe(0);
+
+    const reken = results.get('rekenwiskunde')!;
+    expect(reken.tierId).toBe(2); // 2 paid modules × 800 × 2 = 3200 → Tier 2
+  });
+
+  it('breakdown shows Magister/SomToday-koppeling as separate line', () => {
+    const calc = createCalculator(JIJ_CONFIG, { selectedModules: ['rekenwiskunde'] });
+    const result = calc.calculateModule('rekenwiskunde', 800);
+    expect(result).not.toBeNull();
+    const magisterLine = result!.breakdown.find((s) =>
+      s.label.includes('Magister/SomToday'),
+    );
+    expect(magisterLine).toBeDefined();
+    expect(magisterLine!.amount).toBeGreaterThan(0);
   });
 });
 

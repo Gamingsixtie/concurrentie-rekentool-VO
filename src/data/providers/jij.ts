@@ -112,9 +112,9 @@ export function estimateJijCostPerStudent(
 // ─── Default Prices ─────────────────────────────────────────────────────────────
 
 const JIJ_NOTE =
-  'JIJ! hanteert een licentie + toetsprijs-model. Prijs berekend als ' +
-  '(\u20AC975 jaarfee + 1.600\u00D73,75 toetskosten + \u20AC500 Magister-koppeling) / 800 leerlingen = \u20AC9,34. ' +
-  'Werkelijke kosten vari\u00EBren sterk met schoolgrootte. ' +
+  'JIJ! hanteert een licentie + toetsprijs-model. ' +
+  'E\u00E9n jaarlijkse licentie dekt ALLE modules; tier op basis van totaal afnames over alle modules heen. ' +
+  'Magister/SomToday-koppeling: \u20AC500 (L1-3) of \u20AC195 (L4) \u2014 betaald, dit is bij DIA gratis. ' +
   'Bron: deskresearch MediaTest 2024 (R-5043). Neem contact op met Bureau ICE voor actuele tarieven.';
 
 const JIJ_DEFAULT_PRICES: PriceRecord[] = [

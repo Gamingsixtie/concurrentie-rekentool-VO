@@ -30,6 +30,7 @@ export function createCalculator(
     case 'tiered-license':
       return new JijCalculator(
         config as import('@/data/providers/jij').JijProviderConfig,
+        options?.selectedModules ?? [],
       );
     case 'flat':
       return new FlatCalculator(
