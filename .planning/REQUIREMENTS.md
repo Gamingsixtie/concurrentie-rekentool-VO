@@ -11,7 +11,7 @@
 - [x] **ARCH-02**: Bestaande v1 localStorage-data wordt automatisch gemigreerd naar v2-structuur zonder dataverlies
 - [x] **ARCH-03**: Applicatie gebruikt IndexedDB (Dexie) voor schooldata-persistentie met ondersteuning voor 50+ schoolprofielen
 - [x] **ARCH-04**: Navigatie ondersteunt browser-back-button, deep linking naar specifieke school/view, en URL-state
-- [ ] **ARCH-05**: Applicatie werkt offline op tablet na eerste laden (service worker cacht assets en data)
+- [x] **ARCH-05**: Applicatie werkt offline op tablet na eerste laden (service worker cacht assets en data)
 
 ### School Intelligence
 
@@ -122,7 +122,7 @@
 | ARCH-02 | Phase 6, 8 | Complete |
 | ARCH-03 | Phase 8 | Complete |
 | ARCH-04 | Phase 6 | Complete |
-| ARCH-05 | Phase 12 | Pending |
+| ARCH-05 | Phase 12 | Complete |
 | AUTH-01 | Phase 8 | Complete |
 | AUTH-02 | Phase 8 | Complete |
 | AUTH-03 | Phase 8 | Complete |

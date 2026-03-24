@@ -240,7 +240,7 @@ Plans:
 Plans:
 - [x] 12-01-PLAN.md — PDF verbetering: SVG staafdiagram, SchoolplanSection, multi-page, DMU-samenvatting
 - [ ] 12-02-PLAN.md — Clipboard export: geformatteerde kopieer-functionaliteit voor email/Teams
-- [ ] 12-03-PLAN.md — PWA/Offline: service worker, offline-banner, mutatie-queue
+- [x] 12-03-PLAN.md — PWA/Offline: service worker, offline-banner, mutatie-queue
 
 ### Phase 13: Architectuur Review & Go-Live
 **Goal**: Volledige architectuur-check, performance audit, security review en productie-readiness verificatie voordat de app live gaat voor het team
@@ -324,7 +324,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 10.2 Engine Refactoring: Provider-aware | v2.0 | 2/2 | Complete    | 2026-03-24 |
 | 10.3 UX Overhaul: Wizard & Vergelijking | v2.0 | 2/3 | Complete    | 2026-03-24 |
 | 11. Waarde-engine & Migratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
-| 12. DMU-Export & Offline | v2.0 | 1/3 | In Progress|  |
+| 12. DMU-Export & Offline | v2.0 | 2/3 | In Progress|  |
 | 13. Architectuur Review & Go-Live | v2.0 | 0/2 | Not started | - |
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |

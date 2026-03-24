@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 12-01-PLAN.md
-last_updated: "2026-03-24T21:30:10.619Z"
+stopped_at: Completed 12-03-PLAN.md
+last_updated: "2026-03-24T21:42:26.556Z"
 progress:
   total_phases: 14
   completed_phases: 10
   total_plans: 39
-  completed_plans: 34
+  completed_plans: 35
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 12 (dmu-export-offline) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -106,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 12]: Pure calculateBarLayout function extracted from PdfBarChart for unit testing without react-pdf renderer
 - [Phase 12]: Schoolplan section placed last in all DMU reorder arrays as supplementary context
 - [Phase 12]: View wrap on content container for multi-page overflow instead of fixed page breaks
+- [Phase 12]: OfflineBanner in RootLayout instead of App.tsx (App only renders RouterProvider)
+- [Phase 12]: Server-wins conflict strategy for offline mutation sync (compare mutation.timestamp vs server updated_at)
+- [Phase 12]: queueIfOffline helper pattern for offline-safe mutations in operations.ts
 
 ### Pending Todos
 
@@ -123,6 +126,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T21:30:10.615Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-03-24T21:42:26.553Z
+Stopped at: Completed 12-03-PLAN.md
 Resume file: None
