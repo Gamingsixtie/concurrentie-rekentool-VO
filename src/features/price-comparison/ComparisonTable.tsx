@@ -320,6 +320,11 @@ function ProviderCell({
         <span className="text-base font-semibold">
           {formatCurrency(cost.totalCost)}
         </span>
+        {cost.isPackagePrice && (
+          <span className="inline-flex items-center bg-cito-primary/10 text-cito-primary rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
+            Bundel
+          </span>
+        )}
         <PriceBadge record={cost.priceRecord} />
         {cost.priceRecord.note && <NoteIcon note={cost.priceRecord.note} />}
       </div>

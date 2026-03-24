@@ -3,6 +3,7 @@ import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
 import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
+import { getCitoBundle } from '../../data/providers/cito';
 import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
 import { MODULE_CATALOG } from '../../models/modules';
 import { PROVIDER_CONFIGS } from '../../data/providers';
@@ -44,15 +45,28 @@ function ComparisonSummary({ result }: { result: ComparisonResult }) {
       {/* Totalen per aanbieder */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {/* Cito — baseline */}
-        <div className="rounded-lg bg-cito-primary p-4 text-white">
-          <div className="text-xs font-semibold opacity-70 mb-1 uppercase tracking-wide">
-            {PROVIDER_LABELS.cito}
-          </div>
-          <div className="text-[22px] font-semibold leading-none">
-            {formatCurrency(result.totals.cito)}
-          </div>
-          <div className="text-xs opacity-60 mt-1">{periodLabel} · {bundleLabel}</div>
-        </div>
+        {(() => {
+          const bundle = getCitoBundle(citoBundleType);
+          const bundlePrice = bundle.contractPrices?.[contractPeriod] ?? bundle.pricePerStudent;
+          return (
+            <div className="rounded-lg bg-cito-primary p-4 text-white">
+              <div className="text-xs font-semibold opacity-70 mb-1 uppercase tracking-wide">
+                {PROVIDER_LABELS.cito}
+              </div>
+              <div className="text-[22px] font-semibold leading-none">
+                {formatCurrency(result.totals.cito)}
+              </div>
+              <div className="text-xs opacity-60 mt-1">{periodLabel} · {bundleLabel}</div>
+              {bundlePrice !== null && (
+                <div className="mt-2 pt-2 border-t border-white/20">
+                  <span className="text-sm font-semibold">
+                    {bundleLabel} bundel: {formatCurrency(bundlePrice)}/lln/jr
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* DIA */}
         <div className="rounded-lg bg-neutral-50 border border-neutral-200 p-4">
