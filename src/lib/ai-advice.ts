@@ -45,7 +45,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
 // ─── Build request payload ──────────────────────────────────────────────────
 
-function buildAdvicePayload(
+export function buildAdvicePayload(
   result: ComparisonResult,
   levels: SchoolLevel[],
   studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>,
@@ -79,6 +79,32 @@ function buildAdvicePayload(
       })),
     },
     differentiators: relevantDifferentiators,
+  };
+}
+
+// ─── Build retention payload (Scenario C) ───────────────────────────────────
+
+export function buildRetentionAdvicePayload(
+  result: ComparisonResult,
+  levels: SchoolLevel[],
+  studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>,
+  selectedModules: string[],
+  moduleSetups: ModuleCurrentSetup[],
+  schoolplanOpportunities?: Array<{ moduleId: string; kans: string }>,
+) {
+  const base = buildAdvicePayload(result, levels, studentCounts, selectedModules, moduleSetups);
+  return {
+    ...base,
+    scenarioType: 'C' as const,
+    schoolplanOpportunities: schoolplanOpportunities ?? [],
+    migrationContext: {
+      platformUpgradeNextYear: true,
+      newPlatformBenefits: [
+        'Nieuw platform met verbeterde functionaliteit',
+        'Automatische migratie zonder extra kosten',
+        'Doorlopende toegang tot bestaande data',
+      ],
+    },
   };
 }
 
@@ -202,6 +228,50 @@ export async function* streamAdvice(
   });
 
   if (!response.ok) throw new Error('AI-advies genereren mislukt.');
+
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    const { texts, error } = parseSSEChunk(chunk);
+
+    if (error) throw new Error(error);
+    for (const text of texts) {
+      yield text;
+    }
+  }
+}
+
+// ─── Streaming retention variant (Scenario C) ──────────────────────────────
+
+/**
+ * Streaming variant for retention advice (Scenario C).
+ * Uses buildRetentionAdvicePayload instead of buildAdvicePayload.
+ */
+export async function* streamRetentionAdvice(
+  result: ComparisonResult,
+  levels: SchoolLevel[],
+  studentCounts: Partial<Record<SchoolLevel, Record<number, number>>>,
+  selectedModules: string[],
+  moduleSetups: ModuleCurrentSetup[],
+  schoolplanOpportunities?: Array<{ moduleId: string; kans: string }>,
+): AsyncGenerator<string> {
+  const headers = await getAuthHeaders();
+  const payload = buildRetentionAdvicePayload(
+    result, levels, studentCounts, selectedModules, moduleSetups, schoolplanOpportunities,
+  );
+
+  const response = await fetch('/api/ai-advice', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error('Retentie-advies genereren mislukt.');
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();

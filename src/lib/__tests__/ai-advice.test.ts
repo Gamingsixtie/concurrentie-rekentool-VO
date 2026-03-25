@@ -44,7 +44,7 @@ const mockStudentCounts: Partial<Record<SchoolLevel, Record<number, number>>> = 
 };
 const mockSelectedModules = ['rekenwiskunde'];
 const mockModuleSetups: ModuleCurrentSetup[] = [
-  { moduleId: 'rekenwiskunde', currentProvider: 'cito', pricePerStudent: null },
+  { moduleId: 'rekenwiskunde', currentProvider: 'cito-oud', pricePerStudent: null },
 ];
 
 // ─── Tests ───────────────────────────────────────────────────────────────────

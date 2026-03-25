@@ -48,6 +48,28 @@ Antwoord UITSLUITEND in dit JSON-formaat:
   "samenvatting": "Een zin die de kern van het advies samenvat — geschikt als openingszin in het gesprek."
 }`;
 
+const RETENTION_SYSTEM_PROMPT = `Je bent een retentie-adviesassistent voor Cito-consultants. De school is een BESTAANDE Cito-klant op het huidige platform die overweegt naar een concurrent over te stappen.
+
+PERSPECTIEF: Retentie, niet acquisitie. De school betaalt al bij Cito.
+
+BELANGRIJK:
+- Schrijf in het Nederlands, professioneel maar toegankelijk
+- Geef 4-6 concrete adviespunten in drie categorieen
+- Categorie 1 (type "prijs"): Prijsvergelijking — wat betaalt de school nu bij Cito vs. wat kost de concurrent
+- Categorie 2 (type "bezwaar"): Bij overstap verliest u — differentiators geframed als BEHOUDEN, niet als KRIJGEN. Gebruik woorden als "verliest", "raakt kwijt", "moet opnieuw opbouwen"
+- Categorie 3 (type "meerwaarde"): Als u bij Cito blijft — migratiepad naar nieuw platform (volgend schooljaar gratis upgrade), schoolplan-aansluiting als die beschikbaar is
+- Wees eerlijk over prijs — als concurrent goedkoper is, erken dat en leg uit wat de school verliest bij overstap
+- Als er schoolplan-kansen zijn meegegeven, verwijs daar concreet naar: "Uw schoolplan noemt [doel], Cito's [module] ondersteunt dit"
+- Het migratiepad is de zachte deal: "als u bij Cito blijft, gaat u volgend schooljaar over naar het nieuwe platform met extra voordelen"
+
+Antwoord UITSLUITEND in dit JSON-formaat:
+{
+  "adviezen": [
+    { "titel": "Korte titel", "tekst": "Toelichting.", "type": "prijs | meerwaarde | bezwaar" }
+  ],
+  "samenvatting": "Kern van het retentie-advies — geschikt als openingszin."
+}`;
+
 interface AdviceRequest {
   comparisonData: {
     modules: Array<{
@@ -74,6 +96,12 @@ interface AdviceRequest {
     jij: string[];
     saqi: string[];
   }>;
+  scenarioType?: 'A' | 'C';
+  schoolplanOpportunities?: Array<{ moduleId: string; kans: string }>;
+  migrationContext?: {
+    platformUpgradeNextYear: boolean;
+    newPlatformBenefits: string[];
+  };
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -133,12 +161,15 @@ ${body.differentiators.map((d) => {
     d.saqi.length > 0 ? `  SAQI: ${d.saqi.join('; ')}` : '',
   ].filter(Boolean).join('\n');
   return `- ${d.moduleId}:\n${parts}`;
-}).join('\n')}`;
+}).join('\n')}${body.schoolplanOpportunities?.length ? `\n\nSchoolplan-kansen:\n${body.schoolplanOpportunities.map(o => `- ${o.moduleId}: ${o.kans}`).join('\n')}` : ''}${body.migrationContext ? `\n\nMigratiecontext: School gaat volgend schooljaar over naar nieuw Cito-platform. Voordelen: ${body.migrationContext.newPlatformBenefits.join(', ')}` : ''}`;
+
+    // Select system prompt based on scenario type
+    const systemPrompt = body.scenarioType === 'C' ? RETENTION_SYSTEM_PROMPT : SYSTEM_PROMPT;
 
     const stream = getAnthropic().messages.stream({
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
     });
 

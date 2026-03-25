@@ -17,6 +17,7 @@ import { useState } from 'react';
 import { useWizardStore } from './wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { streamWizardAdvice, parseAdviceFromText } from '@/lib/ai-wizard';
+import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { MODULE_DIFFERENTIATORS } from '@/data/differentiators';
 import { DIA_PACKAGES } from '@/data/providers/dia';
 import { JIJ_LICENSE_TIERS } from '@/data/providers/jij';
@@ -80,8 +81,20 @@ export function WizardStep3Advice() {
   const setStreamingText = useWizardStore((s) => s.setStreamingText);
   const appendStreamingText = useWizardStore((s) => s.appendStreamingText);
 
+  const scenario = useWizardStore((s) => s.scenario);
+
   const [error, setError] = useState<string | null>(null);
   const [dmuExpanded, setDmuExpanded] = useState(false);
+
+  const isRetentionScenario = scenario === 'alles-oud-cito-concurrent';
+
+  // Schoolplan data for retention advice (graceful degradation: empty array if unavailable)
+  const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId) ?? '';
+  const { data: schoolplanAnalysis } = useSchoolplanAnalysis(activeSchoolId);
+  const schoolplanOpportunities = schoolplanAnalysis?.opportunities?.map((opp) => ({
+    moduleId: opp.moduleId ?? '',
+    kans: opp.explanation ?? opp.theme ?? '',
+  })).filter((o) => o.moduleId && o.kans) ?? [];
 
   const hasGenerated = aiAdvice !== null;
 
@@ -140,12 +153,26 @@ export function WizardStep3Advice() {
     let fullText = '';
 
     try {
+      // For Scenario C (alles-oud-cito-concurrent), pass retention context
+      const retentionContext = isRetentionScenario
+        ? {
+            ...extraContext,
+            bijzonderheden: [
+              extraContext.bijzonderheden,
+              'SCENARIO: Retentie — bestaande Cito-klant overweegt concurrent. Gebruik retentie-framing: wat verliest de school bij overstap, wat behouden ze bij Cito, migratiepad als zachte deal.',
+              ...(schoolplanOpportunities.length > 0
+                ? [`Schoolplan-kansen: ${schoolplanOpportunities.map(o => `${o.moduleId}: ${o.kans}`).join('; ')}`]
+                : []),
+            ].filter(Boolean).join('\n'),
+          }
+        : extraContext;
+
       const stream = streamWizardAdvice(
         activeSelections,
         profile,
         differentiators,
         providerData,
-        extraContext,
+        retentionContext,
       );
 
       for await (const chunk of stream) {
@@ -222,6 +249,8 @@ export function WizardStep3Advice() {
           </>
         ) : hasGenerated ? (
           'Opnieuw genereren'
+        ) : isRetentionScenario ? (
+          'Genereer retentie-advies'
         ) : (
           'Genereer advies'
         )}
