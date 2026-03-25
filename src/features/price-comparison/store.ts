@@ -60,6 +60,13 @@ interface PriceComparisonState {
   setForceDiaPackageId: (id: string | null) => void;
 
   initialize: () => void;
+  // Atomic wizard apply: sets config + recalculates + sets providers in one batch
+  applyWizardConfig: (config: {
+    competitorModuleIds: Partial<Record<ProviderKey, string[]>> | null;
+    forceDiaPackageId: string | null | undefined;
+    citoBundleType?: CitoBundleType;
+    visibleProviders: ProviderKey[];
+  }) => void;
   setDraftOverride: (override: PriceOverride) => void;
   resetOverride: (moduleId: string, provider: string) => void;
   resetAllOverrides: () => void;
@@ -205,6 +212,44 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const visibleProviders: ProviderKey[] = ['cito', ...defaultVisible.filter(p => p !== 'cito').sort()];
 
       set({
+        result,
+        diaPackageResult,
+        visibleProviders,
+        ...extended,
+      });
+    },
+
+    applyWizardConfig: (config) => {
+      const { selectedModules, studentCounts } =
+        useSchoolProfileStore.getState();
+      const state = get();
+
+      // Determine effective bundle type
+      const citoBundleType = config.citoBundleType ?? state.citoBundleType;
+
+      // Compute result with wizard config applied
+      const annualResult = calculateComparison(selectedModules, studentCounts, {
+        citoBundleType,
+        competitorModuleIds: config.competitorModuleIds ?? undefined,
+        forceDiaPackageId: config.forceDiaPackageId,
+      });
+
+      const bundle = getCitoBundle(citoBundleType);
+      const citoFactor = getCitoFactorForBundle(bundle, state.contractPeriod);
+      const result = applyContractPeriodToResult(annualResult, state.contractPeriod, citoFactor);
+      const diaPackageResult = annualResult.diaPackageResult ?? null;
+      const extended = computeExtendedResults(result);
+
+      // Ensure 'cito' is always included in visible providers
+      const visibleProviders: ProviderKey[] = config.visibleProviders.includes('cito')
+        ? config.visibleProviders
+        : ['cito', ...config.visibleProviders];
+
+      // Single atomic set — all config + computed results at once
+      set({
+        competitorModuleIds: config.competitorModuleIds,
+        forceDiaPackageId: config.forceDiaPackageId,
+        citoBundleType,
         result,
         diaPackageResult,
         visibleProviders,

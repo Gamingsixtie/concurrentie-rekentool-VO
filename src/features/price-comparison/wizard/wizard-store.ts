@@ -191,24 +191,14 @@ export const useWizardStore = create<WizardState>()(
         }
         // undefined = no DIA selections, engine uses default behavior
 
-        const comparisonStore = usePriceComparisonStore.getState();
-
-        // Set variant config (competitor module mapping + forced package)
-        comparisonStore.setVariantConfig(competitorModuleIds, forceDiaPackageId);
-
-        // Set Cito bundle type if AI recommended one
-        if (state.aiAdvice?.aanbevolenCitoBundel) {
-          comparisonStore.setCitoBundleType(state.aiAdvice.aanbevolenCitoBundel);
-          // setCitoBundleType auto-triggers initialize()
-        } else {
-          // No bundle recommendation, manually initialize
-          comparisonStore.initialize();
-        }
-
-        // Set visible providers AFTER initialize — initialize() overwrites
-        // visibleProviders with defaults from moduleSetups, so we must apply
-        // the wizard's provider selection after recalculation completes.
-        comparisonStore.setVisibleProviders(providers);
+        // Apply all wizard config atomically — single set() call avoids
+        // React 18 batching issues where intermediate states cause stale renders.
+        usePriceComparisonStore.getState().applyWizardConfig({
+          competitorModuleIds,
+          forceDiaPackageId,
+          citoBundleType: state.aiAdvice?.aanbevolenCitoBundel || undefined,
+          visibleProviders: providers,
+        });
 
         // Scenario C: write scenario to school profile store
         if (state.scenario === 'alles-oud-cito-concurrent') {
