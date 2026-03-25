@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Phase 16 UI-SPEC approved
-last_updated: "2026-03-25T08:55:08.951Z"
+status: Ready to execute
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-03-25T09:32:10.319Z"
 progress:
   total_phases: 15
   completed_phases: 12
-  total_plans: 42
-  completed_plans: 39
+  total_plans: 45
+  completed_plans: 40
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 13 — architectuur-review-go-live
+**Current focus:** Phase 16 — ai-wizard-verbetering-prijsvergelijking-harmonisatie
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
+Phase: 16 (ai-wizard-verbetering-prijsvergelijking-harmonisatie) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -114,6 +114,9 @@ Recent decisions affecting current work:
 - [Phase 13]: OfflineQueueTable union type at entry point; type assertion for dynamic sync calls
 - [Phase 13]: VERCEL_ENV guard on SKIP_AUTH: preserves local dev convenience while guaranteeing auth in production
 - [Phase 13]: Storage path includes teamId as first segment for RLS path-based enforcement
+- [Phase 16]: Persist only essential wizard state via partialize -- streaming/advice state regenerated each time
+- [Phase 16]: applyToTable uses adjustedSelections when available, falls back to variantSelections
+- [Phase 16]: parseAdviceFromText returns fallback instead of throwing on invalid JSON
 
 ### Roadmap Evolution
 
@@ -135,6 +138,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T08:55:08.946Z
-Stopped at: Phase 16 UI-SPEC approved
-Resume file: .planning/phases/16-ai-wizard-verbetering-prijsvergelijking-harmonisatie/16-UI-SPEC.md
+Last session: 2026-03-25T09:32:10.312Z
+Stopped at: Completed 16-01-PLAN.md
+Resume file: None
