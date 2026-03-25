@@ -12,7 +12,7 @@ import { ComparisonWizardProgress } from './ComparisonWizardProgress';
 import { ScenarioDetector } from './ScenarioDetector';
 import { WizardStep1Notes } from './WizardStep1Notes';
 import { WizardStep2Variants } from './WizardStep2Variants';
-// WizardStep3Advice will be imported once created in Plan 03
+import { WizardStep3Advice } from './WizardStep3Advice';
 
 export function ComparisonWizard() {
   const currentStep = useWizardStore((s) => s.currentStep);
@@ -79,12 +79,7 @@ export function ComparisonWizard() {
       case 1:
         return <WizardStep2Variants />;
       case 2:
-        // WizardStep3Advice placeholder until Plan 03
-        return (
-          <div className="text-sm text-neutral-500 p-4">
-            Advies & Resultaat (stap 3)
-          </div>
-        );
+        return <WizardStep3Advice />;
       default:
         return null;
     }

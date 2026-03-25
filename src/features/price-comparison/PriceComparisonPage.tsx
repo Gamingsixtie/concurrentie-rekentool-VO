@@ -14,7 +14,7 @@ import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
 import { CitoBundleSelector } from './CitoBundleSelector';
-import { AdvicePanel } from './AdvicePanel';
+import { ComparisonWizard } from './wizard/ComparisonWizard';
 import { AnalysisPanel } from './AnalysisPanel';
 
 interface PriceComparisonPageProps {
@@ -379,8 +379,10 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         <ComparisonChart result={result} onBarClick={handleBarClick} />
       </div>
 
-      {/* AI Gespreksadvies */}
-      <AdvicePanel />
+      {/* AI Vergelijkingswizard */}
+      <div className="mb-8">
+        <ComparisonWizard />
+      </div>
 
       {/* AI Concurrentieanalyse */}
       <AnalysisPanel mode="comparison" />
