@@ -22,7 +22,6 @@ import UpsellCard from '../components/UpsellCard';
 import DmuMatrix from '../components/DmuMatrix';
 import CustomerJourneySummary from '../components/CustomerJourneySummary';
 import { useContacts } from '@/hooks/useContacts';
-<<<<<<< HEAD
 import { useSchool } from '@/hooks/useSchools';
 import { useConversations } from '@/hooks/useConversations';
 import { useSystemEvents } from '@/hooks/useSystemEvents';
