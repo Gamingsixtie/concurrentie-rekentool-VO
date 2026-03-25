@@ -193,9 +193,6 @@ export const useWizardStore = create<WizardState>()(
 
         const comparisonStore = usePriceComparisonStore.getState();
 
-        // Set visible providers
-        comparisonStore.setVisibleProviders(providers);
-
         // Set variant config (competitor module mapping + forced package)
         comparisonStore.setVariantConfig(competitorModuleIds, forceDiaPackageId);
 
@@ -207,6 +204,11 @@ export const useWizardStore = create<WizardState>()(
           // No bundle recommendation, manually initialize
           comparisonStore.initialize();
         }
+
+        // Set visible providers AFTER initialize — initialize() overwrites
+        // visibleProviders with defaults from moduleSetups, so we must apply
+        // the wizard's provider selection after recalculation completes.
+        comparisonStore.setVisibleProviders(providers);
 
         // Scenario C: write scenario to school profile store
         if (state.scenario === 'alles-oud-cito-concurrent') {
