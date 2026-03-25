@@ -9,6 +9,7 @@ import { ModuleDetailPanel } from './ModuleDetailPanel';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { CitoBundleSelector } from './CitoBundleSelector';
+import { getCitoBundle } from '../../data/providers/cito';
 
 interface ComparisonTableProps {
   result: ComparisonResult;
@@ -132,6 +133,13 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
   );
 }
 
+/** Detect which modules are part of a Cito bundle (2+ modules with isPackagePrice). */
+function getBundleModuleIds(modules: ComparisonResult['modules']): Set<string> {
+  const bundled = modules.filter((m) => m.providers.cito?.isPackagePrice);
+  if (bundled.length < 2) return new Set();
+  return new Set(bundled.map((m) => m.moduleId));
+}
+
 function CategoryGroup({
   label,
   modules,
@@ -147,6 +155,8 @@ function CategoryGroup({
   onToggle: (moduleId: string) => void;
   activeProviders: readonly ProviderKey[];
 }) {
+  const bundleModuleIds = getBundleModuleIds(modules);
+
   return (
     <>
       {/* Category subheader */}
@@ -159,22 +169,97 @@ function CategoryGroup({
         </td>
       </tr>
 
-      {modules.map((mod) => {
+      {modules.map((mod, idx) => {
         const isExpanded = expandedModule === mod.moduleId;
         const isHighlighted = onBarHighlight === mod.moduleId;
+        const isBundled = bundleModuleIds.has(mod.moduleId);
+
+        // Check if this is the last bundled module in the list
+        const isLastBundled = isBundled && !modules.slice(idx + 1).some((m) => bundleModuleIds.has(m.moduleId));
 
         return (
-          <ModuleRow
-            key={mod.moduleId}
-            mod={mod}
-            isExpanded={isExpanded}
-            isHighlighted={isHighlighted}
-            onToggle={onToggle}
-            activeProviders={activeProviders}
-          />
+          <BundleGroupWrapper key={mod.moduleId}>
+            <ModuleRow
+              mod={mod}
+              isExpanded={isExpanded}
+              isHighlighted={isHighlighted}
+              onToggle={onToggle}
+              activeProviders={activeProviders}
+              isBundleGrouped={isBundled}
+            />
+            {isLastBundled && (
+              <BundelSubtotaalRow
+                bundleModules={modules.filter((m) => bundleModuleIds.has(m.moduleId))}
+                activeProviders={activeProviders}
+              />
+            )}
+          </BundleGroupWrapper>
         );
       })}
     </>
+  );
+}
+
+/** Fragment wrapper — just passes children through. Needed for the key prop. */
+function BundleGroupWrapper({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
+function BundelSubtotaalRow({
+  bundleModules,
+  activeProviders,
+}: {
+  bundleModules: ComparisonResult['modules'];
+  activeProviders: readonly ProviderKey[];
+}) {
+  const citoBundleType = usePriceComparisonStore((s) => s.citoBundleType);
+  const contractPeriod = usePriceComparisonStore((s) => s.contractPeriod);
+  const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
+  const totalStudents = getTotalStudents(studentCounts);
+
+  const bundle = getCitoBundle(citoBundleType);
+  const bundleLabel = bundle.name;
+  const bundlePricePerStudent = bundle.contractPrices?.[contractPeriod] ?? bundle.pricePerStudent;
+
+  return (
+    <tr className="bg-cito-primary/5 border-t border-cito-primary/10">
+      <td className="py-2 px-4 pl-10 text-sm font-semibold text-cito-primary">
+        Subtotaal {bundleLabel} bundel
+      </td>
+      {activeProviders.map((provider) => {
+        // Sum the per-student prices for this provider across the bundle modules
+        const perStudent = bundleModules.reduce((sum, m) => {
+          const cost = m.providers[provider];
+          return sum + (cost?.pricePerStudent ?? 0);
+        }, 0);
+        const total = perStudent * totalStudents;
+
+        // For Cito: show the actual bundle price if available
+        const isCito = provider === 'cito';
+        const displayPerStudent = isCito && bundlePricePerStudent !== null
+          ? bundlePricePerStudent
+          : perStudent;
+        const displayTotal = isCito && bundlePricePerStudent !== null
+          ? bundlePricePerStudent * totalStudents
+          : total;
+
+        const hasAnyPrice = bundleModules.some((m) => m.providers[provider] !== null);
+        if (!hasAnyPrice) {
+          return <td key={provider} className="py-2 px-4 text-sm text-neutral-400">—</td>;
+        }
+
+        return (
+          <td key={provider} className="py-2 px-4">
+            <span className="text-sm font-semibold text-neutral-800">
+              {formatCurrency(displayTotal)}
+            </span>
+            <span className="text-xs text-neutral-500 ml-1.5">
+              ({formatCurrency(displayPerStudent)}/lln)
+            </span>
+          </td>
+        );
+      })}
+    </tr>
   );
 }
 
@@ -184,12 +269,14 @@ function ModuleRow({
   isHighlighted,
   onToggle,
   activeProviders,
+  isBundleGrouped = false,
 }: {
   mod: ComparisonResult['modules'][number];
   isExpanded: boolean;
   isHighlighted: boolean;
   onToggle: (moduleId: string) => void;
   activeProviders: readonly ProviderKey[];
+  isBundleGrouped?: boolean;
 }) {
   return (
     <>
@@ -201,7 +288,9 @@ function ModuleRow({
       >
         {/* Module name cell */}
         <td
-          className="py-3 px-4 cursor-pointer select-none"
+          className={`py-3 px-4 cursor-pointer select-none ${
+            isBundleGrouped ? 'border-l-2 border-l-cito-primary/30' : ''
+          }`}
           onClick={() => onToggle(mod.moduleId)}
           role="button"
           tabIndex={0}
