@@ -50,11 +50,13 @@ Exceptions: Touch targets use 44px minimum height (`h-[44px]`) per existing proj
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 16px (`text-base`) | 400 (normal) | 1.5 |
-| Label | 14px (`text-[14px]`) | 600 (semibold) | 1.4 |
+| Label | 14px (`text-sm`) | 600 (semibold) | 1.4 |
 | Heading | 20px (`text-[20px]`) | 600 (semibold) | 1.2 |
-| Small / Meta | 13px (`text-[13px]`) | 400 (normal) | 1.4 |
+| Small / Meta | 12px (`text-xs`) | 400 (normal) | 1.4 |
 
-**Source:** Existing `ConversationForm.tsx` and `ActionItem.tsx` use these exact values. No changes needed.
+**Scale rationale:** 4 tiers with clear separation — 12 / 14 / 16 / 20. The previous 13px tier was collapsed to 12px to create a visible 2px step from the 14px Label tier. 12px is used for timestamps, deadline dates, action type chips, and overdue badges.
+
+**Source:** Existing `ConversationForm.tsx` and `ActionItem.tsx` patterns, adjusted from 13px to 12px for scale clarity.
 
 ---
 
@@ -96,8 +98,8 @@ Accent reserved for:
 | State | Border | Badge |
 |-------|--------|-------|
 | No deadline | none | none |
-| Future deadline | none | `text-[13px] text-neutral-500` with calendar icon |
-| Overdue deadline | `border-red-300` on card | `text-[13px] text-red-600 font-semibold` with date |
+| Future deadline | none | `text-xs text-neutral-500` with calendar icon |
+| Overdue deadline | `border-red-300` on card | `text-xs text-red-600 font-semibold` with date |
 
 ---
 
@@ -110,22 +112,35 @@ Accent reserved for:
 | Speech toggle start | Tooltip: "Klik om spraakherkenning te starten" |
 | Speech toggle stop | Tooltip: "Klik om spraakherkenning te stoppen" |
 | Speech unsupported | Tooltip: "Spraakherkenning niet ondersteund in deze browser" |
-| Empty state (kanban column) | "Geen acties" |
+| Empty state (kanban: Te doen) | "Geen openstaande acties — typ een actie hieronder" |
+| Empty state (kanban: In uitvoering) | "Nog geen acties in uitvoering" |
+| Empty state (kanban: Afgerond) | "Nog geen afgeronde acties" |
 | Empty state (conversations) | "Nog geen gesprekken vastgelegd" |
 | Empty state (no contacts) | Select option: "Geen contactpersonen" |
 | Error state (speech) | "Spraakherkenning onderbroken. Klik op de microfoon om opnieuw te starten." |
 | Delete conversation confirmation title | "Gesprek verwijderen" |
 | Delete conversation confirmation body | "Weet u zeker dat u dit gesprek wilt verwijderen? Dit kan niet ongedaan worden gemaakt." |
 | Delete conversation confirm button | "Gesprek verwijderen" |
+| Delete conversation cancel button | "Gesprek bewaren" |
 | Delete action confirmation title | "Actie verwijderen" |
 | Delete action confirmation body | "Weet u zeker dat u deze actie wilt verwijderen? Dit kan niet ongedaan worden gemaakt." |
 | Delete action confirm button | "Actie verwijderen" |
-| Cancel button (all dialogs) | "Annuleren" |
+| Delete action cancel button | "Actie bewaren" |
 | Contact dropdown format | "{naam} -- {DMU-positie} -- {engagement-status}" |
 | Inline edit placeholder | "Actietitel..." |
 | Deadline label | "Deadline" |
 | Type label (post-creation) | "Type" |
 | Add action button (removed) | N/A -- replaced by always-visible input |
+
+---
+
+## Visual Focal Points
+
+| Screen | Primary Focal Point | Rationale |
+|--------|-------------------|-----------|
+| Gesprekken-tab (form open) | "Gesprek opslaan" CTA button at the bottom of the conversation form | Accent-colored (`cito-accent`), 44px height, full form-width — draws the eye after filling in fields |
+| Gesprekken-tab (form closed) | "+ Gesprek vastleggen" button above the timeline | Entry point for the primary workflow on this tab |
+| Acties kanban | Always-visible inline input at the bottom of "Te doen" column | Persistent affordance — users see where to type without searching |
 
 ---
 
@@ -143,7 +158,7 @@ Accent reserved for:
 | Component | Changes |
 |-----------|---------|
 | `ConversationForm` | Hide AI toggle, add microphone button, upgrade contact dropdown with DMU+engagement |
-| `ActionKanban` | Always-visible inline input (remove toggle), column header icons |
+| `ActionKanban` | Always-visible inline input (remove toggle), column header icons, per-column empty states |
 | `ActionItemCard` | Inline title edit, type label chip, deadline display, modal delete |
 
 ### Reused As-Is
@@ -209,7 +224,7 @@ Accent reserved for:
 | Aspect | Specification |
 |--------|--------------|
 | Display | Colored chip/badge below the action title |
-| Size | `text-[13px] px-2 py-0.5 rounded-full` |
+| Size | `text-xs px-2 py-0.5 rounded-full` |
 | Set via | Click "Type" link on card (appears on hover) -> dropdown with preset options + custom input |
 | Preset options | bellen, mailen, offerte, intern overleg |
 | Custom | Free text typed into the same dropdown input |
@@ -235,12 +250,15 @@ Accent reserved for:
 | Role | `alertdialog` with `aria-describedby` |
 | Title | `text-[20px] font-semibold text-neutral-900 mb-4` |
 | Body | `text-base text-neutral-600 mb-6` |
-| Cancel button | `h-[44px] px-4 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 rounded-lg` |
+| Cancel button (conversation) | Label: "Gesprek bewaren". Style: `h-[44px] px-4 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 rounded-lg` |
+| Cancel button (action) | Label: "Actie bewaren". Style: `h-[44px] px-4 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 rounded-lg` |
 | Confirm button | `h-[44px] px-4 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700` |
 | Button layout | `flex justify-end gap-4` |
-| Dismiss | Click backdrop or "Annuleren" button |
+| Dismiss | Click backdrop or cancel button |
 
-**Source:** Exact copy of `DeleteSchoolDialog.tsx` pattern.
+**ConfirmDialog props:** The `ConfirmDialog` component accepts a `cancelLabel` prop (string) so the caller specifies the context-specific cancel copy. No default "Annuleren" fallback.
+
+**Source:** Exact layout of `DeleteSchoolDialog.tsx` pattern, with context-specific cancel labels.
 
 ### IC-08: Hidden AI Intake (D-05)
 
@@ -259,7 +277,7 @@ Accent reserved for:
 | Card hover | `hover:shadow-sm hover:border-neutral-300 transition-all` |
 | Card spacing | `p-3` inner padding (existing), `gap-2` between cards in column |
 | Conversation link indicator | Existing clock icon + date. No change needed. |
-| Created date | Add `text-[13px] text-neutral-400` date below title (new) |
+| Created date | Add `text-xs text-neutral-400` date below title (new) |
 
 ---
 
