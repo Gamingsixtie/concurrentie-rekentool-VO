@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
-import { addConversation, updateConversation, mapConversationRow } from '@/db/operations';
+import { addConversation, updateConversation, deleteConversation, mapConversationRow } from '@/db/operations';
 import type { Conversation } from '@/db/types';
 import type { z } from 'zod';
 import type { conversationSchema } from '@/features/school-profile/schemas/conversation.schema';
@@ -40,6 +40,17 @@ export function useUpdateConversation() {
   return useMutation({
     mutationFn: ({ schoolId, conversationId, data }: { schoolId: string; conversationId: string; data: Partial<Conversation> }) =>
       updateConversation(schoolId, conversationId, data),
+    onSuccess: (_, { schoolId }) => {
+      qc.invalidateQueries({ queryKey: ['conversations', schoolId] });
+    },
+  });
+}
+
+export function useDeleteConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ schoolId, conversationId }: { schoolId: string; conversationId: string }) =>
+      deleteConversation(schoolId, conversationId),
     onSuccess: (_, { schoolId }) => {
       qc.invalidateQueries({ queryKey: ['conversations', schoolId] });
     },

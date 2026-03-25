@@ -130,6 +130,8 @@ function mapActionRow(row: Record<string, unknown>): ActionItem {
     title: row.title as string,
     status: (row.status as ActionItem['status']) ?? 'todo',
     conversationId: (row.conversation_id as string | null) ?? null,
+    type: (row.type as string | null) ?? null,
+    dueDate: (row.due_date as string | null) ?? null,
     createdBy: (row.created_by as string) ?? undefined,
     updatedBy: (row.updated_by as string) ?? undefined,
     createdAt: row.created_at as string,
@@ -454,6 +456,18 @@ export async function updateConversation(
   if (error) throw error;
 }
 
+export async function deleteConversation(
+  schoolId: string,
+  conversationId: string,
+): Promise<void> {
+  if (queueIfOffline('conversations', 'delete', { id: conversationId, school_id: schoolId })) return;
+  const { error } = await supabase.from('conversations')
+    .delete()
+    .eq('id', conversationId)
+    .eq('school_id', schoolId);
+  if (error) throw error;
+}
+
 // --- Action CRUD ---
 
 export async function addAction(
@@ -465,6 +479,8 @@ export async function addAction(
     title: data.title,
     status: data.status ?? 'todo',
     conversation_id: data.conversationId ?? null,
+    type: data.type ?? null,
+    due_date: data.dueDate ?? null,
   })) {
     const now = new Date().toISOString();
     return {
@@ -473,6 +489,8 @@ export async function addAction(
       title: data.title,
       status: data.status ?? 'todo',
       conversationId: data.conversationId ?? null,
+      type: data.type ?? null,
+      dueDate: data.dueDate ?? null,
       createdAt: now,
       updatedAt: now,
     };
@@ -485,6 +503,8 @@ export async function addAction(
       title: data.title,
       status: data.status ?? 'todo',
       conversation_id: data.conversationId ?? null,
+      type: data.type ?? null,
+      due_date: data.dueDate ?? null,
       created_by: user.id,
       updated_by: user.id,
     })
@@ -507,6 +527,8 @@ export async function updateAction(
   if (data.title !== undefined) updateData.title = data.title;
   if (data.status !== undefined) updateData.status = data.status;
   if (data.conversationId !== undefined) updateData.conversation_id = data.conversationId;
+  if (data.type !== undefined) updateData.type = data.type;
+  if (data.dueDate !== undefined) updateData.due_date = data.dueDate;
 
   const { error } = await supabase.from('actions')
     .update(updateData)
