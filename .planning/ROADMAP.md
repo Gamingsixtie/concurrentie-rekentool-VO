@@ -383,17 +383,19 @@ Plans:
 ### Phase 18: Contactbeheer Upgrade & Klantreis-inzicht
 **Goal**: Accountmanager kan per school DMU-posities handmatig toewijzen aan contactpersonen (beslisser, adviseur, gebruiker, inkoper, etc.) — eenmalig instellen, overal beschikbaar. Onder het tabblad Contacten wordt de volledige klantreis zichtbaar: wie was het eerste contactpunt, met wie moet intern overlegd worden, waar hangt de beslissing om en waar loopt het vast. Het school-dashboard toont een totaaloverzicht van de DMU-structuur en klantreis-voortgang.
 **Depends on**: Phase 15 (DMU Klantreis), Phase 7 (contactpersonen)
-**Requirements**: TBD
+**Requirements**: SC-18-01, SC-18-02, SC-18-03, SC-18-04, SC-18-05
 **Success Criteria** (what must be TRUE):
   1. Gebruiker kan per contactpersoon handmatig een DMU-positie toewijzen (beslisser, adviseur, gebruiker, inkoper, beïnvloeder) — dit wordt eenmalig ingesteld en is vervolgens overal in de app beschikbaar
   2. Onder het tabblad Contacten is per school zichtbaar wie welke DMU-rol heeft, wie de beslisser is en wie adviseert — met duidelijke visuele hiërarchie
   3. Klantreis-tijdlijn toont chronologisch: wie was het eerste contact, wie is daarna benaderd, met wie moet overlegd worden, en waar loopt het proces vast — inclusief blokkades en notities
   4. School-dashboard (totaaloverzicht) toont een samenvatting van de DMU-structuur en klantreis-status zodat de accountmanager in één oogopslag ziet hoe het salesproces ervoor staat
   5. DMU-posities en klantreis-data worden persistent opgeslagen en zijn beschikbaar voor alle views (contacten-tab, dashboard, exports)
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 18-01-PLAN.md — DMU-rolmodel update (6 rollen), data migratie, SystemEvent uitbreiding, useSystemEvents hook
+- [ ] 18-02-PLAN.md — ContactsTab upgrade met DMU-groepering en klantreis-tijdlijn views
+- [ ] 18-03-PLAN.md — Dashboard CustomerJourneySummary en DmuMatrix contactvolgorde kolom
 
 ### Phase 19: Gesprekken-tab & Acties Upgrade
 **Goal**: Het tabblad Gesprekken wordt vereenvoudigd en praktischer: AI-extractie wordt verwijderd (dat gebeurt al in de AI Wizard), notities kunnen ingesproken worden via spraak-naar-tekst, en per gesprek wordt de contactpersoon gekoppeld met status. Het tabblad Acties wordt verfijnd met directe inline invoer en een bevestigingsdialoog bij verwijderen.
