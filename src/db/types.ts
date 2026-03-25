@@ -65,6 +65,22 @@ export interface ActionItem {
   updatedAt: string;
 }
 
+export type PlannedTouchpointStatus = 'planned' | 'completed' | 'skipped';
+
+export interface PlannedTouchpoint {
+  id: string;
+  schoolId: string;
+  contactId: string;
+  schoolYearStart: number;
+  monthIndex: number; // 0=Sep, 11=Aug
+  note: string;
+  status: PlannedTouchpointStatus;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LostDealInfo {
   competitor: 'dia' | 'jij' | 'overig';
   competitorName?: string;

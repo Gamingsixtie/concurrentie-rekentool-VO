@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import type { Contact, Conversation, SystemEvent } from '@/db/types';
+import { useMemo, useState, useRef, useEffect } from 'react';
+import type { Contact, Conversation, SystemEvent, PlannedTouchpoint } from '@/db/types';
 import {
   DMU_POSITION_ORDER,
   SCHOOL_YEAR_MONTHS,
@@ -16,6 +16,10 @@ interface SchoolYearPlannerProps {
   contacts: Contact[];
   conversations: Conversation[];
   systemEvents: SystemEvent[];
+  plannedTouchpoints: PlannedTouchpoint[];
+  onCreateTouchpoint: (data: { contactId: string; schoolYearStart: number; monthIndex: number; note?: string }) => void;
+  onUpdateTouchpoint: (touchpointId: string, data: Partial<Pick<PlannedTouchpoint, 'note' | 'status' | 'monthIndex'>>) => void;
+  onDeleteTouchpoint: (touchpointId: string) => void;
 }
 
 interface MonthActivity {
@@ -67,31 +71,463 @@ function buildActivityMap(
   return map;
 }
 
-/** Get available school years from conversations */
-function getAvailableYears(conversations: Conversation[]): number[] {
+/** Get available school years from conversations + planned touchpoints */
+function getAvailableYears(conversations: Conversation[], touchpoints: PlannedTouchpoint[]): number[] {
   const years = new Set<number>();
   for (const conv of conversations) {
     years.add(getSchoolYearStartYear(new Date(conv.date)));
+  }
+  for (const tp of touchpoints) {
+    years.add(tp.schoolYearStart);
   }
   // Always include current school year
   years.add(getSchoolYearStartYear(new Date()));
   return [...years].sort((a, b) => b - a);
 }
 
+// --- Cell Popover ---
+
+type PopoverTarget = { contactId: string; monthIdx: number } | null;
+
+interface CellPopoverProps {
+  target: NonNullable<PopoverTarget>;
+  contactName: string;
+  monthLabel: string;
+  activity: MonthActivity | undefined;
+  touchpoints: PlannedTouchpoint[];
+  onCreateTouchpoint: (note: string) => void;
+  onCompleteTouchpoint: (id: string) => void;
+  onSkipTouchpoint: (id: string) => void;
+  onDeleteTouchpoint: (id: string) => void;
+  onUpdateNote: (id: string, note: string) => void;
+  onMoveTouchpoint: (id: string, newMonthIdx: number) => void;
+  onClose: () => void;
+}
+
+function CellPopover({
+  contactName,
+  monthLabel,
+  activity,
+  touchpoints,
+  onCreateTouchpoint,
+  onCompleteTouchpoint,
+  onSkipTouchpoint,
+  onDeleteTouchpoint,
+  onUpdateNote,
+  onMoveTouchpoint,
+  onClose,
+}: CellPopoverProps) {
+  const [newNote, setNewNote] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editNote, setEditNote] = useState('');
+  const [movingId, setMovingId] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
+  const plannedTouchpoints = touchpoints.filter(tp => tp.status === 'planned');
+  const completedTouchpoints = touchpoints.filter(tp => tp.status === 'completed');
+  const skippedTouchpoints = touchpoints.filter(tp => tp.status === 'skipped');
+
+  const handleSubmitNew = () => {
+    onCreateTouchpoint(newNote.trim());
+    setNewNote('');
+  };
+
+  return (
+    <div
+      ref={ref}
+      className="absolute z-50 bg-white rounded-lg border border-neutral-200 shadow-lg p-4 min-w-[280px] max-w-[340px]"
+      style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="text-[13px] font-semibold text-neutral-900">{contactName}</p>
+          <p className="text-[12px] text-neutral-500">{monthLabel}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-neutral-400 hover:text-neutral-600 p-1"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Existing conversations info */}
+      {activity && activity.conversationCount > 0 && (
+        <div className="mb-3 px-2 py-1.5 bg-cito-primary/5 rounded text-[12px] text-cito-primary font-medium">
+          {activity.conversationCount} gesprek{activity.conversationCount !== 1 ? 'ken' : ''} gevoerd
+        </div>
+      )}
+
+      {/* Planned touchpoints */}
+      {plannedTouchpoints.length > 0 && (
+        <div className="mb-3 space-y-2">
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Gepland</p>
+          {plannedTouchpoints.map(tp => (
+            <div key={tp.id} className="border border-amber-200 bg-amber-50 rounded-lg p-2">
+              {editingId === tp.id ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={editNote}
+                    onChange={e => setEditNote(e.target.value)}
+                    className="w-full text-[13px] px-2 py-1 border border-neutral-200 rounded"
+                    autoFocus
+                  />
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => { onUpdateNote(tp.id, editNote); setEditingId(null); }}
+                      className="text-[11px] px-2 py-1 bg-cito-primary text-white rounded hover:bg-cito-primary/90"
+                    >
+                      Opslaan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="text-[11px] px-2 py-1 text-neutral-500 hover:text-neutral-700"
+                    >
+                      Annuleer
+                    </button>
+                  </div>
+                </div>
+              ) : movingId === tp.id ? (
+                <div className="space-y-2">
+                  <p className="text-[12px] text-neutral-600">Verplaats naar:</p>
+                  <div className="grid grid-cols-4 gap-1">
+                    {SCHOOL_YEAR_MONTHS.map((m, idx) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => { onMoveTouchpoint(tp.id, idx); setMovingId(null); }}
+                        className={`text-[11px] px-1 py-1 rounded ${
+                          idx === tp.monthIndex
+                            ? 'bg-amber-300 text-amber-900 font-semibold'
+                            : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50'
+                        }`}
+                      >
+                        {SCHOOL_YEAR_MONTH_SHORT[m]}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMovingId(null)}
+                    className="text-[11px] text-neutral-500 hover:text-neutral-700"
+                  >
+                    Annuleer
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[13px] text-neutral-800 mb-2">
+                    {tp.note || <span className="italic text-neutral-400">Geen notitie</span>}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onCompleteTouchpoint(tp.id)}
+                      className="text-[11px] px-2 py-1 bg-emerald-500 text-white rounded hover:bg-emerald-600"
+                    >
+                      Afgerond
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onSkipTouchpoint(tp.id)}
+                      className="text-[11px] px-2 py-1 bg-neutral-100 text-neutral-600 rounded hover:bg-neutral-200"
+                    >
+                      Overslaan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMovingId(tp.id); }}
+                      className="text-[11px] px-2 py-1 bg-neutral-100 text-neutral-600 rounded hover:bg-neutral-200"
+                    >
+                      Verplaats
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingId(tp.id); setEditNote(tp.note); }}
+                      className="text-[11px] px-2 py-1 bg-neutral-100 text-neutral-600 rounded hover:bg-neutral-200"
+                    >
+                      Bewerk
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeleteTouchpoint(tp.id)}
+                      className="text-[11px] px-2 py-1 text-red-500 hover:text-red-700"
+                    >
+                      Verwijder
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Completed touchpoints */}
+      {completedTouchpoints.length > 0 && (
+        <div className="mb-3 space-y-1">
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Afgerond</p>
+          {completedTouchpoints.map(tp => (
+            <div key={tp.id} className="flex items-center gap-1.5 text-[12px] text-emerald-600">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {tp.note || 'Contactmoment'}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Skipped touchpoints */}
+      {skippedTouchpoints.length > 0 && (
+        <div className="mb-3 space-y-1">
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Overgeslagen</p>
+          {skippedTouchpoints.map(tp => (
+            <div key={tp.id} className="text-[12px] text-neutral-400 line-through">
+              {tp.note || 'Contactmoment'}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add new planned touchpoint */}
+      <div className="border-t border-neutral-100 pt-3">
+        <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+          Contactmoment plannen
+        </p>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newNote}
+            onChange={e => setNewNote(e.target.value)}
+            placeholder="bv. Offerte bespreken"
+            className="flex-1 text-[13px] px-2 py-1.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cito-primary"
+            onKeyDown={e => { if (e.key === 'Enter') handleSubmitNew(); }}
+          />
+          <button
+            type="button"
+            onClick={handleSubmitNew}
+            className="text-[13px] px-3 py-1.5 bg-cito-primary text-white rounded-lg hover:bg-cito-primary/90 font-medium whitespace-nowrap"
+          >
+            Plan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- Mobile Month Card ---
+
+interface MobileMonthCardProps {
+  month: typeof SCHOOL_YEAR_MONTHS[number];
+  monthIdx: number;
+  isCurrentMonth: boolean;
+  year: number;
+  contacts: Contact[];
+  activityMap: ContactMonthMap;
+  touchpointMap: Map<string, PlannedTouchpoint[]>;
+  onCellClick: (contactId: string, monthIdx: number) => void;
+  popoverTarget: PopoverTarget;
+  onCreateTouchpoint: (contactId: string, note: string) => void;
+  onCompleteTouchpoint: (id: string) => void;
+  onSkipTouchpoint: (id: string) => void;
+  onDeleteTouchpoint: (id: string) => void;
+  onUpdateNote: (id: string, note: string) => void;
+  onMoveTouchpoint: (id: string, newMonthIdx: number) => void;
+  onClosePopover: () => void;
+}
+
+function MobileMonthCard({
+  month,
+  monthIdx,
+  isCurrentMonth,
+  year,
+  contacts,
+  activityMap,
+  touchpointMap,
+  onCellClick,
+  popoverTarget,
+  onCreateTouchpoint,
+  onCompleteTouchpoint,
+  onSkipTouchpoint,
+  onDeleteTouchpoint,
+  onUpdateNote,
+  onMoveTouchpoint,
+  onClosePopover,
+}: MobileMonthCardProps) {
+  // Contacts with any activity, touchpoints, or that are relevant this month
+  const relevantContacts = contacts.filter(c => {
+    const activity = activityMap.get(c.id)?.get(monthIdx);
+    const tps = touchpointMap.get(c.id);
+    const hasActivity = activity && (activity.conversationCount > 0 || activity.hasStatusChange);
+    const hasTouchpoints = tps && tps.length > 0;
+    return hasActivity || hasTouchpoints;
+  });
+
+  if (relevantContacts.length === 0 && !isCurrentMonth) return null;
+
+  return (
+    <div
+      className={`rounded-lg border p-4 ${
+        isCurrentMonth
+          ? 'border-cito-primary/40 bg-cito-primary/5'
+          : 'border-neutral-200 bg-white'
+      }`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <h4 className={`text-[14px] font-semibold ${
+          isCurrentMonth ? 'text-cito-primary' : 'text-neutral-700'
+        }`}>
+          {SCHOOL_YEAR_MONTH_LABELS[month]} {year}
+        </h4>
+        {isCurrentMonth && (
+          <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full px-2 py-0.5">
+            Nu
+          </span>
+        )}
+      </div>
+
+      {relevantContacts.length === 0 ? (
+        <p className="text-[13px] text-neutral-400">Geen activiteit</p>
+      ) : (
+        <div className="space-y-2">
+          {relevantContacts.map(contact => {
+            const activity = activityMap.get(contact.id)?.get(monthIdx);
+            const tps = touchpointMap.get(contact.id) ?? [];
+            const plannedCount = tps.filter(tp => tp.status === 'planned').length;
+            const isOpen = popoverTarget?.contactId === contact.id && popoverTarget?.monthIdx === monthIdx;
+
+            return (
+              <div key={contact.id} className="relative">
+                <button
+                  type="button"
+                  onClick={() => onCellClick(contact.id, monthIdx)}
+                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-medium text-neutral-900">
+                      {contact.name}
+                    </span>
+                    <DMUBadge position={contact.dmuPosition} />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {activity && activity.conversationCount > 0 && (
+                      <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                        {activity.conversationCount}
+                      </span>
+                    )}
+                    {plannedCount > 0 && (
+                      <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                        !
+                      </span>
+                    )}
+                    <EngagementBadge status={contact.engagementStatus} size="sm" />
+                  </div>
+                </button>
+                {isOpen && (
+                  <CellPopover
+                    target={{ contactId: contact.id, monthIdx }}
+                    contactName={contact.name}
+                    monthLabel={`${SCHOOL_YEAR_MONTH_LABELS[month]} ${year}`}
+                    activity={activity}
+                    touchpoints={tps}
+                    onCreateTouchpoint={note => onCreateTouchpoint(contact.id, note)}
+                    onCompleteTouchpoint={onCompleteTouchpoint}
+                    onSkipTouchpoint={onSkipTouchpoint}
+                    onDeleteTouchpoint={onDeleteTouchpoint}
+                    onUpdateNote={onUpdateNote}
+                    onMoveTouchpoint={onMoveTouchpoint}
+                    onClose={onClosePopover}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add button for contacts without activity this month */}
+      {contacts.filter(c => !relevantContacts.includes(c)).length > 0 && (
+        <div className="mt-2 pt-2 border-t border-neutral-100">
+          <details className="text-[12px] text-neutral-500">
+            <summary className="cursor-pointer hover:text-neutral-700">
+              Overige contacten ({contacts.length - relevantContacts.length})
+            </summary>
+            <div className="mt-2 space-y-1">
+              {contacts.filter(c => !relevantContacts.includes(c)).map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => onCellClick(c.id, monthIdx)}
+                  className="w-full text-left flex items-center gap-1.5 p-1.5 rounded hover:bg-neutral-50"
+                >
+                  <span className="text-[12px] text-neutral-600">{c.name}</span>
+                  <DMUBadge position={c.dmuPosition} />
+                </button>
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Main Component ---
+
 export default function SchoolYearPlanner({
   contacts,
   conversations,
   systemEvents,
+  plannedTouchpoints,
+  onCreateTouchpoint,
+  onUpdateTouchpoint,
+  onDeleteTouchpoint,
 }: SchoolYearPlannerProps) {
   const currentStartYear = getSchoolYearStartYear(new Date());
   const [selectedStartYear, setSelectedStartYear] = useState(currentStartYear);
+  const [popoverTarget, setPopoverTarget] = useState<PopoverTarget>(null);
 
-  const availableYears = useMemo(() => getAvailableYears(conversations), [conversations]);
+  const availableYears = useMemo(
+    () => getAvailableYears(conversations, plannedTouchpoints),
+    [conversations, plannedTouchpoints],
+  );
 
   const activityMap = useMemo(
     () => buildActivityMap(conversations, systemEvents, selectedStartYear),
     [conversations, systemEvents, selectedStartYear],
   );
+
+  // Build touchpoint map: contactId -> monthIdx -> touchpoints[]
+  const touchpointsByContactMonth = useMemo(() => {
+    const map = new Map<string, Map<number, PlannedTouchpoint[]>>();
+    for (const tp of plannedTouchpoints) {
+      if (tp.schoolYearStart !== selectedStartYear) continue;
+      if (!map.has(tp.contactId)) map.set(tp.contactId, new Map());
+      const contactMap = map.get(tp.contactId)!;
+      if (!contactMap.has(tp.monthIndex)) contactMap.set(tp.monthIndex, []);
+      contactMap.get(tp.monthIndex)!.push(tp);
+    }
+    return map;
+  }, [plannedTouchpoints, selectedStartYear]);
 
   // Sort contacts by DMU position order
   const sortedContacts = useMemo(
@@ -108,21 +544,58 @@ export default function SchoolYearPlanner({
   // Totals per month
   const monthTotals = useMemo(() => {
     return SCHOOL_YEAR_MONTHS.map((_, idx) => {
-      let contactCount = 0;
       let convCount = 0;
+      let plannedCount = 0;
       for (const contact of sortedContacts) {
         const activity = activityMap.get(contact.id)?.get(idx);
         if (activity && activity.conversationCount > 0) {
-          contactCount += 1;
           convCount += activity.conversationCount;
         }
+        const tps = touchpointsByContactMonth.get(contact.id)?.get(idx);
+        if (tps) {
+          plannedCount += tps.filter(tp => tp.status === 'planned').length;
+        }
       }
-      return { contactCount, convCount };
+      return { convCount, plannedCount };
     });
-  }, [sortedContacts, activityMap]);
+  }, [sortedContacts, activityMap, touchpointsByContactMonth]);
 
   const canGoPrev = availableYears.includes(selectedStartYear - 1) || selectedStartYear - 1 >= currentStartYear - 3;
   const canGoNext = selectedStartYear < currentStartYear;
+
+  const handleCellClick = (contactId: string, monthIdx: number) => {
+    if (popoverTarget?.contactId === contactId && popoverTarget?.monthIdx === monthIdx) {
+      setPopoverTarget(null);
+    } else {
+      setPopoverTarget({ contactId, monthIdx });
+    }
+  };
+
+  const handleCreateTouchpoint = (contactId: string, note: string) => {
+    onCreateTouchpoint({
+      contactId,
+      schoolYearStart: selectedStartYear,
+      monthIndex: popoverTarget?.monthIdx ?? 0,
+      note,
+    });
+  };
+
+  const handleCompleteTouchpoint = (id: string) => {
+    onUpdateTouchpoint(id, { status: 'completed' });
+  };
+
+  const handleSkipTouchpoint = (id: string) => {
+    onUpdateTouchpoint(id, { status: 'skipped' });
+  };
+
+  const handleUpdateNote = (id: string, note: string) => {
+    onUpdateTouchpoint(id, { note });
+  };
+
+  const handleMoveTouchpoint = (id: string, newMonthIdx: number) => {
+    onUpdateTouchpoint(id, { monthIndex: newMonthIdx });
+    setPopoverTarget(null);
+  };
 
   if (contacts.length === 0) {
     return (
@@ -173,6 +646,24 @@ export default function SchoolYearPlanner({
         </div>
       </div>
 
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-4 mb-4 text-[12px] text-neutral-500">
+        <span className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">1</span>
+          Gesprekken
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full w-5 h-5 inline-flex items-center justify-center">!</span>
+          Gepland
+        </span>
+        <span className="flex items-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Afgerond
+        </span>
+      </div>
+
       {/* Desktop: table view */}
       <div className="hidden md:block bg-white rounded-lg border border-neutral-200 overflow-x-auto">
         <table className="w-full min-w-[800px]">
@@ -201,6 +692,7 @@ export default function SchoolYearPlanner({
           <tbody>
             {sortedContacts.map(contact => {
               const contactActivity = activityMap.get(contact.id);
+              const contactTouchpoints = touchpointsByContactMonth.get(contact.id);
 
               return (
                 <tr key={contact.id} className="border-t border-neutral-100">
@@ -214,27 +706,69 @@ export default function SchoolYearPlanner({
                   </td>
                   {SCHOOL_YEAR_MONTHS.map((month, idx) => {
                     const activity = contactActivity?.get(idx);
+                    const touchpoints = contactTouchpoints?.get(idx) ?? [];
+                    const plannedTps = touchpoints.filter(tp => tp.status === 'planned');
+                    const completedTps = touchpoints.filter(tp => tp.status === 'completed');
                     const isCurrentMonth = idx === currentMonthIndex;
+                    const isOpen = popoverTarget?.contactId === contact.id && popoverTarget?.monthIdx === idx;
+                    const hasContent = (activity && (activity.conversationCount > 0 || activity.hasStatusChange)) || touchpoints.length > 0;
 
                     return (
                       <td
                         key={month}
-                        className={`px-1 py-2.5 text-center ${
+                        className={`px-1 py-2.5 text-center relative ${
                           isCurrentMonth ? 'bg-[color:var(--color-cito-primary)]/5' : ''
                         }`}
                       >
-                        {activity ? (
-                          <div className="flex flex-col items-center gap-0.5">
-                            {activity.conversationCount > 0 && (
-                              <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
-                                {activity.conversationCount}
-                              </span>
-                            )}
-                            {activity.hasStatusChange && (
-                              <EngagementBadge status={contact.engagementStatus} size="sm" />
-                            )}
-                          </div>
-                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => handleCellClick(contact.id, idx)}
+                          className={`w-full min-h-[32px] rounded-md transition-colors flex flex-col items-center justify-center gap-0.5 ${
+                            hasContent
+                              ? 'hover:bg-neutral-100'
+                              : 'hover:bg-neutral-50 group'
+                          }`}
+                        >
+                          {activity && activity.conversationCount > 0 && (
+                            <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                              {activity.conversationCount}
+                            </span>
+                          )}
+                          {plannedTps.length > 0 && (
+                            <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                              !
+                            </span>
+                          )}
+                          {completedTps.length > 0 && (
+                            <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 16 16" fill="none">
+                              <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                          {activity?.hasStatusChange && (
+                            <EngagementBadge status={contact.engagementStatus} size="sm" />
+                          )}
+                          {!hasContent && (
+                            <span className="text-neutral-300 group-hover:text-neutral-400 text-[14px] leading-none">+</span>
+                          )}
+                        </button>
+
+                        {/* Popover */}
+                        {isOpen && (
+                          <CellPopover
+                            target={{ contactId: contact.id, monthIdx: idx }}
+                            contactName={contact.name}
+                            monthLabel={`${SCHOOL_YEAR_MONTH_LABELS[month]} ${schoolYearMonthToCalendar(idx, selectedStartYear).year}`}
+                            activity={activity}
+                            touchpoints={touchpoints}
+                            onCreateTouchpoint={note => handleCreateTouchpoint(contact.id, note)}
+                            onCompleteTouchpoint={handleCompleteTouchpoint}
+                            onSkipTouchpoint={handleSkipTouchpoint}
+                            onDeleteTouchpoint={onDeleteTouchpoint}
+                            onUpdateNote={handleUpdateNote}
+                            onMoveTouchpoint={handleMoveTouchpoint}
+                            onClose={() => setPopoverTarget(null)}
+                          />
+                        )}
                       </td>
                     );
                   })}
@@ -257,13 +791,20 @@ export default function SchoolYearPlanner({
                       isCurrentMonth ? 'bg-[color:var(--color-cito-primary)]/5' : ''
                     }`}
                   >
-                    {totals.convCount > 0 ? (
-                      <span className="text-[12px] font-semibold text-neutral-600">
-                        {totals.convCount}
-                      </span>
-                    ) : (
-                      <span className="text-[12px] text-neutral-300">-</span>
-                    )}
+                    <div className="flex flex-col items-center gap-0.5">
+                      {totals.convCount > 0 ? (
+                        <span className="text-[12px] font-semibold text-neutral-600">
+                          {totals.convCount}
+                        </span>
+                      ) : (
+                        <span className="text-[12px] text-neutral-300">-</span>
+                      )}
+                      {totals.plannedCount > 0 && (
+                        <span className="text-[10px] text-amber-500">
+                          {totals.plannedCount} gepland
+                        </span>
+                      )}
+                    </div>
                   </td>
                 );
               })}
@@ -273,12 +814,20 @@ export default function SchoolYearPlanner({
       </div>
 
       {/* "Nog niet benaderd" notice */}
-      {sortedContacts.some(c => !activityMap.get(c.id)?.size) && (
+      {sortedContacts.some(c => {
+        const hasActivity = activityMap.get(c.id)?.size;
+        const hasTouchpoints = touchpointsByContactMonth.get(c.id)?.size;
+        return !hasActivity && !hasTouchpoints;
+      }) && (
         <div className="hidden md:block mt-3 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg">
           <p className="text-[13px] text-neutral-500">
-            <span className="font-semibold">Nog niet benaderd: </span>
+            <span className="font-semibold">Nog niet benaderd/gepland: </span>
             {sortedContacts
-              .filter(c => !activityMap.get(c.id)?.size)
+              .filter(c => {
+                const hasActivity = activityMap.get(c.id)?.size;
+                const hasTouchpoints = touchpointsByContactMonth.get(c.id)?.size;
+                return !hasActivity && !hasTouchpoints;
+              })
               .map(c => c.name)
               .join(', ')}
           </p>
@@ -291,76 +840,60 @@ export default function SchoolYearPlanner({
           const isCurrentMonth = idx === currentMonthIndex;
           const { year } = schoolYearMonthToCalendar(idx, selectedStartYear);
 
-          // Collect contacts with activity this month
-          const activeContacts = sortedContacts.filter(c => {
-            const activity = activityMap.get(c.id)?.get(idx);
-            return activity && (activity.conversationCount > 0 || activity.hasStatusChange);
-          });
-
-          if (activeContacts.length === 0 && !isCurrentMonth) return null;
+          // Build touchpoint map for this month (contactId -> touchpoints[])
+          const monthTouchpointMap = new Map<string, PlannedTouchpoint[]>();
+          for (const contact of sortedContacts) {
+            const tps = touchpointsByContactMonth.get(contact.id)?.get(idx);
+            if (tps) monthTouchpointMap.set(contact.id, tps);
+          }
 
           return (
-            <div
+            <MobileMonthCard
               key={month}
-              className={`rounded-lg border p-4 ${
-                isCurrentMonth
-                  ? 'border-cito-primary/40 bg-cito-primary/5'
-                  : 'border-neutral-200 bg-white'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h4 className={`text-[14px] font-semibold ${
-                  isCurrentMonth ? 'text-cito-primary' : 'text-neutral-700'
-                }`}>
-                  {SCHOOL_YEAR_MONTH_LABELS[month]} {year}
-                </h4>
-                {isCurrentMonth && (
-                  <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full px-2 py-0.5">
-                    Nu
-                  </span>
-                )}
-              </div>
-
-              {activeContacts.length === 0 ? (
-                <p className="text-[13px] text-neutral-400">Geen activiteit</p>
-              ) : (
-                <div className="space-y-2">
-                  {activeContacts.map(contact => {
-                    const activity = activityMap.get(contact.id)?.get(idx)!;
-                    return (
-                      <div key={contact.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[13px] font-medium text-neutral-900">
-                            {contact.name}
-                          </span>
-                          <DMUBadge position={contact.dmuPosition} />
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          {activity.conversationCount > 0 && (
-                            <span className="text-[12px] text-neutral-500">
-                              {activity.conversationCount} gesprek{activity.conversationCount !== 1 ? 'ken' : ''}
-                            </span>
-                          )}
-                          <EngagementBadge status={contact.engagementStatus} size="sm" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+              month={month}
+              monthIdx={idx}
+              isCurrentMonth={isCurrentMonth}
+              year={year}
+              contacts={sortedContacts}
+              activityMap={activityMap}
+              touchpointMap={monthTouchpointMap}
+              onCellClick={handleCellClick}
+              popoverTarget={popoverTarget}
+              onCreateTouchpoint={(contactId, note) => {
+                onCreateTouchpoint({
+                  contactId,
+                  schoolYearStart: selectedStartYear,
+                  monthIndex: idx,
+                  note,
+                });
+              }}
+              onCompleteTouchpoint={handleCompleteTouchpoint}
+              onSkipTouchpoint={handleSkipTouchpoint}
+              onDeleteTouchpoint={onDeleteTouchpoint}
+              onUpdateNote={handleUpdateNote}
+              onMoveTouchpoint={handleMoveTouchpoint}
+              onClosePopover={() => setPopoverTarget(null)}
+            />
           );
         })}
 
         {/* Uncontacted contacts on mobile */}
-        {sortedContacts.some(c => !activityMap.get(c.id)?.size) && (
+        {sortedContacts.some(c => {
+          const hasActivity = activityMap.get(c.id)?.size;
+          const hasTouchpoints = touchpointsByContactMonth.get(c.id)?.size;
+          return !hasActivity && !hasTouchpoints;
+        }) && (
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
             <h4 className="text-[14px] font-semibold text-neutral-600 mb-2">
-              Nog niet benaderd
+              Nog niet benaderd/gepland
             </h4>
             <div className="space-y-1.5">
               {sortedContacts
-                .filter(c => !activityMap.get(c.id)?.size)
+                .filter(c => {
+                  const hasActivity = activityMap.get(c.id)?.size;
+                  const hasTouchpoints = touchpointsByContactMonth.get(c.id)?.size;
+                  return !hasActivity && !hasTouchpoints;
+                })
                 .map(contact => (
                   <div key={contact.id} className="flex items-center gap-1.5">
                     <span className="text-[13px] text-neutral-700">{contact.name}</span>

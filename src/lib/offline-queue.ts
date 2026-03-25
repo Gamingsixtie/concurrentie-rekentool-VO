@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 /** Tables that can be queued for offline mutation sync */
-export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses';
+export type OfflineQueueTable = 'schools' | 'contacts' | 'conversations' | 'actions' | 'school_prices' | 'system_events' | 'schoolplan_analyses' | 'planned_touchpoints';
 
 export interface PendingMutation {
   id: string;

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useContacts, useDeleteContact } from '@/hooks/useContacts';
 import { useConversations } from '@/hooks/useConversations';
 import { useSystemEvents } from '@/hooks/useSystemEvents';
+import { usePlannedTouchpoints, useCreatePlannedTouchpoint, useUpdatePlannedTouchpoint, useDeletePlannedTouchpoint } from '@/hooks/usePlannedTouchpoints';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { DMU_POSITIONS } from '@/models/school';
 import type { Contact } from '@/db/types';
@@ -24,7 +25,21 @@ export default function ContactsTab() {
   const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
   const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
   const { data: systemEvents = [] } = useSystemEvents(activeSchoolId ?? '');
+  const { data: plannedTouchpoints = [] } = usePlannedTouchpoints(activeSchoolId ?? '');
   const deleteContactMutation = useDeleteContact();
+  const createTouchpoint = useCreatePlannedTouchpoint();
+  const updateTouchpoint = useUpdatePlannedTouchpoint();
+  const deleteTouchpoint = useDeletePlannedTouchpoint();
+
+  // Group contacts by DMU role, only non-empty groups
+  const groupedContacts = useMemo(() => {
+    return DMU_POSITIONS
+      .filter(role => contacts.some(c => c.dmuPosition === role))
+      .map(role => ({
+        role,
+        contacts: contacts.filter(c => c.dmuPosition === role),
+      }));
+  }, [contacts]);
 
   if (!activeSchoolId) return null;
 
@@ -59,16 +74,6 @@ export default function ContactsTab() {
       linkedConversations,
     };
   };
-
-  // Group contacts by DMU role, only non-empty groups
-  const groupedContacts = useMemo(() => {
-    return DMU_POSITIONS
-      .filter(role => contacts.some(c => c.dmuPosition === role))
-      .map(role => ({
-        role,
-        contacts: contacts.filter(c => c.dmuPosition === role),
-      }));
-  }, [contacts]);
 
   return (
     <div>
@@ -187,6 +192,10 @@ export default function ContactsTab() {
           contacts={contacts}
           conversations={conversations}
           systemEvents={systemEvents}
+          plannedTouchpoints={plannedTouchpoints}
+          onCreateTouchpoint={data => createTouchpoint.mutate({ schoolId: activeSchoolId, data })}
+          onUpdateTouchpoint={(touchpointId, data) => updateTouchpoint.mutate({ schoolId: activeSchoolId, touchpointId, data })}
+          onDeleteTouchpoint={touchpointId => deleteTouchpoint.mutate({ schoolId: activeSchoolId, touchpointId })}
         />
       )}
 

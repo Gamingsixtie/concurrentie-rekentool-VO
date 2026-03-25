@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client';
-import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo } from './types';
+import type { SchoolRecord, Contact, Conversation, ActionItem, SystemEvent, LostDealInfo, PlannedTouchpoint } from './types';
 import type { PipelineStatus, EngagementStatus } from '@/models/school';
 import { PIPELINE_STATUS_ORDER } from '@/models/school';
 import { contactSchema } from '@/features/school-profile/schemas/contact.schema';
@@ -728,5 +728,102 @@ export async function migrateDmuPositions(): Promise<void> {
   localStorage.setItem(DMU_MIGRATION_KEY, 'true');
 }
 
+// --- Planned Touchpoints CRUD ---
+
+function mapPlannedTouchpointRow(row: Record<string, unknown>): PlannedTouchpoint {
+  return {
+    id: row.id as string,
+    schoolId: row.school_id as string,
+    contactId: row.contact_id as string,
+    schoolYearStart: row.school_year_start as number,
+    monthIndex: row.month_index as number,
+    note: (row.note as string) ?? '',
+    status: (row.status as PlannedTouchpoint['status']) ?? 'planned',
+    createdBy: (row.created_by as string) ?? undefined,
+    updatedBy: (row.updated_by as string) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export async function addPlannedTouchpoint(
+  schoolId: string,
+  data: { contactId: string; schoolYearStart: number; monthIndex: number; note?: string },
+): Promise<PlannedTouchpoint> {
+  if (queueIfOffline('planned_touchpoints', 'insert', {
+    school_id: schoolId,
+    contact_id: data.contactId,
+    school_year_start: data.schoolYearStart,
+    month_index: data.monthIndex,
+    note: data.note ?? '',
+  })) {
+    const now = new Date().toISOString();
+    return {
+      id: crypto.randomUUID(),
+      schoolId,
+      contactId: data.contactId,
+      schoolYearStart: data.schoolYearStart,
+      monthIndex: data.monthIndex,
+      note: data.note ?? '',
+      status: 'planned',
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+  const user = await getCurrentUser();
+
+  const { data: row, error } = await supabase.from('planned_touchpoints')
+    .insert({
+      school_id: schoolId,
+      contact_id: data.contactId,
+      school_year_start: data.schoolYearStart,
+      month_index: data.monthIndex,
+      note: data.note ?? '',
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return mapPlannedTouchpointRow(row);
+}
+
+export async function updatePlannedTouchpoint(
+  schoolId: string,
+  touchpointId: string,
+  data: Partial<Pick<PlannedTouchpoint, 'note' | 'status' | 'monthIndex'>>,
+): Promise<void> {
+  if (queueIfOffline('planned_touchpoints', 'update', {
+    id: touchpointId, school_id: schoolId, ...data,
+  })) return;
+  const user = await getCurrentUser();
+
+  const updateData: Record<string, unknown> = { updated_by: user.id };
+  if (data.note !== undefined) updateData.note = data.note;
+  if (data.status !== undefined) updateData.status = data.status;
+  if (data.monthIndex !== undefined) updateData.month_index = data.monthIndex;
+
+  const { error } = await supabase.from('planned_touchpoints')
+    .update(updateData)
+    .eq('id', touchpointId)
+    .eq('school_id', schoolId);
+  if (error) throw error;
+}
+
+export async function deletePlannedTouchpoint(
+  schoolId: string,
+  touchpointId: string,
+): Promise<void> {
+  if (queueIfOffline('planned_touchpoints', 'delete', {
+    id: touchpointId, school_id: schoolId,
+  })) return;
+  const { error } = await supabase.from('planned_touchpoints')
+    .delete()
+    .eq('id', touchpointId)
+    .eq('school_id', schoolId);
+  if (error) throw error;
+}
+
 // Re-export mappers for use in hooks
-export { mapContactRow, mapConversationRow, mapActionRow, mapSystemEventRow };
+export { mapContactRow, mapConversationRow, mapActionRow, mapSystemEventRow, mapPlannedTouchpointRow };
