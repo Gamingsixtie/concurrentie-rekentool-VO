@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 17-01-PLAN.md
-last_updated: "2026-03-25T16:05:44.938Z"
+stopped_at: Completed 17-02-PLAN.md
+last_updated: "2026-03-25T16:12:19.808Z"
 progress:
   total_phases: 17
   completed_phases: 13
   total_plans: 48
-  completed_plans: 43
+  completed_plans: 44
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 17 (huidig-cito-platform-vs-concurrent-prijsvergelijking) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -122,6 +122,8 @@ Recent decisions affecting current work:
 - [Phase 16]: adjustedSelections initialized from variantSelections when advice first generated
 - [Phase 17]: forRetentionComparison as optional options param keeps backward compat while enabling Scenario C
 - [Phase 17]: Post-process cito providerResults for Scenario C instead of modifying calculator internals
+- [Phase 17]: Migration callback sets school scenario to B directly (ComparisonTab picks up change reactively)
+- [Phase 17]: Scenario C routing placed before B/A checks in ComparisonTab for correct priority
 
 ### Roadmap Evolution
 
@@ -143,6 +145,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T16:05:44.933Z
-Stopped at: Completed 17-01-PLAN.md
+Last session: 2026-03-25T16:12:19.803Z
+Stopped at: Completed 17-02-PLAN.md
 Resume file: None
