@@ -388,13 +388,17 @@ Plans:
 Plans:
 - [ ] TBD
 
+
 ## Backlog
 
-### Phase 999.1: Wizard als onderdeel van school-aanmaak flow (BACKLOG)
+| Phase | Description | Status |
+|-------|-------------|--------|
+| 999.1 | Wizard als onderdeel van school-aanmaak flow | Backlog |
 
-**Goal:** Bij het aanmaken van een nieuwe school meteen de vergelijkingswizard doorlopen zodat het profiel direct compleet is â de wizard wordt het startpunt van elk schoolgesprek, niet een los tabblad dat je later moet ontdekken.
-**Requirements:** TBD
-**Plans:** 0 plans
+### Phase 999.1: Wizard als onderdeel van school-aanmaak flow (BACKLOG)
+**Goal**: Bij het aanmaken van een nieuwe school meteen de vergelijkingswizard doorlopen zodat het profiel direct compleet is — de wizard wordt het startpunt van elk schoolgesprek, niet een los tabblad dat je later moet ontdekken.
+**Requirements**: WIZ-01, WIZ-02, WIZ-03, WIZ-04
+**Plans**: 1 plan
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [ ] 999.1-01-PLAN.md — SchoolNameDialog, SchoolCard wizard-routing, DashboardTab CTA banner, WizardPage context-header
