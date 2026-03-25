@@ -14,6 +14,7 @@ import type {
   ExtractedVariantResult,
 } from './types';
 import { usePriceComparisonStore } from '../store';
+import { useSchoolProfileStore } from '@/features/school-profile/store';
 import type { ProviderKey } from '@/engine/price-comparison';
 
 interface WizardState {
@@ -178,6 +179,12 @@ export const useWizardStore = create<WizardState>()(
         } else {
           // No bundle recommendation, manually initialize
           comparisonStore.initialize();
+        }
+
+        // Scenario C: write scenario to school profile store
+        if (state.scenario === 'alles-oud-cito-concurrent') {
+          const schoolStore = useSchoolProfileStore.getState();
+          schoolStore.setScenario('C');
         }
 
         // Mark wizard as completed and collapsed

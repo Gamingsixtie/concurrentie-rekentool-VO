@@ -4,7 +4,7 @@
  * Manages step navigation, collapsed/expanded state, and scenario detection.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useWizardStore } from './wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { detectScenario } from './scenario-detection';
@@ -25,6 +25,7 @@ export function ComparisonWizard() {
 
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
+  const setSchoolScenario = useSchoolProfileStore((s) => s.setScenario);
 
   // Detect scenario on mount
   useEffect(() => {
@@ -64,6 +65,17 @@ export function ComparisonWizard() {
       </div>
     );
   }
+
+  // Scenario C: user chooses competitor comparison from keuze-UI
+  const handleChooseCompetitor = useCallback(() => {
+    useWizardStore.getState().setScenario('alles-oud-cito-concurrent');
+    setStep(1);
+  }, [setStep]);
+
+  // User chooses migration from keuze-UI — set school scenario to B
+  const handleChooseMigration = useCallback(() => {
+    setSchoolScenario('B');
+  }, [setSchoolScenario]);
 
   const handleStepClick = (step: 0 | 1 | 2) => {
     // Only allow clicking completed (earlier) steps
@@ -108,6 +120,8 @@ export function ComparisonWizard() {
           onProceed={() => {
             // Allow proceeding in all-new-cito scenario
           }}
+          onChooseCompetitor={handleChooseCompetitor}
+          onChooseMigration={handleChooseMigration}
         />
 
         {/* Active step content */}
