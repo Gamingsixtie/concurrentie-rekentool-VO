@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Fundament** - Phases 1-5 (shipped 2026-03-20)
-- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-15 (in progress)
+- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-16 (in progress)
 
 ## Phases
 
@@ -70,6 +70,7 @@ Plans:
 - [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
+- [ ] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie → AI-advies → tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ
 
 ## Phase Details
 
@@ -329,3 +330,20 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
+| 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 0/3 | Planned | — |
+
+### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
+**Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
+**Depends on**: Phase 10.3 (UX Overhaul), Phase 10.2 (Engine Refactoring)
+**Requirements**: PRIJS-01, PRIJS-03, PRIJS-05, PRIJS-06
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kiest in een eerste stap welk specifiek aanbod/variant van de concurrent (DIA of JIJ) wordt gebruikt als vergelijkingsbasis — de wizard toont de beschikbare varianten per concurrent
+  2. AI wizard genereert na de selectie een eerlijk vergelijkingsadvies dat het geselecteerde concurrent-aanbod correct matcht met het juiste Cito-aanbod, inclusief uitleg waarom deze matching eerlijk is
+  3. AI gebruikt de correcte concurrentie-informatie (prijzen, features, pakketten) uit de provider-configuraties voor het advies
+  4. Prijzen en tabelweergave in het tabblad vergelijking zijn identiek aan de output van de wizard — geen afwijkingen tussen wizard-resultaat en vergelijkingstab
+  5. Tabelweergave in het vergelijkingstabblad weerspiegelt exact de input (geselecteerde variant, prijzen, modules) zonder dataverlies of transformatie-fouten
+**Plans:** 3 plans
+
+- [ ] 16-01-PLAN.md — Types, wizard store, scenario detection, variant suggestions, AI endpoints
+- [ ] 16-02-PLAN.md — Wizard shell, progress bar, step 1 notes, step 2 variant selection
+- [ ] 16-03-PLAN.md — Step 3 AI advice streaming, PriceComparisonPage integration, visual verification
