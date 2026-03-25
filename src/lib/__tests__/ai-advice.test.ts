@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 
 // buildRetentionAdvicePayload will be exported from src/lib/ai-advice.ts by Plan 17-03
 // For now, these tests document the expected contract and will fail until implemented.

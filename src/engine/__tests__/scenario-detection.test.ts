@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectScenario } from '../scenario-detection';
+import { calculateComparison } from '../price-comparison';
 import type { ModuleCurrentSetup, Scenario } from '../../models/school';
 import { SCENARIO_LABELS } from '../../models/school';
 import { getOldPlatformPrice } from '../../data/cito-migration-prices';
@@ -148,5 +149,76 @@ describe('getOldPlatformPrice', () => {
 
   it('returns null for nonexistent module', () => {
     expect(getOldPlatformPrice('nonexistent')).toBeNull();
+  });
+});
+
+describe('Scenario C detection', () => {
+  it('returns recommended C when forRetentionComparison is true and all modules are cito-oud', () => {
+    const setups: ModuleCurrentSetup[] = [
+      { moduleId: 'rekenwiskunde', currentProvider: 'cito-oud', pricePerStudent: null },
+      { moduleId: 'nederlands', currentProvider: 'cito-oud', pricePerStudent: null },
+    ];
+
+    const result = detectScenario(setups, { forRetentionComparison: true });
+
+    expect(result.recommended).toBe('C');
+    expect(result.hasMigrationModules).toBe(true);
+    expect(result.hasCompetitorModules).toBe(false);
+  });
+
+  it('still returns recommended B by default when all modules are cito-oud (backward compat)', () => {
+    const setups: ModuleCurrentSetup[] = [
+      { moduleId: 'rekenwiskunde', currentProvider: 'cito-oud', pricePerStudent: null },
+      { moduleId: 'nederlands', currentProvider: 'cito-oud', pricePerStudent: null },
+    ];
+
+    const result = detectScenario(setups);
+
+    expect(result.recommended).toBe('B');
+  });
+
+  it('returns recommended A when modules are mixed even with forRetentionComparison', () => {
+    const setups: ModuleCurrentSetup[] = [
+      { moduleId: 'rekenwiskunde', currentProvider: 'cito-oud', pricePerStudent: null },
+      { moduleId: 'sociaal-emotioneel', currentProvider: 'dia', pricePerStudent: 3.5 },
+    ];
+
+    const result = detectScenario(setups, { forRetentionComparison: true });
+
+    expect(result.recommended).toBe('A');
+  });
+});
+
+describe('calculateComparison Scenario C', () => {
+  const studentCounts = {
+    havo: { 3: 100 },
+  };
+
+  it('uses old-platform prices for cito when scenarioType is C', () => {
+    const result = calculateComparison(
+      ['rekenwiskunde'],
+      studentCounts,
+      { scenarioType: 'C' as Scenario },
+    );
+
+    const citoModule = result.modules[0]?.providers.cito;
+    expect(citoModule).not.toBeNull();
+    // Old platform price for rekenwiskunde is 7.07
+    expect(citoModule!.pricePerStudent).toBe(7.07);
+    expect(citoModule!.totalCost).toBe(7.07 * 100);
+  });
+
+  it('uses new-platform prices for cito when no scenarioType (backward compat)', () => {
+    const result = calculateComparison(
+      ['rekenwiskunde'],
+      studentCounts,
+      {},
+    );
+
+    const citoModule = result.modules[0]?.providers.cito;
+    expect(citoModule).not.toBeNull();
+    // Without scenarioType C, should NOT be 7.07 (old platform price)
+    // The new platform price differs from 7.07
+    expect(citoModule!.pricePerStudent).not.toBe(7.07);
   });
 });

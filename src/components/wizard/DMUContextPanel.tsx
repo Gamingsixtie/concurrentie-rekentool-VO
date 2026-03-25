@@ -15,6 +15,10 @@ const SCENARIO_DMU_MAP: Record<Scenario, { positions: string[]; explanation: str
     positions: ['finance', 'mt'],
     explanation: 'Scenario B (migratie) is vooral relevant voor finance (kosten/baten) en MT (besluitvorming).',
   },
+  C: {
+    positions: ['coordinator', 'mt', 'finance'],
+    explanation: 'Scenario C (retentie) is relevant voor coördinatoren (inhoudelijk), MT (besluitvorming) en finance (kosten huidige platform vs. concurrent).',
+  },
 };
 
 export default function DMUContextPanel({ contacts, scenario }: DMUContextPanelProps) {

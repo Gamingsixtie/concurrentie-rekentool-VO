@@ -1,7 +1,12 @@
 import type { ModuleCurrentSetup, Scenario } from '../models/school';
 
+export interface DetectScenarioOptions {
+  /** When true, recommends 'C' instead of 'B' for all-cito-oud scenarios */
+  forRetentionComparison?: boolean;
+}
+
 export interface ScenarioDetection {
-  /** Recommended scenario: 'A' (current vs. Cito) or 'B' (migration old → new Cito platform). */
+  /** Recommended scenario: 'A' (current vs. Cito), 'B' (migration old → new Cito platform), or 'C' (retention: current Cito vs. competitor). */
   recommended: Scenario;
   /** At least one module on 'cito-oud' — candidate for migration. */
   hasMigrationModules: boolean;
@@ -25,7 +30,7 @@ const COMPETITOR_PROVIDERS = new Set(['dia', 'jij', 'saqi', 'overig']);
  * Pure function: detect the best comparison scenario from a school's module setups.
  * Does not modify any external state.
  */
-export function detectScenario(moduleSetups: ModuleCurrentSetup[]): ScenarioDetection {
+export function detectScenario(moduleSetups: ModuleCurrentSetup[], options?: DetectScenarioOptions): ScenarioDetection {
   const migrationModuleIds: string[] = [];
   const competitorModuleIds: string[] = [];
   const upsellModuleIds: string[] = [];
@@ -46,10 +51,12 @@ export function detectScenario(moduleSetups: ModuleCurrentSetup[]): ScenarioDete
   const hasUpsellModules = upsellModuleIds.length > 0;
   const isMixed = hasMigrationModules && (hasCompetitorModules || hasUpsellModules);
 
-  // Only recommend B (migration) when ALL active modules are on cito-oud
+  // Only recommend B (migration) or C (retention comparison) when ALL active modules are on cito-oud
   // Mixed or competitor → A (current-vs-proposed handles everything, with CTA to migration)
   const recommended: Scenario =
-    hasMigrationModules && !hasCompetitorModules && !hasUpsellModules ? 'B' : 'A';
+    hasMigrationModules && !hasCompetitorModules && !hasUpsellModules
+      ? (options?.forRetentionComparison ? 'C' : 'B')
+      : 'A';
 
   return {
     recommended,

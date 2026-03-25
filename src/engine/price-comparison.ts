@@ -3,10 +3,12 @@ import type { ModuleCategory } from '../models/modules';
 import type { DiaPackageResult } from '../models/dia-packages';
 import type { PriceBreakdownStep } from './calculators/types';
 import type { CitoBundleType } from '../data/providers/cito';
+import type { Scenario } from '../models/school';
 import { MODULE_CATALOG } from '../models/modules';
 import { PROVIDER_CONFIGS } from '../data/providers/index';
 import { createCalculator } from './calculators/index';
 import { getDiaVolumeDiscountPercent } from './dia-packages';
+import { getOldPlatformPrice } from '../data/cito-migration-prices';
 
 export type ProviderKey = 'cito' | 'dia' | 'jij' | 'saqi';
 
@@ -52,6 +54,7 @@ export interface ComparisonResult {
 export interface ComparisonOptions {
   citoBundleType?: CitoBundleType;
   overridePrices?: Map<string, number>; // key: "moduleId:provider"
+  scenarioType?: Scenario;
 }
 
 /**
@@ -117,6 +120,27 @@ export function calculateComparison(
     const calc = calculators.get(providerKey)!;
     const overrides = providerOverrides.get(providerKey);
     providerResults.set(providerKey, calc.calculateAll(selectedModules, totalStudents, overrides));
+  }
+
+  // Scenario C: override cito prices with old-platform prices
+  if (options.scenarioType === 'C') {
+    const citoResults = providerResults.get('cito');
+    if (citoResults) {
+      for (const moduleId of selectedModules) {
+        const oldPrice = getOldPlatformPrice(moduleId);
+        if (oldPrice !== null) {
+          const existing = citoResults.get(moduleId);
+          if (existing) {
+            citoResults.set(moduleId, {
+              ...existing,
+              pricePerStudent: oldPrice,
+              totalCost: oldPrice * totalStudents,
+            });
+          }
+        }
+        // If oldPrice is null, keep the new-platform price as fallback
+      }
+    }
   }
 
   // Build module comparisons
