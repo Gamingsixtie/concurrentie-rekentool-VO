@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Milestone complete
-stopped_at: Completed 999.1-01-PLAN.md
-last_updated: "2026-03-25T21:09:32.052Z"
+status: Ready to plan
+stopped_at: Completed 19-01-PLAN.md
+last_updated: "2026-03-25T22:27:22.787Z"
 progress:
   total_phases: 22
-  completed_phases: 15
-  total_plans: 53
-  completed_plans: 49
+  completed_phases: 16
+  total_plans: 56
+  completed_plans: 52
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 999.1 complete, Phase 18 complete — ready for next phase
+**Current focus:** Phase 19 — gesprekken-tab-acties-upgrade
 
 ## Current Position
 
@@ -130,6 +130,9 @@ Recent decisions affecting current work:
 - [Phase 999.1]: SchoolNameDialog follows SchoolPickerDialog visual pattern for UI consistency
 - [Phase 999.1]: DashboardTab uses early return for incomplete school CTA instead of conditional section
 - [Phase 999.1]: WizardPage detects fresh school via completedSteps.length === 0
+- [Phase 19]: IntakeModeToggle hidden per D-05 (code kept, never rendered)
+- [Phase 19]: ConfirmDialog as reusable component with configurable cancel labels
+- [Phase 19]: Always-visible inline input replaces toggle-based add form in kanban
 
 ### Roadmap Evolution
 
@@ -151,6 +154,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T20:55:26.364Z
-Stopped at: Completed 999.1-01-PLAN.md
-Resume file: .planning/phases/999.1-wizard-school-aanmaak-flow/999.1-01-SUMMARY.md
+Last session: 2026-03-25T22:12:09.169Z
+Stopped at: Completed 19-01-PLAN.md
+Resume file: None

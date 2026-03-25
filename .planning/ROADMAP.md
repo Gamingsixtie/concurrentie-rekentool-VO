@@ -74,8 +74,8 @@ Plans:
 - [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie â AI-advies â tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
 - [ ] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
 - [ ] **Phase 18: Contactbeheer Upgrade & Klantreis-inzicht** - DMU-posities handmatig toewijzen (eenmalig, geldt overal), klantreis-tijdlijn per school met contactvolgorde en blokkades, en totaaloverzicht in school-dashboard
-- [ ] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging
-- [ ] **Phase 20: Vergelijking & Waarde Optimalisatie** - Vergelijkingstab hernoemen en uitbreiden met zachte waarde (tijdwinst, voordelen) naast harde prijsvergelijking, zodat alles in één overzichtelijk totaalbeeld samenkomt
+- [x] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging (completed 2026-03-25)
+- [ ] **Phase 20: Waarde-tab Veilig Verwijderen** - Het Waarde-tabblad volledig verwijderen uit de app zonder dat andere tabs, routes, stores of exports kapot gaan — alle afhankelijkheden opruimen en de app stabiel houden
 - [ ] **Phase 21: DMU-Export Upgrade** - Export-tab met DMU-gerichte rapporten (coördinator, MT/directie, finance) op basis van generieke aannames, met geëxtraheerde tekst uit schoolplan en Cito-bronnen
 - [ ] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
  (completed 2026-03-25)
@@ -341,7 +341,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete    | 2026-03-25 |
 | 17. Huidig Cito vs. Concurrent | v2.0 | 3/4 | Gap closure | — |
 | 18. Contactbeheer Upgrade & Klantreis-inzicht | v2.0 | 0/0 | Not Started | — |
-| 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/0 | Not Started | — |
+| 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/3 | Complete    | 2026-03-25 |
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
 | 21. DMU-Export Upgrade | v2.0 | 0/0 | Not Started | — |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 0/0 | Not Started | — |
@@ -406,23 +406,25 @@ Plans:
   4. Actie-tab: gebruiker kan direct inline een nieuwe actie typen zonder extra klikken — het invoerveld is altijd zichtbaar en ondersteunt verschillende actietypes
   5. Bij het verwijderen van een gesprek of actie verschijnt een bevestigingsdialoog ("Weet u het zeker?") voordat het definitief wordt verwijderd
   6. Algeheel verfijnd design van het actie-tabblad met verbeterde UX
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 19-01-PLAN.md — Data layer extensie: ActionItem type+deadline, deleteConversation, useSpeechRecognition hook, ConfirmDialog, Supabase migratie
 - [ ] 19-02-PLAN.md — ConversationForm upgrade: AI-toggle verborgen, spraak-naar-tekst, contact-dropdown met DMU+engagement, gesprek-verwijdering
 - [ ] 19-03-PLAN.md — Kanban upgrade: always-visible inline invoer, inline titel-edit, type-labels, deadline, modale verwijder-bevestiging, visuele verfijning
 
-### Phase 20: Vergelijking & Waarde Optimalisatie
-**Goal**: De huidige losse tabbladen Vergelijking en Waarde samenvoegen tot één geoptimaliseerd totaaloverzicht met een toepasselijkere naam. Naast de harde prijsvergelijking worden de zachte kanten (tijdwinst, ecosysteemvoordelen, differentiators) geïntegreerd, zodat de accountmanager in één view zowel de euro's als de meerwaarde kan laten zien.
+### Phase 20: Waarde-tab Veilig Verwijderen
+**Goal**: Het Waarde-tabblad volledig en veilig verwijderen uit de app. Alle componenten, routes, navigatie-items en store-referenties die exclusief aan de Waarde-tab hangen worden opgeruimd, zonder dat de overige tabs (Dashboard, Vergelijking, Export, etc.), routes of functionaliteit kapot gaan. De app moet na verwijdering foutloos builden en werken.
 **Depends on**: Phase 18, Phase 19
 **Requirements**: TBD
 **Success Criteria** (what must be TRUE):
-  1. Tabblad "Vergelijking" krijgt een nieuwe, toepasselijkere naam die zowel prijs als waarde dekt (bijv. "Overzicht" of "Totaalvergelijking")
-  2. Tijdwinst-berekeningen en zachte voordelen (nu op apart Waarde-tab) zijn geïntegreerd in het vergelijkingsoverzicht — één totaalbeeld
-  3. Harde vergelijking (prijzen per module, totaalkosten) en zachte waarde (uren bespaard, ecosysteemvoordelen, differentiators) staan overzichtelijk naast elkaar
-  4. Meerjarenprojectie en break-even zijn zichtbaar in hetzelfde overzicht
-  5. Het gecombineerde overzicht is geoptimaliseerd qua layout, leesbaarheid en flow voor gebruik tijdens klantgesprekken
+  1. Het Waarde-tabblad is volledig verwijderd uit de tab-navigatie (TabNavigation.tsx) — niet meer zichtbaar of bereikbaar
+  2. WaardeTab.tsx en alle componenten die exclusief door de Waarde-tab gebruikt worden (ValueHeroCard, ValueAIPanel, ZachteKantPanel, ai-value.ts, etc.) zijn verwijderd of veilig losgekoppeld
+  3. Routes die naar de Waarde-tab verwijzen zijn opgeruimd zonder andere routes te breken
+  4. Store-state en berekeningen die door andere tabs gebruikt worden (export, vergelijking) blijven intact en werken correct
+  5. `npm run build` slaagt zonder errors na verwijdering
+  6. Alle bestaande tests slagen (`npx vitest run`) — geen regressies in overige functionaliteit
+  7. Navigatie tussen overige tabs werkt correct — geen dode links of lege views
 **Plans:** 0 plans
 
 Plans:
@@ -430,7 +432,7 @@ Plans:
 
 ### Phase 21: DMU-Export Upgrade
 **Goal**: Het export-tabblad wordt uitgebreid met intelligente, DMU-gerichte rapporten. Op basis van generieke aannames per DMU-rol (coördinator, MT/directie, finance) worden de relevante verschillen en voordelen getoond. De rapporten bevatten geëxtraheerde tekst uit het schoolplan en Cito-bronmateriaal, zodat elk rapport inhoudelijk onderbouwd is voor de specifieke beslisser.
-**Depends on**: Phase 20 (vergelijking & waarde), Phase 14 (schoolplan-analyse)
+**Depends on**: Phase 20 (waarde-tab verwijderd), Phase 14 (schoolplan-analyse)
 **Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Gebruiker kan per DMU-rol (coördinator, MT/directie, finance) een rapport genereren op basis van generieke aannames over wat die rol belangrijk vindt
