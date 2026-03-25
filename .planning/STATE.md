@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Phase 17 context gathered
-last_updated: "2026-03-25T15:15:49.012Z"
+status: Ready to execute
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-03-25T16:05:44.938Z"
 progress:
   total_phases: 17
   completed_phases: 13
-  total_plans: 45
-  completed_plans: 42
+  total_plans: 48
+  completed_plans: 43
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 16 — ai-wizard-verbetering-prijsvergelijking-harmonisatie
+**Current focus:** Phase 17 — huidig-cito-platform-vs-concurrent-prijsvergelijking
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 17 (huidig-cito-platform-vs-concurrent-prijsvergelijking) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -120,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 16]: Step 1 internal navigation: WizardStep1Notes calls setStep(1) directly after extraction
 - [Phase 16]: Editable matching uses simple dropdown selects per module (not full card grid from step 2)
 - [Phase 16]: adjustedSelections initialized from variantSelections when advice first generated
+- [Phase 17]: forRetentionComparison as optional options param keeps backward compat while enabling Scenario C
+- [Phase 17]: Post-process cito providerResults for Scenario C instead of modifying calculator internals
 
 ### Roadmap Evolution
 
@@ -141,6 +143,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:15:49.008Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-huidig-cito-platform-vs-concurrent-prijsvergelijking/17-CONTEXT.md
+Last session: 2026-03-25T16:05:44.933Z
+Stopped at: Completed 17-01-PLAN.md
+Resume file: None

@@ -360,10 +360,10 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
   3. AI-advies houdt rekening met het feit dat de school al Cito-klant is en genereert passend advies (retentie-perspectief, niet acquisitie)
   4. Resultaat in vergelijkingstabel toont huidig Cito vs. concurrent, niet nieuw Cito vs. concurrent
   5. ScenarioDetector vangt dit scenario correct op en routeert naar de juiste flow
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 17-01-PLAN.md — Types, engine scenario detection, old-platform price helper en tests
+- [x] 17-01-PLAN.md — Types, engine scenario detection, old-platform price helper en tests
 - [ ] 17-02-PLAN.md — ScenarioDetector keuze-UI, wizard store Scenario C, ComparisonTab routing
 - [ ] 17-03-PLAN.md — AI retentie-advies, ComparisonTable label override, visuele verificatie
 
