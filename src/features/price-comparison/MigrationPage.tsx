@@ -8,7 +8,7 @@ import { getTotalStudents } from '../../engine/price-comparison';
 import { formatCurrency } from '../../lib/format';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { EditableField } from '@/features/school-profile/components/EditableField';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
 import { AnalysisPanel } from './AnalysisPanel';
@@ -27,19 +27,40 @@ function MultiYearChart({ result }: { result: MigrationResult }) {
   }));
 
   return (
-    <div className="h-48">
+    <div className="h-52">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} barSize={48}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis
-            tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`}
-            tick={{ fontSize: 12 }}
+        <BarChart data={data} barSize={52} margin={{ top: 24, right: 8, bottom: 4, left: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 12, fill: '#6B7280' }}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip formatter={(v) => [formatCurrency(Number(v)), 'Cumulatieve waarde']} />
-          <Bar dataKey="waarde" radius={[4, 4, 0, 0]}>
+          <YAxis
+            tickFormatter={(v) => `€${(v / 1000).toFixed(0)}k`}
+            tick={{ fontSize: 11, fill: '#9CA3AF' }}
+            axisLine={false}
+            tickLine={false}
+            width={55}
+          />
+          <Tooltip
+            formatter={(v) => [formatCurrency(Number(v)), 'Cumulatieve waarde']}
+            contentStyle={{
+              borderRadius: 12,
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              fontSize: 13,
+            }}
+            cursor={{ fill: 'rgba(0, 48, 130, 0.04)', radius: 4 }}
+          />
+          <Bar dataKey="waarde" radius={[6, 6, 0, 0]}>
+            <LabelList
+              dataKey="waarde"
+              position="top"
+              formatter={(v) => formatCurrency(Number(v))}
+              style={{ fontSize: 11, fontWeight: 500, fill: '#6B7280' }}
+            />
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.waarde >= 0 ? '#003082' : '#dc2626'} />
             ))}
