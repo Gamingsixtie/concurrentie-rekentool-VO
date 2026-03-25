@@ -189,7 +189,7 @@ export function WizardStep2Variants() {
                       id={pkg.id}
                       name={pkg.name}
                       priceLabel={`\u20AC${pkg.pricePerStudent.toFixed(2)}/leerling/jaar`}
-                      description={`Bevat ${pkg.includedModuleIds.length} module(s)`}
+                      description={pkg.description ?? `Bevat ${pkg.includedModuleIds.length} module(s)`}
                       includedModules={moduleNames}
                       isSelected={selection?.variantId === pkg.id}
                       isRecommended={suggestedDia?.id === pkg.id}

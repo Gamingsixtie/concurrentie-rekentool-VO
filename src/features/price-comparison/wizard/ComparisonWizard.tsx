@@ -114,8 +114,8 @@ export function ComparisonWizard() {
         {renderStep()}
 
         {/* Navigation buttons */}
-        {currentStep > 0 && (
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-100">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-100">
+          {currentStep > 0 ? (
             <button
               type="button"
               onClick={() => setStep((currentStep - 1) as 0 | 1 | 2)}
@@ -123,8 +123,19 @@ export function ComparisonWizard() {
             >
               Vorige stap
             </button>
-          </div>
-        )}
+          ) : (
+            <div />
+          )}
+          {currentStep < 2 && (
+            <button
+              type="button"
+              onClick={() => setStep((currentStep + 1) as 0 | 1 | 2)}
+              className="bg-cito-primary text-white text-sm font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity min-h-[44px]"
+            >
+              Volgende stap
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

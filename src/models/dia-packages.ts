@@ -4,6 +4,8 @@ export interface DiaPackage {
   includedModuleIds: string[];
   pricePerStudent: number;
   minModules: number;
+  /** Short description of what's included beyond the base modules */
+  description?: string;
 }
 
 export interface DiaPackageResult {

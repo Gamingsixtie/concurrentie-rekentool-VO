@@ -24,7 +24,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['nederlands'],
     pricePerStudent: 5.84,
     minModules: 2,
-    // Diatekst NE (lezen) + Diawoord NE (woordenschat) -- 2 DIA-modules, 1 tool-module
+    description: 'Diatekst NE (lezen) + Diawoord NE (woordenschat). Alleen LVS-toetsen.',
   },
   {
     id: 'pakket-ne-compleet',
@@ -32,7 +32,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['nederlands', 'taalverzorging'],
     pricePerStudent: 8.58,
     minModules: 2,
-    // Diatekst NE + Diawoord NE + Diaspel -- 3 DIA-modules
+    description: 'Diatekst NE + Diawoord NE + Diaspel (spelling). Alleen LVS-toetsen.',
   },
   {
     id: 'pakket-en',
@@ -40,7 +40,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['engels'],
     pricePerStudent: 5.84,
     minModules: 2,
-    // Diatekst EN (lezen) + Diawoord EN (woordenschat) -- 2 DIA-modules, 1 tool-module
+    description: 'Diatekst EN (lezen) + Diawoord EN (woordenschat). Alleen LVS-toetsen.',
   },
 
   // -- Combinatiepakketten --
@@ -50,7 +50,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
     pricePerStudent: 18.13,
     minModules: 3,
-    // Alle 7 DIA LVS-modules: Diatekst NE, Diawoord NE, Diaspel, Diacijfer, Diawisk, Diatekst EN, Diawoord EN
+    description: 'Alle 7 DIA LVS-modules (Diacijfer, Diawisk, Diatekst NE/EN, Diawoord NE/EN, Diaspel). Geen oefenmateriaal.',
   },
 
   // -- Basisvaardigheden pakketten (inclusief oefenmateriaal) --
@@ -60,7 +60,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
     pricePerStudent: 21.10,
     minModules: 3,
-    // 5 modules + Diaplus Burgerschap (oefenmateriaal)
+    description: 'Alle 7 LVS-modules + Diaplus Burgerschap (oefenmateriaal). Inclusief oefenen.',
   },
   {
     id: 'basisvaardigheden-1-plus',
@@ -68,7 +68,7 @@ export const DIA_PACKAGES: DiaPackage[] = [
     includedModuleIds: ['rekenwiskunde', 'nederlands', 'engels', 'taalverzorging'],
     pricePerStudent: 35.58,
     minModules: 3,
-    // Uitgebreid pakket inclusief alle oefenmateriaal (Tekstenlab, Spellab, Burgerschap)
+    description: 'Alle 7 LVS-modules + alle oefenmateriaal (Tekstenlab, Spellab, Burgerschap). Meest uitgebreid.',
   },
 ];
 
