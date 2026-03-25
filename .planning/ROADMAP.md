@@ -406,10 +406,12 @@ Plans:
   4. Actie-tab: gebruiker kan direct inline een nieuwe actie typen zonder extra klikken — het invoerveld is altijd zichtbaar en ondersteunt verschillende actietypes
   5. Bij het verwijderen van een gesprek of actie verschijnt een bevestigingsdialoog ("Weet u het zeker?") voordat het definitief wordt verwijderd
   6. Algeheel verfijnd design van het actie-tabblad met verbeterde UX
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 19-01-PLAN.md — Data layer extensie: ActionItem type+deadline, deleteConversation, useSpeechRecognition hook, ConfirmDialog, Supabase migratie
+- [ ] 19-02-PLAN.md — ConversationForm upgrade: AI-toggle verborgen, spraak-naar-tekst, contact-dropdown met DMU+engagement, gesprek-verwijdering
+- [ ] 19-03-PLAN.md — Kanban upgrade: always-visible inline invoer, inline titel-edit, type-labels, deadline, modale verwijder-bevestiging, visuele verfijning
 
 ### Phase 20: Vergelijking & Waarde Optimalisatie
 **Goal**: De huidige losse tabbladen Vergelijking en Waarde samenvoegen tot één geoptimaliseerd totaaloverzicht met een toepasselijkere naam. Naast de harde prijsvergelijking worden de zachte kanten (tijdwinst, ecosysteemvoordelen, differentiators) geïntegreerd, zodat de accountmanager in één view zowel de euro's als de meerwaarde kan laten zien.
