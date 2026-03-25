@@ -84,10 +84,10 @@
 
 ### Wizard School-aanmaak Flow
 
-- [ ] **WIZ-01**: Bij "School toevoegen" handmatig wordt de schoolnaam gevraagd in een dialog voordat het schoolrecord wordt aangemaakt
-- [ ] **WIZ-02**: Incomplete scholen tonen een "Profiel voltooien" banner op het dashboard met link naar de wizard
-- [ ] **WIZ-03**: SchoolCard voor incomplete scholen linkt direct naar de wizard in plaats van het dashboard
-- [ ] **WIZ-04**: Zowel handmatige als "kies uit lijst" school-aanmaak flow werkt correct
+- [x] **WIZ-01**: Bij "School toevoegen" handmatig wordt de schoolnaam gevraagd in een dialog voordat het schoolrecord wordt aangemaakt
+- [x] **WIZ-02**: Incomplete scholen tonen een "Profiel voltooien" banner op het dashboard met link naar de wizard
+- [x] **WIZ-03**: SchoolCard voor incomplete scholen linkt direct naar de wizard in plaats van het dashboard
+- [x] **WIZ-04**: Zowel handmatige als "kies uit lijst" school-aanmaak flow werkt correct
 
 ## v2.x Requirements (Deferred)
 
