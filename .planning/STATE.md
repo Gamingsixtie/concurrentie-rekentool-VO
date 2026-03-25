@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Executing Phase 17
-stopped_at: Phase 18 UI-SPEC approved
-last_updated: "2026-03-25T19:51:51.846Z"
+status: Ready to plan
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-03-25T20:55:26.364Z"
 progress:
   total_phases: 22
-  completed_phases: 13
-  total_plans: 49
-  completed_plans: 45
+  completed_phases: 14
+  total_plans: 53
+  completed_plans: 48
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 17 — huidig-cito-platform-vs-concurrent-prijsvergelijking
+**Current focus:** Phase 18 — contactbeheer-upgrade-klantreis-inzicht
 
 ## Current Position
 
-Phase: 17 (huidig-cito-platform-vs-concurrent-prijsvergelijking) — EXECUTING
-Plan: 1 of 4
+Phase: 999.1
+Plan: Not started
 
 ## Performance Metrics
 
@@ -126,6 +126,7 @@ Recent decisions affecting current work:
 - [Phase 17]: Scenario C routing placed before B/A checks in ComparisonTab for correct priority
 - [Phase 17]: Retention prompt uses three explicit categories (prijs/bezwaar/meerwaarde) matching same JSON output structure as acquisition prompt
 - [Phase 17]: buildAdvicePayload exported for reuse by buildRetentionAdvicePayload (explicit architectural choice)
+- [Phase 18]: DMU_POSITION_ORDER as constant for hierarchy display sorting; blokkades stored as system_events; view toggle via localStorage
 
 ### Roadmap Evolution
 
@@ -147,6 +148,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T19:51:51.828Z
-Stopped at: Phase 18 UI-SPEC approved
-Resume file: .planning/phases/18-contactbeheer-upgrade-klantreis-inzicht/18-UI-SPEC.md
+Last session: 2026-03-25T20:48:28.142Z
+Stopped at: Completed 18-01-PLAN.md
+Resume file: None
