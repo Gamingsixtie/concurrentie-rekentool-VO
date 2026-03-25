@@ -1,21 +1,36 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useContacts, useDeleteContact } from '@/hooks/useContacts';
 import { useConversations } from '@/hooks/useConversations';
+import { useSystemEvents } from '@/hooks/useSystemEvents';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
+import { DMU_POSITIONS } from '@/models/school';
 import type { Contact } from '@/db/types';
 import ContactCard from '@/features/school-profile/components/ContactCard';
 import ContactForm from '@/features/school-profile/components/ContactForm';
+import ContactGroupHeader from '@/features/school-profile/components/ContactGroupHeader';
+import CustomerJourneyTimeline from '@/features/school-profile/components/CustomerJourneyTimeline';
+
+type ViewMode = 'dmu' | 'timeline';
 
 export default function ContactsTab() {
   const activeSchoolId = useSchoolProfileStore(s => s.activeSchoolId);
   const [formOpen, setFormOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    return (localStorage.getItem('contacts-view-mode') as ViewMode) ?? 'dmu';
+  });
 
   const { data: contacts = [] } = useContacts(activeSchoolId ?? '');
   const { data: conversations = [] } = useConversations(activeSchoolId ?? '');
+  const { data: systemEvents = [] } = useSystemEvents(activeSchoolId ?? '');
   const deleteContactMutation = useDeleteContact();
 
   if (!activeSchoolId) return null;
+
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('contacts-view-mode', mode);
+  };
 
   const handleEdit = (contact: Contact) => {
     setEditingContact(contact);
@@ -44,6 +59,16 @@ export default function ContactsTab() {
     };
   };
 
+  // Group contacts by DMU role, only non-empty groups
+  const groupedContacts = useMemo(() => {
+    return DMU_POSITIONS
+      .filter(role => contacts.some(c => c.dmuPosition === role))
+      .map(role => ({
+        role,
+        contacts: contacts.filter(c => c.dmuPosition === role),
+      }));
+  }, [contacts]);
+
   return (
     <div>
       {/* Header */}
@@ -60,27 +85,86 @@ export default function ContactsTab() {
         </button>
       </div>
 
-      {/* Contact list */}
-      {contacts.length === 0 ? (
-        <p className="text-base text-neutral-500">
-          Nog geen contactpersonen. Voeg een contactpersoon toe om DMU-informatie bij te houden.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {contacts.map(contact => {
-            const { canDelete, linkedConversations } = getDeleteInfo(contact.id);
-            return (
-              <ContactCard
-                key={contact.id}
-                contact={contact}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                canDelete={canDelete}
-                linkedConversations={linkedConversations}
-              />
-            );
-          })}
+      {/* View toggle */}
+      <div className="mb-6" role="tablist">
+        <div className="inline-flex rounded-lg border border-neutral-200 overflow-hidden max-sm:w-full">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'dmu'}
+            onClick={() => handleViewChange('dmu')}
+            className={`h-[44px] px-4 text-[14px] font-semibold transition-colors max-sm:flex-1 ${
+              viewMode === 'dmu'
+                ? 'bg-cito-primary text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-50'
+            }`}
+          >
+            DMU-overzicht
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'timeline'}
+            onClick={() => handleViewChange('timeline')}
+            className={`h-[44px] px-4 text-[14px] font-semibold transition-colors max-sm:flex-1 ${
+              viewMode === 'timeline'
+                ? 'bg-cito-primary text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-50'
+            }`}
+          >
+            Klantreis
+          </button>
         </div>
+      </div>
+
+      {/* DMU-overzicht view */}
+      {viewMode === 'dmu' && (
+        <>
+          {contacts.length === 0 ? (
+            <div className="bg-white border border-neutral-200 rounded-lg p-8 text-center">
+              <p className="text-[16px] font-semibold text-neutral-700 mb-1">
+                Geen contactpersonen
+              </p>
+              <p className="text-[14px] text-neutral-500">
+                Voeg contactpersonen toe via de Contacten-tab om het DMU-beslissingsoverzicht te gebruiken.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              {groupedContacts.map(({ role, contacts: groupContacts }) => (
+                <ContactGroupHeader
+                  key={role}
+                  role={role}
+                  count={groupContacts.length}
+                >
+                  {groupContacts.map(contact => {
+                    const { canDelete, linkedConversations } = getDeleteInfo(contact.id);
+                    return (
+                      <ContactCard
+                        key={contact.id}
+                        contact={contact}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        canDelete={canDelete}
+                        linkedConversations={linkedConversations}
+                      />
+                    );
+                  })}
+                </ContactGroupHeader>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Klantreis (timeline) view */}
+      {viewMode === 'timeline' && (
+        <CustomerJourneyTimeline
+          schoolId={activeSchoolId}
+          contacts={contacts}
+          conversations={conversations}
+          systemEvents={systemEvents}
+        />
       )}
 
       {/* Contact form slide-over */}
