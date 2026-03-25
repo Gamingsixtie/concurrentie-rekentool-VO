@@ -105,14 +105,34 @@ export const PIPELINE_STATUS_ORDER: Record<PipelineStatus, number> = {
   'verloren': 5,
 };
 
-export const DMU_POSITIONS = ['coordinator', 'mt', 'finance', 'overig'] as const;
+export const DMU_POSITIONS = ['beslisser', 'inkoper', 'adviseur', 'gebruiker', 'beinvloeder', 'overig'] as const;
 export type DMUPosition = typeof DMU_POSITIONS[number];
 
 export const DMU_POSITION_LABELS: Record<DMUPosition, string> = {
-  coordinator: 'Coordinator',
-  mt: 'MT',
-  finance: 'Finance',
+  beslisser: 'Beslisser',
+  inkoper: 'Inkoper',
+  adviseur: 'Adviseur',
+  gebruiker: 'Gebruiker',
+  beinvloeder: 'Beinvloeder',
   overig: 'Overig',
+};
+
+/** Hierarchy order for display sorting (beslisser first) */
+export const DMU_POSITION_ORDER: Record<DMUPosition, number> = {
+  beslisser: 0,
+  inkoper: 1,
+  adviseur: 2,
+  gebruiker: 3,
+  beinvloeder: 4,
+  overig: 5,
+};
+
+/** Migration mapping from old DMU positions to new ones */
+export const DMU_MIGRATION_MAP: Record<string, DMUPosition> = {
+  coordinator: 'gebruiker',
+  mt: 'beslisser',
+  finance: 'inkoper',
+  overig: 'overig',
 };
 
 export const PREFERRED_CHANNELS = ['email', 'telefoon', 'teams', 'overig'] as const;

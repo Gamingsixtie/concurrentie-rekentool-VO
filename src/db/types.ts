@@ -45,7 +45,7 @@ export interface SystemEvent {
   id: string;
   schoolId: string;
   timestamp: string;
-  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created' | 'engagement_changed';
+  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created' | 'engagement_changed' | 'blokkade_registered';
   description: string;
   metadata?: Record<string, string>;
   userId?: string;

@@ -68,9 +68,16 @@ function hasAnyContent(sections: Record<SectionKey, string>): boolean {
 // ─── DMU position mapping ───────────────────────────────────────────────────
 
 function mapDmuPosition(dmuPos?: string): DMUPosition {
-  if (dmuPos === 'coordinator' || dmuPos === 'mt' || dmuPos === 'finance') {
-    return dmuPos;
-  }
+  // Map legacy position names to new model
+  const LEGACY_MAP: Record<string, DMUPosition> = {
+    coordinator: 'gebruiker',
+    mt: 'beslisser',
+    finance: 'inkoper',
+  };
+  if (dmuPos && dmuPos in LEGACY_MAP) return LEGACY_MAP[dmuPos];
+  // Check if it's already a valid new position
+  const validPositions: string[] = ['beslisser', 'inkoper', 'adviseur', 'gebruiker', 'beinvloeder', 'overig'];
+  if (dmuPos && validPositions.includes(dmuPos)) return dmuPos as DMUPosition;
   return 'overig';
 }
 

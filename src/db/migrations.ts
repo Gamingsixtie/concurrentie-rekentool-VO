@@ -150,7 +150,7 @@ export async function migrateIndexedDBToSupabase(
         const contactRows = school.contacts.map((c: Record<string, unknown>) => ({
           school_id: schoolId,
           name: (c.name as string) ?? '',
-          dmu_position: (c.dmuPosition as string) ?? 'coordinator',
+          dmu_position: (c.dmuPosition as string) ?? 'gebruiker',
           job_title: (c.jobTitle as string) ?? '',
           email: (c.email as string) ?? '',
           phone: (c.phone as string) ?? '',
