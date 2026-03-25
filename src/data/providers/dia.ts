@@ -143,6 +143,33 @@ export interface DiaProviderConfig {
   packages: DiaPackage[];
 }
 
+// ─── Basisvaardigheden Helpers ──────────────────────────────────────────────────
+
+export const BASISVAARDIGHEDEN_MODULE_IDS = ['rekenwiskunde', 'nederlands', 'engels'] as const;
+
+/** DIA packages that cover ALL given basisvaardigheden modules (group-level). */
+export function getDiaGroupPackages(activeModuleIds: string[]): DiaPackage[] {
+  const basisIds = activeModuleIds.filter((id) =>
+    (BASISVAARDIGHEDEN_MODULE_IDS as readonly string[]).includes(id),
+  );
+  if (basisIds.length < 2) return [];
+
+  return DIA_PACKAGES.filter(
+    (pkg) =>
+      basisIds.every((id) => pkg.includedModuleIds.includes(id)) &&
+      basisIds.length >= pkg.minModules,
+  );
+}
+
+/** DIA packages for a single module, excluding group packages that cover all basisvaardigheden. */
+export function getDiaModulePackages(moduleId: string): DiaPackage[] {
+  return DIA_PACKAGES.filter(
+    (pkg) =>
+      pkg.includedModuleIds.includes(moduleId) &&
+      !BASISVAARDIGHEDEN_MODULE_IDS.every((id) => pkg.includedModuleIds.includes(id)),
+  );
+}
+
 export const DIA_CONFIG: DiaProviderConfig = {
   key: 'dia',
   label: 'DIA',

@@ -2,18 +2,26 @@
  * Step 2: Variant-selectie — per-module selection of DIA package or JIJ tier.
  * Pre-fills from moduleSetups as base (D-07), overlays AI extraction results.
  * Shows smart suggestions via "Aanbevolen" badge.
+ *
+ * Basisvaardigheden (RE+NL+EN) can be grouped or set individually:
+ * - Grouped: single section with group-level DIA packages (Pakket compleet, Basisvaardigheden 2/1+)
+ * - Individual: per-module cards with module-specific packages only
  */
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useWizardStore } from './wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { MODULE_CATALOG } from '@/models/modules';
-import { DIA_PACKAGES } from '@/data/providers/dia';
+import { DIA_PACKAGES, getDiaGroupPackages, getDiaModulePackages, BASISVAARDIGHEDEN_MODULE_IDS, DIA_CONFIG } from '@/data/providers/dia';
 import { JIJ_LICENSE_TIERS } from '@/data/providers/jij';
 import { suggestDiaPackage, suggestJijTier } from './variant-suggestions';
 import { getTotalStudents } from '@/engine/price-comparison';
 import { VariantCard } from './VariantCard';
+import { CitoBundleSelector } from '../CitoBundleSelector';
 import type { ModuleVariantSelection, VariantConfidence } from './types';
+
+// Sentinel value for explicit individual pricing selection
+const DIA_INDIVIDUAL_SENTINEL = 'dia-individual';
 
 // ─── Confidence indicator ─────────────────────────────────────────────────────
 
@@ -76,7 +84,7 @@ function ProviderRadio({
 
 // ─── Basisvaardigheden module IDs ────────────────────────────────────────────
 
-const BASISVAARDIGHEDEN_IDS = ['rekenwiskunde', 'nederlands', 'engels'];
+const BASISVAARDIGHEDEN_IDS: readonly string[] = BASISVAARDIGHEDEN_MODULE_IDS;
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -101,6 +109,25 @@ export function WizardStep2Variants() {
     [selectedModules],
   );
   const hasBasisGroup = activeBasisModules.length > 1;
+
+  // DIA group packages for the grouped basisvaardigheden section
+  const diaGroupPackages = useMemo(
+    () => getDiaGroupPackages(activeBasisModules),
+    [activeBasisModules],
+  );
+
+  // Sum of individual DIA prices for the basis modules (for "Individueel" option)
+  const basisIndividualTotal = useMemo(() => {
+    return activeBasisModules.reduce(
+      (sum, id) => sum + (DIA_CONFIG.pricingStrategy.individualPrices[id] ?? 0),
+      0,
+    );
+  }, [activeBasisModules]);
+
+  // Group selection state (read from the first active basis module)
+  const groupSelection = useMemo(() => {
+    return variantSelections.find((v) => activeBasisModules.includes(v.moduleId));
+  }, [variantSelections, activeBasisModules]);
 
   // Pre-fill logic on mount: moduleSetups as base (D-07), AI extraction overlay
   useEffect(() => {
@@ -138,6 +165,8 @@ export function WizardStep2Variants() {
   const suggestedDia = useMemo(() => suggestDiaPackage(selectedModules), [selectedModules]);
   const suggestedJij = useMemo(() => suggestJijTier(totalStudents), [totalStudents]);
 
+  // ─── Handlers for individual modules ──────────────────────────────────────
+
   const handleProviderChange = useCallback((moduleId: string, provider: 'dia' | 'jij' | 'geen') => {
     const existing = variantSelections.find((v) => v.moduleId === moduleId);
     updateVariantSelection(moduleId, {
@@ -165,28 +194,187 @@ export function WizardStep2Variants() {
     updateVariantSelection(moduleId, { variantId });
   };
 
+  // ─── Handlers for grouped basisvaardigheden ───────────────────────────────
+
+  const handleGroupProviderChange = useCallback((provider: 'dia' | 'jij' | 'geen') => {
+    for (const basisId of activeBasisModules) {
+      const existing = variantSelections.find((v) => v.moduleId === basisId);
+      updateVariantSelection(basisId, {
+        provider,
+        variantId: null,
+        confidence: existing?.confidence ?? 'unknown',
+      });
+    }
+  }, [activeBasisModules, variantSelections, updateVariantSelection]);
+
+  const handleGroupVariantClick = useCallback((variantId: string | null) => {
+    for (const basisId of activeBasisModules) {
+      updateVariantSelection(basisId, { variantId });
+    }
+  }, [activeBasisModules, updateVariantSelection]);
+
+  // ─── Switch handlers for grouped/individual mode ──────────────────────────
+
+  const switchToGrouped = useCallback(() => {
+    setBasisIndividueel(false);
+    // Sync all basis modules to match the first one's provider
+    const first = variantSelections.find((v) => activeBasisModules.includes(v.moduleId));
+    if (first) {
+      for (const basisId of activeBasisModules) {
+        if (basisId !== first.moduleId) {
+          updateVariantSelection(basisId, {
+            provider: first.provider,
+            variantId: null,
+            confidence: 'unknown',
+          });
+        }
+      }
+    }
+  }, [activeBasisModules, variantSelections, updateVariantSelection]);
+
+  const switchToIndividual = useCallback(() => {
+    setBasisIndividueel(true);
+    // Clear group package variantIds (they are invalid in individual mode)
+    const groupPkgIds = new Set(diaGroupPackages.map((p) => p.id));
+    for (const basisId of activeBasisModules) {
+      const sel = variantSelections.find((v) => v.moduleId === basisId);
+      if (sel?.variantId && (groupPkgIds.has(sel.variantId) || sel.variantId === DIA_INDIVIDUAL_SENTINEL)) {
+        updateVariantSelection(basisId, { variantId: null });
+      }
+    }
+  }, [activeBasisModules, variantSelections, updateVariantSelection, diaGroupPackages]);
+
+  // ─── Render ───────────────────────────────────────────────────────────────
+
+  const groupProvider = groupSelection?.provider ?? 'geen';
+
   return (
     <div className="space-y-6">
       <h3 className="text-[15px] font-semibold text-neutral-900">
         Bevestig de variant per module
       </h3>
 
-      {/* Basisvaardigheden consistency banner */}
+      {/* Cito bundel selectie */}
+      <div className="border border-neutral-200 rounded-lg p-4">
+        <CitoBundleSelector />
+      </div>
+
+      {/* ─── Grouped basisvaardigheden section ─────────────────────────────── */}
       {hasBasisGroup && !basisIndividueel && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start justify-between gap-3">
-          <p className="text-sm text-blue-800">
-            Basisvaardigheden (rekenen, taal, Engels) zijn ingesteld op dezelfde aanbieder.
-          </p>
-          <button
-            type="button"
-            onClick={() => setBasisIndividueel(true)}
-            className="text-sm font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap underline"
-          >
-            Individueel aanpassen
-          </button>
-        </div>
+        <>
+          {/* Toggle banner */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start justify-between gap-3">
+            <p className="text-sm text-blue-800">
+              Basisvaardigheden (rekenen, taal, Engels) zijn ingesteld op dezelfde aanbieder.
+            </p>
+            <button
+              type="button"
+              onClick={switchToIndividual}
+              className="text-sm font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap underline"
+            >
+              Individueel aanpassen
+            </button>
+          </div>
+
+          {/* Combined basisvaardigheden card */}
+          <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50/30">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="text-sm font-semibold text-neutral-900">
+                Basisvaardigheden
+                <span className="text-neutral-500 font-normal ml-1.5">
+                  ({activeBasisModules.map((id) => MODULE_CATALOG.find((m) => m.id === id)?.name ?? id).join(', ')})
+                </span>
+              </span>
+            </div>
+
+            {/* Provider radio for the group */}
+            <div className="mb-4">
+              <ProviderRadio
+                moduleId="basisvaardigheden-groep"
+                selected={groupProvider}
+                onChange={handleGroupProviderChange}
+              />
+            </div>
+
+            {/* DIA group packages */}
+            {groupProvider === 'dia' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Individual pricing option */}
+                <VariantCard
+                  type="dia-package"
+                  id={DIA_INDIVIDUAL_SENTINEL}
+                  name="Individuele modules"
+                  priceLabel={`\u20AC${basisIndividualTotal.toFixed(2)}/leerling/jaar`}
+                  description={`Losse DIA-modules zonder pakketbundeling (${activeBasisModules.map((id) => {
+                    const price = DIA_CONFIG.pricingStrategy.individualPrices[id];
+                    return `\u20AC${price?.toFixed(2) ?? '?'}`;
+                  }).join(' + ')})`}
+                  isSelected={groupSelection?.variantId === DIA_INDIVIDUAL_SENTINEL}
+                  isRecommended={false}
+                  onClick={() => handleGroupVariantClick(DIA_INDIVIDUAL_SENTINEL)}
+                />
+
+                {/* Group packages */}
+                {diaGroupPackages.map((pkg) => {
+                  const moduleNames = pkg.includedModuleIds.map((id) => {
+                    const mod = MODULE_CATALOG.find((m) => m.id === id);
+                    return mod?.name ?? id;
+                  });
+
+                  return (
+                    <VariantCard
+                      key={pkg.id}
+                      type="dia-package"
+                      id={pkg.id}
+                      name={pkg.name}
+                      priceLabel={`\u20AC${pkg.pricePerStudent.toFixed(2)}/leerling/jaar`}
+                      description={pkg.description ?? `Bevat ${pkg.includedModuleIds.length} module(s)`}
+                      includedModules={moduleNames}
+                      isSelected={groupSelection?.variantId === pkg.id}
+                      isRecommended={suggestedDia?.id === pkg.id}
+                      onClick={() => handleGroupVariantClick(pkg.id)}
+                    />
+                  );
+                })}
+
+                {diaGroupPackages.length === 0 && (
+                  <p className="text-sm text-neutral-500 italic col-span-2">
+                    Geen groepspakketten beschikbaar voor {activeBasisModules.length} modules. Kies individuele modules of selecteer alle 3 basisvaardigheden.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* JIJ tier cards for the group */}
+            {groupProvider === 'jij' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {JIJ_LICENSE_TIERS.map((tier) => (
+                  <VariantCard
+                    key={String(tier.tier)}
+                    type="jij-tier"
+                    id={String(tier.tier)}
+                    name={tier.label}
+                    priceLabel={`\u20AC${tier.annualFee.toLocaleString('nl-NL')}/jaar + \u20AC${tier.pricePerTest.toFixed(2)}/afname`}
+                    description={`${tier.minAdministrations.toLocaleString('nl-NL')}\u2013${tier.maxAdministrations.toLocaleString('nl-NL')} afnames per jaar`}
+                    isSelected={groupSelection?.variantId === String(tier.tier)}
+                    isRecommended={suggestedJij.tier === tier.tier}
+                    onClick={() => handleGroupVariantClick(String(tier.tier))}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* No provider selected */}
+            {groupProvider === 'geen' && (
+              <p className="text-sm text-neutral-500 italic">
+                Selecteer welk aanbod de concurrent gebruikt voor de basisvaardigheden.
+              </p>
+            )}
+          </div>
+        </>
       )}
 
+      {/* ─── Individual basisvaardigheden banner ─────────────────────────────── */}
       {hasBasisGroup && basisIndividueel && (
         <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 flex items-start justify-between gap-3">
           <p className="text-sm text-neutral-600">
@@ -194,7 +382,7 @@ export function WizardStep2Variants() {
           </p>
           <button
             type="button"
-            onClick={() => setBasisIndividueel(false)}
+            onClick={switchToGrouped}
             className="text-sm font-medium text-cito-primary hover:opacity-80 whitespace-nowrap underline"
           >
             Groepeer weer
@@ -202,16 +390,24 @@ export function WizardStep2Variants() {
         </div>
       )}
 
+      {/* ─── Individual module cards ──────────────────────────────────────── */}
+      {/* When grouped: skip basis modules (handled above). When individual: show all. */}
       {selectedModules.map((moduleId) => {
+        // Skip basisvaardigheden when grouped — they're rendered in the group section above
+        if (!basisIndividueel && hasBasisGroup && BASISVAARDIGHEDEN_IDS.includes(moduleId)) {
+          return null;
+        }
+
         const moduleDef = MODULE_CATALOG.find((m) => m.id === moduleId);
         const selection = variantSelections.find((v) => v.moduleId === moduleId);
         const provider = selection?.provider ?? 'geen';
         const confidence = selection?.confidence ?? 'unknown';
 
-        // Filter DIA packages that include this module
-        const applicablePackages = DIA_PACKAGES.filter((pkg) =>
-          pkg.includedModuleIds.includes(moduleId),
-        );
+        // In individual mode for basis modules: only show module-specific packages (not group packages)
+        const isBasisModule = BASISVAARDIGHEDEN_IDS.includes(moduleId);
+        const applicablePackages = (basisIndividueel && isBasisModule)
+          ? getDiaModulePackages(moduleId)
+          : DIA_PACKAGES.filter((pkg) => pkg.includedModuleIds.includes(moduleId));
 
         return (
           <div key={moduleId} className="border border-neutral-200 rounded-lg p-4">
@@ -233,7 +429,7 @@ export function WizardStep2Variants() {
             </div>
 
             {/* Selected variant price hint */}
-            {provider !== 'geen' && selection?.variantId && (
+            {provider !== 'geen' && selection?.variantId && selection.variantId !== DIA_INDIVIDUAL_SENTINEL && (
               <p className="text-xs text-neutral-500 mb-3">
                 {provider === 'dia' && (() => {
                   const pkg = DIA_PACKAGES.find((p) => p.id === selection.variantId);
@@ -287,6 +483,13 @@ export function WizardStep2Variants() {
                     />
                   );
                 })}
+
+                {/* When individual mode and no packages available for this module, show hint */}
+                {applicablePackages.length === 0 && isBasisModule && (
+                  <p className="text-sm text-neutral-500 italic col-span-2">
+                    Alleen individuele prijs beschikbaar: {'\u20AC'}{(DIA_CONFIG.pricingStrategy.individualPrices[moduleId] ?? 0).toFixed(2)}/leerling/jaar
+                  </p>
+                )}
               </div>
             )}
 

@@ -184,6 +184,10 @@ export const useWizardStore = create<WizardState>()(
         if (diaSelections.length > 0) {
           const withVariant = diaSelections.find((s) => s.variantId);
           forceDiaPackageId = withVariant?.variantId ?? null; // null = individual pricing
+          // Map the 'dia-individual' sentinel (explicit individual choice in grouped mode) to null
+          if (forceDiaPackageId === 'dia-individual') {
+            forceDiaPackageId = null;
+          }
         }
         // undefined = no DIA selections, engine uses default behavior
 
