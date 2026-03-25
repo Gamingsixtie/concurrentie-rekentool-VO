@@ -4,17 +4,22 @@ import { scenarioSchema, type ScenarioData } from '../schemas/step5-schema.ts';
 import { SCENARIO_LABELS, type Scenario } from '../../../models/school.ts';
 import { useSchoolProfileStore } from '../store.ts';
 import StepContainer from '../../../components/wizard/StepContainer.tsx';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useMemo } from 'react';
 import type { WizardStepRef } from './WizardStep1.tsx';
 import ScenarioPreview from '../../../components/wizard/ScenarioPreview.tsx';
 import DMUContextPanel from '../../../components/wizard/DMUContextPanel.tsx';
 import { useWizardInsights } from '../../../hooks/useWizardInsights.ts';
 
-const SCENARIOS: Scenario[] = ['A', 'B'];
-
 const WizardStep5 = forwardRef<WizardStepRef>(function WizardStep5(_props, ref) {
-  const { scenario, setScenario, contacts } = useSchoolProfileStore();
+  const { scenario, setScenario, contacts, moduleSetups } = useSchoolProfileStore();
   const { comparisonPreview, schijnvoordelen, upsellOpportunities, totalStudents } = useWizardInsights();
+
+  // Show Scenario C option when all active modules are on cito-oud
+  const scenarios: Scenario[] = useMemo(() => {
+    const allCitoOud = moduleSetups.length > 0 &&
+      moduleSetups.every((s) => s.currentProvider === 'cito-oud');
+    return allCitoOud ? ['A', 'B', 'C'] : ['A', 'B'];
+  }, [moduleSetups]);
 
   const {
     watch,
@@ -48,7 +53,7 @@ const WizardStep5 = forwardRef<WizardStepRef>(function WizardStep5(_props, ref) 
   return (
     <StepContainer title="Wat wilt u vergelijken?">
       <div className="space-y-4">
-        {SCENARIOS.map((s) => {
+        {scenarios.map((s) => {
           const isSelected = currentScenario === s;
           const label = SCENARIO_LABELS[s];
           return (
