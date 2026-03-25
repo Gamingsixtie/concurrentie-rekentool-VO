@@ -330,7 +330,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
-| 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete   | 2026-03-25 |
+| 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete    | 2026-03-25 |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
