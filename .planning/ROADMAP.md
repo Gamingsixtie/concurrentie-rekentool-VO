@@ -75,6 +75,9 @@ Plans:
 - [ ] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
 - [ ] **Phase 18: Contactbeheer Upgrade & Klantreis-inzicht** - DMU-posities handmatig toewijzen (eenmalig, geldt overal), klantreis-tijdlijn per school met contactvolgorde en blokkades, en totaaloverzicht in school-dashboard
 - [ ] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging
+- [ ] **Phase 20: Vergelijking & Waarde Optimalisatie** - Vergelijkingstab hernoemen en uitbreiden met zachte waarde (tijdwinst, voordelen) naast harde prijsvergelijking, zodat alles in één overzichtelijk totaalbeeld samenkomt
+- [ ] **Phase 21: DMU-Export Upgrade** - Export-tab met DMU-gerichte rapporten (coördinator, MT/directie, finance) op basis van generieke aannames, met geëxtraheerde tekst uit schoolplan en Cito-bronnen
+- [ ] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
  (completed 2026-03-25)
 
 ## Phase Details
@@ -338,6 +341,10 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete    | 2026-03-25 |
 | 17. Huidig Cito vs. Concurrent | v2.0 | 3/4 | Gap closure | — |
 | 18. Contactbeheer Upgrade & Klantreis-inzicht | v2.0 | 0/0 | Not Started | — |
+| 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/0 | Not Started | — |
+| 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
+| 21. DMU-Export Upgrade | v2.0 | 0/0 | Not Started | — |
+| 22. Architectuur, Testen & Productie-readiness | v2.0 | 0/0 | Not Started | — |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -388,6 +395,67 @@ Plans:
 Plans:
 - [ ] TBD
 
+### Phase 19: Gesprekken-tab & Acties Upgrade
+**Goal**: Het tabblad Gesprekken wordt vereenvoudigd en praktischer: AI-extractie wordt verwijderd (dat gebeurt al in de AI Wizard), notities kunnen ingesproken worden via spraak-naar-tekst, en per gesprek wordt de contactpersoon gekoppeld met status. Het tabblad Acties wordt verfijnd met directe inline invoer en een bevestigingsdialoog bij verwijderen.
+**Depends on**: Phase 18 (contactbeheer upgrade), Phase 9 (gesprekken-infra)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. AI-extractiefunctie is verwijderd uit het gesprekken-tab — gespreksnotities worden handmatig of via spraak vastgelegd (AI-intake gebeurt via de wizard)
+  2. Gebruiker kan een gespreksnotitie inspreken via spraak-naar-tekst (Web Speech API of vergelijkbaar) zodat er niet alles overgetypt hoeft te worden
+  3. Bij het vastleggen van een gesprek kan de gebruiker de contactpersoon selecteren waarmee het gesprek is gevoerd, inclusief de huidige status van dat contact
+  4. Actie-tab: gebruiker kan direct inline een nieuwe actie typen zonder extra klikken — het invoerveld is altijd zichtbaar en ondersteunt verschillende actietypes
+  5. Bij het verwijderen van een gesprek of actie verschijnt een bevestigingsdialoog ("Weet u het zeker?") voordat het definitief wordt verwijderd
+  6. Algeheel verfijnd design van het actie-tabblad met verbeterde UX
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
+
+### Phase 20: Vergelijking & Waarde Optimalisatie
+**Goal**: De huidige losse tabbladen Vergelijking en Waarde samenvoegen tot één geoptimaliseerd totaaloverzicht met een toepasselijkere naam. Naast de harde prijsvergelijking worden de zachte kanten (tijdwinst, ecosysteemvoordelen, differentiators) geïntegreerd, zodat de accountmanager in één view zowel de euro's als de meerwaarde kan laten zien.
+**Depends on**: Phase 18, Phase 19
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Tabblad "Vergelijking" krijgt een nieuwe, toepasselijkere naam die zowel prijs als waarde dekt (bijv. "Overzicht" of "Totaalvergelijking")
+  2. Tijdwinst-berekeningen en zachte voordelen (nu op apart Waarde-tab) zijn geïntegreerd in het vergelijkingsoverzicht — één totaalbeeld
+  3. Harde vergelijking (prijzen per module, totaalkosten) en zachte waarde (uren bespaard, ecosysteemvoordelen, differentiators) staan overzichtelijk naast elkaar
+  4. Meerjarenprojectie en break-even zijn zichtbaar in hetzelfde overzicht
+  5. Het gecombineerde overzicht is geoptimaliseerd qua layout, leesbaarheid en flow voor gebruik tijdens klantgesprekken
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
+
+### Phase 21: DMU-Export Upgrade
+**Goal**: Het export-tabblad wordt uitgebreid met intelligente, DMU-gerichte rapporten. Op basis van generieke aannames per DMU-rol (coördinator, MT/directie, finance) worden de relevante verschillen en voordelen getoond. De rapporten bevatten geëxtraheerde tekst uit het schoolplan en Cito-bronmateriaal, zodat elk rapport inhoudelijk onderbouwd is voor de specifieke beslisser.
+**Depends on**: Phase 20 (vergelijking & waarde), Phase 14 (schoolplan-analyse)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan per DMU-rol (coördinator, MT/directie, finance) een rapport genereren op basis van generieke aannames over wat die rol belangrijk vindt
+  2. Rapporten tonen de relevante verschillen per rapporttype — coördinator ziet tijdwinst en dagelijks gebruik, MT ziet strategische waarde, finance ziet euro's en meerjarenprojectie
+  3. Geëxtraheerde tekst uit het schoolplan (indien beschikbaar) wordt automatisch verwerkt in het rapport als onderbouwing
+  4. Cito-bronmateriaal en productinformatie wordt gebruikt om de voordelen inhoudelijk te onderbouwen — niet alleen cijfers maar ook context
+  5. Rapporten zijn exporteerbaar als PDF met Cito-huisstijl en zijn direct bruikbaar in klantgesprekken
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
+
+### Phase 22: Architectuur, Testen & Productie-readiness
+**Goal**: Complete architectuurreview en uitgebreide testsuite (unit, integratie, end-to-end) zodat het prototype productiegereed is. Alle engines, views, flows en koppelingen worden systematisch getest volgens gangbare development-methodieken. Dit is de afsluitende kwaliteitsfase die het prototype klaar maakt voor dagelijks gebruik door het team.
+**Depends on**: Phase 21 (alle features compleet)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Alle engines hebben volledige unit tests met edge cases en foutscenario's — testcoverage >80%
+  2. Integratietests verifiëren de koppelingen tussen modules: wizard → store → engine → UI → export
+  3. End-to-end tests dekken de volledige gebruikersflows: school aanmaken → wizard doorlopen → vergelijking bekijken → rapport exporteren
+  4. Architectuurreview bevestigt correcte scheiding van concerns, geen security-issues, en performante queries
+  5. Alle bekende bugs en technische schuld uit eerdere fases zijn opgelost
+  6. App is stabiel, performant en productiegereed voor dagelijks gebruik door het team
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
 
 ## Backlog
 
