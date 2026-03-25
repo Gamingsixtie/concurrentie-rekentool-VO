@@ -14,7 +14,6 @@ function getTabs(slug: string): Tab[] {
     { label: 'Producten', path: r(SCHOOL_TAB_ROUTES.producten) },
     { label: 'Contacten', path: r(SCHOOL_TAB_ROUTES.contacten) },
     { label: 'Gesprekken', path: r(SCHOOL_TAB_ROUTES.gesprekken) },
-    { label: 'Waarde', path: r(SCHOOL_TAB_ROUTES.waarde) },
     { label: 'Schoolplan', path: r(SCHOOL_TAB_ROUTES.schoolplan) },
     { label: 'Export', path: r(SCHOOL_TAB_ROUTES.export) },
   ];

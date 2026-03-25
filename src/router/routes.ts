@@ -15,7 +15,6 @@ import ComparisonTab from '@/features/school-profile/tabs/ComparisonTab';
 import ProductsTab from '@/features/school-profile/tabs/ProductsTab';
 import ContactsTab from '@/features/school-profile/tabs/ContactsTab';
 import ConversationsTab from '@/features/school-profile/tabs/ConversationsTab';
-import WaardeTab from '@/features/school-profile/tabs/WaardeTab';
 import SchoolplanTab from '@/features/school-profile/tabs/SchoolplanTab';
 import ExportTab from '@/features/export/ExportTab';
 import { LoginPage } from '@/features/auth/LoginPage';
@@ -121,13 +120,6 @@ export const schoolConversationsRoute = createRoute({
   component: ConversationsTab,
 });
 
-// Waarde tab
-export const waardeRoute = createRoute({
-  getParentRoute: () => schoolRoute,
-  path: '/waarde',
-  component: WaardeTab,
-});
-
 // Schoolplan tab
 export const schoolplanRoute = createRoute({
   getParentRoute: () => schoolRoute,
@@ -151,7 +143,6 @@ export const SCHOOL_TAB_ROUTES = {
   producten: '/scholen/$slug/producten',
   contacten: '/scholen/$slug/contacten',
   gesprekken: '/scholen/$slug/gesprekken',
-  waarde: '/scholen/$slug/waarde',
   schoolplan: '/scholen/$slug/schoolplan',
   export: '/scholen/$slug/export',
 } as const;
@@ -169,7 +160,6 @@ export const routeTree = rootRoute.addChildren([
     schoolProductsRoute,
     schoolContactsRoute,
     schoolConversationsRoute,
-    waardeRoute,
     schoolplanRoute,
     exportRoute,
   ]),
