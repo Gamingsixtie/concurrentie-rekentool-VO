@@ -17,6 +17,8 @@ import { useState } from 'react';
 import { useWizardStore } from './wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { streamWizardAdvice, parseAdviceFromText } from '@/lib/ai-wizard';
+import { streamRetentionAdvice } from '@/lib/ai-advice';
+import { usePriceComparisonStore } from '@/features/price-comparison/store';
 import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { MODULE_DIFFERENTIATORS } from '@/data/differentiators';
 import { DIA_PACKAGES } from '@/data/providers/dia';
@@ -153,31 +155,38 @@ export function WizardStep3Advice() {
     let fullText = '';
 
     try {
-      // For Scenario C (alles-oud-cito-concurrent), pass retention context
-      const retentionContext = isRetentionScenario
-        ? {
-            ...extraContext,
-            bijzonderheden: [
-              extraContext.bijzonderheden,
-              'SCENARIO: Retentie — bestaande Cito-klant overweegt concurrent. Gebruik retentie-framing: wat verliest de school bij overstap, wat behouden ze bij Cito, migratiepad als zachte deal.',
-              ...(schoolplanOpportunities.length > 0
-                ? [`Schoolplan-kansen: ${schoolplanOpportunities.map(o => `${o.moduleId}: ${o.kans}`).join('; ')}`]
-                : []),
-            ].filter(Boolean).join('\n'),
-          }
-        : extraContext;
+      // For Scenario C (alles-oud-cito-concurrent), use the dedicated retention endpoint
+      // which triggers RETENTION_SYSTEM_PROMPT via /api/ai-advice with scenarioType 'C'
+      const compResult = usePriceComparisonStore.getState().result;
 
-      const stream = streamWizardAdvice(
-        activeSelections,
-        profile,
-        differentiators,
-        providerData,
-        retentionContext,
-      );
+      if (isRetentionScenario && compResult) {
+        const stream = streamRetentionAdvice(
+          compResult,
+          schoolProfile.levels,
+          schoolProfile.studentCounts,
+          schoolProfile.selectedModules,
+          schoolProfile.moduleSetups,
+          schoolplanOpportunities.length > 0 ? schoolplanOpportunities : undefined,
+        );
 
-      for await (const chunk of stream) {
-        fullText += chunk;
-        appendStreamingText(chunk);
+        for await (const chunk of stream) {
+          fullText += chunk;
+          appendStreamingText(chunk);
+        }
+      } else {
+        // Scenario A or fallback: use generic wizard advice endpoint
+        const stream = streamWizardAdvice(
+          activeSelections,
+          profile,
+          differentiators,
+          providerData,
+          extraContext,
+        );
+
+        for await (const chunk of stream) {
+          fullText += chunk;
+          appendStreamingText(chunk);
+        }
       }
 
       const parsed = parseAdviceFromText(fullText);
