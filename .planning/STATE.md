@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-03-25T09:32:10.319Z"
+stopped_at: Completed 16-02-PLAN.md
+last_updated: "2026-03-25T09:40:17.410Z"
 progress:
   total_phases: 15
   completed_phases: 12
   total_plans: 45
-  completed_plans: 40
+  completed_plans: 41
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 16 (ai-wizard-verbetering-prijsvergelijking-harmonisatie) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -117,6 +117,7 @@ Recent decisions affecting current work:
 - [Phase 16]: Persist only essential wizard state via partialize -- streaming/advice state regenerated each time
 - [Phase 16]: applyToTable uses adjustedSelections when available, falls back to variantSelections
 - [Phase 16]: parseAdviceFromText returns fallback instead of throwing on invalid JSON
+- [Phase 16]: Step 1 internal navigation: WizardStep1Notes calls setStep(1) directly after extraction
 
 ### Roadmap Evolution
 
@@ -138,6 +139,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T09:32:10.312Z
-Stopped at: Completed 16-01-PLAN.md
+Last session: 2026-03-25T09:40:17.404Z
+Stopped at: Completed 16-02-PLAN.md
 Resume file: None
