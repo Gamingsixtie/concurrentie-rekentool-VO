@@ -347,3 +347,14 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 - [x] 16-01-PLAN.md — Types, wizard store, scenario detection, variant suggestions, AI endpoints
 - [x] 16-02-PLAN.md — Wizard shell, progress bar, step 1 notes, step 2 variant selection
 - [x] 16-03-PLAN.md — Step 3 AI advice streaming, PriceComparisonPage integration, visual verification
+
+## Backlog
+
+### Phase 999.1: Wizard als onderdeel van school-aanmaak flow (BACKLOG)
+
+**Goal:** Bij het aanmaken van een nieuwe school meteen de vergelijkingswizard doorlopen zodat het profiel direct compleet is — de wizard wordt het startpunt van elk schoolgesprek, niet een los tabblad dat je later moet ontdekken.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
