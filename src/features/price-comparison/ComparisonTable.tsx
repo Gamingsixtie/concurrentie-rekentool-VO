@@ -9,6 +9,7 @@ import { ModuleDetailPanel } from './ModuleDetailPanel';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { CitoBundleSelector } from './CitoBundleSelector';
+import { DiaBundleSelector } from './DiaBundleSelector';
 import { getCitoBundle } from '../../data/providers/cito';
 
 interface ComparisonTableProps {
@@ -96,7 +97,8 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
                     <div className="text-[10px] font-normal opacity-80 text-right">(huidig platform)</div>
                   )}
                   {provider === 'cito' && <CitoBundleSelector compact />}
-                  {tierBadge && provider !== 'cito' && (
+                  {provider === 'dia' && <DiaBundleSelector compact />}
+                  {tierBadge && provider !== 'cito' && provider !== 'dia' && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
                       {tierBadge}
                     </span>

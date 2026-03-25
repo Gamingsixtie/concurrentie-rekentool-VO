@@ -57,6 +57,7 @@ interface PriceComparisonState {
     competitorModuleIds: Partial<Record<ProviderKey, string[]>> | null,
     forceDiaPackageId: string | null | undefined,
   ) => void;
+  setForceDiaPackageId: (id: string | null) => void;
 
   initialize: () => void;
   setDraftOverride: (override: PriceOverride) => void;
@@ -165,6 +166,10 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     },
     setCitoBundleType: (bundleType) => {
       set({ citoBundleType: bundleType });
+      get().initialize();
+    },
+    setForceDiaPackageId: (id) => {
+      set({ forceDiaPackageId: id });
       get().initialize();
     },
 

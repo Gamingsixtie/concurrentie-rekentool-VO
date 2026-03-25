@@ -14,6 +14,7 @@ import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
 import { CitoBundleSelector } from './CitoBundleSelector';
+import { DiaBundleSelector } from './DiaBundleSelector';
 import { ComparisonWizard } from './wizard/ComparisonWizard';
 import { AnalysisPanel } from './AnalysisPanel';
 
@@ -362,6 +363,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
       {/* Bundel + Contractperiode keuze */}
       <div className="flex flex-wrap items-start gap-6 mb-8">
         <CitoBundleSelector />
+        <DiaBundleSelector />
         <PeriodToggle />
       </div>
 
