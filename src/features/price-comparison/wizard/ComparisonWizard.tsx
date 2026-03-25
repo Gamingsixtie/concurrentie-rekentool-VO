@@ -25,13 +25,20 @@ export function ComparisonWizard() {
 
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
+  const schoolScenario = useSchoolProfileStore((s) => s.scenario);
   const setSchoolScenario = useSchoolProfileStore((s) => s.setScenario);
 
-  // Detect scenario on mount
+  // Detect scenario on mount — respect school-level scenario choice
   useEffect(() => {
     const detected = detectScenario(moduleSetups);
-    setScenario(detected);
-  }, [moduleSetups, setScenario]);
+    // If school scenario is already 'C' and all modules are cito-oud,
+    // skip the choice UI and go straight to competitor wizard flow
+    if (detected === 'alles-oud-cito' && schoolScenario === 'C') {
+      setScenario('alles-oud-cito-concurrent');
+    } else {
+      setScenario(detected);
+    }
+  }, [moduleSetups, schoolScenario, setScenario]);
 
   // Empty state guard: no modules selected
   if (selectedModules.length === 0) {

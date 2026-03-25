@@ -7,6 +7,46 @@ import { detectScenario } from '@/engine/scenario-detection';
 import { updateSchoolData } from '@/db/operations';
 import { SCENARIO_LABELS, type Scenario } from '@/models/school';
 
+// ─── View switcher for all-cito-oud schools ─────────────────────────────────
+
+function ViewSwitcher({
+  current,
+  onSwitch,
+}: {
+  current: 'B' | 'C';
+  onSwitch: (scenario: Scenario) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-4 sm:px-8 pt-4 pb-2 max-w-[960px] mx-auto">
+      <span className="text-xs font-medium text-neutral-500 mr-1">Weergave:</span>
+      <button
+        type="button"
+        onClick={() => onSwitch('B')}
+        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[32px] ${
+          current === 'B'
+            ? 'bg-cito-primary text-white'
+            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+        }`}
+      >
+        Migratie bekijken
+      </button>
+      <button
+        type="button"
+        onClick={() => onSwitch('C')}
+        className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors min-h-[32px] ${
+          current === 'C'
+            ? 'bg-cito-primary text-white'
+            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+        }`}
+      >
+        Vergelijk met concurrent
+      </button>
+    </div>
+  );
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
+
 export default function ComparisonTab() {
   const scenario = useSchoolProfileStore((s) => s.scenario);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
@@ -14,9 +54,8 @@ export default function ComparisonTab() {
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
   const setScenario = useSchoolProfileStore((s) => s.setScenario);
 
-  // Track whether all-cito-oud choice has been made this session
-  const [allOudChoice, setAllOudChoice] = useState<'migration' | 'competitor' | null>(null);
-  const [allOudSelected, setAllOudSelected] = useState<'migration' | 'competitor' | null>(null);
+  // Pending selection in the initial choice UI (before confirming)
+  const [pendingChoice, setPendingChoice] = useState<'migration' | 'competitor' | null>(null);
 
   // Detect scenario from module setups
   const detection = useMemo(
@@ -30,17 +69,7 @@ export default function ComparisonTab() {
     return detection.hasMigrationModules && !detection.hasCompetitorModules && !detection.hasUpsellModules;
   }, [detection]);
 
-  // Fallback: auto-detect scenario from moduleSetups when not explicitly set
-  const effectiveScenario = useMemo(() => {
-    // If user made choice via the all-cito-oud UI
-    if (allOudChoice === 'competitor') return 'C' as Scenario;
-    if (allOudChoice === 'migration') return 'B' as Scenario;
-    if (scenario) return scenario;
-    if (moduleSetups.length === 0) return null;
-    return detection?.recommended ?? null;
-  }, [scenario, moduleSetups, detection, allOudChoice]);
-
-  // Apply detected scenario to store + database
+  // Apply scenario to store + database
   const handleApplyScenario = useCallback(async (chosen: Scenario) => {
     setScenario(chosen);
     if (activeSchoolId) {
@@ -48,13 +77,20 @@ export default function ComparisonTab() {
     }
   }, [setScenario, activeSchoolId]);
 
-  // Handle all-cito-oud choice confirmation
-  const handleAllOudConfirm = useCallback(async () => {
-    if (!allOudSelected) return;
-    setAllOudChoice(allOudSelected);
-    const chosenScenario: Scenario = allOudSelected === 'competitor' ? 'C' : 'B';
+  // Handle choice confirmation
+  const handleConfirmChoice = useCallback(async () => {
+    if (!pendingChoice) return;
+    const chosenScenario: Scenario = pendingChoice === 'competitor' ? 'C' : 'B';
     await handleApplyScenario(chosenScenario);
-  }, [allOudSelected, handleApplyScenario]);
+    setPendingChoice(null);
+  }, [pendingChoice, handleApplyScenario]);
+
+  // Effective scenario: store scenario takes priority, then auto-detect
+  const effectiveScenario = useMemo(() => {
+    if (scenario) return scenario;
+    if (moduleSetups.length === 0) return null;
+    return detection?.recommended ?? null;
+  }, [scenario, moduleSetups, detection]);
 
   // No modules selected at all
   if (selectedModules.length === 0) {
@@ -69,8 +105,8 @@ export default function ComparisonTab() {
     );
   }
 
-  // All modules are cito-oud and no choice made yet — show choice UI
-  if (isAllCitoOud && !allOudChoice && (!scenario || scenario === 'B' || scenario === 'C')) {
+  // All modules are cito-oud and no B/C scenario chosen yet — show choice UI
+  if (isAllCitoOud && (!scenario || (scenario !== 'B' && scenario !== 'C'))) {
     return (
       <div className="p-8 max-sm:p-4">
         <div className="bg-white border border-neutral-200 rounded-lg p-6 max-w-lg mx-auto">
@@ -84,9 +120,9 @@ export default function ComparisonTab() {
             {/* Migration card */}
             <button
               type="button"
-              onClick={() => setAllOudSelected('migration')}
+              onClick={() => setPendingChoice('migration')}
               className={`flex-1 text-left rounded-lg border p-4 cursor-pointer transition-colors min-h-[80px] ${
-                allOudSelected === 'migration'
+                pendingChoice === 'migration'
                   ? 'border-cito-primary border-2 bg-cito-primary/5'
                   : 'border-blue-200 bg-blue-50 hover:border-blue-300'
               }`}
@@ -107,9 +143,9 @@ export default function ComparisonTab() {
             {/* Competitor card */}
             <button
               type="button"
-              onClick={() => setAllOudSelected('competitor')}
+              onClick={() => setPendingChoice('competitor')}
               className={`flex-1 text-left rounded-lg border p-4 cursor-pointer transition-colors min-h-[80px] ${
-                allOudSelected === 'competitor'
+                pendingChoice === 'competitor'
                   ? 'border-cito-primary border-2 bg-cito-primary/5'
                   : 'border-amber-200 bg-amber-50 hover:border-amber-300'
               }`}
@@ -129,11 +165,11 @@ export default function ComparisonTab() {
           </div>
 
           {/* Confirm button */}
-          {allOudSelected !== null && (
+          {pendingChoice !== null && (
             <div className="mt-4">
               <button
                 type="button"
-                onClick={handleAllOudConfirm}
+                onClick={handleConfirmChoice}
                 className="bg-cito-primary text-white text-sm font-semibold py-2.5 px-6 rounded-lg min-h-[44px] hover:opacity-90 transition-opacity"
               >
                 Doorgaan
@@ -207,13 +243,24 @@ export default function ComparisonTab() {
     (setup) => setup.currentProvider !== 'geen',
   );
 
-  // Scenario C: current Cito vs. competitor — uses the comparison page
-  if (effectiveScenario === 'C' && hasProviderSetups) {
-    return <PriceComparisonPage />;
+  // Scenario B: migration — huidig Cito-platform vs. nieuw platform
+  if (effectiveScenario === 'B' && hasProviderSetups) {
+    return (
+      <>
+        {isAllCitoOud && <ViewSwitcher current="B" onSwitch={handleApplyScenario} />}
+        <MigrationPage />
+      </>
+    );
   }
 
-  if (effectiveScenario === 'B' && hasProviderSetups) {
-    return <MigrationPage />;
+  // Scenario C: current Cito vs. competitor — uses the comparison page
+  if (effectiveScenario === 'C' && hasProviderSetups) {
+    return (
+      <>
+        {isAllCitoOud && <ViewSwitcher current="C" onSwitch={handleApplyScenario} />}
+        <PriceComparisonPage />
+      </>
+    );
   }
 
   if (effectiveScenario === 'A' && hasProviderSetups) {
