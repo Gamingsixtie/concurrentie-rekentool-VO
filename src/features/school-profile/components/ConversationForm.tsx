@@ -11,7 +11,9 @@ import { DMU_POSITION_LABELS } from '@/models/school';
 import { ENGAGEMENT_STATUS_LABELS } from '@/models/school';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import TagInput from '@/features/school-profile/components/TagInput';
-import IntakeModeToggle from '@/features/school-profile/components/IntakeModeToggle';
+// IntakeModeToggle hidden per D-05 — import kept for future re-enable
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import _IntakeModeToggle from '@/features/school-profile/components/IntakeModeToggle';
 import StreamingExtraction, { STREAMING_FIELD_LABELS } from '@/features/school-profile/components/StreamingExtraction';
 import DiffView, { type DiffSelection } from '@/features/school-profile/components/DiffView';
 import { streamIntakeFromNotes, parseExtractionFromText } from '@/lib/ai-intake';

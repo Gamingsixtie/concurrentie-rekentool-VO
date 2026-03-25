@@ -55,7 +55,7 @@ function CheckCircleIcon() {
   );
 }
 
-const COLUMNS: { status: ColumnStatus; label: string; headerBg: string; headerText: string; Icon: () => JSX.Element; emptyText: string }[] = [
+const COLUMNS: { status: ColumnStatus; label: string; headerBg: string; headerText: string; Icon: () => React.ReactElement; emptyText: string }[] = [
   { status: 'todo', label: 'Te doen', headerBg: 'bg-amber-50', headerText: 'text-amber-800', Icon: ClipboardIcon, emptyText: 'Geen openstaande acties \u2014 typ een actie hieronder' },
   { status: 'in-progress', label: 'In uitvoering', headerBg: 'bg-blue-50', headerText: 'text-blue-800', Icon: PlayCircleIcon, emptyText: 'Nog geen acties in uitvoering \u2014 versleep een kaart hiernaartoe' },
   { status: 'done', label: 'Afgerond', headerBg: 'bg-green-50', headerText: 'text-green-800', Icon: CheckCircleIcon, emptyText: 'Nog geen afgeronde acties \u2014 versleep een afgeronde actie hiernaartoe' },
