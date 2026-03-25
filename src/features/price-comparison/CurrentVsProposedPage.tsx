@@ -14,6 +14,7 @@ import { getCitoBundle } from '../../data/cito-bundles';
 import { applyCitoBundlePrices } from '../../engine/cito-bundles';
 import { detectScenario } from '../../engine/scenario-detection';
 import { AnalysisPanel } from './AnalysisPanel';
+import { ComparisonWizard } from './wizard/ComparisonWizard';
 
 interface CurrentVsProposedPageProps {
   onBack?: () => void;
@@ -429,6 +430,11 @@ export function CurrentVsProposedPage({ onBack }: CurrentVsProposedPageProps) {
             </tr>
           </tfoot>
         </table>
+      </div>
+
+      {/* AI Vergelijkingswizard */}
+      <div className="mb-8">
+        <ComparisonWizard />
       </div>
 
       {/* AI Concurrentieanalyse */}

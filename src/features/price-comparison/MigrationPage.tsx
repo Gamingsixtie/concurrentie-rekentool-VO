@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { PeriodToggle } from './PeriodToggle';
 import { AnalysisPanel } from './AnalysisPanel';
+import { ComparisonWizard } from './wizard/ComparisonWizard';
 
 interface MigrationPageProps {
   onBack?: () => void;
@@ -259,6 +260,11 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
         <p className="text-xs text-neutral-400 mt-3 text-center">
           Cumulatieve waarde over 1 en 3 jaar (financieel + tijdswinst)
         </p>
+      </div>
+
+      {/* AI Vergelijkingswizard */}
+      <div className="mb-8">
+        <ComparisonWizard />
       </div>
 
       {/* AI Migration Analysis */}
