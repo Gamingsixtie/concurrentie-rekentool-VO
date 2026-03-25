@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Fundament** - Phases 1-5 (shipped 2026-03-20)
-- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-16 (in progress)
+- 🚧 **v2.0 Sales Intelligence Platform** - Phases 6-17 (in progress)
 
 ## Phases
 
@@ -71,6 +71,7 @@ Plans:
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 - [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie → AI-advies → tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
+- [ ] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform — extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
 
 ## Phase Details
 
@@ -347,6 +348,21 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 - [x] 16-01-PLAN.md — Types, wizard store, scenario detection, variant suggestions, AI endpoints
 - [x] 16-02-PLAN.md — Wizard shell, progress bar, step 1 notes, step 2 variant selection
 - [x] 16-03-PLAN.md — Step 3 AI advice streaming, PriceComparisonPage integration, visual verification
+
+### Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking
+**Goal**: Scholen die op het huidige Cito-platform zitten kunnen een eerlijke prijsvergelijking doen met DIA en JIJ, zonder de aanname dat ze naar het nieuwe Cito-platform migreren. De wizard herkent dit scenario en vergelijkt de huidige Cito-situatie (bestaande modules, huidige prijzen) direct met wat de concurrent biedt — zodat accountmanagers ook voor bestaande klanten die de markt verkennen een onderbouwd verhaal hebben.
+**Depends on**: Phase 16 (AI Wizard)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Wizard herkent het scenario "school zit op huidig Cito-platform en wil vergelijken met concurrent" als aparte flow naast de bestaande scenario's
+  2. Vergelijking gebruikt de huidige Cito-prijzen/modules van de school, niet de tarieven van het nieuwe platform
+  3. AI-advies houdt rekening met het feit dat de school al Cito-klant is en genereert passend advies (retentie-perspectief, niet acquisitie)
+  4. Resultaat in vergelijkingstabel toont huidig Cito vs. concurrent, niet nieuw Cito vs. concurrent
+  5. ScenarioDetector vangt dit scenario correct op en routeert naar de juiste flow
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
 
 ## Backlog
 
