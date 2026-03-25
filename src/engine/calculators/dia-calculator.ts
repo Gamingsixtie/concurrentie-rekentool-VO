@@ -15,9 +15,11 @@ import {
  */
 export class DiaCalculator implements ProviderPriceCalculator {
   private readonly config: DiaProviderConfig;
+  private readonly forceDiaPackageId?: string | null;
 
-  constructor(config: DiaProviderConfig) {
+  constructor(config: DiaProviderConfig, forceDiaPackageId?: string | null) {
     this.config = config;
+    this.forceDiaPackageId = forceDiaPackageId;
   }
 
   calculateModule(
@@ -116,6 +118,7 @@ export class DiaCalculator implements ProviderPriceCalculator {
       nonOverriddenModules,
       this.config.packages,
       perModulePrices,
+      this.forceDiaPackageId,
     );
 
     // Build results for each module

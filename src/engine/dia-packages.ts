@@ -35,6 +35,7 @@ export function selectOptimalDiaPackage(
   selectedDiaModuleIds: string[],
   packages: DiaPackage[],
   perModulePrices: Map<string, number>,
+  forcedPackageId?: string | null,
 ): DiaPackageResult {
   if (selectedDiaModuleIds.length === 0) {
     return {
@@ -50,6 +51,43 @@ export function selectOptimalDiaPackage(
   const individualTotal = selectedDiaModuleIds.reduce((sum, moduleId) => {
     return sum + (perModulePrices.get(moduleId) ?? 0);
   }, 0);
+
+  // If forcedPackageId is explicitly null, use individual pricing only (no packages)
+  if (forcedPackageId === null) {
+    return {
+      selectedPackage: null,
+      totalCost: individualTotal,
+      individualTotal,
+      savings: 0,
+      coveredModuleIds: [],
+    };
+  }
+
+  // If a specific package is forced, use it directly (skip optimization)
+  if (forcedPackageId !== undefined) {
+    const forcedPkg = packages.find((p) => p.id === forcedPackageId);
+    if (forcedPkg) {
+      const coveredModuleIds = forcedPkg.includedModuleIds.filter((id) =>
+        selectedDiaModuleIds.includes(id),
+      );
+      const uncoveredModuleIds = selectedDiaModuleIds.filter(
+        (id) => !coveredModuleIds.includes(id),
+      );
+      const uncoveredCost = uncoveredModuleIds.reduce((sum, moduleId) => {
+        return sum + (perModulePrices.get(moduleId) ?? 0);
+      }, 0);
+      const totalCost = forcedPkg.pricePerStudent + uncoveredCost;
+
+      return {
+        selectedPackage: forcedPkg,
+        totalCost,
+        individualTotal,
+        savings: individualTotal - totalCost,
+        coveredModuleIds,
+      };
+    }
+    // Forced package not found — fall through to auto-optimization
+  }
 
   // Find qualifying packages: selected modules must include at least minModules
   // of the package's included modules

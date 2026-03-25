@@ -6,6 +6,7 @@ import type { ModuleVariantSelection } from '../types';
 const mockSetVisibleProviders = vi.fn();
 const mockSetCitoBundleType = vi.fn();
 const mockInitialize = vi.fn();
+const mockSetVariantConfig = vi.fn();
 
 vi.mock('../../store', () => ({
   usePriceComparisonStore: {
@@ -13,6 +14,7 @@ vi.mock('../../store', () => ({
       setVisibleProviders: mockSetVisibleProviders,
       setCitoBundleType: mockSetCitoBundleType,
       initialize: mockInitialize,
+      setVariantConfig: mockSetVariantConfig,
     }),
   },
 }));

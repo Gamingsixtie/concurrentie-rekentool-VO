@@ -50,6 +50,14 @@ interface PriceComparisonState {
   setVisibleProviders: (providers: ProviderKey[]) => void;
   toggleProvider: (provider: ProviderKey) => void;
 
+  // Wizard variant config: which modules use which competitor, forced DIA package
+  competitorModuleIds: Partial<Record<ProviderKey, string[]>> | null;
+  forceDiaPackageId: string | null | undefined;
+  setVariantConfig: (
+    competitorModuleIds: Partial<Record<ProviderKey, string[]>> | null,
+    forceDiaPackageId: string | null | undefined,
+  ) => void;
+
   initialize: () => void;
   setDraftOverride: (override: PriceOverride) => void;
   resetOverride: (moduleId: string, provider: string) => void;
@@ -122,6 +130,12 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     diaPackageResult: null,
     activeCompetitor: null,
     visibleProviders: ['cito'] as ProviderKey[],
+    competitorModuleIds: null,
+    forceDiaPackageId: undefined,
+
+    setVariantConfig: (competitorModuleIds, forceDiaPackageId) => {
+      set({ competitorModuleIds, forceDiaPackageId });
+    },
 
     setVisibleProviders: (providers) => {
       // Ensure 'cito' is always included
@@ -162,6 +176,8 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       // Step 1: Engine computes everything (provider calculators + breakdown + DIA packages)
       const annualResult = calculateComparison(selectedModules, studentCounts, {
         citoBundleType: state.citoBundleType,
+        competitorModuleIds: state.competitorModuleIds ?? undefined,
+        forceDiaPackageId: state.forceDiaPackageId,
       });
 
       // Step 2: Contract period multipliers (post-processing, stays in store)
@@ -241,6 +257,8 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const annualResult = calculateComparison(selectedModules, studentCounts, {
         citoBundleType: state.citoBundleType,
         overridePrices,
+        competitorModuleIds: state.competitorModuleIds ?? undefined,
+        forceDiaPackageId: state.forceDiaPackageId,
       });
 
       // Step 2: Contract period

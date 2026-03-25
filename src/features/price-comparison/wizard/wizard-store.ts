@@ -167,10 +167,33 @@ export const useWizardStore = create<WizardState>()(
         // Build visible providers list with 'cito' always first
         const providers: ProviderKey[] = ['cito', ...providerSet];
 
+        // Build competitorModuleIds: which modules use which competitor
+        const competitorModuleIds: Partial<Record<ProviderKey, string[]>> = {};
+        for (const sel of selections) {
+          if (sel.provider !== 'geen') {
+            const key = sel.provider as ProviderKey;
+            if (!competitorModuleIds[key]) competitorModuleIds[key] = [];
+            competitorModuleIds[key]!.push(sel.moduleId);
+          }
+        }
+
+        // Determine forceDiaPackageId from variant selections
+        // Find the first DIA selection with a variantId (package choice)
+        const diaSelections = selections.filter((s) => s.provider === 'dia');
+        let forceDiaPackageId: string | null | undefined;
+        if (diaSelections.length > 0) {
+          const withVariant = diaSelections.find((s) => s.variantId);
+          forceDiaPackageId = withVariant?.variantId ?? null; // null = individual pricing
+        }
+        // undefined = no DIA selections, engine uses default behavior
+
         const comparisonStore = usePriceComparisonStore.getState();
 
         // Set visible providers
         comparisonStore.setVisibleProviders(providers);
+
+        // Set variant config (competitor module mapping + forced package)
+        comparisonStore.setVariantConfig(competitorModuleIds, forceDiaPackageId);
 
         // Set Cito bundle type if AI recommended one
         if (state.aiAdvice?.aanbevolenCitoBundel) {

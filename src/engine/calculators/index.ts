@@ -14,7 +14,7 @@ export type { ProviderPriceCalculator, ModulePriceResult, PriceBreakdownStep } f
  */
 export function createCalculator(
   config: ProviderConfig,
-  options?: { citoBundleType?: CitoBundleType; selectedModules?: string[] },
+  options?: { citoBundleType?: CitoBundleType; selectedModules?: string[]; forceDiaPackageId?: string | null },
 ): ProviderPriceCalculator {
   switch (config.pricingStrategy.type) {
     case 'platform+module':
@@ -26,6 +26,7 @@ export function createCalculator(
     case 'package-bundle':
       return new DiaCalculator(
         config as import('@/data/providers/dia').DiaProviderConfig,
+        options?.forceDiaPackageId,
       );
     case 'tiered-license':
       return new JijCalculator(

@@ -55,6 +55,10 @@ export interface ComparisonOptions {
   citoBundleType?: CitoBundleType;
   overridePrices?: Map<string, number>; // key: "moduleId:provider"
   scenarioType?: Scenario;
+  /** Per-provider module subset from wizard — only these modules are calculated for each competitor */
+  competitorModuleIds?: Partial<Record<ProviderKey, string[]>>;
+  /** Force a specific DIA package instead of auto-optimization (null = individual pricing only) */
+  forceDiaPackageId?: string | null;
 }
 
 /**
@@ -110,16 +114,21 @@ export function calculateComparison(
       createCalculator(config, {
         citoBundleType: options.citoBundleType,
         selectedModules,
+        forceDiaPackageId: providerKey === 'dia' ? options.forceDiaPackageId : undefined,
       }),
     );
   }
 
   // Run calculateAll for each provider
+  // For non-cito providers, use competitorModuleIds when available
   const providerResults = new Map<ProviderKey, Map<string, import('./calculators/types').ModulePriceResult>>();
   for (const providerKey of PROVIDERS) {
     const calc = calculators.get(providerKey)!;
     const overrides = providerOverrides.get(providerKey);
-    providerResults.set(providerKey, calc.calculateAll(selectedModules, totalStudents, overrides));
+    const modulesToCalc = providerKey === 'cito'
+      ? selectedModules
+      : (options.competitorModuleIds?.[providerKey] ?? selectedModules);
+    providerResults.set(providerKey, calc.calculateAll(modulesToCalc, totalStudents, overrides));
   }
 
   // Scenario C: override cito prices with old-platform prices
