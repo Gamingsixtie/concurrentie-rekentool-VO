@@ -27,10 +27,38 @@ interface ActionKanbanProps {
 
 type ColumnStatus = 'todo' | 'in-progress' | 'done';
 
-const COLUMNS: { status: ColumnStatus; label: string; headerBg: string; headerText: string }[] = [
-  { status: 'todo', label: 'Te doen', headerBg: 'bg-amber-50', headerText: 'text-amber-800' },
-  { status: 'in-progress', label: 'In uitvoering', headerBg: 'bg-blue-50', headerText: 'text-blue-800' },
-  { status: 'done', label: 'Afgerond', headerBg: 'bg-green-50', headerText: 'text-green-800' },
+// Column header SVG icons
+function ClipboardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+    </svg>
+  );
+}
+
+function PlayCircleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="10 8 16 12 10 16 10 8" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  );
+}
+
+const COLUMNS: { status: ColumnStatus; label: string; headerBg: string; headerText: string; Icon: () => JSX.Element; emptyText: string }[] = [
+  { status: 'todo', label: 'Te doen', headerBg: 'bg-amber-50', headerText: 'text-amber-800', Icon: ClipboardIcon, emptyText: 'Geen openstaande acties \u2014 typ een actie hieronder' },
+  { status: 'in-progress', label: 'In uitvoering', headerBg: 'bg-blue-50', headerText: 'text-blue-800', Icon: PlayCircleIcon, emptyText: 'Nog geen acties in uitvoering \u2014 versleep een kaart hiernaartoe' },
+  { status: 'done', label: 'Afgerond', headerBg: 'bg-green-50', headerText: 'text-green-800', Icon: CheckCircleIcon, emptyText: 'Nog geen afgeronde acties \u2014 versleep een afgeronde actie hiernaartoe' },
 ];
 
 function DroppableColumn({
@@ -61,7 +89,6 @@ export default function ActionKanban({
 }: ActionKanbanProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [addingTitle, setAddingTitle] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
 
   const updateActionMutation = useUpdateAction();
   const createActionMutation = useCreateAction();
@@ -125,7 +152,6 @@ export default function ActionKanban({
       {
         onSuccess: () => {
           setAddingTitle('');
-          setShowAddForm(false);
         },
       },
     );
@@ -147,12 +173,14 @@ export default function ActionKanban({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {COLUMNS.map(col => {
           const columnActions = actions.filter(a => a.status === col.status);
+          const { Icon } = col;
           return (
             <div key={col.status}>
-              {/* Column header */}
+              {/* Column header with icon */}
               <div
-                className={`${col.headerBg} ${col.headerText} px-3 py-2 rounded-t-lg text-[14px] font-semibold`}
+                className={`${col.headerBg} ${col.headerText} px-3 py-2 rounded-t-lg text-[14px] font-semibold flex items-center gap-1.5`}
               >
+                <Icon />
                 {col.label} ({columnActions.length})
               </div>
 
@@ -167,6 +195,7 @@ export default function ActionKanban({
                       key={action.id}
                       action={action}
                       conversations={conversations}
+                      schoolId={schoolId}
                       onDelete={handleDeleteAction}
                     />
                   ))}
@@ -174,48 +203,23 @@ export default function ActionKanban({
 
                 {columnActions.length === 0 && (
                   <div className="border border-dashed border-neutral-200 rounded-lg py-6 text-center">
-                    <p className="text-[14px] text-neutral-400">Geen acties</p>
+                    <p className="text-xs text-neutral-400 px-2">{col.emptyText}</p>
                   </div>
                 )}
 
-                {/* Add button in todo column */}
+                {/* Always-visible inline input in todo column (D-09) */}
                 {col.status === 'todo' && (
-                  <>
-                    {showAddForm ? (
-                      <div className="flex gap-2 mt-1">
-                        <input
-                          type="text"
-                          value={addingTitle}
-                          onChange={e => setAddingTitle(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') handleAddAction();
-                            if (e.key === 'Escape') {
-                              setShowAddForm(false);
-                              setAddingTitle('');
-                            }
-                          }}
-                          placeholder="Actietitel..."
-                          autoFocus
-                          className="flex-1 h-[36px] border border-neutral-200 rounded-lg px-2 text-[14px] text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddAction}
-                          className="h-[36px] px-3 text-[14px] font-semibold bg-cito-accent text-white rounded-lg hover:bg-orange-600 transition-colors"
-                        >
-                          Toevoegen
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setShowAddForm(true)}
-                        className="w-full h-[44px] text-[14px] text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors"
-                      >
-                        + Actie toevoegen
-                      </button>
-                    )}
-                  </>
+                  <input
+                    type="text"
+                    value={addingTitle}
+                    onChange={e => setAddingTitle(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleAddAction();
+                      if (e.key === 'Escape') setAddingTitle('');
+                    }}
+                    placeholder="Nieuwe actie..."
+                    className="h-[36px] w-full border border-neutral-200 rounded-lg px-2 text-[14px] text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary mt-1"
+                  />
                 )}
               </DroppableColumn>
             </div>
@@ -230,6 +234,7 @@ export default function ActionKanban({
             <ActionItemCard
               action={activeAction}
               conversations={conversations}
+              schoolId={schoolId}
               onDelete={() => {}}
             />
           </div>
