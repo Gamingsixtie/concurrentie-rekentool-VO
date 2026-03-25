@@ -140,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after Phase 16 ai-wizard-verbetering-prijsvergelijking-harmonisatie completion*
+*Last updated: 2026-03-25 after Phase 18 contactbeheer-upgrade-klantreis-inzicht completion*
