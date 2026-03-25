@@ -46,6 +46,11 @@ Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk 
 - [x] School overview with filtering, list/kanban views, compact/extended cards (SCHOOL-06)
 - [x] School-specific price overrides clearly separated from publication prices (PRIJS-07)
 
+**v2.0 AI Wizard Prijsvergelijking** (validated Phase 16, 2026-03-25):
+- [x] 3-staps AI wizard voor eerlijke prijsvergelijking met variant-selectie per module (PRIJS-01, PRIJS-03)
+- [x] AI-advies met matching-uitleg en Cito-bundel aanbeveling op basis van provider-configuraties (PRIJS-05, PRIJS-06)
+- [x] Wizard-tabel harmonisatie: single source of truth via applyToTable() cross-store write
+
 ### Active
 
 *Wordt gedefinieerd in REQUIREMENTS.md voor v2.0*
@@ -135,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after Phase 07 school-intelligence completion*
+*Last updated: 2026-03-25 after Phase 16 ai-wizard-verbetering-prijsvergelijking-harmonisatie completion*
