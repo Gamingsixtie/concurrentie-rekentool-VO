@@ -358,6 +358,48 @@ export interface Database {
         };
         Relationships: [];
       };
+      planned_touchpoints: {
+        Row: {
+          id: string;
+          school_id: string;
+          contact_id: string;
+          school_year_start: number;
+          month_index: number;
+          note: string;
+          status: string;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          school_id: string;
+          contact_id: string;
+          school_year_start: number;
+          month_index: number;
+          note?: string;
+          status?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          school_id?: string;
+          contact_id?: string;
+          school_year_start?: number;
+          month_index?: number;
+          note?: string;
+          status?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       school_prices: {
         Row: {
           id: string;
