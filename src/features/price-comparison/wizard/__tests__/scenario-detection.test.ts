@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { detectScenario } from '../scenario-detection';
 import type { ModuleCurrentSetup } from '@/models/school';
+import type { WizardScenario } from '../types';
 
 describe('detectScenario', () => {
   it('returns "deels-concurrent" when moduleSetups has mix of cito and dia/jij providers', () => {
@@ -47,5 +48,12 @@ describe('detectScenario', () => {
       { moduleId: 'nederlands', currentProvider: 'cito-nieuw', pricePerStudent: null },
     ];
     expect(detectScenario(setups)).toBe('deels-concurrent');
+  });
+});
+
+describe('Scenario C types', () => {
+  it('accepts "alles-oud-cito-concurrent" as a valid WizardScenario value', () => {
+    const scenario: WizardScenario = 'alles-oud-cito-concurrent';
+    expect(scenario).toBe('alles-oud-cito-concurrent');
   });
 });

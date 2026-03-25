@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { detectScenario } from '../scenario-detection';
-import type { ModuleCurrentSetup } from '../../models/school';
+import type { ModuleCurrentSetup, Scenario } from '../../models/school';
+import { SCENARIO_LABELS } from '../../models/school';
+import { getOldPlatformPrice } from '../../data/cito-migration-prices';
 
 describe('detectScenario', () => {
   it('returns scenario B when all modules are on cito-oud', () => {
@@ -111,5 +113,40 @@ describe('detectScenario', () => {
     expect(result.recommended).toBe('A');
     expect(result.hasCompetitorModules).toBe(true);
     expect(result.competitorModuleIds).toEqual(['sociaal-emotioneel', 'rekenwiskunde']);
+  });
+});
+
+describe('Scenario C type system', () => {
+  it('accepts C as a valid Scenario value', () => {
+    const scenario: Scenario = 'C';
+    expect(scenario).toBe('C');
+  });
+
+  it('has Dutch label for Scenario C in SCENARIO_LABELS', () => {
+    expect(SCENARIO_LABELS['C']).toBeDefined();
+    expect(SCENARIO_LABELS['C'].title).toBe('Huidig Cito vs. concurrentie');
+    expect(SCENARIO_LABELS['C'].description).toContain('retentie-perspectief');
+  });
+});
+
+describe('getOldPlatformPrice', () => {
+  it('returns 7.07 for rekenwiskunde', () => {
+    expect(getOldPlatformPrice('rekenwiskunde')).toBe(7.07);
+  });
+
+  it('returns 7.07 for engels', () => {
+    expect(getOldPlatformPrice('engels')).toBe(7.07);
+  });
+
+  it('returns 1.60 for taalverzorging', () => {
+    expect(getOldPlatformPrice('taalverzorging')).toBe(1.60);
+  });
+
+  it('returns null for leer-werkhouding (missing module)', () => {
+    expect(getOldPlatformPrice('leer-werkhouding')).toBeNull();
+  });
+
+  it('returns null for nonexistent module', () => {
+    expect(getOldPlatformPrice('nonexistent')).toBeNull();
   });
 });

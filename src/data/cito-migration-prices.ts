@@ -62,3 +62,12 @@ export const CITO_MIGRATION_PRICES: CitoMigrationPriceRecord[] = [
     verifiedAt: new Date('2026-03-23'),
   },
 ];
+
+/**
+ * Get the old platform price per student for a given module.
+ * Returns null if the module has no known old-platform price.
+ */
+export function getOldPlatformPrice(moduleId: string): number | null {
+  const record = CITO_MIGRATION_PRICES.find((r) => r.moduleId === moduleId);
+  return record?.oldPricePerStudent ?? null;
+}

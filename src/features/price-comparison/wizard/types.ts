@@ -3,7 +3,7 @@
  * Manages 3-step wizard state: notes extraction, variant selection, AI advice.
  */
 
-export type WizardScenario = 'deels-concurrent' | 'alles-oud-cito' | 'alles-nieuw-cito';
+export type WizardScenario = 'deels-concurrent' | 'alles-oud-cito' | 'alles-oud-cito-concurrent' | 'alles-nieuw-cito';
 
 export type VariantConfidence = 'high' | 'low' | 'unknown';
 

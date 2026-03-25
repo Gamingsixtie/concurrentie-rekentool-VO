@@ -34,7 +34,7 @@ export interface ModuleCurrentSetup {
   customProviderName?: string;    // alleen bij currentProvider === 'overig'
 }
 
-export type Scenario = 'A' | 'B';
+export type Scenario = 'A' | 'B' | 'C';
 
 /**
  * Maps a CurrentProvider value to the provider key used in DEFAULT_PRICES.
@@ -75,6 +75,10 @@ export const SCENARIO_LABELS: Record<Scenario, { title: string; description: str
   B: {
     title: 'Huidig naar nieuw Cito-platform',
     description: 'Bereken de business case voor de overstap naar het nieuwe Cito-platform',
+  },
+  C: {
+    title: 'Huidig Cito vs. concurrentie',
+    description: 'Vergelijk de huidige Cito-kosten met een concurrent (retentie-perspectief)',
   },
 };
 
