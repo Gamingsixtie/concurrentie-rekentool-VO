@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useSchoolProfileStore } from '../store';
 import { PriceComparisonPage } from '@/features/price-comparison/PriceComparisonPage';
 import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProposedPage';
@@ -14,18 +14,31 @@ export default function ComparisonTab() {
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
   const setScenario = useSchoolProfileStore((s) => s.setScenario);
 
-  // Fallback: auto-detect scenario from moduleSetups when not explicitly set
-  const effectiveScenario = useMemo(() => {
-    if (scenario) return scenario;
-    if (moduleSetups.length === 0) return null;
-    return detectScenario(moduleSetups).recommended;
-  }, [scenario, moduleSetups]);
+  // Track whether all-cito-oud choice has been made this session
+  const [allOudChoice, setAllOudChoice] = useState<'migration' | 'competitor' | null>(null);
+  const [allOudSelected, setAllOudSelected] = useState<'migration' | 'competitor' | null>(null);
 
-  // Detect what scenario would be recommended
+  // Detect scenario from module setups
   const detection = useMemo(
     () => moduleSetups.length > 0 ? detectScenario(moduleSetups) : null,
     [moduleSetups],
   );
+
+  // Check if all active modules are cito-oud (candidate for choice UI)
+  const isAllCitoOud = useMemo(() => {
+    if (!detection) return false;
+    return detection.hasMigrationModules && !detection.hasCompetitorModules && !detection.hasUpsellModules;
+  }, [detection]);
+
+  // Fallback: auto-detect scenario from moduleSetups when not explicitly set
+  const effectiveScenario = useMemo(() => {
+    // If user made choice via the all-cito-oud UI
+    if (allOudChoice === 'competitor') return 'C' as Scenario;
+    if (allOudChoice === 'migration') return 'B' as Scenario;
+    if (scenario) return scenario;
+    if (moduleSetups.length === 0) return null;
+    return detection?.recommended ?? null;
+  }, [scenario, moduleSetups, detection, allOudChoice]);
 
   // Apply detected scenario to store + database
   const handleApplyScenario = useCallback(async (chosen: Scenario) => {
@@ -35,6 +48,14 @@ export default function ComparisonTab() {
     }
   }, [setScenario, activeSchoolId]);
 
+  // Handle all-cito-oud choice confirmation
+  const handleAllOudConfirm = useCallback(async () => {
+    if (!allOudSelected) return;
+    setAllOudChoice(allOudSelected);
+    const chosenScenario: Scenario = allOudSelected === 'competitor' ? 'C' : 'B';
+    await handleApplyScenario(chosenScenario);
+  }, [allOudSelected, handleApplyScenario]);
+
   // No modules selected at all
   if (selectedModules.length === 0) {
     return (
@@ -43,6 +64,82 @@ export default function ComparisonTab() {
           <p className="text-[16px] text-neutral-500">
             Geen vergelijking beschikbaar. Vul eerst het schoolprofiel aan via de Overzicht-tab.
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // All modules are cito-oud and no choice made yet — show choice UI
+  if (isAllCitoOud && !allOudChoice && (!scenario || scenario === 'B')) {
+    return (
+      <div className="p-8 max-sm:p-4">
+        <div className="bg-white border border-neutral-200 rounded-lg p-6 max-w-lg mx-auto">
+          <h3 className="text-[18px] font-semibold text-neutral-900 mb-2">
+            Wat wilt u vergelijken?
+          </h3>
+          <p className="text-sm text-neutral-500 mb-6">
+            Alle modules staan op het huidige Cito-platform. Kies wat u wilt bekijken.
+          </p>
+          <div className="flex gap-4 sm:flex-row flex-col">
+            {/* Migration card */}
+            <button
+              type="button"
+              onClick={() => setAllOudSelected('migration')}
+              className={`flex-1 text-left rounded-lg border p-4 cursor-pointer transition-colors min-h-[80px] ${
+                allOudSelected === 'migration'
+                  ? 'border-cito-primary border-2 bg-cito-primary/5'
+                  : 'border-blue-200 bg-blue-50 hover:border-blue-300'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold">Migratie bekijken</p>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    Vergelijk het huidige Cito-platform met het nieuwe platform.
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            {/* Competitor card */}
+            <button
+              type="button"
+              onClick={() => setAllOudSelected('competitor')}
+              className={`flex-1 text-left rounded-lg border p-4 cursor-pointer transition-colors min-h-[80px] ${
+                allOudSelected === 'competitor'
+                  ? 'border-cito-primary border-2 bg-cito-primary/5'
+                  : 'border-amber-200 bg-amber-50 hover:border-amber-300'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l3 9a5.002 5.002 0 01-6.001 0M18 7l-3 9m-5.5-6L12 5m0 0l2.5 4" />
+                </svg>
+                <div>
+                  <p className="text-sm font-semibold">Vergelijk met concurrent</p>
+                  <p className="text-sm text-neutral-500 mt-1">
+                    Vergelijk uw huidige Cito-kosten met een alternatieve aanbieder.
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Confirm button */}
+          {allOudSelected !== null && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleAllOudConfirm}
+                className="bg-cito-primary text-white text-sm font-semibold py-2.5 px-6 rounded-lg min-h-[44px] hover:opacity-90 transition-opacity"
+              >
+                Doorgaan
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
