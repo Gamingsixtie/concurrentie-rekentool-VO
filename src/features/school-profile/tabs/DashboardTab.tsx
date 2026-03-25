@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '../store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
 import { updateSchoolData } from '@/db/operations';
@@ -21,6 +21,7 @@ import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 import UpsellCard from '../components/UpsellCard';
 import DmuMatrix from '../components/DmuMatrix';
 import { useContacts } from '@/hooks/useContacts';
+import { useSchool } from '@/hooks/useSchools';
 
 // Context-smart actions per pipeline status
 const SMART_ACTIONS: Record<
@@ -85,6 +86,10 @@ export default function DashboardTab() {
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const scenario = useSchoolProfileStore((s) => s.scenario);
   const region = useSchoolProfileStore((s) => s.region);
+
+  // Check if school profile is complete via DB record
+  const { data: schoolRecord } = useSchool(slug);
+  const isComplete = schoolRecord?.isComplete ?? true;
 
   // Migration-specific data from price comparison store
   const migrationHourlyRate = usePriceComparisonStore((s) => s.migrationHourlyRate);
@@ -190,6 +195,31 @@ export default function DashboardTab() {
   };
 
   const actions = SMART_ACTIONS[pipelineStatus];
+
+  if (!isComplete) {
+    return (
+      <div className="p-8 max-sm:p-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto text-amber-500 mb-3" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <h2 className="text-lg font-semibold text-amber-800">
+            Schoolprofiel is nog niet voltooid
+          </h2>
+          <p className="mt-2 text-sm text-amber-700 max-w-md mx-auto">
+            Vul de wizard in om prijsvergelijkingen te kunnen maken voor deze school.
+          </p>
+          <Link
+            to="/scholen/$slug/wizard/$step"
+            params={{ slug, step: '1' }}
+            className="mt-4 inline-flex items-center gap-2 bg-cito-accent text-white font-semibold px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-sm"
+          >
+            Profiel voltooien
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 max-sm:p-4">

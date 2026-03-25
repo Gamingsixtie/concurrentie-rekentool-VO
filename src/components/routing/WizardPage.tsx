@@ -1,11 +1,16 @@
 import { useEffect } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
+import { useSchool } from '@/hooks/useSchools';
 import WizardShell from '@/components/wizard/WizardShell';
 
 export default function WizardPage() {
-  const { step } = useParams({ from: '/scholen/$slug/wizard/$step' });
+  const { slug, step } = useParams({ from: '/scholen/$slug/wizard/$step' });
   const setCurrentStep = useSchoolProfileStore((s) => s.setCurrentStep);
+
+  // Check if school is fresh (no completed steps) for context-aware header
+  const { data: schoolRecord } = useSchool(slug);
+  const isFreshSchool = (schoolRecord?.completedSteps?.length ?? 0) === 0;
 
   // Sync URL step param (1-based) to store step (0-based)
   useEffect(() => {
@@ -21,10 +26,12 @@ export default function WizardPage() {
           Cito intern instrument
         </span>
         <h1 className="text-[28px] font-semibold leading-[1.2] text-cito-primary">
-          Prijsvergelijking voor uw school
+          {isFreshSchool ? 'Schoolprofiel instellen' : 'Prijsvergelijking voor uw school'}
         </h1>
         <p className="mt-2 text-base text-neutral-600 max-w-[560px]">
-          Vul het schoolprofiel in en vergelijk de kosten van Cito, DIA en JIJ (IEP) per module.
+          {isFreshSchool
+            ? 'Vul de basisgegevens van de school in om een prijsvergelijking te kunnen maken.'
+            : 'Vul het schoolprofiel in en vergelijk de kosten van Cito, DIA en JIJ (IEP) per module.'}
         </p>
       </div>
 

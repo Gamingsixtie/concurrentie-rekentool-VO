@@ -109,8 +109,8 @@ export default function SchoolCard({
 
   return (
     <Link
-      to="/scholen/$slug"
-      params={{ slug: school.slug }}
+      to={school.isComplete ? '/scholen/$slug' : '/scholen/$slug/wizard/$step'}
+      params={school.isComplete ? { slug: school.slug } : { slug: school.slug, step: '1' }}
       className={`block bg-white border border-neutral-200 border-l-[3px] ${borderColor} rounded-lg hover:shadow-md hover:border-neutral-300 transition-all duration-150 focus:outline-2 focus:outline-cito-primary focus:outline-offset-2 relative group ${
         isCompact ? 'p-4' : 'p-5'
       }`}
