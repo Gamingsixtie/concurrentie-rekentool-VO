@@ -113,9 +113,9 @@ Accent reserved for:
 | Speech toggle stop | Tooltip: "Klik om spraakherkenning te stoppen" |
 | Speech unsupported | Tooltip: "Spraakherkenning niet ondersteund in deze browser" |
 | Empty state (kanban: Te doen) | "Geen openstaande acties — typ een actie hieronder" |
-| Empty state (kanban: In uitvoering) | "Nog geen acties in uitvoering" |
-| Empty state (kanban: Afgerond) | "Nog geen afgeronde acties" |
-| Empty state (conversations) | "Nog geen gesprekken vastgelegd" |
+| Empty state (kanban: In uitvoering) | "Nog geen acties in uitvoering — versleep een kaart hiernaartoe" |
+| Empty state (kanban: Afgerond) | "Nog geen afgeronde acties — versleep een afgeronde actie hiernaartoe" |
+| Empty state (conversations) | "Nog geen gesprekken vastgelegd — klik op '+ Gesprek vastleggen' om te starten" |
 | Empty state (no contacts) | Select option: "Geen contactpersonen" |
 | Error state (speech) | "Spraakherkenning onderbroken. Klik op de microfoon om opnieuw te starten." |
 | Delete conversation confirmation title | "Gesprek verwijderen" |
@@ -224,7 +224,7 @@ Accent reserved for:
 | Aspect | Specification |
 |--------|--------------|
 | Display | Colored chip/badge below the action title |
-| Size | `text-xs px-2 py-0.5 rounded-full` |
+| Size | `text-xs px-2 py-1 rounded-full` |
 | Set via | Click "Type" link on card (appears on hover) -> dropdown with preset options + custom input |
 | Preset options | bellen, mailen, offerte, intern overleg |
 | Custom | Free text typed into the same dropdown input |
@@ -238,7 +238,7 @@ Accent reserved for:
 | Element | Native `<input type="date">` (consistent with ConversationForm date field) |
 | Trigger | Click calendar icon or "Deadline" placeholder text on the card |
 | Overdue | Card gets `border-red-300`. Date text becomes `text-red-600 font-semibold`. |
-| Clear | Small X button next to date to remove deadline |
+| Clear | Small X button next to date to remove deadline. `aria-label="Deadline verwijderen"` on the button element. |
 | Format | `nl-NL` locale date formatting via `Intl.DateTimeFormat` |
 
 ### IC-07: Delete Confirmation Modal (D-14)
