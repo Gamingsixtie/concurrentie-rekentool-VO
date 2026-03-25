@@ -72,7 +72,7 @@ Plans:
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 - [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie â AI-advies â tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
-- [ ] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
+- [x] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren (completed 2026-03-25)
 
 ## Phase Details
 
@@ -360,12 +360,12 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
   3. AI-advies houdt rekening met het feit dat de school al Cito-klant is en genereert passend advies (retentie-perspectief, niet acquisitie)
   4. Resultaat in vergelijkingstabel toont huidig Cito vs. concurrent, niet nieuw Cito vs. concurrent
   5. ScenarioDetector vangt dit scenario correct op en routeert naar de juiste flow
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 17-01-PLAN.md — Types, engine scenario detection, old-platform price helper en tests
 - [x] 17-02-PLAN.md — ScenarioDetector keuze-UI, wizard store Scenario C, ComparisonTab routing
-- [ ] 17-03-PLAN.md — AI retentie-advies, ComparisonTable label override, visuele verificatie
+- [x] 17-03-PLAN.md — AI retentie-advies, ComparisonTable label override, visuele verificatie
 
 ## Backlog
 

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to execute
-stopped_at: Completed 17-02-PLAN.md
-last_updated: "2026-03-25T16:12:19.808Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 17-03-PLAN.md
+last_updated: "2026-03-25T18:57:11.534Z"
 progress:
   total_phases: 17
-  completed_phases: 13
+  completed_phases: 14
   total_plans: 48
-  completed_plans: 44
+  completed_plans: 45
 ---
 
 # Project State
@@ -124,6 +124,8 @@ Recent decisions affecting current work:
 - [Phase 17]: Post-process cito providerResults for Scenario C instead of modifying calculator internals
 - [Phase 17]: Migration callback sets school scenario to B directly (ComparisonTab picks up change reactively)
 - [Phase 17]: Scenario C routing placed before B/A checks in ComparisonTab for correct priority
+- [Phase 17]: Retention prompt uses three explicit categories (prijs/bezwaar/meerwaarde) matching same JSON output structure as acquisition prompt
+- [Phase 17]: buildAdvicePayload exported for reuse by buildRetentionAdvicePayload (explicit architectural choice)
 
 ### Roadmap Evolution
 
@@ -145,6 +147,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T16:12:19.803Z
-Stopped at: Completed 17-02-PLAN.md
+Last session: 2026-03-25T18:57:11.528Z
+Stopped at: Completed 17-03-PLAN.md
 Resume file: None
