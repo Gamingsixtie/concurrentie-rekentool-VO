@@ -70,7 +70,7 @@ export default function ComparisonTab() {
   }
 
   // All modules are cito-oud and no choice made yet — show choice UI
-  if (isAllCitoOud && !allOudChoice && (!scenario || scenario === 'B')) {
+  if (isAllCitoOud && !allOudChoice && (!scenario || scenario === 'B' || scenario === 'C')) {
     return (
       <div className="p-8 max-sm:p-4">
         <div className="bg-white border border-neutral-200 rounded-lg p-6 max-w-lg mx-auto">

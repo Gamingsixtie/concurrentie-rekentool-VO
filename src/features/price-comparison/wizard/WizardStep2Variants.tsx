@@ -4,7 +4,7 @@
  * Shows smart suggestions via "Aanbevolen" badge.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useWizardStore } from './wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { MODULE_CATALOG } from '@/models/modules';
@@ -74,6 +74,10 @@ function ProviderRadio({
   );
 }
 
+// ─── Basisvaardigheden module IDs ────────────────────────────────────────────
+
+const BASISVAARDIGHEDEN_IDS = ['rekenwiskunde', 'nederlands', 'engels'];
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function WizardStep2Variants() {
@@ -87,6 +91,16 @@ export function WizardStep2Variants() {
   const updateVariantSelection = useWizardStore((s) => s.updateVariantSelection);
 
   const totalStudents = useMemo(() => getTotalStudents(studentCounts), [studentCounts]);
+
+  // Basisvaardigheden consistency: track if user wants individual control
+  const [basisIndividueel, setBasisIndividueel] = useState(false);
+
+  // Selected basisvaardigheden modules in this school's selection
+  const activeBasisModules = useMemo(
+    () => selectedModules.filter((id) => BASISVAARDIGHEDEN_IDS.includes(id)),
+    [selectedModules],
+  );
+  const hasBasisGroup = activeBasisModules.length > 1;
 
   // Pre-fill logic on mount: moduleSetups as base (D-07), AI extraction overlay
   useEffect(() => {
@@ -124,14 +138,28 @@ export function WizardStep2Variants() {
   const suggestedDia = useMemo(() => suggestDiaPackage(selectedModules), [selectedModules]);
   const suggestedJij = useMemo(() => suggestJijTier(totalStudents), [totalStudents]);
 
-  const handleProviderChange = (moduleId: string, provider: 'dia' | 'jij' | 'geen') => {
+  const handleProviderChange = useCallback((moduleId: string, provider: 'dia' | 'jij' | 'geen') => {
     const existing = variantSelections.find((v) => v.moduleId === moduleId);
     updateVariantSelection(moduleId, {
       provider,
       variantId: null,
       confidence: existing?.confidence ?? 'unknown',
     });
-  };
+
+    // Auto-sync basisvaardigheden to same provider when not in individual mode
+    if (!basisIndividueel && hasBasisGroup && BASISVAARDIGHEDEN_IDS.includes(moduleId)) {
+      for (const basisId of activeBasisModules) {
+        if (basisId !== moduleId) {
+          const bExisting = variantSelections.find((v) => v.moduleId === basisId);
+          updateVariantSelection(basisId, {
+            provider,
+            variantId: null,
+            confidence: bExisting?.confidence ?? 'unknown',
+          });
+        }
+      }
+    }
+  }, [variantSelections, updateVariantSelection, basisIndividueel, hasBasisGroup, activeBasisModules]);
 
   const handleVariantClick = (moduleId: string, variantId: string) => {
     updateVariantSelection(moduleId, { variantId });
@@ -142,6 +170,37 @@ export function WizardStep2Variants() {
       <h3 className="text-[15px] font-semibold text-neutral-900">
         Bevestig de variant per module
       </h3>
+
+      {/* Basisvaardigheden consistency banner */}
+      {hasBasisGroup && !basisIndividueel && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start justify-between gap-3">
+          <p className="text-sm text-blue-800">
+            Basisvaardigheden (rekenen, taal, Engels) zijn ingesteld op dezelfde aanbieder.
+          </p>
+          <button
+            type="button"
+            onClick={() => setBasisIndividueel(true)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap underline"
+          >
+            Individueel aanpassen
+          </button>
+        </div>
+      )}
+
+      {hasBasisGroup && basisIndividueel && (
+        <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3 flex items-start justify-between gap-3">
+          <p className="text-sm text-neutral-600">
+            Basisvaardigheden worden individueel ingesteld.
+          </p>
+          <button
+            type="button"
+            onClick={() => setBasisIndividueel(false)}
+            className="text-sm font-medium text-cito-primary hover:opacity-80 whitespace-nowrap underline"
+          >
+            Groepeer weer
+          </button>
+        </div>
+      )}
 
       {selectedModules.map((moduleId) => {
         const moduleDef = MODULE_CATALOG.find((m) => m.id === moduleId);
@@ -172,6 +231,37 @@ export function WizardStep2Variants() {
                 onChange={(p) => handleProviderChange(moduleId, p)}
               />
             </div>
+
+            {/* Selected variant price hint */}
+            {provider !== 'geen' && selection?.variantId && (
+              <p className="text-xs text-neutral-500 mb-3">
+                {provider === 'dia' && (() => {
+                  const pkg = DIA_PACKAGES.find((p) => p.id === selection.variantId);
+                  if (!pkg) return null;
+                  return (
+                    <>
+                      Geselecteerd: <span className="font-medium">{pkg.name}</span>{' '}
+                      — {'\u20AC'}{pkg.pricePerStudent.toFixed(2)}/leerling/jaar
+                      {pkg.includedModuleIds.length > 1 && (
+                        <span className="text-neutral-400 ml-1">
+                          (onderdeel van pakket met {pkg.includedModuleIds.length} modules)
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
+                {provider === 'jij' && (() => {
+                  const tier = JIJ_LICENSE_TIERS.find((t) => String(t.tier) === selection.variantId);
+                  if (!tier) return null;
+                  return (
+                    <>
+                      Geselecteerd: <span className="font-medium">{tier.label}</span>{' '}
+                      — {'\u20AC'}{tier.annualFee.toLocaleString('nl-NL')}/jaar + {'\u20AC'}{tier.pricePerTest.toFixed(2)}/afname
+                    </>
+                  );
+                })()}
+              </p>
+            )}
 
             {/* DIA variant cards */}
             {provider === 'dia' && (

@@ -90,8 +90,11 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
                 : null;
 
               return (
-                <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
-                  <div>{getProviderLabel(provider)}</div>
+                <th key={provider} style={{ width: providerWidth }} className="text-right py-3 px-4">
+                  <div className="text-right">{getProviderLabel(provider)}</div>
+                  {provider === 'cito' && scenario === 'C' && (
+                    <div className="text-[10px] font-normal opacity-80 text-right">(huidig platform)</div>
+                  )}
                   {provider === 'cito' && <CitoBundleSelector compact />}
                   {tierBadge && provider !== 'cito' && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
@@ -124,10 +127,10 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
           <tr className="text-sm text-neutral-700">
             <td className="py-2 px-4"></td>
             {activeProviders.map((provider) => {
-              if (provider === 'cito') return <td key={provider} className="py-2 px-4"></td>;
+              if (provider === 'cito') return <td key={provider} className="py-2 px-4 text-right"></td>;
               const diff = getDifference(provider);
               return (
-                <td key={provider} className="py-2 px-4">
+                <td key={provider} className="py-2 px-4 text-right tabular-nums">
                   {diff !== null
                     ? `Verschil: ${formatCurrency(Math.abs(diff))}`
                     : 'n.v.t.'}
@@ -253,11 +256,11 @@ function BundelSubtotaalRow({
 
         const hasAnyPrice = bundleModules.some((m) => m.providers[provider] !== null);
         if (!hasAnyPrice) {
-          return <td key={provider} className="py-2 px-4 text-sm text-neutral-400">—</td>;
+          return <td key={provider} className="py-2 px-4 text-sm text-neutral-400 text-right">—</td>;
         }
 
         return (
-          <td key={provider} className="py-2 px-4">
+          <td key={provider} className="py-2 px-4 text-right tabular-nums">
             <span className="text-sm font-semibold text-neutral-800">
               {formatCurrency(displayTotal)}
             </span>
@@ -290,7 +293,7 @@ function ModuleRow({
     <>
       <tr
         id={`module-row-${mod.moduleId}`}
-        className={`hover:bg-neutral-100 transition-colors duration-200 ${
+        className={`hover:bg-neutral-100 transition-colors duration-200 even:bg-neutral-50 ${
           isHighlighted ? 'bg-neutral-100' : ''
         }`}
       >
@@ -354,7 +357,7 @@ function TotaalRow({ result, activeProviders }: { result: ComparisonResult; acti
     <tr className="bg-neutral-50 font-semibold text-base">
       <td className="py-3 px-4">Totaal</td>
       {activeProviders.map((provider) => (
-        <td key={provider} className="py-3 px-4">
+        <td key={provider} className="py-3 px-4 text-right tabular-nums">
           <span>{formatCurrency(result.totals[provider])}</span>
           {provider === 'dia' && hasPackageDiscount && (
             <div className="text-xs font-normal text-green-700 mt-0.5">
@@ -403,7 +406,7 @@ function ProviderCell({
 }) {
   if (cost === null) {
     return (
-      <td className="py-3 px-4">
+      <td className="py-3 px-4 text-right">
         <span className="inline-flex items-center bg-cito-accent/10 text-cito-accent rounded-full px-2 py-0.5 text-sm font-semibold">
           Niet beschikbaar
         </span>
@@ -412,8 +415,8 @@ function ProviderCell({
   }
 
   return (
-    <td className="py-3 px-4">
-      <div className="flex items-center gap-2">
+    <td className="py-3 px-4 text-right tabular-nums">
+      <div className="flex items-center justify-end gap-2">
         <span className="text-base font-semibold">
           {formatCurrency(cost.totalCost)}
         </span>
@@ -425,7 +428,7 @@ function ProviderCell({
         <PriceBadge record={cost.priceRecord} />
         {cost.priceRecord.note && <NoteIcon note={cost.priceRecord.note} />}
       </div>
-      <div className="text-sm text-neutral-500">
+      <div className="text-sm text-neutral-500 text-right">
         per leerling: {formatCurrency(cost.pricePerStudent)}
       </div>
     </td>

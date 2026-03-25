@@ -275,6 +275,9 @@ export function WizardStep3Advice() {
       {/* Streaming display */}
       {(isGeneratingAdvice || (streamingText && !aiAdvice)) && (
         <div className="bg-cito-primary/5 border border-cito-primary/20 rounded-lg p-4">
+          <p className="text-xs font-semibold text-cito-primary uppercase tracking-wide mb-2">
+            Advies wordt gegenereerd...
+          </p>
           <p className="text-sm text-neutral-700 whitespace-pre-wrap leading-relaxed">
             {streamingText}
             {isGeneratingAdvice && (
@@ -290,11 +293,14 @@ export function WizardStep3Advice() {
           {/* Samenvatting banner */}
           {aiAdvice.samenvatting && (
             <div className="bg-cito-primary text-white rounded-lg p-4">
-              <p className="text-sm font-medium leading-relaxed">
+              <p className="text-base font-medium leading-relaxed">
                 {aiAdvice.samenvatting}
               </p>
             </div>
           )}
+
+          {/* Visual separator */}
+          <hr className="border-neutral-200" />
 
           {/* Matching uitleg + Cito bundle recommendation */}
           {aiAdvice.matchingUitleg && (
@@ -331,7 +337,7 @@ export function WizardStep3Advice() {
                         {item.titel}
                       </h4>
                     </div>
-                    <p className="text-sm text-neutral-600 leading-relaxed pl-0.5">
+                    <p className="text-sm text-neutral-600 leading-relaxed pl-0.5 whitespace-pre-line">
                       {item.tekst}
                     </p>
                   </div>
