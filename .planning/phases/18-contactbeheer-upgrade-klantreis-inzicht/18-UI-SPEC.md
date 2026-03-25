@@ -47,14 +47,14 @@ Exceptions: Touch targets remain 44px minimum height (h-[44px]) for all interact
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
+| Small | 12px | 400 (regular) | 1.5 |
 | Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 600 (semibold) | 1.5 |
 | Heading | 20px | 600 (semibold) | 1.3 |
 | Display | 28px | 600 (semibold) | 1.2 |
 
-Source: Established pattern from DmuMatrix.tsx, ContactsTab.tsx, ContactCard.tsx. All use text-[14px], text-[16px], text-[20px] with font-semibold.
+Weights: 400 (regular) and 600 (semibold). Use weight to distinguish hierarchy within the same size -- contact names, stat values, and labels use 14px at weight 600, body text uses 14px at weight 400. Compact indicators (DmuProgressIndicator, stagnation badges) and stat labels use 12px.
 
-Additional note: 16px used for contact names (text-[16px] font-semibold) and initials in avatar circles. 12px used for compact indicators (DmuProgressIndicator, stagnation badges).
+Source: Established pattern from DmuMatrix.tsx, ContactsTab.tsx, ContactCard.tsx.
 
 ---
 
@@ -104,6 +104,16 @@ Retained from EngagementBadge.tsx:
 | Blokkade (blockade) | `border-l-red-400` | Warning triangle SVG |
 | Statuswijziging (system event) | `border-l-neutral-300` | Arrow right SVG |
 | Eerste contact (first contact) | `border-l-green-400` | Star SVG |
+
+---
+
+## Focal Points
+
+| Screen | Focal Element | Rationale |
+|--------|---------------|-----------|
+| ContactsTab (DMU-overzicht) | The first non-empty DMU role group header (beslisser group) | The highest-authority decision maker group is the primary reason users visit this tab -- it answers "who decides?" at first glance |
+| ContactsTab (Klantreis) | The topmost timeline entry (most recent event) | Chronological recency drives action -- the latest interaction or blokkade is what the user needs to act on |
+| DashboardTab | The CustomerJourneySummary card (specifically the "Huidige blokkade" cell) | The active blokkade is the single most actionable insight -- it tells the user what is currently blocking progress |
 
 ---
 
@@ -193,7 +203,7 @@ Triggered by "+ Blokkade registreren" text button below the timeline.
 | Container | `bg-neutral-50 border border-neutral-200 rounded-lg p-4 mt-4` |
 | Description textarea | Full width, 3 rows, `text-[14px]`, placeholder: "Bijv. Wacht op budget-goedkeuring van [contactpersoon]" |
 | Contact dropdown | Optional, reuses WaitingForSelect pattern, label: "Gerelateerd aan" |
-| Save button | `h-[44px] px-4 bg-cito-accent text-white rounded-lg text-[14px] font-semibold` |
+| Save button | `h-[44px] px-4 bg-cito-accent text-white rounded-lg text-[14px] font-semibold`, label: "Blokkade opslaan" |
 | Cancel link | `text-[14px] text-neutral-500 hover:text-neutral-700` |
 
 ### CustomerJourneySummary (dashboard card)
@@ -206,7 +216,7 @@ Placed above DmuMatrix on DashboardTab.
 | Title | "Klantreis-overzicht", `text-[20px] font-semibold text-neutral-900` |
 | Layout | 2x2 grid on desktop (`grid grid-cols-2 gap-4`), stacked on mobile |
 | Stat label | `text-[12px] text-neutral-500 uppercase tracking-wide` |
-| Stat value | `text-[16px] font-semibold text-neutral-900` |
+| Stat value | `text-[14px] font-semibold text-neutral-900` |
 
 Grid cells:
 1. **Eerste aanspreekpunt** — Contact name + DMUBadge
@@ -241,7 +251,7 @@ New column added after "Naam", before "DMU-rol".
 1. User clicks "+ Blokkade registreren" below timeline
 2. Inline form expands with slide-down animation (no modal)
 3. User types description, optionally selects related contact
-4. User clicks "Opslaan" -- saves as system event in conversations table
+4. User clicks "Blokkade opslaan" -- saves as system event in conversations table
 5. Form collapses, new entry appears at top of timeline
 6. Cancel closes form without saving
 
@@ -265,6 +275,7 @@ New column added after "Naam", before "DMU-rol".
 |---------|------|
 | Primary CTA (contacts) | "+ Contact toevoegen" |
 | Primary CTA (blokkade) | "+ Blokkade registreren" |
+| Save button (blokkade form) | "Blokkade opslaan" |
 | View toggle option 1 | "DMU-overzicht" |
 | View toggle option 2 | "Klantreis" |
 | Empty state heading (contacts) | "Geen contactpersonen" |
