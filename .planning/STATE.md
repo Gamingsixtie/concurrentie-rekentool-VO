@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to execute
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-03-25T09:40:17.410Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 16-03-PLAN.md tasks 1-2, checkpoint task 3 pending human verification
+last_updated: "2026-03-25T09:48:06.395Z"
 progress:
   total_phases: 15
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 45
-  completed_plans: 41
+  completed_plans: 42
 ---
 
 # Project State
@@ -118,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 16]: applyToTable uses adjustedSelections when available, falls back to variantSelections
 - [Phase 16]: parseAdviceFromText returns fallback instead of throwing on invalid JSON
 - [Phase 16]: Step 1 internal navigation: WizardStep1Notes calls setStep(1) directly after extraction
+- [Phase 16]: Editable matching uses simple dropdown selects per module (not full card grid from step 2)
+- [Phase 16]: adjustedSelections initialized from variantSelections when advice first generated
 
 ### Roadmap Evolution
 
@@ -139,6 +141,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-25T09:40:17.404Z
-Stopped at: Completed 16-02-PLAN.md
+Last session: 2026-03-25T09:48:06.388Z
+Stopped at: Completed 16-03-PLAN.md tasks 1-2, checkpoint task 3 pending human verification
 Resume file: None

@@ -70,7 +70,7 @@ Plans:
 - [x] **Phase 15: DMU Klantreis Registratie** - Registratie van DMU-contactpersonen in de klantreis, van eerste contact tot aan beslissing
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
-- [ ] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie → AI-advies → tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ
+- [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie → AI-advies → tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
 
 ## Phase Details
 
@@ -330,7 +330,7 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
 | 14. Schoolplan Upload & Kansen-analyse | v2.0 | 3/3 | Complete   | 2026-03-23 |
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
-| 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 2/3 | In Progress|  |
+| 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete   | 2026-03-25 |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -342,8 +342,8 @@ Phases execute in custom order: 6 → 7 → 8 → 9 → 10 → 11 → 14 → 15 
   3. AI gebruikt de correcte concurrentie-informatie (prijzen, features, pakketten) uit de provider-configuraties voor het advies
   4. Prijzen en tabelweergave in het tabblad vergelijking zijn identiek aan de output van de wizard — geen afwijkingen tussen wizard-resultaat en vergelijkingstab
   5. Tabelweergave in het vergelijkingstabblad weerspiegelt exact de input (geselecteerde variant, prijzen, modules) zonder dataverlies of transformatie-fouten
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 - [x] 16-01-PLAN.md — Types, wizard store, scenario detection, variant suggestions, AI endpoints
 - [x] 16-02-PLAN.md — Wizard shell, progress bar, step 1 notes, step 2 variant selection
-- [ ] 16-03-PLAN.md — Step 3 AI advice streaming, PriceComparisonPage integration, visual verification
+- [x] 16-03-PLAN.md — Step 3 AI advice streaming, PriceComparisonPage integration, visual verification
