@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import type { TimelineEvent } from '@/models/timeline';
 import type { Contact, Conversation } from '@/db/types';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 
 interface TimelineEntryProps {
   event: TimelineEvent;
   contacts: Contact[];
   onEdit?: (conversation: Conversation) => void;
   onCreateAction?: (conversationId: string) => void;
+  onDelete?: (conversationId: string) => void;
 }
 
 const SYSTEM_EVENT_COLORS: Record<string, string> = {
@@ -37,8 +39,10 @@ export default function TimelineEntry({
   contacts,
   onEdit,
   onCreateAction,
+  onDelete,
 }: TimelineEntryProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (event.type === 'system') {
     const color = SYSTEM_EVENT_COLORS[event.data.eventType] ?? 'text-neutral-500';
@@ -139,9 +143,37 @@ export default function TimelineEntry({
                 Actie aanmaken
               </button>
             )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="inline-flex items-center gap-1.5 text-[14px] text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 rounded-md px-2.5 py-1 transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 4h10M5 4V2.5h4V4M5.5 6v5M8.5 6v5M3 4l.5 8.5h7L11 4" />
+                </svg>
+                Verwijderen
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      {onDelete && (
+        <ConfirmDialog
+          open={showDeleteConfirm}
+          title="Gesprek verwijderen"
+          body="Weet u zeker dat u dit gesprek wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+          confirmLabel="Gesprek verwijderen"
+          cancelLabel="Gesprek bewaren"
+          onConfirm={() => {
+            onDelete(conversation.id);
+            setShowDeleteConfirm(false);
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }
