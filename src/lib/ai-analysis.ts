@@ -156,6 +156,19 @@ export function buildAnalysisPayload(
     };
   }
 
+  // Build time savings payload for comparison modes (same tasks as migration)
+  let timeSavingsPayload = undefined;
+  if (mode !== 'migration') {
+    timeSavingsPayload = TIME_SAVING_TASKS.map((task) => ({
+      taskLabel: task.label,
+      oldMethod: task.oldMethodLabel,
+      newMethod: task.newMethodLabel,
+      defaultHoursPerYear: task.defaultHoursPerYear,
+      description: task.description,
+      benefit: task.benefit,
+    }));
+  }
+
   // Build migration payload
   let migrationPayload = undefined;
   if (mode === 'migration' && migrationResult) {
@@ -217,6 +230,7 @@ export function buildAnalysisPayload(
     currentVsProposedData,
     schoolplanData: schoolplanPayload ?? null,
     migrationData: migrationPayload,
+    timeSavingsData: timeSavingsPayload,
   };
 }
 

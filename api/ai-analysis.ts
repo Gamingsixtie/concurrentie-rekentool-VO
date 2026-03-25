@@ -47,6 +47,12 @@ MODUS:
 - Bij mode "current-vs-proposed": focus op huidige situatie vs. overstap naar Cito. Benoem besparingen, maar ook waar de school mogelijk meer gaat betalen en waarom dat gerechtvaardigd is.
 - Bij mode "migration": focus op de business case voor migratie van het HUIDIGE Cito-platform naar het NIEUWE Cito-platform (Woots). Dit is GEEN concurrentievergelijking — het gaat om dezelfde leverancier, een nieuw platform. Focus op: prijsverschillen oud→nieuw, platformverbeteringen (adaptief toetsen, Entree-federatie, automatische sync, zelf resetten), tijdswinst per taak, en waarom nu migreren slim is ondanks eventuele prijsstijging. concurrentieVergelijking moet leeg zijn bij migration mode. citoSterkePunten worden "platformverbeteringen" — voordelen van het nieuwe platform t.o.v. het oude.
 
+TIJDWINST (bij comparison en current-vs-proposed modes):
+- Als timeSavingsData is meegegeven, gebruik deze om tijdswinst-argumenten te maken.
+- Dit zijn concrete taken waar het Cito-platform tijd bespaart: automatische rechten, zelf resetten, Entree-federatie, planningssuggesties, LAS-sync.
+- Verwerk tijdwinst in de gespreksargumenten: "Naast de prijsvergelijking bespaart het Cito-platform ook X uur per jaar op [taak]."
+- Combineer tijdwinst met schoolplan-thema's waar mogelijk (bijv. "efficiëntie" in het schoolplan + automatische rapportages).
+
 EERLIJKHEID:
 - Wees eerlijk over concurrentievoordelen. Als een concurrent goedkoper is, erken dat.
 - Geef bij elk concurrent-voordeel een weerlegging: hoe kan de consultant dit counteren in het gesprek?
@@ -234,6 +240,14 @@ interface AnalysisRequest {
       voordelen: string[];
     }>;
   };
+  timeSavingsData?: Array<{
+    taskLabel: string;
+    oldMethod: string;
+    newMethod: string;
+    defaultHoursPerYear: number;
+    description: string;
+    benefit: string;
+  }>;
 }
 
 function buildUserMessage(body: AnalysisRequest): string {
@@ -335,6 +349,14 @@ ${body.migrationData.timeSavings.map((t) =>
 Platformverbeteringen per module:
 ${body.migrationData.moduleBenefits.map((b) =>
   `- ${b.moduleId}: ${b.toelichting}\n  Voordelen: ${b.voordelen.join('; ')}`
+).join('\n')}`);
+  }
+
+  // Time savings (comparison/current-vs-proposed modes)
+  if (body.timeSavingsData && body.timeSavingsData.length > 0) {
+    parts.push(`\nTIJDWINST CITO-PLATFORM (concrete besparingen voor docenten en administratie):
+${body.timeSavingsData.map((t) =>
+  `- ${t.taskLabel}: ${t.oldMethod} → ${t.newMethod} (~${t.defaultHoursPerYear} uur/jaar)\n  ${t.benefit}`
 ).join('\n')}`);
   }
 
