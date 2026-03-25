@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: v2.0 milestone complete
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-03-25T07:50:55.856Z"
+status: Ready to plan
+stopped_at: Phase 16 context gathered
+last_updated: "2026-03-25T08:29:16.188Z"
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 12
   total_plans: 42
   completed_plans: 39
@@ -115,6 +115,10 @@ Recent decisions affecting current work:
 - [Phase 13]: VERCEL_ENV guard on SKIP_AUTH: preserves local dev convenience while guaranteeing auth in production
 - [Phase 13]: Storage path includes teamId as first segment for RLS path-based enforcement
 
+### Roadmap Evolution
+
+- Phase 16 added: AI Wizard Verbetering & Prijsvergelijking Harmonisatie — eerlijke concurrentievergelijking via verbeterde wizard met concurrent-selectie, AI-advies en tabblad-synchronisatie
+
 ### Pending Todos
 
 - [10-03 deferred] DiaPackageManager UI: create `DiaPackageManager.tsx`, add `diaPackageOverrides`/`setDiaPackageOverride` to store.ts, wire ModeToggle + SensitivitySection + DiaPackageManager into PriceComparisonPage.tsx — deferred to post-Vercel deployment
@@ -131,6 +135,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-24T22:23:03.822Z
-Stopped at: Completed 13-01-PLAN.md
-Resume file: None
+Last session: 2026-03-25T08:29:16.180Z
+Stopped at: Phase 16 context gathered
+Resume file: .planning/phases/16-ai-wizard-verbetering-prijsvergelijking-harmonisatie/16-CONTEXT.md
