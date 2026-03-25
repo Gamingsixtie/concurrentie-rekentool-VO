@@ -11,8 +11,8 @@ import { detectScenario } from './scenario-detection';
 import { ComparisonWizardProgress } from './ComparisonWizardProgress';
 import { ScenarioDetector } from './ScenarioDetector';
 import { WizardStep1Notes } from './WizardStep1Notes';
-// WizardStep2Variants and WizardStep3Advice will be imported once created
-// import { WizardStep2Variants } from './WizardStep2Variants';
+import { WizardStep2Variants } from './WizardStep2Variants';
+// WizardStep3Advice will be imported once created in Plan 03
 
 export function ComparisonWizard() {
   const currentStep = useWizardStore((s) => s.currentStep);
@@ -77,12 +77,7 @@ export function ComparisonWizard() {
       case 0:
         return <WizardStep1Notes />;
       case 1:
-        // WizardStep2Variants placeholder until component is created in Task 2
-        return (
-          <div className="text-sm text-neutral-500 p-4">
-            Variant-selectie (stap 2)
-          </div>
-        );
+        return <WizardStep2Variants />;
       case 2:
         // WizardStep3Advice placeholder until Plan 03
         return (
