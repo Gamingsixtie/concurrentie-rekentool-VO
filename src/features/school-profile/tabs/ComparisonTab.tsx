@@ -5,7 +5,7 @@ import { CurrentVsProposedPage } from '@/features/price-comparison/CurrentVsProp
 import { MigrationPage } from '@/features/price-comparison/MigrationPage';
 import { detectScenario } from '@/engine/scenario-detection';
 import { updateSchoolData } from '@/db/operations';
-import { SCENARIO_LABELS } from '@/models/school';
+import { SCENARIO_LABELS, type Scenario } from '@/models/school';
 
 export default function ComparisonTab() {
   const scenario = useSchoolProfileStore((s) => s.scenario);
@@ -28,7 +28,7 @@ export default function ComparisonTab() {
   );
 
   // Apply detected scenario to store + database
-  const handleApplyScenario = useCallback(async (chosen: 'A' | 'B') => {
+  const handleApplyScenario = useCallback(async (chosen: Scenario) => {
     setScenario(chosen);
     if (activeSchoolId) {
       await updateSchoolData(activeSchoolId, { scenario: chosen });
@@ -60,7 +60,7 @@ export default function ComparisonTab() {
             Kies het scenario dat bij deze school past.
           </p>
           <div className="flex flex-col gap-3">
-            {(['A', 'B'] as const).map((s) => (
+            {(['A', 'B', 'C'] as const).map((s) => (
               <button
                 key={s}
                 type="button"
@@ -109,6 +109,11 @@ export default function ComparisonTab() {
   const hasProviderSetups = moduleSetups.some(
     (setup) => setup.currentProvider !== 'geen',
   );
+
+  // Scenario C: current Cito vs. competitor — uses the comparison page
+  if (effectiveScenario === 'C' && hasProviderSetups) {
+    return <PriceComparisonPage />;
+  }
 
   if (effectiveScenario === 'B' && hasProviderSetups) {
     return <MigrationPage />;
