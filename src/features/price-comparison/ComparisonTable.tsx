@@ -36,6 +36,14 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 
 export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps) {
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
+  const scenario = useSchoolProfileStore((s) => s.scenario);
+
+  const getProviderLabel = (provider: ProviderKey) => {
+    if (provider === 'cito' && scenario === 'C') {
+      return 'Huidig Cito';
+    }
+    return PROVIDER_LABELS[provider];
+  };
 
   const toggleModule = (moduleId: string) => {
     setExpandedModule((prev) => (prev === moduleId ? null : moduleId));
@@ -83,7 +91,7 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
 
               return (
                 <th key={provider} style={{ width: providerWidth }} className="text-left py-3 px-4">
-                  <div>{PROVIDER_LABELS[provider]}</div>
+                  <div>{getProviderLabel(provider)}</div>
                   {provider === 'cito' && <CitoBundleSelector compact />}
                   {tierBadge && provider !== 'cito' && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
