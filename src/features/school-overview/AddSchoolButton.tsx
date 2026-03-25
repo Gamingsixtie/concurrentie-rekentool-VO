@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { createSchool } from '@/db/operations';
 import SchoolListImportDialog from './SchoolListImportDialog';
 import SchoolPickerDialog from './SchoolPickerDialog';
+import SchoolNameDialog from './SchoolNameDialog';
 import { useSchoolListStore } from './school-list-store';
 
 export default function AddSchoolButton() {
@@ -10,6 +11,7 @@ export default function AddSchoolButton() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const hasImportedList = useSchoolListStore((s) => s.entries.length > 0);
 
@@ -25,9 +27,14 @@ export default function AddSchoolButton() {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  const handleManual = async () => {
+  const handleManual = () => {
     setMenuOpen(false);
-    const school = await createSchool('Nieuw schoolprofiel');
+    setShowNameDialog(true);
+  };
+
+  const handleNameConfirm = async (name: string) => {
+    setShowNameDialog(false);
+    const school = await createSchool(name);
     navigate({
       to: '/scholen/$slug/wizard/$step',
       params: { slug: school.slug, step: '1' },
@@ -196,6 +203,14 @@ export default function AddSchoolButton() {
         <SchoolPickerDialog
           onClose={() => setShowPicker(false)}
           onSelect={handlePickerCreate}
+        />
+      )}
+
+      {/* Name dialog for manual creation */}
+      {showNameDialog && (
+        <SchoolNameDialog
+          onClose={() => setShowNameDialog(false)}
+          onConfirm={handleNameConfirm}
         />
       )}
     </>
