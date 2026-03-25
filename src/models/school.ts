@@ -164,3 +164,50 @@ export const ENGAGEMENT_STATUS_LABELS: Record<EngagementStatus, string> = {
 
 /** Stagnation threshold in days */
 export const STAGNATION_THRESHOLD_DAYS = 30;
+
+// --- Schooljaar (school year) ---
+
+export const SCHOOL_YEAR_MONTHS = [
+  'sep', 'okt', 'nov', 'dec', 'jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug',
+] as const;
+export type SchoolYearMonth = typeof SCHOOL_YEAR_MONTHS[number];
+
+export const SCHOOL_YEAR_MONTH_LABELS: Record<SchoolYearMonth, string> = {
+  sep: 'September', okt: 'Oktober', nov: 'November', dec: 'December',
+  jan: 'Januari', feb: 'Februari', mrt: 'Maart', apr: 'April',
+  mei: 'Mei', jun: 'Juni', jul: 'Juli', aug: 'Augustus',
+};
+
+export const SCHOOL_YEAR_MONTH_SHORT: Record<SchoolYearMonth, string> = {
+  sep: 'Sep', okt: 'Okt', nov: 'Nov', dec: 'Dec',
+  jan: 'Jan', feb: 'Feb', mrt: 'Mrt', apr: 'Apr',
+  mei: 'Mei', jun: 'Jun', jul: 'Jul', aug: 'Aug',
+};
+
+/** Get the school year label (e.g. "2025-2026") for a given date. School year starts September. */
+export function getSchoolYear(date: Date): string {
+  const year = date.getFullYear();
+  const month = date.getMonth(); // 0-indexed: 0=Jan
+  if (month >= 8) return `${year}-${year + 1}`; // Sep-Dec = start year
+  return `${year - 1}-${year}`; // Jan-Aug = end year
+}
+
+/** Get the start year of the school year for a given date */
+export function getSchoolYearStartYear(date: Date): number {
+  const month = date.getMonth();
+  return month >= 8 ? date.getFullYear() : date.getFullYear() - 1;
+}
+
+/** Get the school year month index (0=Sep, 11=Aug) for a JS Date */
+export function getSchoolYearMonthIndex(date: Date): number {
+  const m = date.getMonth(); // 0=Jan
+  return m >= 8 ? m - 8 : m + 4;
+}
+
+/** Convert a school year month index + start year to a JS month (0-11) and calendar year */
+export function schoolYearMonthToCalendar(monthIndex: number, startYear: number): { jsMonth: number; year: number } {
+  // monthIndex 0=Sep, 1=Oct, ..., 4=Jan, ..., 11=Aug
+  const jsMonth = monthIndex < 4 ? monthIndex + 8 : monthIndex - 4;
+  const year = monthIndex < 4 ? startYear : startYear + 1;
+  return { jsMonth, year };
+}

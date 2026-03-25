@@ -9,8 +9,9 @@ import ContactCard from '@/features/school-profile/components/ContactCard';
 import ContactForm from '@/features/school-profile/components/ContactForm';
 import ContactGroupHeader from '@/features/school-profile/components/ContactGroupHeader';
 import CustomerJourneyTimeline from '@/features/school-profile/components/CustomerJourneyTimeline';
+import SchoolYearPlanner from '@/features/school-profile/components/SchoolYearPlanner';
 
-type ViewMode = 'dmu' | 'timeline';
+type ViewMode = 'dmu' | 'timeline' | 'schooljaar';
 
 export default function ContactsTab() {
   const activeSchoolId = useSchoolProfileStore(s => s.activeSchoolId);
@@ -114,6 +115,19 @@ export default function ContactsTab() {
           >
             Klantreis
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'schooljaar'}
+            onClick={() => handleViewChange('schooljaar')}
+            className={`h-[44px] px-4 text-[14px] font-semibold transition-colors max-sm:flex-1 ${
+              viewMode === 'schooljaar'
+                ? 'bg-cito-primary text-white'
+                : 'bg-white text-neutral-700 hover:bg-neutral-50'
+            }`}
+          >
+            Schooljaar
+          </button>
         </div>
       </div>
 
@@ -161,6 +175,15 @@ export default function ContactsTab() {
       {viewMode === 'timeline' && (
         <CustomerJourneyTimeline
           schoolId={activeSchoolId}
+          contacts={contacts}
+          conversations={conversations}
+          systemEvents={systemEvents}
+        />
+      )}
+
+      {/* Schooljaar (matrix) view */}
+      {viewMode === 'schooljaar' && (
+        <SchoolYearPlanner
           contacts={contacts}
           conversations={conversations}
           systemEvents={systemEvents}

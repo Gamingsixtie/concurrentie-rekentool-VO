@@ -150,7 +150,8 @@ export default function DashboardTab() {
   const [editScenario, setEditScenario] = useState<Scenario | null>(scenario);
 
   const totalStudents = getTotalStudents(studentCounts);
-  const lastContactDate = contacts
+  const effectiveContacts = liveContacts ?? contacts;
+  const lastContactDate = effectiveContacts
     .filter((c) => c.lastContactDate)
     .sort((a, b) => (b.lastContactDate! > a.lastContactDate! ? 1 : -1))[0]?.lastContactDate;
 
@@ -246,7 +247,7 @@ export default function DashboardTab() {
           <div>
             <p className="text-[14px] text-neutral-500">Contacten</p>
             <p className="text-[20px] font-semibold text-neutral-900 mt-1">
-              {contacts.length}
+              {effectiveContacts.length}
             </p>
           </div>
           <div>
