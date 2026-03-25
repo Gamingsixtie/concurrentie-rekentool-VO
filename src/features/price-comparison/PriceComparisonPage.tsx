@@ -10,13 +10,14 @@ import { PROVIDER_CONFIGS } from '../../data/providers';
 import { formatCurrency } from '../../lib/format';
 import { ComparisonChart } from './ComparisonChart';
 import { ComparisonTable } from './ComparisonTable';
-import { BusinessCaseCTA } from './BusinessCaseCTA';
 import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { DiaBundleSelector } from './DiaBundleSelector';
 import { ComparisonWizard } from './wizard/ComparisonWizard';
 import { AnalysisPanel } from './AnalysisPanel';
+import { SchoolplanBanner } from './SchoolplanBanner';
+import { ZachteKantPanel } from './ZachteKantPanel';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -220,59 +221,6 @@ function PricingModelCards() {
   );
 }
 
-// ─── Tijdswinst sectie ───────────────────────────────────────────────────────
-
-function TimeSavingsSection() {
-  return (
-    <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-10 h-10 bg-cito-primary/10 rounded-lg flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-cito-primary"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-[15px] font-semibold text-neutral-900">
-            Tijdbesparing — meer dan alleen kosten
-          </h3>
-          <p className="text-sm text-neutral-600 mt-1 leading-relaxed">
-            Cito biedt aantoonbare tijdswinst voor docenten en administratie door geïntegreerde
-            remediering, automatische rapportages en directe koppeling met methodeaanbieders.
-            Vraag uw accountmanager om een gepersonaliseerde tijdwinst-analyse voor deze school.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 rounded-full px-3 py-1 text-xs font-medium text-neutral-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Automatische rapportages
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 rounded-full px-3 py-1 text-xs font-medium text-neutral-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Remediering inbegrepen
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-white border border-neutral-200 rounded-full px-3 py-1 text-xs font-medium text-neutral-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              Directe methodeaanbiederintegratie
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Hoofd component ─────────────────────────────────────────────────────────
 
 export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
@@ -349,6 +297,9 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
     <div className="max-w-[960px] mx-auto px-4 sm:px-8 py-12">
       {BackButton}
 
+      {/* Schoolplan suggestie/samenvatting */}
+      <SchoolplanBanner />
+
       {/* Paginatitel */}
       <div className="mb-8">
         <h1 className="text-[28px] font-semibold leading-[1.2] text-cito-primary">
@@ -394,14 +345,9 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         <ComparisonTable result={result} onBarHighlight={chartHighlight} />
       </div>
 
-      {/* Business case CTA */}
+      {/* Zachte kant: voordelen, schoolplan-koppeling, tijdwinst */}
       <div className="mb-8">
-        <BusinessCaseCTA />
-      </div>
-
-      {/* Tijdswinst */}
-      <div className="mb-6">
-        <TimeSavingsSection />
+        <ZachteKantPanel />
       </div>
 
       {/* Disclaimer + bronvermelding */}
