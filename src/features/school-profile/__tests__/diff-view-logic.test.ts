@@ -61,7 +61,7 @@ const existingContacts: Contact[] = [
     id: 'c1',
     schoolId: 'school-1',
     name: 'Jan de Vries',
-    dmuPosition: 'coordinator',
+    dmuPosition: 'gebruiker',
     jobTitle: 'Coordinator',
     email: 'jan@school.nl',
     phone: '',

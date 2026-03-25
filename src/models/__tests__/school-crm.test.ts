@@ -5,6 +5,8 @@ import {
   PIPELINE_STATUS_ORDER,
   DMU_POSITIONS,
   DMU_POSITION_LABELS,
+  DMU_POSITION_ORDER,
+  DMU_MIGRATION_MAP,
   PREFERRED_CHANNELS,
   AUTHORITY_LEVELS,
 } from '@/models/school';
@@ -44,8 +46,8 @@ describe('PipelineStatus', () => {
 });
 
 describe('DMUPosition', () => {
-  it('has all 4 values', () => {
-    expect(DMU_POSITIONS).toEqual(['coordinator', 'mt', 'finance', 'overig']);
+  it('has all 6 values', () => {
+    expect(DMU_POSITIONS).toEqual(['beslisser', 'inkoper', 'adviseur', 'gebruiker', 'beinvloeder', 'overig']);
   });
 
   it('has labels for all positions', () => {
@@ -54,9 +56,24 @@ describe('DMUPosition', () => {
     }
   });
 
+  it('has hierarchy order for all positions', () => {
+    for (const pos of DMU_POSITIONS) {
+      expect(typeof DMU_POSITION_ORDER[pos]).toBe('number');
+    }
+    expect(DMU_POSITION_ORDER['beslisser']).toBe(0);
+    expect(DMU_POSITION_ORDER['overig']).toBe(5);
+  });
+
   it('type-checks DMUPosition assignment', () => {
-    const pos: DMUPosition = 'coordinator';
+    const pos: DMUPosition = 'beslisser';
     expect(DMU_POSITIONS).toContain(pos);
+  });
+
+  it('has migration map from old to new positions', () => {
+    expect(DMU_MIGRATION_MAP['coordinator']).toBe('gebruiker');
+    expect(DMU_MIGRATION_MAP['mt']).toBe('beslisser');
+    expect(DMU_MIGRATION_MAP['finance']).toBe('inkoper');
+    expect(DMU_MIGRATION_MAP['overig']).toBe('overig');
   });
 });
 
