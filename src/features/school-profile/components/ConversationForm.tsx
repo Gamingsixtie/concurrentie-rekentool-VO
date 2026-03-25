@@ -7,15 +7,20 @@ import { conversationSchema } from '@/features/school-profile/schemas/conversati
 import { addConversation, updateConversation, addContact, addAction, updateSchoolData } from '@/db/operations';
 import type { Contact, Conversation, ActionItem, SchoolRecord } from '@/db/types';
 import type { DMUPosition, Scenario } from '@/models/school';
+import { DMU_POSITION_LABELS } from '@/models/school';
+import { ENGAGEMENT_STATUS_LABELS } from '@/models/school';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import TagInput from '@/features/school-profile/components/TagInput';
-import IntakeModeToggle from '@/features/school-profile/components/IntakeModeToggle';
+// IntakeModeToggle hidden per D-05 — import kept for future re-enable
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import _IntakeModeToggle from '@/features/school-profile/components/IntakeModeToggle';
 import StreamingExtraction, { STREAMING_FIELD_LABELS } from '@/features/school-profile/components/StreamingExtraction';
 import DiffView, { type DiffSelection } from '@/features/school-profile/components/DiffView';
 import { streamIntakeFromNotes, parseExtractionFromText } from '@/lib/ai-intake';
 import type { IntakeExtractionV2 } from '@/features/school-profile/schemas/intake-extraction.schema';
 import StructuredIntakeForm from '@/features/school-profile/components/StructuredIntakeForm';
 import { detectScenario } from '@/engine/scenario-detection';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 
 type ConversationFormInput = z.input<typeof conversationSchema>;
 
@@ -62,8 +67,8 @@ export default function ConversationForm({
   const today = new Date().toISOString().slice(0, 10);
   const queryClient = useQueryClient();
 
-  // AI intake state
-  const [intakeMode, setIntakeMode] = useState<'manual' | 'ai'>('manual');
+  // AI intake state — kept but hidden per D-05
+  const [intakeMode] = useState<'manual' | 'ai'>('manual');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiNotes, setAiNotes] = useState('');
   const [streamFields, setStreamFields] = useState<{ label: string; done: boolean }[]>(
@@ -73,12 +78,15 @@ export default function ConversationForm({
   const [showDiffView, setShowDiffView] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
 
   // Manual form
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<ConversationFormInput>({
     resolver: zodResolver(conversationSchema),
@@ -96,6 +104,31 @@ export default function ConversationForm({
           tags: [],
         },
   });
+
+  // Speech recognition hook
+  const { isSupported: speechSupported, isListening, start: startListening, stop: stopListening } = useSpeechRecognition({
+    lang: 'nl-NL',
+    onTranscript: (text) => {
+      const current = getValues('content');
+      // Append transcribed text with space separator
+      const newContent = current ? `${current} ${text}` : text;
+      setValue('content', newContent, { shouldValidate: true });
+      setSpeechError(null);
+    },
+    onError: (error) => {
+      setSpeechError('Spraakherkenning onderbroken. Klik op de microfoon om opnieuw te starten.');
+      console.warn('Speech recognition error:', error);
+    },
+  });
+
+  const handleMicToggle = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      setSpeechError(null);
+      startListening();
+    }
+  };
 
   const onManualSubmit = async (data: ConversationFormInput) => {
     if (isEditing && conversation) {
@@ -306,10 +339,7 @@ export default function ConversationForm({
         {isEditing ? 'Gesprek bewerken' : 'Gesprek vastleggen'}
       </h3>
 
-      {/* Mode toggle - only when creating new conversation */}
-      {!isEditing && (
-        <IntakeModeToggle mode={intakeMode} onChange={setIntakeMode} />
-      )}
+      {/* AI mode toggle hidden per D-05 — code kept, import kept, never rendered */}
 
       {intakeMode === 'manual' ? (
         /* ─── Manual Mode ─── */
@@ -339,11 +369,11 @@ export default function ConversationForm({
                 className="h-[44px] w-full border border-neutral-200 rounded-lg px-3 text-base text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary bg-white"
               >
                 {contacts.length === 0 && (
-                  <option value="">Geen contactpersonen</option>
+                  <option value="" disabled>Geen contactpersonen</option>
                 )}
                 {contacts.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.name} — {DMU_POSITION_LABELS[c.dmuPosition]} — {ENGAGEMENT_STATUS_LABELS[c.engagementStatus]}
                   </option>
                 ))}
               </select>
@@ -353,11 +383,38 @@ export default function ConversationForm({
             </div>
           </div>
 
-          {/* Inhoud */}
+          {/* Inhoud with microphone */}
           <div>
-            <label className="block text-[14px] font-semibold text-neutral-700 mb-1">
-              Inhoud <span className="text-red-600">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[14px] font-semibold text-neutral-700">
+                Inhoud <span className="text-red-600">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={handleMicToggle}
+                disabled={!speechSupported}
+                title={
+                  !speechSupported
+                    ? 'Spraakherkenning niet ondersteund in deze browser'
+                    : isListening
+                      ? 'Klik om spraakherkenning te stoppen'
+                      : 'Klik om spraakherkenning te starten'
+                }
+                className={`p-1.5 rounded-full transition-all ${
+                  !speechSupported
+                    ? 'text-neutral-300 cursor-not-allowed opacity-50'
+                    : isListening
+                      ? 'text-cito-accent ring-2 ring-cito-accent/50 animate-pulse'
+                      : 'text-neutral-500 hover:text-neutral-700'
+                }`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  <line x1="12" x2="12" y1="19" y2="22" />
+                </svg>
+              </button>
+            </div>
             <textarea
               {...register('content')}
               rows={4}
@@ -365,6 +422,9 @@ export default function ConversationForm({
             />
             {errors.content && (
               <p className="text-[14px] text-red-600 mt-1">{errors.content.message}</p>
+            )}
+            {speechError && (
+              <p className="text-[14px] text-red-600 mt-1">{speechError}</p>
             )}
           </div>
 
@@ -405,7 +465,7 @@ export default function ConversationForm({
           </div>
         </form>
       ) : (
-        /* ─── AI Intake Mode ─── */
+        /* ─── AI Intake Mode (hidden per D-05 — intakeMode is always 'manual') ─── */
         <div className="flex flex-col gap-4">
           <StructuredIntakeForm
             disabled={isAnalyzing}

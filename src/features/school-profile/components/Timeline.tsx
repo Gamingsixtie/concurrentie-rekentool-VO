@@ -10,6 +10,7 @@ interface TimelineProps {
   searchQuery: string;
   onEditConversation: (c: Conversation) => void;
   onCreateAction: (conversationId: string) => void;
+  onDeleteConversation?: (conversationId: string) => void;
 }
 
 const dateFormatter = new Intl.DateTimeFormat('nl-NL', {
@@ -50,6 +51,7 @@ export default function Timeline({
   searchQuery,
   onEditConversation,
   onCreateAction,
+  onDeleteConversation,
 }: TimelineProps) {
   const filtered = useMemo(
     () => events.filter(e => matchesSearch(e, searchQuery, contacts)),
@@ -144,6 +146,11 @@ export default function Timeline({
                       onCreateAction={
                         event.type === 'conversation'
                           ? onCreateAction
+                          : undefined
+                      }
+                      onDelete={
+                        event.type === 'conversation'
+                          ? onDeleteConversation
                           : undefined
                       }
                     />

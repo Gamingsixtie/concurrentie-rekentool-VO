@@ -165,6 +165,8 @@ describe('Card mode rendering logic', () => {
           title: 'Demo inplannen',
           status: 'todo',
           conversationId: null,
+          type: null,
+          dueDate: null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },

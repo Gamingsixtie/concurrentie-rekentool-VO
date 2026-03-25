@@ -118,6 +118,8 @@ describe('actionSchema', () => {
       title: 'Offerte sturen',
       status: 'todo',
       conversationId: 'conv-1',
+      type: null,
+      dueDate: null,
     };
     const result = actionSchema.safeParse(data);
     expect(result.success).toBe(true);

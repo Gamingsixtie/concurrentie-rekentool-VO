@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useContacts } from '@/hooks/useContacts';
-import { useConversations } from '@/hooks/useConversations';
+import { useConversations, useDeleteConversation } from '@/hooks/useConversations';
 import { useActions, useCreateAction } from '@/hooks/useActions';
 import { useSchools } from '@/hooks/useSchools';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
@@ -24,6 +24,7 @@ export default function ConversationsTab() {
   const { data: actions = [] } = useActions(activeSchoolId ?? '');
   const { data: schools = [] } = useSchools();
   const createActionMutation = useCreateAction();
+  const deleteConversationMutation = useDeleteConversation();
 
   if (!activeSchoolId) return null;
 
@@ -75,6 +76,13 @@ export default function ConversationsTab() {
     createActionMutation.mutate({
       schoolId: activeSchoolId,
       data: { title, conversationId: conversationId ?? null },
+    });
+  };
+
+  const handleDeleteConversation = (conversationId: string) => {
+    deleteConversationMutation.mutate({
+      schoolId: activeSchoolId,
+      conversationId,
     });
   };
 
@@ -134,26 +142,18 @@ export default function ConversationsTab() {
           searchQuery={searchQuery}
           onEditConversation={handleEditConversation}
           onCreateAction={handleCreateAction}
+          onDeleteConversation={handleDeleteConversation}
         />
       </div>
 
       {/* Acties section */}
       <div className="bg-white border border-neutral-200 rounded-lg p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between mb-4">
-          <h2 className="text-[20px] font-semibold text-neutral-900 border-l-4 border-cito-accent pl-3 flex items-center gap-2">
-            Acties
-            <span className="bg-cito-accent/10 text-cito-accent text-[14px] font-semibold px-2 py-0.5 rounded-full">
-              {actions.length}
-            </span>
-          </h2>
-          <button
-            type="button"
-            onClick={() => handleCreateAction()}
-            className="h-[44px] px-4 text-[14px] font-semibold bg-cito-accent text-white rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            + Actie toevoegen
-          </button>
-        </div>
+        <h2 className="text-[20px] font-semibold text-neutral-900 border-l-4 border-cito-accent pl-3 flex items-center gap-2 mb-4">
+          Acties
+          <span className="bg-cito-accent/10 text-cito-accent text-[14px] font-semibold px-2 py-0.5 rounded-full">
+            {actions.length}
+          </span>
+        </h2>
 
         <ActionKanban
           actions={actions}

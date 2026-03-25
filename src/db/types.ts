@@ -57,6 +57,8 @@ export interface ActionItem {
   title: string;
   status: 'todo' | 'in-progress' | 'done';
   conversationId: string | null;
+  type: string | null;
+  dueDate: string | null;
   createdBy?: string;
   updatedBy?: string;
   createdAt: string;
