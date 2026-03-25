@@ -72,7 +72,10 @@ Plans:
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 - [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie â AI-advies â tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
-- [x] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren (completed 2026-03-25)
+- [ ] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
+- [ ] **Phase 18: Contactbeheer Upgrade & Klantreis-inzicht** - DMU-posities handmatig toewijzen (eenmalig, geldt overal), klantreis-tijdlijn per school met contactvolgorde en blokkades, en totaaloverzicht in school-dashboard
+- [ ] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging
+ (completed 2026-03-25)
 
 ## Phase Details
 
@@ -333,6 +336,8 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
 | 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete    | 2026-03-25 |
+| 17. Huidig Cito vs. Concurrent | v2.0 | 3/4 | Gap closure | — |
+| 18. Contactbeheer Upgrade & Klantreis-inzicht | v2.0 | 0/0 | Not Started | — |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -360,12 +365,28 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
   3. AI-advies houdt rekening met het feit dat de school al Cito-klant is en genereert passend advies (retentie-perspectief, niet acquisitie)
   4. Resultaat in vergelijkingstabel toont huidig Cito vs. concurrent, niet nieuw Cito vs. concurrent
   5. ScenarioDetector vangt dit scenario correct op en routeert naar de juiste flow
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete + 1 gap closure)
 
 Plans:
 - [x] 17-01-PLAN.md — Types, engine scenario detection, old-platform price helper en tests
 - [x] 17-02-PLAN.md — ScenarioDetector keuze-UI, wizard store Scenario C, ComparisonTab routing
 - [x] 17-03-PLAN.md — AI retentie-advies, ComparisonTable label override, visuele verificatie
+- [ ] 17-04-PLAN.md — Gap closure: retention advice wiring fix + UX verbeteringen (advies rendering, tabel formatting, pakketkeuze, basisvaardigheden)
+
+### Phase 18: Contactbeheer Upgrade & Klantreis-inzicht
+**Goal**: Accountmanager kan per school DMU-posities handmatig toewijzen aan contactpersonen (beslisser, adviseur, gebruiker, inkoper, etc.) — eenmalig instellen, overal beschikbaar. Onder het tabblad Contacten wordt de volledige klantreis zichtbaar: wie was het eerste contactpunt, met wie moet intern overlegd worden, waar hangt de beslissing om en waar loopt het vast. Het school-dashboard toont een totaaloverzicht van de DMU-structuur en klantreis-voortgang.
+**Depends on**: Phase 15 (DMU Klantreis), Phase 7 (contactpersonen)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Gebruiker kan per contactpersoon handmatig een DMU-positie toewijzen (beslisser, adviseur, gebruiker, inkoper, beïnvloeder) — dit wordt eenmalig ingesteld en is vervolgens overal in de app beschikbaar
+  2. Onder het tabblad Contacten is per school zichtbaar wie welke DMU-rol heeft, wie de beslisser is en wie adviseert — met duidelijke visuele hiërarchie
+  3. Klantreis-tijdlijn toont chronologisch: wie was het eerste contact, wie is daarna benaderd, met wie moet overlegd worden, en waar loopt het proces vast — inclusief blokkades en notities
+  4. School-dashboard (totaaloverzicht) toont een samenvatting van de DMU-structuur en klantreis-status zodat de accountmanager in één oogopslag ziet hoe het salesproces ervoor staat
+  5. DMU-posities en klantreis-data worden persistent opgeslagen en zijn beschikbaar voor alle views (contacten-tab, dashboard, exports)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD
 
 ## Backlog
 
