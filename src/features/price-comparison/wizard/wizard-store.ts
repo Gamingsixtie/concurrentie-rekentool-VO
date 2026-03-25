@@ -1,0 +1,202 @@
+/**
+ * Zustand store for the AI comparison wizard.
+ * Manages 3-step wizard state independently from usePriceComparisonStore.
+ * applyToTable() writes variant selections and Cito bundle type to the comparison store.
+ */
+
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import type {
+  ModuleVariantSelection,
+  WizardAdviceResult,
+  ExtraContextInput,
+  WizardScenario,
+  ExtractedVariantResult,
+} from './types';
+import { usePriceComparisonStore } from '../store';
+import type { ProviderKey } from '@/engine/price-comparison';
+
+interface WizardState {
+  // Navigation
+  currentStep: 0 | 1 | 2;
+  isCollapsed: boolean;
+  hasCompletedOnce: boolean;
+
+  // Step 1 data
+  conversationNotes: string;
+  extractionResult: ExtractedVariantResult | null;
+  isExtracting: boolean;
+
+  // Step 2 data
+  variantSelections: ModuleVariantSelection[];
+
+  // Step 3 data
+  aiAdvice: WizardAdviceResult | null;
+  adjustedSelections: ModuleVariantSelection[];
+  extraContext: ExtraContextInput;
+  isGeneratingAdvice: boolean;
+  streamingText: string;
+
+  // Scenario
+  scenario: WizardScenario;
+
+  // Actions
+  setStep: (step: 0 | 1 | 2) => void;
+  setConversationNotes: (notes: string) => void;
+  setExtractionResult: (result: ExtractedVariantResult | null) => void;
+  setIsExtracting: (v: boolean) => void;
+  setVariantSelections: (selections: ModuleVariantSelection[]) => void;
+  updateVariantSelection: (moduleId: string, update: Partial<ModuleVariantSelection>) => void;
+  setAiAdvice: (advice: WizardAdviceResult | null) => void;
+  setAdjustedSelections: (selections: ModuleVariantSelection[]) => void;
+  setExtraContext: (ctx: Partial<ExtraContextInput>) => void;
+  setIsGeneratingAdvice: (v: boolean) => void;
+  setStreamingText: (text: string) => void;
+  appendStreamingText: (text: string) => void;
+  setScenario: (s: WizardScenario) => void;
+  collapse: () => void;
+  expand: () => void;
+  resetWizard: () => void;
+
+  // D-24: Explicit apply to table
+  applyToTable: () => void;
+}
+
+const DEFAULT_EXTRA_CONTEXT: ExtraContextInput = {
+  korting: '',
+  dmuFocus: '',
+  bijzonderheden: '',
+};
+
+export const useWizardStore = create<WizardState>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      currentStep: 0,
+      isCollapsed: false,
+      hasCompletedOnce: false,
+
+      conversationNotes: '',
+      extractionResult: null,
+      isExtracting: false,
+
+      variantSelections: [],
+
+      aiAdvice: null,
+      adjustedSelections: [],
+      extraContext: { ...DEFAULT_EXTRA_CONTEXT },
+      isGeneratingAdvice: false,
+      streamingText: '',
+
+      scenario: 'deels-concurrent',
+
+      // Actions
+      setStep: (step) => set({ currentStep: step }),
+
+      setConversationNotes: (notes) => set({ conversationNotes: notes }),
+
+      setExtractionResult: (result) => set({ extractionResult: result }),
+
+      setIsExtracting: (v) => set({ isExtracting: v }),
+
+      setVariantSelections: (selections) => set({ variantSelections: selections }),
+
+      updateVariantSelection: (moduleId, update) =>
+        set((state) => ({
+          variantSelections: state.variantSelections.map((s) =>
+            s.moduleId === moduleId ? { ...s, ...update } : s,
+          ),
+        })),
+
+      setAiAdvice: (advice) => set({ aiAdvice: advice }),
+
+      setAdjustedSelections: (selections) => set({ adjustedSelections: selections }),
+
+      setExtraContext: (ctx) =>
+        set((state) => ({
+          extraContext: { ...state.extraContext, ...ctx },
+        })),
+
+      setIsGeneratingAdvice: (v) => set({ isGeneratingAdvice: v }),
+
+      setStreamingText: (text) => set({ streamingText: text }),
+
+      appendStreamingText: (text) =>
+        set((state) => ({ streamingText: state.streamingText + text })),
+
+      setScenario: (s) => set({ scenario: s }),
+
+      collapse: () => set({ isCollapsed: true }),
+
+      expand: () => set({ isCollapsed: false }),
+
+      resetWizard: () => {
+        const { conversationNotes, variantSelections } = get();
+        set({
+          currentStep: 0,
+          isCollapsed: false,
+          extractionResult: null,
+          isExtracting: false,
+          // Preserve conversationNotes and variantSelections as defaults for re-run
+          conversationNotes,
+          variantSelections,
+          aiAdvice: null,
+          adjustedSelections: [],
+          extraContext: { ...DEFAULT_EXTRA_CONTEXT },
+          isGeneratingAdvice: false,
+          streamingText: '',
+        });
+      },
+
+      applyToTable: () => {
+        const state = get();
+        const selections =
+          state.adjustedSelections.length > 0
+            ? state.adjustedSelections
+            : state.variantSelections;
+
+        // Extract unique providers from selections (filter out 'geen')
+        const providerSet = new Set<ProviderKey>();
+        for (const sel of selections) {
+          if (sel.provider !== 'geen') {
+            providerSet.add(sel.provider as ProviderKey);
+          }
+        }
+
+        // Build visible providers list with 'cito' always first
+        const providers: ProviderKey[] = ['cito', ...providerSet];
+
+        const comparisonStore = usePriceComparisonStore.getState();
+
+        // Set visible providers
+        comparisonStore.setVisibleProviders(providers);
+
+        // Set Cito bundle type if AI recommended one
+        if (state.aiAdvice?.aanbevolenCitoBundel) {
+          comparisonStore.setCitoBundleType(state.aiAdvice.aanbevolenCitoBundel);
+          // setCitoBundleType auto-triggers initialize()
+        } else {
+          // No bundle recommendation, manually initialize
+          comparisonStore.initialize();
+        }
+
+        // Mark wizard as completed and collapsed
+        set({
+          isCollapsed: true,
+          hasCompletedOnce: true,
+        });
+      },
+    }),
+    {
+      name: 'wizard-store-v1',
+      partialize: (state) => ({
+        conversationNotes: state.conversationNotes,
+        variantSelections: state.variantSelections,
+        extraContext: state.extraContext,
+        hasCompletedOnce: state.hasCompletedOnce,
+        isCollapsed: state.isCollapsed,
+        scenario: state.scenario,
+      }),
+    },
+  ),
+);
