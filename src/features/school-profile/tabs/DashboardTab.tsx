@@ -20,8 +20,12 @@ import PipelineBadge from '@/components/ui/PipelineBadge';
 import { SCHOOL_TAB_ROUTES } from '@/router/routes';
 import UpsellCard from '../components/UpsellCard';
 import DmuMatrix from '../components/DmuMatrix';
+import CustomerJourneySummary from '../components/CustomerJourneySummary';
 import { useContacts } from '@/hooks/useContacts';
+<<<<<<< HEAD
 import { useSchool } from '@/hooks/useSchools';
+import { useConversations } from '@/hooks/useConversations';
+import { useSystemEvents } from '@/hooks/useSystemEvents';
 
 // Context-smart actions per pipeline status
 const SMART_ACTIONS: Record<
@@ -100,6 +104,8 @@ export default function DashboardTab() {
 
   // Live contacts from DB for DMU matrix (store contacts may be stale)
   const { data: liveContacts } = useContacts(activeSchoolId ?? '');
+  const { data: liveConversations = [] } = useConversations(activeSchoolId ?? '');
+  const { data: liveSystemEvents = [] } = useSystemEvents(activeSchoolId ?? '');
 
   // Compute upsell opportunities
   const hasModuleSetups = moduleSetups.some((m) => m.currentProvider !== 'geen');
@@ -464,10 +470,22 @@ export default function DashboardTab() {
         </div>
       </div>
 
+      {/* Klantreis-overzicht */}
+      {(liveContacts ?? contacts).length > 0 && (
+        <div className="mt-6">
+          <CustomerJourneySummary
+            contacts={liveContacts ?? contacts}
+            conversations={liveConversations}
+            systemEvents={liveSystemEvents}
+          />
+        </div>
+      )}
+
       {/* DMU-beslissingsoverzicht */}
       <DmuMatrix
         schoolId={activeSchoolId ?? ''}
         contacts={liveContacts ?? contacts}
+        conversations={liveConversations}
         pipelineStatus={pipelineStatus}
         onNavigateToPipeline={() => {
           // Scroll to profile header where pipeline dropdown lives

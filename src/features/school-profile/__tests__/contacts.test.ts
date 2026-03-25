@@ -26,15 +26,15 @@ vi.mock('@/lib/supabase/client', () => ({
 
 describe('ContactForm schema validation', () => {
   it('validates required fields: name and dmuPosition', () => {
-    const result = contactSchema.safeParse({ name: '', dmuPosition: 'coordinator' });
+    const result = contactSchema.safeParse({ name: '', dmuPosition: 'gebruiker' });
     expect(result.success).toBe(false);
 
-    const valid = contactSchema.safeParse({ name: 'Jan', dmuPosition: 'coordinator' });
+    const valid = contactSchema.safeParse({ name: 'Jan', dmuPosition: 'gebruiker' });
     expect(valid.success).toBe(true);
   });
 
   it('provides defaults for optional fields', () => {
-    const result = contactSchema.parse({ name: 'Jan', dmuPosition: 'mt' });
+    const result = contactSchema.parse({ name: 'Jan', dmuPosition: 'beslisser' });
     expect(result.jobTitle).toBe('');
     expect(result.email).toBe('');
     expect(result.phone).toBe('');
@@ -44,17 +44,33 @@ describe('ContactForm schema validation', () => {
     expect(result.isPrimary).toBe(false);
   });
 
+  it('validates all new DMU positions', () => {
+    const positions = ['beslisser', 'inkoper', 'adviseur', 'gebruiker', 'beinvloeder', 'overig'];
+    for (const pos of positions) {
+      const result = contactSchema.safeParse({ name: 'Test', dmuPosition: pos });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('rejects old DMU positions', () => {
+    const oldPositions = ['coordinator', 'mt', 'finance'];
+    for (const pos of oldPositions) {
+      const result = contactSchema.safeParse({ name: 'Test', dmuPosition: pos });
+      expect(result.success).toBe(false);
+    }
+  });
+
   it('validates email format when provided', () => {
     const invalid = contactSchema.safeParse({
       name: 'Jan',
-      dmuPosition: 'coordinator',
+      dmuPosition: 'gebruiker',
       email: 'not-an-email',
     });
     expect(invalid.success).toBe(false);
 
     const valid = contactSchema.safeParse({
       name: 'Jan',
-      dmuPosition: 'coordinator',
+      dmuPosition: 'gebruiker',
       email: 'jan@school.nl',
     });
     expect(valid.success).toBe(true);
@@ -63,7 +79,7 @@ describe('ContactForm schema validation', () => {
   it('allows empty email string', () => {
     const result = contactSchema.safeParse({
       name: 'Jan',
-      dmuPosition: 'coordinator',
+      dmuPosition: 'gebruiker',
       email: '',
     });
     expect(result.success).toBe(true);

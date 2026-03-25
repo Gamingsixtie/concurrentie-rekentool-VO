@@ -679,5 +679,32 @@ export function validatePipelineTransition(
   };
 }
 
+// --- DMU Position Migration ---
+
+const DMU_MIGRATION_KEY = 'dmu-position-migration-v2';
+
+/**
+ * One-time migration: update old DMU position values (coordinator, mt, finance)
+ * to new model (gebruiker, beslisser, inkoper). Guarded by localStorage flag.
+ */
+export async function migrateDmuPositions(): Promise<void> {
+  if (localStorage.getItem(DMU_MIGRATION_KEY) === 'true') return;
+
+  const mapping: Record<string, string> = {
+    coordinator: 'gebruiker',
+    mt: 'beslisser',
+    finance: 'inkoper',
+    // 'overig' stays 'overig'
+  };
+
+  for (const [oldPos, newPos] of Object.entries(mapping)) {
+    await supabase.from('contacts')
+      .update({ dmu_position: newPos })
+      .eq('dmu_position', oldPos);
+  }
+
+  localStorage.setItem(DMU_MIGRATION_KEY, 'true');
+}
+
 // Re-export mappers for use in hooks
 export { mapContactRow, mapConversationRow, mapActionRow, mapSystemEventRow };

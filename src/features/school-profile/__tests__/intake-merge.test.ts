@@ -42,7 +42,7 @@ const existingContacts: Contact[] = [
     id: 'c1',
     schoolId: 'school-1',
     name: 'Bestaande Persoon',
-    dmuPosition: 'coordinator',
+    dmuPosition: 'gebruiker',
     jobTitle: '',
     email: 'bp@school.nl',
     phone: '',

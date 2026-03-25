@@ -1,4 +1,5 @@
 import type { Scenario } from '@/models/school';
+import { DMU_POSITION_LABELS } from '@/models/school';
 import type { Contact } from '@/db/types';
 
 interface DMUContextPanelProps {
@@ -8,16 +9,16 @@ interface DMUContextPanelProps {
 
 const SCENARIO_DMU_MAP: Record<Scenario, { positions: string[]; explanation: string }> = {
   A: {
-    positions: ['coordinator', 'mt'],
-    explanation: 'Scenario A (vergelijking) is vooral relevant voor coördinatoren (inhoudelijk) en MT (financieel).',
+    positions: ['gebruiker', 'beslisser'],
+    explanation: 'Scenario A (vergelijking) is vooral relevant voor gebruikers (inhoudelijk) en beslissers (financieel).',
   },
   B: {
-    positions: ['finance', 'mt'],
-    explanation: 'Scenario B (migratie) is vooral relevant voor finance (kosten/baten) en MT (besluitvorming).',
+    positions: ['inkoper', 'beslisser'],
+    explanation: 'Scenario B (migratie) is vooral relevant voor inkopers (kosten/baten) en beslissers (besluitvorming).',
   },
   C: {
-    positions: ['coordinator', 'mt', 'finance'],
-    explanation: 'Scenario C (retentie) is relevant voor coördinatoren (inhoudelijk), MT (besluitvorming) en finance (kosten huidige platform vs. concurrent).',
+    positions: ['gebruiker', 'beslisser', 'inkoper'],
+    explanation: 'Scenario C (retentie) is relevant voor gebruikers (inhoudelijk), beslissers (besluitvorming) en inkopers (kosten huidige platform vs. concurrent).',
   },
 };
 
@@ -46,7 +47,7 @@ export default function DMUContextPanel({ contacts, scenario }: DMUContextPanelP
             </div>
             <div className="min-w-0">
               <div className="font-medium text-neutral-900 truncate">{contact.name}</div>
-              <div className="text-xs text-neutral-500">{contact.dmuPosition}</div>
+              <div className="text-xs text-neutral-500">{DMU_POSITION_LABELS[contact.dmuPosition]}</div>
             </div>
           </div>
         ))}

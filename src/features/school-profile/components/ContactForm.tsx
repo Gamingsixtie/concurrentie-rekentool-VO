@@ -55,7 +55,7 @@ export default function ContactForm({ contact, schoolId, onClose, onSaved }: Con
         }
       : {
           name: '',
-          dmuPosition: 'coordinator',
+          dmuPosition: 'gebruiker',
           jobTitle: '',
           email: '',
           phone: '',

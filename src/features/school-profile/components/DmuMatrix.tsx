@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Contact } from '@/db/types';
+import { useState, useMemo } from 'react';
+import type { Contact, Conversation } from '@/db/types';
 import type { PipelineStatus, EngagementStatus } from '@/models/school';
 import { STAGNATION_THRESHOLD_DAYS } from '@/models/school';
 import DMUBadge from '@/components/ui/DMUBadge';
@@ -13,6 +13,7 @@ import { useSetEngagementStatus } from '@/hooks/useContacts';
 interface DmuMatrixProps {
   schoolId: string;
   contacts: Contact[];
+  conversations?: Conversation[];
   pipelineStatus: PipelineStatus;
   onNavigateToPipeline: () => void;
 }
@@ -25,14 +26,45 @@ function daysSince(isoDate: string | null): number {
   return Math.floor((now - then) / (1000 * 60 * 60 * 24));
 }
 
+/** Compute contact order based on earliest conversation date */
+function getContactOrder(conversations: Conversation[]): Map<string, number> {
+  const firstDates = new Map<string, string>();
+  for (const conv of conversations) {
+    const existing = firstDates.get(conv.contactId);
+    if (!existing || conv.date < existing) {
+      firstDates.set(conv.contactId, conv.date);
+    }
+  }
+
+  const sorted = [...firstDates.entries()]
+    .sort(([, a], [, b]) => a.localeCompare(b));
+
+  const orderMap = new Map<string, number>();
+  sorted.forEach(([contactId], index) => {
+    orderMap.set(contactId, index + 1);
+  });
+  return orderMap;
+}
+
+/** Format ordinal in Dutch: 1e, 2e, 3e, etc. */
+function formatOrdinal(n: number): string {
+  return `${n}e`;
+}
+
 export default function DmuMatrix({
   schoolId,
   contacts,
+  conversations = [],
   pipelineStatus,
   onNavigateToPipeline,
 }: DmuMatrixProps) {
   const setEngagement = useSetEngagementStatus();
   const [pendingDropOff, setPendingDropOff] = useState<Contact | null>(null);
+
+  const contactOrder = useMemo(
+    () => getContactOrder(conversations),
+    [conversations],
+  );
 
   const handleStatusChange = (contact: Contact, newStatus: EngagementStatus) => {
     if (newStatus === 'afgehaakt') {
@@ -108,6 +140,9 @@ export default function DmuMatrix({
               <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ minWidth: 120 }}>
                 Naam
               </th>
+              <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ width: 48 }}>
+                Nr.
+              </th>
               <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ width: 100 }}>
                 DMU-rol
               </th>
@@ -126,6 +161,7 @@ export default function DmuMatrix({
             {contacts.map((contact) => {
               const stagnationDays = daysSince(contact.engagementStatusChangedAt);
               const isStagnating = stagnationDays >= STAGNATION_THRESHOLD_DAYS;
+              const order = contactOrder.get(contact.id);
 
               // Find the contact name for the waiting-for reference
               const waitingForContact = contact.waitingForContactId
@@ -136,6 +172,9 @@ export default function DmuMatrix({
                 <tr key={contact.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3 text-[14px] text-neutral-700">
                     {contact.name}
+                  </td>
+                  <td className="px-4 py-3 text-[14px] text-neutral-700">
+                    {order ? formatOrdinal(order) : <span className="text-neutral-400">--</span>}
                   </td>
                   <td className="px-4 py-3">
                     <DMUBadge position={contact.dmuPosition} />
@@ -192,6 +231,7 @@ export default function DmuMatrix({
           const waitingForContact = contact.waitingForContactId
             ? contacts.find((c) => c.id === contact.waitingForContactId)
             : null;
+          const order = contactOrder.get(contact.id);
 
           return (
             <div key={contact.id} className="bg-white border border-neutral-200 rounded-lg p-4">
@@ -200,6 +240,11 @@ export default function DmuMatrix({
                   {contact.name}
                 </span>
                 <DMUBadge position={contact.dmuPosition} />
+                {order && (
+                  <span className="text-[12px] text-neutral-500">
+                    {formatOrdinal(order)}
+                  </span>
+                )}
               </div>
               <div className="space-y-2 text-[14px]">
                 <div className="flex items-center justify-between">

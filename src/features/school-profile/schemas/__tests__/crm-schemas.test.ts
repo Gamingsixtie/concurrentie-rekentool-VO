@@ -7,7 +7,7 @@ describe('contactSchema', () => {
   it('validates a complete contact', () => {
     const data: ContactFormData = {
       name: 'Jan de Vries',
-      dmuPosition: 'coordinator',
+      dmuPosition: 'gebruiker',
       jobTitle: 'Toetscoordinator',
       email: 'jan@school.nl',
       phone: '06-12345678',
@@ -21,7 +21,7 @@ describe('contactSchema', () => {
   });
 
   it('requires name with min 1 character', () => {
-    const result = contactSchema.safeParse({ name: '', dmuPosition: 'coordinator' });
+    const result = contactSchema.safeParse({ name: '', dmuPosition: 'gebruiker' });
     expect(result.success).toBe(false);
   });
 
@@ -33,7 +33,7 @@ describe('contactSchema', () => {
   it('validates email format when provided', () => {
     const result = contactSchema.safeParse({
       name: 'Test',
-      dmuPosition: 'mt',
+      dmuPosition: 'beslisser',
       email: 'not-an-email',
     });
     expect(result.success).toBe(false);
@@ -42,7 +42,7 @@ describe('contactSchema', () => {
   it('allows empty email', () => {
     const result = contactSchema.safeParse({
       name: 'Test',
-      dmuPosition: 'mt',
+      dmuPosition: 'beslisser',
       email: '',
     });
     expect(result.success).toBe(true);
@@ -51,7 +51,7 @@ describe('contactSchema', () => {
   it('applies defaults for optional fields', () => {
     const result = contactSchema.safeParse({
       name: 'Test',
-      dmuPosition: 'finance',
+      dmuPosition: 'inkoper',
     });
     expect(result.success).toBe(true);
     if (result.success) {
