@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { usePriceComparisonStore } from '@/features/price-comparison/store';
@@ -8,6 +8,10 @@ import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { calculateComparison, getTotalStudents } from '@/engine/price-comparison';
 import { calculateMigration } from '@/engine/migration';
 import { CITO_MIGRATION_PRICES } from '@/data/cito-migration-prices';
+import { getDefaultAssumptions } from '@/data/dmu-assumptions';
+import type { DmuAssumption } from '@/data/dmu-assumptions';
+import { CITO_PRODUCT_ADVANTAGES } from '@/data/cito-product-info';
+import { tagSchoolplanOpportunity } from './utils/dmu-tag-filter';
 import type { ExportConfig, ReportData } from './types';
 import { ExportConfigPanel } from './components/ExportConfigPanel';
 import { ExportPreview } from './components/ExportPreview';
@@ -22,6 +26,16 @@ export default function ExportTab() {
     reportType: 'gecombineerd',
     dmuTarget: 'generiek',
   });
+
+  // Assumptions state (session-scoped, not Zustand)
+  const [assumptions, setAssumptions] = useState<DmuAssumption[]>(
+    () => getDefaultAssumptions(config.dmuTarget)
+  );
+
+  // Reset assumptions when DMU target changes
+  useEffect(() => {
+    setAssumptions(getDefaultAssumptions(config.dmuTarget));
+  }, [config.dmuTarget]);
 
   // School data
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
@@ -91,6 +105,14 @@ export default function ExportTab() {
       })
     : undefined;
 
+  // Tag schoolplan opportunities for DMU filtering
+  const taggedSchoolplanOpportunities = schoolplanOpportunities
+    ? schoolplanOpportunities.map(opp => ({
+        ...opp,
+        tags: tagSchoolplanOpportunity(opp),
+      }))
+    : undefined;
+
   const reportData: ReportData = {
     schoolName: schoolName || 'School',
     date: today,
@@ -99,7 +121,9 @@ export default function ExportTab() {
     comparison,
     migration,
     priceDifference,
-    schoolplanOpportunities,
+    schoolplanOpportunities: taggedSchoolplanOpportunities,
+    dmuAssumptions: assumptions,
+    productAdvantages: CITO_PRODUCT_ADVANTAGES,
   };
 
   const hasData = comparison !== null || (migration && migration.modules.length > 0);
@@ -116,7 +140,13 @@ export default function ExportTab() {
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
         {/* Left: config */}
         <div className="space-y-6">
-          <ExportConfigPanel config={config} onChange={setConfig} />
+          <ExportConfigPanel
+            config={config}
+            onChange={setConfig}
+            assumptions={assumptions}
+            defaultAssumptions={getDefaultAssumptions(config.dmuTarget)}
+            onAssumptionsChange={setAssumptions}
+          />
           <PdfDownloadButton config={config} data={reportData} disabled={!hasData} />
           <ClipboardButton config={config} data={reportData} disabled={!hasData} />
         </div>

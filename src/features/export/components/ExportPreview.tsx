@@ -1,6 +1,7 @@
 import { getReportSections } from '../pdf/dmu-filters';
 import type { SectionId } from '../pdf/dmu-filters';
 import type { ExportConfig, ReportData } from '../types';
+import { filterByDmuTags } from '../utils/dmu-tag-filter';
 import { PROVIDER_LABELS } from '@/engine/price-comparison';
 import type { ProviderKey } from '@/engine/price-comparison';
 import { formatCurrencyCompact } from '@/lib/format';
@@ -32,19 +33,33 @@ export function ExportPreview({ config, data }: ExportPreviewProps) {
     switch (sectionId) {
       case 'summary':
         return (
-          <div key={sectionId} className="bg-neutral-50 border-l-3 border-cito-accent p-4 rounded">
-            <h4 className="font-semibold text-cito-primary text-sm mb-2">Samenvatting</h4>
-            <ul className="text-sm text-neutral-700 space-y-1">
-              {data.priceDifference !== null && data.priceDifference > 0 && (
-                <li>• {formatCurrencyCompact(data.priceDifference)} goedkoper dan de concurrentie</li>
-              )}
-              {data.migration && data.migration.totalTimeSavingsHours > 0 && (
-                <li>• {data.migration.totalTimeSavingsHours} uur tijdwinst per jaar</li>
-              )}
-              {data.migration && data.migration.totalAnnualValue > 0 && (
-                <li>• Totale jaarlijkse waarde: {formatCurrencyCompact(data.migration.totalAnnualValue)}</li>
-              )}
-            </ul>
+          <div key={sectionId}>
+            <div className="bg-neutral-50 border-l-3 border-cito-accent p-4 rounded">
+              <h4 className="font-semibold text-cito-primary text-sm mb-2">Samenvatting</h4>
+              <ul className="text-sm text-neutral-700 space-y-1">
+                {data.priceDifference !== null && data.priceDifference > 0 && (
+                  <li>• {formatCurrencyCompact(data.priceDifference)} goedkoper dan de concurrentie</li>
+                )}
+                {data.migration && data.migration.totalTimeSavingsHours > 0 && (
+                  <li>• {data.migration.totalTimeSavingsHours} uur tijdwinst per jaar</li>
+                )}
+                {data.migration && data.migration.totalAnnualValue > 0 && (
+                  <li>• Totale jaarlijkse waarde: {formatCurrencyCompact(data.migration.totalAnnualValue)}</li>
+                )}
+              </ul>
+            </div>
+            {/* Intro paragraph from assumptions */}
+            {data.dmuAssumptions?.[0]?.introText && (
+              <p className="text-sm text-neutral-700 mt-3 leading-relaxed">
+                {data.dmuAssumptions[0].introText}
+              </p>
+            )}
+            {/* D-07: Schoolplan prompt when no schoolplan */}
+            {!data.schoolplanOpportunities?.length && (
+              <p className="text-xs text-neutral-400 italic mt-2">
+                Upload een schoolplan voor een nog specifiekere onderbouwing.
+              </p>
+            )}
           </div>
         );
 
@@ -194,20 +209,40 @@ export function ExportPreview({ config, data }: ExportPreviewProps) {
           </div>
         );
 
-      case 'differentiators':
+      case 'differentiators': {
+        const filtered = data.productAdvantages
+          ? filterByDmuTags(data.productAdvantages, config.dmuTarget)
+          : [];
+        if (filtered.length === 0) {
+          return (
+            <div key={sectionId}>
+              <h4 className="font-semibold text-cito-primary text-sm mb-2 border-b border-neutral-200 pb-1">
+                Cito Differentiators
+              </h4>
+              <ul className="text-xs text-neutral-700 space-y-1">
+                <li>• Remediering in samenwerking met methodeaanbieders</li>
+                <li>• Adaptieve toetsafname op maat van de leerling</li>
+                <li>• Breed gevalideerd instrumentarium voor alle niveaus</li>
+                <li>• Doorlopende doorontwikkeling en ondersteuning</li>
+              </ul>
+            </div>
+          );
+        }
         return (
           <div key={sectionId}>
             <h4 className="font-semibold text-cito-primary text-sm mb-2 border-b border-neutral-200 pb-1">
-              Cito Differentiators
+              Relevante Cito-voordelen
             </h4>
-            <ul className="text-xs text-neutral-700 space-y-1">
-              <li>• Remediëring in samenwerking met methodeaanbieders</li>
-              <li>• Adaptieve toetsafname op maat van de leerling</li>
-              <li>• Breed gevalideerd instrumentarium voor alle niveaus</li>
-              <li>• Doorlopende doorontwikkeling en ondersteuning</li>
-            </ul>
+            {filtered.map((adv, i) => (
+              <div key={i} className="mb-2">
+                <p className="text-xs font-semibold text-neutral-800">{adv.advantage}</p>
+                <p className="text-xs text-neutral-600">{adv.context}</p>
+                <p className="text-[10px] text-neutral-400 italic">Bron: {adv.source}</p>
+              </div>
+            ))}
           </div>
         );
+      }
 
       default:
         return null;
