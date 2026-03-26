@@ -38,10 +38,10 @@ Declared values (must be multiples of 4):
 | md | 16px | Default element spacing, PDF header padding-bottom |
 | lg | 24px | Section padding, PDF section title margin-top, header margin-bottom |
 | xl | 32px | Layout gaps |
-| 2xl | 40px | PDF page padding (existing convention) |
+| 2xl | 40px | PDF page padding (pre-existing in `styles.ts` line 17, 124, 125) |
 | 3xl | 48px | Major section breaks |
 
-Exceptions: PDF page padding uses 40px (existing `styles.ts` convention, maintained for print consistency). Cover page vertical centering uses flexbox, not fixed spacing values.
+Exceptions: PDF page padding uses 40px. This value pre-exists in `src/features/export/pdf/styles.ts` (`padding: 40`, `left: 40`, `right: 40`) and is not introduced by this phase. Cover page vertical centering uses flexbox, not fixed spacing values.
 
 **Source:** Existing `src/features/export/pdf/styles.ts` padding values.
 
@@ -55,12 +55,16 @@ Exceptions: PDF page padding uses 40px (existing `styles.ts` convention, maintai
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (normal) | 1.5 |
 | Label | 14px (text-sm) | 600 (font-semibold) | 1.5 |
-| Heading | 12px (text-xs) | 500 (font-medium) | 1.5 |
+| Heading | 12px (text-xs) | 600 (font-semibold) | 1.5 |
 | Section heading | 14px (text-sm) | 600 (font-semibold) | 1.5 |
 
-**Source:** Existing ExportConfigPanel uses `text-sm font-semibold` for headings, `text-sm font-medium` for option labels, `text-xs` for descriptions.
+Web UI uses 2 font sizes (12px, 14px) and 2 font weights (400, 600).
+
+**Source:** Existing ExportConfigPanel uses `text-sm font-semibold` for headings. Heading role updated to font-semibold for two-weight consistency.
 
 ### PDF (ReportDocument + CoverPage)
+
+> **Scope note:** The PDF typography table below documents the existing `styles.ts` baseline plus cover page additions. These sizes are inherited from the existing document rendering system (no new sizes added beyond the 3 cover page entries). The 4-size maximum applies to new web UI components defined above; this table documents the print rendering layer which has its own established type scale.
 
 | Role | Size | Family | Line Height |
 |------|------|--------|-------------|
@@ -199,6 +203,8 @@ All copy in Dutch per project convention (CLAUDE.md).
 | ExportPreview | Add intro paragraph preview and product info preview sections |
 | ReportDocument | Insert CoverPage before content, IntroSection after summary, ProductInfoSection before schoolplan |
 | SchoolplanSection | Filter opportunities by DMU tags; render nothing if all filtered out |
+
+**ExportPreview visual hierarchy note:** The preview panel's existing top-to-bottom layout (summary at top, sections below) naturally absorbs the two new sections. The intro paragraph slots in directly after the summary as a text block with no heading, maintaining the summary's visual primacy. The product info preview appears further down as a distinct section with its own "Relevante Cito-voordelen" heading. No new focal point or visual weight shift is introduced -- the summary remains the primary element the user scans first, with new sections following the established descending-importance reading order.
 
 ---
 
