@@ -543,6 +543,7 @@ export function devApiPlugin(apiKey: string): Plugin {
           }
 
           const userMessage = buildAnalysisUserMessage(body);
+          console.log('[ai-analysis] User message length:', userMessage.length, 'chars');
 
           const message = await anthropic.messages.create({
             model: 'claude-sonnet-4-6',
@@ -566,6 +567,7 @@ export function devApiPlugin(apiKey: string): Plugin {
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(toolBlock.input));
         } catch (err) {
+          console.error('[ai-analysis] Error:', err);
           res.statusCode = 500;
           res.end(`Er is een fout opgetreden bij de AI-analyse: ${String(err)}`);
         }

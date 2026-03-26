@@ -260,7 +260,9 @@ export async function generateAnalysis(
   migrationResult?: MigrationResult | null,
   wizardContext?: WizardNarrativeContext | null,
 ): Promise<AnalysisResult> {
+  console.log('[ai-analysis] Step 1: getAuthHeaders...');
   const headers = await getAuthHeaders();
+  console.log('[ai-analysis] Step 2: buildAnalysisPayload...');
   const payload = buildAnalysisPayload(
     mode,
     result,
@@ -274,6 +276,7 @@ export async function generateAnalysis(
     migrationResult,
     wizardContext,
   );
+  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis, payload keys:', Object.keys(payload));
 
   const response = await fetch('/api/ai-analysis', {
     method: 'POST',
@@ -281,12 +284,15 @@ export async function generateAnalysis(
     body: JSON.stringify(payload),
   });
 
+  console.log('[ai-analysis] Step 4: response status:', response.status);
   if (!response.ok) {
     const text = await response.text();
+    console.error('[ai-analysis] Server error:', text);
     throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
   }
 
   const data = await response.json();
+  console.log('[ai-analysis] Step 5: response parsed, keys:', Object.keys(data));
 
   // Validate essential fields
   if (typeof data.samenvatting !== 'string' || !Array.isArray(data.gespreksargumenten)) {

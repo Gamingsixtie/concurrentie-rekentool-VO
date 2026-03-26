@@ -141,6 +141,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
       );
       setAnalysis(analysisResult);
     } catch (err) {
+      console.error('[AnalysisPanel] Error:', err);
       setError(err instanceof Error ? err.message : 'Er ging iets mis bij het genereren van de analyse.');
     } finally {
       setLoading(false);

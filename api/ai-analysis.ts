@@ -454,7 +454,8 @@ export async function POST(request: Request): Promise<Response> {
     return new Response(JSON.stringify(toolBlock.input), {
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch {
-    return new Response('Er is een fout opgetreden bij de AI-analyse', { status: 500 });
+  } catch (err) {
+    console.error('[ai-analysis] Error:', err);
+    return new Response(`Er is een fout opgetreden bij de AI-analyse: ${String(err)}`, { status: 500 });
   }
 }
