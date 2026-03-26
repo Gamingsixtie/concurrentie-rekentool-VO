@@ -45,7 +45,7 @@ export interface SystemEvent {
   id: string;
   schoolId: string;
   timestamp: string;
-  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created' | 'engagement_changed' | 'blokkade_registered';
+  eventType: 'pipeline_changed' | 'comparison_created' | 'prices_updated' | 'school_created' | 'engagement_changed' | 'blokkade_registered' | 'demo_gegeven' | 'offerte_verstuurd' | 'beslissing_genomen' | 'contract_getekend' | 'implementatie_gestart' | 'evaluatie_gepland';
   description: string;
   metadata?: Record<string, string>;
   userId?: string;
@@ -127,6 +127,8 @@ export interface SchoolRecord {
   appliedOverrides: PriceOverride[];
   migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number | null>;
+  customTimeSavingTasks?: import('../models/migration').TimeSavingTask[];
+  hiddenTimeSavingTaskIds?: string[];
   switchingCosts: number;
 
   // CRM-lite data

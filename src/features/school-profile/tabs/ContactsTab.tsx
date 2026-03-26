@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useContacts, useDeleteContact } from '@/hooks/useContacts';
-import { useConversations } from '@/hooks/useConversations';
+import { useConversations, useCreateConversation } from '@/hooks/useConversations';
 import { useSystemEvents } from '@/hooks/useSystemEvents';
 import { usePlannedTouchpoints, useCreatePlannedTouchpoint, useUpdatePlannedTouchpoint, useDeletePlannedTouchpoint } from '@/hooks/usePlannedTouchpoints';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
@@ -30,6 +30,7 @@ export default function ContactsTab() {
   const createTouchpoint = useCreatePlannedTouchpoint();
   const updateTouchpoint = useUpdatePlannedTouchpoint();
   const deleteTouchpoint = useDeletePlannedTouchpoint();
+  const createConversation = useCreateConversation();
 
   // Group contacts by DMU role, only non-empty groups
   const groupedContacts = useMemo(() => {
@@ -196,6 +197,10 @@ export default function ContactsTab() {
           onCreateTouchpoint={data => createTouchpoint.mutate({ schoolId: activeSchoolId, data })}
           onUpdateTouchpoint={(touchpointId, data) => updateTouchpoint.mutate({ schoolId: activeSchoolId, touchpointId, data })}
           onDeleteTouchpoint={touchpointId => deleteTouchpoint.mutate({ schoolId: activeSchoolId, touchpointId })}
+          onQuickMark={(contactId, date) => createConversation.mutate({
+            schoolId: activeSchoolId,
+            data: { contactId, date, content: '[Gesproken]', tags: ['quick-mark'] },
+          })}
         />
       )}
 

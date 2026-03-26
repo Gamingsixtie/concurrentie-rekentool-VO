@@ -20,6 +20,7 @@ interface SchoolYearPlannerProps {
   onCreateTouchpoint: (data: { contactId: string; schoolYearStart: number; monthIndex: number; note?: string }) => void;
   onUpdateTouchpoint: (touchpointId: string, data: Partial<Pick<PlannedTouchpoint, 'note' | 'status' | 'monthIndex'>>) => void;
   onDeleteTouchpoint: (touchpointId: string) => void;
+  onQuickMark?: (contactId: string, date: string) => void;
 }
 
 interface MonthActivity {
@@ -353,6 +354,7 @@ interface MobileMonthCardProps {
   onUpdateNote: (id: string, note: string) => void;
   onMoveTouchpoint: (id: string, newMonthIdx: number) => void;
   onClosePopover: () => void;
+  onQuickMark?: (contactId: string, monthIdx: number) => void;
 }
 
 function MobileMonthCard({
@@ -372,6 +374,7 @@ function MobileMonthCard({
   onUpdateNote,
   onMoveTouchpoint,
   onClosePopover,
+  onQuickMark,
 }: MobileMonthCardProps) {
   // Contacts with any activity, touchpoints, or that are relevant this month
   const relevantContacts = contacts.filter(c => {
@@ -417,31 +420,46 @@ function MobileMonthCard({
 
             return (
               <div key={contact.id} className="relative">
-                <button
-                  type="button"
-                  onClick={() => onCellClick(contact.id, monthIdx)}
-                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 transition-colors text-left"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-medium text-neutral-900">
-                      {contact.name}
-                    </span>
-                    <DMUBadge position={contact.dmuPosition} />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {activity && activity.conversationCount > 0 && (
-                      <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
-                        {activity.conversationCount}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onCellClick(contact.id, monthIdx)}
+                    className="flex-1 flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-medium text-neutral-900">
+                        {contact.name}
                       </span>
-                    )}
-                    {plannedCount > 0 && (
-                      <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full w-5 h-5 inline-flex items-center justify-center">
-                        !
-                      </span>
-                    )}
-                    <EngagementBadge status={contact.engagementStatus} size="sm" />
-                  </div>
-                </button>
+                      <DMUBadge position={contact.dmuPosition} />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {activity && activity.conversationCount > 0 && (
+                        <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                          {activity.conversationCount}
+                        </span>
+                      )}
+                      {plannedCount > 0 && (
+                        <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 rounded-full w-5 h-5 inline-flex items-center justify-center">
+                          !
+                        </span>
+                      )}
+                      <EngagementBadge status={contact.engagementStatus} size="sm" />
+                    </div>
+                  </button>
+                  {onQuickMark && (
+                    <button
+                      type="button"
+                      onClick={() => onQuickMark(contact.id, monthIdx)}
+                      className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 hover:bg-emerald-600 transition-colors"
+                      title="Gesproken"
+                      aria-label={`Markeer als gesproken: ${contact.name}`}
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
                 {isOpen && (
                   <CellPopover
                     target={{ contactId: contact.id, monthIdx }}
@@ -501,10 +519,29 @@ export default function SchoolYearPlanner({
   onCreateTouchpoint,
   onUpdateTouchpoint,
   onDeleteTouchpoint,
+  onQuickMark,
 }: SchoolYearPlannerProps) {
   const currentStartYear = getSchoolYearStartYear(new Date());
   const [selectedStartYear, setSelectedStartYear] = useState(currentStartYear);
   const [popoverTarget, setPopoverTarget] = useState<PopoverTarget>(null);
+  const [quickMarkFlash, setQuickMarkFlash] = useState<Set<string>>(new Set());
+
+  const handleQuickMark = (contactId: string, monthIdx: number) => {
+    if (!onQuickMark) return;
+    const { year, jsMonth } = schoolYearMonthToCalendar(monthIdx, selectedStartYear);
+    const date = `${year}-${String(jsMonth + 1).padStart(2, '0')}-01`;
+    onQuickMark(contactId, date);
+
+    const key = `${contactId}-${monthIdx}`;
+    setQuickMarkFlash(prev => new Set(prev).add(key));
+    setTimeout(() => {
+      setQuickMarkFlash(prev => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }, 1500);
+  };
 
   const availableYears = useMemo(
     () => getAvailableYears(conversations, plannedTouchpoints),
@@ -662,6 +699,16 @@ export default function SchoolYearPlanner({
           </svg>
           Afgerond
         </span>
+        {onQuickMark && (
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 h-4 rounded-full bg-emerald-500 inline-flex items-center justify-center">
+              <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            Snel markeren (hover)
+          </span>
+        )}
       </div>
 
       {/* Desktop: table view */}
@@ -716,7 +763,7 @@ export default function SchoolYearPlanner({
                     return (
                       <td
                         key={month}
-                        className={`px-1 py-2.5 text-center relative ${
+                        className={`px-1 py-2.5 text-center relative group/cell ${
                           isCurrentMonth ? 'bg-[color:var(--color-cito-primary)]/5' : ''
                         }`}
                       >
@@ -727,7 +774,7 @@ export default function SchoolYearPlanner({
                             hasContent
                               ? 'hover:bg-neutral-100'
                               : 'hover:bg-neutral-50 group'
-                          }`}
+                          } ${quickMarkFlash.has(`${contact.id}-${idx}`) ? 'animate-pulse bg-emerald-50' : ''}`}
                         >
                           {activity && activity.conversationCount > 0 && (
                             <span className="text-[11px] font-semibold text-cito-primary bg-cito-primary/10 rounded-full w-5 h-5 inline-flex items-center justify-center">
@@ -751,6 +798,20 @@ export default function SchoolYearPlanner({
                             <span className="text-neutral-300 group-hover:text-neutral-400 text-[14px] leading-none">+</span>
                           )}
                         </button>
+                        {/* Quick-mark button */}
+                        {onQuickMark && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleQuickMark(contact.id, idx); }}
+                            className="absolute bottom-0.5 right-0.5 w-5 h-5 rounded-full bg-emerald-500 text-white opacity-0 group-hover/cell:opacity-100 transition-opacity flex items-center justify-center shadow-sm hover:bg-emerald-600"
+                            title="Gesproken"
+                            aria-label={`Markeer als gesproken: ${contact.name}`}
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none">
+                              <path d="M3 8l4 4 6-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                        )}
 
                         {/* Popover */}
                         {isOpen && (
@@ -873,6 +934,7 @@ export default function SchoolYearPlanner({
               onUpdateNote={handleUpdateNote}
               onMoveTouchpoint={handleMoveTouchpoint}
               onClosePopover={() => setPopoverTarget(null)}
+              onQuickMark={onQuickMark ? (contactId, monthIdx) => handleQuickMark(contactId, monthIdx) : undefined}
             />
           );
         })}
