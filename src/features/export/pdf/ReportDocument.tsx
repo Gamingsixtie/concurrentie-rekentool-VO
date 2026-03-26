@@ -10,6 +10,9 @@ import { PriceComparisonSection } from './components/PriceComparisonSection';
 import { ValueReportSection } from './components/ValueReportSection';
 import { PdfBarChart, PROVIDER_CHART_COLORS } from './components/PdfBarChart';
 import { SchoolplanSection } from './components/SchoolplanSection';
+import { CoverPage } from './components/CoverPage';
+import { IntroSection } from './components/IntroSection';
+import { ProductInfoSection } from './components/ProductInfoSection';
 import { PROVIDER_LABELS } from '@/engine/price-comparison';
 import type { ProviderKey } from '@/engine/price-comparison';
 
@@ -30,7 +33,15 @@ export function ReportDocument({ config, data }: ReportDocumentProps) {
   const renderSection = (sectionId: SectionId) => {
     switch (sectionId) {
       case 'summary':
-        return <SummarySection key={sectionId} data={data} sections={reportSections} />;
+        return (
+          <View key={sectionId}>
+            <SummarySection data={data} sections={reportSections} />
+            <IntroSection assumptions={data.dmuAssumptions} />
+            {!data.schoolplanOpportunities?.length && (
+              <Text style={styles.introText}>Upload een schoolplan voor een nog specifiekere onderbouwing.</Text>
+            )}
+          </View>
+        );
 
       case 'priceComparison': {
         if (!data.comparison) return null;
@@ -86,7 +97,7 @@ export function ReportDocument({ config, data }: ReportDocumentProps) {
         );
 
       case 'schoolplan':
-        return <SchoolplanSection key={sectionId} opportunities={data.schoolplanOpportunities} />;
+        return <SchoolplanSection key={sectionId} opportunities={data.schoolplanOpportunities} dmuTarget={config.dmuTarget} />;
 
       default:
         return null;
@@ -95,6 +106,12 @@ export function ReportDocument({ config, data }: ReportDocumentProps) {
 
   return (
     <Document>
+      <CoverPage
+        schoolName={data.schoolName}
+        date={data.date}
+        dmuTarget={config.dmuTarget}
+        reportType={config.reportType}
+      />
       <Page size="A4" style={styles.page}>
         <PdfHeader
           title={REPORT_TITLES[config.reportType]}
@@ -104,6 +121,12 @@ export function ReportDocument({ config, data }: ReportDocumentProps) {
 
         <View wrap>
           {reportSections.sections.map(renderSection)}
+
+          {/* Product info before disclaimer */}
+          <ProductInfoSection
+            advantages={data.productAdvantages}
+            dmuTarget={config.dmuTarget}
+          />
 
           {/* Disclaimer */}
           <View style={styles.disclaimer}>

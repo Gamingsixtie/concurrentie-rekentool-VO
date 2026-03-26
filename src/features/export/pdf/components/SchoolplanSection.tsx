@@ -1,9 +1,11 @@
 import { View, Text } from '@react-pdf/renderer';
 import { styles, CITO_COLORS } from '../styles';
-import type { ReportData } from '../../types';
+import type { DmuTarget, ReportData } from '../../types';
+import { filterByDmuTags, tagSchoolplanOpportunity } from '@/features/export/utils/dmu-tag-filter';
 
 interface SchoolplanSectionProps {
   opportunities: ReportData['schoolplanOpportunities'];
+  dmuTarget?: DmuTarget;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -18,15 +20,24 @@ const STATUS_LABELS: Record<string, string> = {
   'niet-relevant': 'Niet relevant',
 };
 
-export function SchoolplanSection({ opportunities }: SchoolplanSectionProps) {
-  if (!opportunities || opportunities.length === 0) {
+export function SchoolplanSection({ opportunities, dmuTarget }: SchoolplanSectionProps) {
+  // Tag and filter opportunities by DMU role
+  const filtered = opportunities
+    ? (dmuTarget && dmuTarget !== 'generiek'
+      ? opportunities
+          .map(opp => ({ ...opp, tags: opp.tags ?? tagSchoolplanOpportunity(opp) }))
+          .filter(opp => filterByDmuTags([opp], dmuTarget).length > 0)
+      : opportunities)
+    : [];
+
+  if (filtered.length === 0) {
     return null;
   }
 
   return (
     <View>
       <Text style={styles.sectionTitle}>Schoolplan Kansen</Text>
-      {opportunities.map((opp, i) => (
+      {filtered.map((opp, i) => (
         <View
           key={i}
           style={{
