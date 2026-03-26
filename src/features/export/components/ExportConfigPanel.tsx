@@ -1,8 +1,13 @@
 import type { ExportConfig, ReportType, DmuTarget } from '../types';
+import type { DmuAssumption } from '@/data/dmu-assumptions';
+import { AssumptionsEditor } from './AssumptionsEditor';
 
 interface ExportConfigPanelProps {
   config: ExportConfig;
   onChange: (config: ExportConfig) => void;
+  assumptions?: DmuAssumption[];
+  defaultAssumptions?: DmuAssumption[];
+  onAssumptionsChange?: (assumptions: DmuAssumption[]) => void;
 }
 
 const REPORT_OPTIONS: { value: ReportType; label: string; description: string }[] = [
@@ -46,7 +51,13 @@ const DMU_OPTIONS: { value: DmuTarget; label: string; description: string }[] = 
   },
 ];
 
-export function ExportConfigPanel({ config, onChange }: ExportConfigPanelProps) {
+export function ExportConfigPanel({
+  config,
+  onChange,
+  assumptions,
+  defaultAssumptions,
+  onAssumptionsChange,
+}: ExportConfigPanelProps) {
   return (
     <div className="space-y-6">
       {/* Report type */}
@@ -108,6 +119,18 @@ export function ExportConfigPanel({ config, onChange }: ExportConfigPanelProps) 
           ))}
         </div>
       </div>
+
+      {/* Assumptions editor */}
+      {assumptions && defaultAssumptions && onAssumptionsChange && (
+        <div>
+          <h3 className="text-sm font-semibold text-neutral-700 mb-3">Aannames</h3>
+          <AssumptionsEditor
+            assumptions={assumptions}
+            defaults={defaultAssumptions}
+            onChange={onAssumptionsChange}
+          />
+        </div>
+      )}
     </div>
   );
 }
