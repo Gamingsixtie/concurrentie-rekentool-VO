@@ -148,6 +148,87 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
+  // Cover page
+  coverPage: {
+    padding: 40,
+    fontFamily: 'Helvetica',
+    backgroundColor: CITO_COLORS.white,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  coverLogo: {
+    maxWidth: 180,
+    maxHeight: 60,
+    marginBottom: 48,
+  },
+  coverLogoText: {
+    fontSize: 36,
+    fontFamily: 'Helvetica-Bold',
+    color: CITO_COLORS.primary,
+    marginBottom: 48,
+  },
+  coverTitle: {
+    fontSize: 18,
+    fontFamily: 'Helvetica-Bold',
+    color: CITO_COLORS.primary,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  coverSchoolName: {
+    fontSize: 28,
+    fontFamily: 'Helvetica-Bold',
+    color: CITO_COLORS.textDark,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  coverAccentLine: {
+    width: 60,
+    height: 3,
+    backgroundColor: CITO_COLORS.accent,
+    marginBottom: 24,
+  },
+  coverMeta: {
+    fontSize: 12,
+    color: CITO_COLORS.textMuted,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  coverConfidential: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Oblique',
+    color: CITO_COLORS.accent,
+    marginTop: 32,
+    textAlign: 'center',
+  },
+  // Intro section
+  introText: {
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    lineHeight: 1.6,
+    color: CITO_COLORS.textDark,
+    marginBottom: 16,
+  },
+  // Product info section
+  advantageTitle: {
+    fontSize: 10,
+    fontFamily: 'Helvetica-Bold',
+    color: CITO_COLORS.textDark,
+    marginBottom: 2,
+  },
+  advantageContext: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: CITO_COLORS.textDark,
+    lineHeight: 1.5,
+    marginBottom: 2,
+  },
+  advantageSource: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Oblique',
+    color: CITO_COLORS.textMuted,
+    marginBottom: 8,
+  },
   // Disclaimer
   disclaimer: {
     marginTop: 24,
