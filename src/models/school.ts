@@ -27,11 +27,15 @@ export type CurrentProvider =
   | 'overig'     // andere aanbieder (naam invulbaar)
   | 'geen';      // module niet in gebruik
 
+export type PriceAdjustmentType = 'prijswijziging' | 'korting';
+
 export interface ModuleCurrentSetup {
   moduleId: string;
   currentProvider: CurrentProvider;
   pricePerStudent: number | null; // null = gebruik publicatieprijs van die aanbieder
   customProviderName?: string;    // alleen bij currentProvider === 'overig'
+  priceAdjustmentType?: PriceAdjustmentType; // 'prijswijziging' = absoluut tarief, 'korting' = % op publicatieprijs
+  discountPercentage?: number;    // 0-100, alleen bij priceAdjustmentType === 'korting'
 }
 
 export type Scenario = 'A' | 'B' | 'C';
