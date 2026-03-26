@@ -343,7 +343,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 18. Contactbeheer Upgrade & Klantreis-inzicht | v2.0 | 0/0 | Not Started | — |
 | 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/3 | Complete    | 2026-03-25 |
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
-| 21. DMU-Export Upgrade | v2.0 | 1/3 | In Progress|  |
+| 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 0/0 | Not Started | — |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
@@ -440,11 +440,11 @@ Plans:
   3. Geëxtraheerde tekst uit het schoolplan (indien beschikbaar) wordt automatisch verwerkt in het rapport als onderbouwing
   4. Cito-bronmateriaal en productinformatie wordt gebruikt om de voordelen inhoudelijk te onderbouwen — niet alleen cijfers maar ook context
   5. Rapporten zijn exporteerbaar als PDF met Cito-huisstijl en zijn direct bruikbaar in klantgesprekken
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 21-01-PLAN.md — Data foundation: dmu-tag-filter utility, dmu-assumptions data, cito-product-info data, export types uitbreiding
-- [ ] 21-02-PLAN.md — PDF componenten: CoverPage, IntroSection, ProductInfoSection, SchoolplanSection DMU-filtering, ReportDocument wiring
+- [x] 21-02-PLAN.md — PDF componenten: CoverPage, IntroSection, ProductInfoSection, SchoolplanSection DMU-filtering, ReportDocument wiring
 - [ ] 21-03-PLAN.md — UI layer: AssumptionsEditor, ExportConfigPanel uitbreiding, ExportTab state wiring, ExportPreview uitbreiding
 
 ### Phase 22: Architectuur, Testen & Productie-readiness

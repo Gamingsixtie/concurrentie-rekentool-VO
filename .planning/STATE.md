@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 21-01-PLAN.md
-last_updated: "2026-03-26T22:14:39.831Z"
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-03-26T22:18:45.289Z"
 progress:
   total_phases: 22
   completed_phases: 16
   total_plans: 59
-  completed_plans: 53
+  completed_plans: 54
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 21 (dmu-export-upgrade) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -134,6 +134,7 @@ Recent decisions affecting current work:
 - [Phase 19]: ConfirmDialog as reusable component with configurable cancel labels
 - [Phase 19]: Always-visible inline input replaces toggle-based add form in kanban
 - [Phase 21]: Keyword stem betrouwba for Dutch inflection matching in DMU tag filter
+- [Phase 21]: Text fallback for Cito logo on cover page; IntroSection renders first assumption introText; ProductInfoSection before disclaimer; generiek skips DMU filtering
 
 ### Roadmap Evolution
 
@@ -155,6 +156,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-26T22:14:39.827Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-03-26T22:18:45.285Z
+Stopped at: Completed 21-02-PLAN.md
 Resume file: None
