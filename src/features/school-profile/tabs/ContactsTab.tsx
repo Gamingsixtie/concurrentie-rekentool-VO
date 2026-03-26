@@ -201,6 +201,10 @@ export default function ContactsTab() {
             schoolId: activeSchoolId,
             data: { contactId, date, content: '[Gesproken]', tags: ['quick-mark'] },
           })}
+          onCreateConversation={data => createConversation.mutate({
+            schoolId: activeSchoolId,
+            data,
+          })}
         />
       )}
 

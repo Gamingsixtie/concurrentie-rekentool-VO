@@ -21,6 +21,7 @@ interface SchoolYearPlannerProps {
   onUpdateTouchpoint: (touchpointId: string, data: Partial<Pick<PlannedTouchpoint, 'note' | 'status' | 'monthIndex'>>) => void;
   onDeleteTouchpoint: (touchpointId: string) => void;
   onQuickMark?: (contactId: string, date: string) => void;
+  onCreateConversation?: (data: { contactId: string; date: string; content: string; tags: string[] }) => void;
 }
 
 interface MonthActivity {
@@ -95,6 +96,7 @@ interface CellPopoverProps {
   contactName: string;
   monthLabel: string;
   activity: MonthActivity | undefined;
+  conversations: Conversation[];
   touchpoints: PlannedTouchpoint[];
   onCreateTouchpoint: (note: string) => void;
   onCompleteTouchpoint: (id: string) => void;
@@ -102,13 +104,15 @@ interface CellPopoverProps {
   onDeleteTouchpoint: (id: string) => void;
   onUpdateNote: (id: string, note: string) => void;
   onMoveTouchpoint: (id: string, newMonthIdx: number) => void;
+  onCreateConversation?: (content: string) => void;
   onClose: () => void;
 }
 
 function CellPopover({
   contactName,
   monthLabel,
-  activity,
+  activity: _activity,
+  conversations,
   touchpoints,
   onCreateTouchpoint,
   onCompleteTouchpoint,
@@ -116,9 +120,11 @@ function CellPopover({
   onDeleteTouchpoint,
   onUpdateNote,
   onMoveTouchpoint,
+  onCreateConversation,
   onClose,
 }: CellPopoverProps) {
   const [newNote, setNewNote] = useState('');
+  const [newConvContent, setNewConvContent] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editNote, setEditNote] = useState('');
   const [movingId, setMovingId] = useState<string | null>(null);
@@ -143,10 +149,21 @@ function CellPopover({
     setNewNote('');
   };
 
+  const handleSubmitConversation = () => {
+    if (!onCreateConversation || !newConvContent.trim()) return;
+    onCreateConversation(newConvContent.trim());
+    setNewConvContent('');
+  };
+
+  // Sort conversations newest first
+  const sortedConversations = [...conversations].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
   return (
     <div
       ref={ref}
-      className="absolute z-50 bg-white rounded-lg border border-neutral-200 shadow-lg p-4 min-w-[280px] max-w-[340px]"
+      className="absolute z-50 bg-white rounded-lg border border-neutral-200 shadow-lg p-4 min-w-[300px] max-w-[380px]"
       style={{ top: '100%', left: '50%', transform: 'translateX(-50%)' }}
     >
       {/* Header */}
@@ -166,10 +183,56 @@ function CellPopover({
         </button>
       </div>
 
-      {/* Existing conversations info */}
-      {activity && activity.conversationCount > 0 && (
-        <div className="mb-3 px-2 py-1.5 bg-cito-primary/5 rounded text-[12px] text-cito-primary font-medium">
-          {activity.conversationCount} gesprek{activity.conversationCount !== 1 ? 'ken' : ''} gevoerd
+      {/* Existing conversations - show actual content */}
+      {sortedConversations.length > 0 && (
+        <div className="mb-3 space-y-1.5">
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Contactmomenten</p>
+          {sortedConversations.map(conv => (
+            <div key={conv.id} className="px-2 py-1.5 bg-cito-primary/5 rounded-lg">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[11px] text-neutral-400">
+                  {new Date(conv.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}
+                </span>
+                {conv.tags.includes('quick-mark') && (
+                  <span className="text-[10px] text-emerald-600 bg-emerald-50 rounded px-1">snel</span>
+                )}
+              </div>
+              <p className="text-[12px] text-neutral-700 leading-snug">
+                {conv.content === '[Gesproken]' ? (
+                  <span className="italic text-neutral-400">Gesproken (geen notitie)</span>
+                ) : (
+                  conv.content.length > 80 ? conv.content.slice(0, 80) + '...' : conv.content
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Register contact moment */}
+      {onCreateConversation && (
+        <div className="mb-3 border-t border-neutral-100 pt-3">
+          <p className="text-[11px] font-semibold text-cito-primary uppercase tracking-wide mb-2">
+            Contactmoment vastleggen
+          </p>
+          <div className="space-y-2">
+            <textarea
+              value={newConvContent}
+              onChange={e => setNewConvContent(e.target.value)}
+              placeholder="bv. Offerte besproken, akkoord op VAS-module"
+              className="w-full text-[13px] px-2 py-1.5 border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cito-primary resize-none"
+              rows={2}
+              onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleSubmitConversation(); }}
+            />
+            <button
+              type="button"
+              onClick={handleSubmitConversation}
+              disabled={!newConvContent.trim()}
+              className="w-full text-[13px] px-3 py-1.5 bg-cito-primary text-white rounded-lg hover:bg-cito-primary/90 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Vastleggen
+            </button>
+          </div>
         </div>
       )}
 
@@ -345,6 +408,7 @@ interface MobileMonthCardProps {
   contacts: Contact[];
   activityMap: ContactMonthMap;
   touchpointMap: Map<string, PlannedTouchpoint[]>;
+  conversationMap: Map<string, Conversation[]>;
   onCellClick: (contactId: string, monthIdx: number) => void;
   popoverTarget: PopoverTarget;
   onCreateTouchpoint: (contactId: string, note: string) => void;
@@ -355,6 +419,7 @@ interface MobileMonthCardProps {
   onMoveTouchpoint: (id: string, newMonthIdx: number) => void;
   onClosePopover: () => void;
   onQuickMark?: (contactId: string, monthIdx: number) => void;
+  onCreateConversation?: (contactId: string, content: string) => void;
 }
 
 function MobileMonthCard({
@@ -365,6 +430,7 @@ function MobileMonthCard({
   contacts,
   activityMap,
   touchpointMap,
+  conversationMap,
   onCellClick,
   popoverTarget,
   onCreateTouchpoint,
@@ -375,6 +441,7 @@ function MobileMonthCard({
   onMoveTouchpoint,
   onClosePopover,
   onQuickMark,
+  onCreateConversation,
 }: MobileMonthCardProps) {
   // Contacts with any activity, touchpoints, or that are relevant this month
   const relevantContacts = contacts.filter(c => {
@@ -466,6 +533,7 @@ function MobileMonthCard({
                     contactName={contact.name}
                     monthLabel={`${SCHOOL_YEAR_MONTH_LABELS[month]} ${year}`}
                     activity={activity}
+                    conversations={conversationMap.get(contact.id) ?? []}
                     touchpoints={tps}
                     onCreateTouchpoint={note => onCreateTouchpoint(contact.id, note)}
                     onCompleteTouchpoint={onCompleteTouchpoint}
@@ -473,6 +541,7 @@ function MobileMonthCard({
                     onDeleteTouchpoint={onDeleteTouchpoint}
                     onUpdateNote={onUpdateNote}
                     onMoveTouchpoint={onMoveTouchpoint}
+                    onCreateConversation={onCreateConversation ? content => onCreateConversation(contact.id, content) : undefined}
                     onClose={onClosePopover}
                   />
                 )}
@@ -520,6 +589,7 @@ export default function SchoolYearPlanner({
   onUpdateTouchpoint,
   onDeleteTouchpoint,
   onQuickMark,
+  onCreateConversation,
 }: SchoolYearPlannerProps) {
   const currentStartYear = getSchoolYearStartYear(new Date());
   const [selectedStartYear, setSelectedStartYear] = useState(currentStartYear);
@@ -565,6 +635,23 @@ export default function SchoolYearPlanner({
     }
     return map;
   }, [plannedTouchpoints, selectedStartYear]);
+
+  // Build conversations map: contactId -> monthIdx -> Conversation[]
+  const conversationsByContactMonth = useMemo(() => {
+    const map = new Map<string, Map<number, Conversation[]>>();
+    for (const conv of conversations) {
+      const date = new Date(conv.date);
+      const convStartYear = getSchoolYearStartYear(date);
+      if (convStartYear !== selectedStartYear) continue;
+
+      const monthIdx = getSchoolYearMonthIndex(date);
+      if (!map.has(conv.contactId)) map.set(conv.contactId, new Map());
+      const contactMap = map.get(conv.contactId)!;
+      if (!contactMap.has(monthIdx)) contactMap.set(monthIdx, []);
+      contactMap.get(monthIdx)!.push(conv);
+    }
+    return map;
+  }, [conversations, selectedStartYear]);
 
   // Sort contacts by DMU position order
   const sortedContacts = useMemo(
@@ -632,6 +719,13 @@ export default function SchoolYearPlanner({
   const handleMoveTouchpoint = (id: string, newMonthIdx: number) => {
     onUpdateTouchpoint(id, { monthIndex: newMonthIdx });
     setPopoverTarget(null);
+  };
+
+  const handleCreateConversation = (contactId: string, monthIdx: number, content: string) => {
+    if (!onCreateConversation) return;
+    const { year, jsMonth } = schoolYearMonthToCalendar(monthIdx, selectedStartYear);
+    const date = `${year}-${String(jsMonth + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+    onCreateConversation({ contactId, date, content, tags: [] });
   };
 
   if (contacts.length === 0) {
@@ -820,6 +914,7 @@ export default function SchoolYearPlanner({
                             contactName={contact.name}
                             monthLabel={`${SCHOOL_YEAR_MONTH_LABELS[month]} ${schoolYearMonthToCalendar(idx, selectedStartYear).year}`}
                             activity={activity}
+                            conversations={conversationsByContactMonth.get(contact.id)?.get(idx) ?? []}
                             touchpoints={touchpoints}
                             onCreateTouchpoint={note => handleCreateTouchpoint(contact.id, note)}
                             onCompleteTouchpoint={handleCompleteTouchpoint}
@@ -827,6 +922,7 @@ export default function SchoolYearPlanner({
                             onDeleteTouchpoint={onDeleteTouchpoint}
                             onUpdateNote={handleUpdateNote}
                             onMoveTouchpoint={handleMoveTouchpoint}
+                            onCreateConversation={onCreateConversation ? content => handleCreateConversation(contact.id, idx, content) : undefined}
                             onClose={() => setPopoverTarget(null)}
                           />
                         )}
@@ -903,9 +999,12 @@ export default function SchoolYearPlanner({
 
           // Build touchpoint map for this month (contactId -> touchpoints[])
           const monthTouchpointMap = new Map<string, PlannedTouchpoint[]>();
+          const monthConversationMap = new Map<string, Conversation[]>();
           for (const contact of sortedContacts) {
             const tps = touchpointsByContactMonth.get(contact.id)?.get(idx);
             if (tps) monthTouchpointMap.set(contact.id, tps);
+            const convs = conversationsByContactMonth.get(contact.id)?.get(idx);
+            if (convs) monthConversationMap.set(contact.id, convs);
           }
 
           return (
@@ -918,6 +1017,7 @@ export default function SchoolYearPlanner({
               contacts={sortedContacts}
               activityMap={activityMap}
               touchpointMap={monthTouchpointMap}
+              conversationMap={monthConversationMap}
               onCellClick={handleCellClick}
               popoverTarget={popoverTarget}
               onCreateTouchpoint={(contactId, note) => {
@@ -935,6 +1035,7 @@ export default function SchoolYearPlanner({
               onMoveTouchpoint={handleMoveTouchpoint}
               onClosePopover={() => setPopoverTarget(null)}
               onQuickMark={onQuickMark ? (contactId, monthIdx) => handleQuickMark(contactId, monthIdx) : undefined}
+              onCreateConversation={onCreateConversation ? (contactId, content) => handleCreateConversation(contactId, idx, content) : undefined}
             />
           );
         })}
