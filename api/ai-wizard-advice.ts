@@ -92,6 +92,7 @@ interface AdviceRequest {
     dmuFocus: string;
     bijzonderheden: string;
   };
+  schoolplanOpportunities?: Array<{ moduleId: string; kans: string }>;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -147,7 +148,10 @@ ${body.differentiators.map((d) => {
 
 ${body.extraContext.korting ? `KORTING/DEAL INFO: ${body.extraContext.korting}` : ''}
 ${body.extraContext.dmuFocus ? `DMU-FOCUS: ${body.extraContext.dmuFocus}` : ''}
-${body.extraContext.bijzonderheden ? `BIJZONDERHEDEN: ${body.extraContext.bijzonderheden}` : ''}`;
+${body.extraContext.bijzonderheden ? `BIJZONDERHEDEN: ${body.extraContext.bijzonderheden}` : ''}
+${body.schoolplanOpportunities && body.schoolplanOpportunities.length > 0
+  ? `\nSCHOOLPLAN KANSEN:\n${body.schoolplanOpportunities.map((o) => `- ${o.moduleId}: ${o.kans}`).join('\n')}`
+  : ''}`;
 
     const stream = getAnthropic().messages.stream({
       model: 'claude-sonnet-4-6',

@@ -251,8 +251,11 @@ function ComparisonTimeSavings() {
         CITO_MIGRATION_PRICES,
         migrationTimeSavingOverrides,
         migrationHourlyRate,
+        0,
+        customTimeSavingTasks,
+        hiddenTimeSavingTaskIds,
       ),
-    [selectedModules, studentCounts, migrationTimeSavingOverrides, migrationHourlyRate],
+    [selectedModules, studentCounts, migrationTimeSavingOverrides, migrationHourlyRate, customTimeSavingTasks, hiddenTimeSavingTaskIds],
   );
 
   const handleHourlyRateChange = (rate: number | null) => {

@@ -12,6 +12,8 @@ import type { DiaPackageResult } from '../../models/dia-packages';
 import type { CitoBundleType, ContractPeriod } from '../../data/cito-bundles';
 import { getCitoBundle, getCitoFactorForBundle } from '../../data/cito-bundles';
 import { applyContractPeriodToResult } from '../../engine/cito-bundles';
+import { buildOverridePricesFromSetups } from '../../engine/build-override-prices';
+import { DEFAULT_PRICES } from '../../data/default-prices';
 
 export interface PriceOverride {
   moduleId: string;
@@ -28,6 +30,8 @@ interface PriceComparisonState {
   // Migration (Scenario B)
   migrationHourlyRate: number | null;
   migrationTimeSavingOverrides: Record<string, number | null>;
+  customTimeSavingTasks: import('../../models/migration').TimeSavingTask[];
+  hiddenTimeSavingTaskIds: string[];
 
   // Mode toggle (per D-19, D-20)
   isInternalMode: boolean;
@@ -74,6 +78,14 @@ interface PriceComparisonState {
   hydrate: (record: SchoolRecord) => void;
   setMigrationHourlyRate: (rate: number | null) => void;
   setMigrationTimeSavingOverride: (taskId: string, hours: number | null) => void;
+  addCustomTimeSavingTask: (task: import('../../models/migration').TimeSavingTask) => void;
+  removeCustomTimeSavingTask: (taskId: string) => void;
+  updateCustomTimeSavingTask: (taskId: string, updates: Partial<import('../../models/migration').TimeSavingTask>) => void;
+  toggleHiddenTimeSavingTask: (taskId: string) => void;
+
+  // Products tab price dirty tracking
+  productPricesDirty: boolean;
+  markProductPricesDirty: () => void;
 }
 
 /**
@@ -128,6 +140,8 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     hasPendingChanges: false,
     migrationHourlyRate: null,
     migrationTimeSavingOverrides: {},
+    customTimeSavingTasks: [],
+    hiddenTimeSavingTaskIds: [],
 
     // New state defaults
     isInternalMode: true,
@@ -140,6 +154,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     visibleProviders: ['cito'] as ProviderKey[],
     competitorModuleIds: null,
     forceDiaPackageId: undefined,
+    productPricesDirty: false,
 
     setVariantConfig: (competitorModuleIds, forceDiaPackageId) => {
       set({ competitorModuleIds, forceDiaPackageId });
@@ -180,16 +195,22 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       get().initialize();
     },
 
+    markProductPricesDirty: () => set({ productPricesDirty: true }),
+
     initialize: () => {
       const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
+
+      // Build override prices from Products tab edits
+      const setupOverrides = buildOverridePricesFromSetups(moduleSetups, DEFAULT_PRICES);
 
       // Step 1: Engine computes everything (provider calculators + breakdown + DIA packages)
       const annualResult = calculateComparison(selectedModules, studentCounts, {
         citoBundleType: state.citoBundleType,
         competitorModuleIds: state.competitorModuleIds ?? undefined,
         forceDiaPackageId: state.forceDiaPackageId,
+        overridePrices: setupOverrides.size > 0 ? setupOverrides : undefined,
       });
 
       // Step 2: Contract period multipliers (post-processing, stays in store)
@@ -215,23 +236,28 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         result,
         diaPackageResult,
         visibleProviders,
+        productPricesDirty: false,
         ...extended,
       });
     },
 
     applyWizardConfig: (config) => {
-      const { selectedModules, studentCounts } =
+      const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
 
       // Determine effective bundle type
       const citoBundleType = config.citoBundleType ?? state.citoBundleType;
 
+      // Build override prices from Products tab edits
+      const setupOverrides = buildOverridePricesFromSetups(moduleSetups, DEFAULT_PRICES);
+
       // Compute result with wizard config applied
       const annualResult = calculateComparison(selectedModules, studentCounts, {
         citoBundleType,
         competitorModuleIds: config.competitorModuleIds ?? undefined,
         forceDiaPackageId: config.forceDiaPackageId,
+        overridePrices: setupOverrides.size > 0 ? setupOverrides : undefined,
       });
 
       const bundle = getCitoBundle(citoBundleType);
@@ -288,17 +314,20 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
     },
 
     recalculate: () => {
-      const { selectedModules, studentCounts } =
+      const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
 
-      // Merge overrides into a Map for the engine
+      // Base: Products tab overrides
+      const setupOverrides = buildOverridePricesFromSetups(moduleSetups, DEFAULT_PRICES);
+
+      // Layer comparison-view overrides on top (take priority)
       const allOverrides = [...state.appliedOverrides, ...state.draftOverrides];
       const deduped = new Map<string, PriceOverride>();
       for (const o of allOverrides) {
         deduped.set(`${o.moduleId}:${o.provider}`, o);
       }
-      const overridePrices = new Map<string, number>();
+      const overridePrices = new Map(setupOverrides);
       for (const [key, o] of deduped) {
         overridePrices.set(key, o.amount);
       }
@@ -345,6 +374,8 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         appliedOverrides: record.appliedOverrides,
         migrationHourlyRate: record.migrationHourlyRate ?? null,
         migrationTimeSavingOverrides: record.migrationTimeSavingOverrides,
+        customTimeSavingTasks: record.customTimeSavingTasks ?? [],
+        hiddenTimeSavingTaskIds: record.hiddenTimeSavingTaskIds ?? [],
         draftOverrides: [],
         hasPendingChanges: false,
         visibleProviders,
@@ -361,6 +392,30 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
           ...state.migrationTimeSavingOverrides,
           [taskId]: hours,
         },
+      })),
+
+    addCustomTimeSavingTask: (task) =>
+      set((state) => ({
+        customTimeSavingTasks: [...state.customTimeSavingTasks, task],
+      })),
+
+    removeCustomTimeSavingTask: (taskId) =>
+      set((state) => ({
+        customTimeSavingTasks: state.customTimeSavingTasks.filter((t) => t.id !== taskId),
+      })),
+
+    updateCustomTimeSavingTask: (taskId, updates) =>
+      set((state) => ({
+        customTimeSavingTasks: state.customTimeSavingTasks.map((t) =>
+          t.id === taskId ? { ...t, ...updates } : t,
+        ),
+      })),
+
+    toggleHiddenTimeSavingTask: (taskId) =>
+      set((state) => ({
+        hiddenTimeSavingTaskIds: state.hiddenTimeSavingTaskIds.includes(taskId)
+          ? state.hiddenTimeSavingTaskIds.filter((id) => id !== taskId)
+          : [...state.hiddenTimeSavingTaskIds, taskId],
       })),
   }),
 );

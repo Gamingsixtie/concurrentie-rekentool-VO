@@ -181,6 +181,7 @@ export function WizardStep3Advice() {
           differentiators,
           providerData,
           extraContext,
+          schoolplanOpportunities.length > 0 ? schoolplanOpportunities : undefined,
         );
 
         for await (const chunk of stream) {
@@ -258,8 +259,6 @@ export function WizardStep3Advice() {
           </>
         ) : hasGenerated ? (
           'Opnieuw genereren'
-        ) : isRetentionScenario ? (
-          'Genereer retentie-advies'
         ) : (
           'Genereer advies'
         )}

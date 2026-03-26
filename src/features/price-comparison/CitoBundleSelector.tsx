@@ -2,6 +2,7 @@ import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { CITO_BUNDLES } from '../../data/cito-bundles';
 import type { ContractPeriod } from '../../data/cito-bundles';
+import { MODULE_CATALOG } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
 
 export function CitoBundleSelector({ compact = false }: { compact?: boolean }) {
@@ -63,6 +64,7 @@ export function CitoBundleSelector({ compact = false }: { compact?: boolean }) {
             isActive={bundleType === bundle.id}
             available={available}
             missingModules={missingModules}
+            includedModuleIds={bundle.includedModuleIds}
             onClick={() => available && setBundleType(bundle.id)}
           />
         ))}
@@ -80,6 +82,7 @@ function BundleOption({
   isActive,
   available,
   missingModules,
+  includedModuleIds,
   onClick,
 }: {
   name: string;
@@ -90,6 +93,7 @@ function BundleOption({
   isActive: boolean;
   available: boolean;
   missingModules: string[];
+  includedModuleIds: string[];
   onClick: () => void;
 }) {
   const showContractPrice = contractPeriod !== 'annual' && contractPrice !== null && price !== null && contractPrice !== price;
@@ -124,6 +128,24 @@ function BundleOption({
             </span>
           )}
         </div>
+      )}
+      {includedModuleIds.length > 0 && (
+        <ul className="mt-1.5 space-y-0.5">
+          {includedModuleIds.map((id) => {
+            const mod = MODULE_CATALOG.find((m) => m.id === id);
+            return (
+              <li key={id} className="flex items-center gap-1 text-[11px] text-neutral-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 flex-shrink-0" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                {mod?.name ?? id}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {includedModuleIds.length === 0 && (
+        <span className="text-[11px] text-neutral-400 mt-1.5">Losse prijs per module</span>
       )}
       {!available && missingModules.length > 0 && (
         <span className="text-[10px] text-neutral-400 mt-1">

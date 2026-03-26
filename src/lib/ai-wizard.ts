@@ -153,6 +153,7 @@ export async function* streamWizardAdvice(
     citoBundles: Array<{ id: string; name: string; pricePerStudent: number | null; includedModuleIds: string[] }>;
   },
   extraContext: ExtraContextInput,
+  schoolplanOpportunities?: Array<{ moduleId: string; kans: string }>,
 ): AsyncGenerator<string> {
   const headers = await getAuthHeaders();
 
@@ -165,10 +166,19 @@ export async function* streamWizardAdvice(
       differentiators,
       providerData,
       extraContext,
+      schoolplanOpportunities,
     }),
   });
 
-  if (!response.ok) throw new Error('AI-advies genereren mislukt.');
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    const statusMsg = response.status === 401
+      ? 'Niet ingelogd. Log opnieuw in om AI-functies te gebruiken.'
+      : response.status === 500
+        ? `Serverfout: ${errorBody || 'Onbekende fout bij AI-advies genereren'}`
+        : `AI-advies genereren mislukt (${response.status}): ${errorBody}`;
+    throw new Error(statusMsg);
+  }
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();

@@ -74,6 +74,8 @@ export function calculateMigration(
   timeSavingOverrides: Record<string, number | null>,
   hourlyRate: number | null,
   switchingCosts: number = 0,
+  customTasks: TimeSavingTask[] = [],
+  hiddenTaskIds: string[] = [],
 ): MigrationResult {
   const totalStudents = getTotalStudents(studentCounts);
 
@@ -106,7 +108,10 @@ export function calculateMigration(
 
   const effectiveRate = hourlyRate ?? 0;
 
-  const timeSavings: TimeSavingResult[] = TIME_SAVING_TASKS.map((task) => {
+  const hiddenSet = new Set(hiddenTaskIds);
+  const allTasks = [...TIME_SAVING_TASKS, ...customTasks].filter((t) => !hiddenSet.has(t.id));
+
+  const timeSavings: TimeSavingResult[] = allTasks.map((task) => {
     // If the task has an explicit override, use it (including null = skipped).
     // If no override exists for this task, use the default hours.
     const hasOverride = task.id in timeSavingOverrides;

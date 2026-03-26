@@ -77,6 +77,8 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
   const initialize = usePriceComparisonStore((s) => s.initialize);
   const migrationHourlyRate = usePriceComparisonStore((s) => s.migrationHourlyRate);
   const migrationTimeSavingOverrides = usePriceComparisonStore((s) => s.migrationTimeSavingOverrides);
+  const customTimeSavingTasks = usePriceComparisonStore((s) => s.customTimeSavingTasks);
+  const hiddenTimeSavingTaskIds = usePriceComparisonStore((s) => s.hiddenTimeSavingTaskIds);
   const setMigrationHourlyRate = usePriceComparisonStore((s) => s.setMigrationHourlyRate);
   const setMigrationTimeSavingOverride = usePriceComparisonStore((s) => s.setMigrationTimeSavingOverride);
 
@@ -94,6 +96,9 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
     CITO_MIGRATION_PRICES,
     migrationTimeSavingOverrides,
     migrationHourlyRate,
+    0,
+    customTimeSavingTasks,
+    hiddenTimeSavingTaskIds,
   );
 
   const totalStudents = getTotalStudents(studentCounts);

@@ -227,7 +227,12 @@ export async function* streamAdvice(
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) throw new Error('AI-advies genereren mislukt.');
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    throw new Error(response.status === 401
+      ? 'Niet ingelogd. Log opnieuw in om AI-functies te gebruiken.'
+      : `AI-advies genereren mislukt (${response.status}): ${errorBody || 'Onbekende fout'}`);
+  }
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -271,7 +276,12 @@ export async function* streamRetentionAdvice(
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) throw new Error('Retentie-advies genereren mislukt.');
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    throw new Error(response.status === 401
+      ? 'Niet ingelogd. Log opnieuw in om AI-functies te gebruiken.'
+      : `Advies genereren mislukt (${response.status}): ${errorBody || 'Onbekende fout'}`);
+  }
 
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();

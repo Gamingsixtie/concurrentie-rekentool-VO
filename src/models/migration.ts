@@ -5,7 +5,7 @@
  */
 
 export interface TimeSavingTask {
-  id: 'rechten' | 'resetten' | 'inloggen' | 'planning' | 'koppeling';
+  id: string;
   label: string;
   oldMethodLabel: string;
   newMethodLabel: string;
