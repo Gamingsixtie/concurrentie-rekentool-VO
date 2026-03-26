@@ -36,3 +36,12 @@ export interface ExtractedVariantResult {
   selections: ModuleVariantSelection[];
   uitleg: string; // AI explanation of what was/wasn't found
 }
+
+/** Context from wizard advice that feeds into the analysis panel for progressive enrichment */
+export interface WizardNarrativeContext {
+  samenvatting: string;
+  matchingUitleg: string;
+  aanbevolenCitoBundel: string;
+  adviezen: Array<{ titel: string; tekst: string; type: string }>;
+  dmuStrategie?: Record<string, string>;
+}

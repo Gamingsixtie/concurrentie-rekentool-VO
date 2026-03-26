@@ -17,6 +17,7 @@ import type { MigrationResult } from '../engine/migration';
 import type { SchoolplanAnalysisRow } from '@/db/types';
 import { MIGRATION_MODULE_BENEFITS } from '../models/migration';
 import { TIME_SAVING_TASKS } from '../models/migration';
+import type { WizardNarrativeContext } from '../features/price-comparison/wizard/types';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ export function buildAnalysisPayload(
   currentVsProposedResult?: CurrentVsProposedResult | null,
   schoolplanData?: SchoolplanAnalysisRow | null,
   migrationResult?: MigrationResult | null,
+  wizardContext?: WizardNarrativeContext | null,
 ) {
   const totalStudents = getTotalStudents(studentCounts);
 
@@ -204,6 +206,14 @@ export function buildAnalysisPayload(
     };
   }
 
+  // Build wizard advice context for progressive enrichment
+  const wizardAdviceContext = wizardContext ? {
+    samenvatting: wizardContext.samenvatting,
+    matchingUitleg: wizardContext.matchingUitleg,
+    aanbevolenCitoBundel: wizardContext.aanbevolenCitoBundel,
+    adviesTitels: wizardContext.adviezen.map((a) => a.titel),
+  } : null;
+
   return {
     mode,
     comparisonData: {
@@ -231,6 +241,7 @@ export function buildAnalysisPayload(
     schoolplanData: schoolplanPayload ?? null,
     migrationData: migrationPayload,
     timeSavingsData: timeSavingsPayload,
+    wizardAdviceContext,
   };
 }
 
@@ -247,6 +258,7 @@ export async function generateAnalysis(
   currentVsProposedResult?: CurrentVsProposedResult | null,
   schoolplanData?: SchoolplanAnalysisRow | null,
   migrationResult?: MigrationResult | null,
+  wizardContext?: WizardNarrativeContext | null,
 ): Promise<AnalysisResult> {
   const headers = await getAuthHeaders();
   const payload = buildAnalysisPayload(
@@ -260,6 +272,7 @@ export async function generateAnalysis(
     currentVsProposedResult,
     schoolplanData,
     migrationResult,
+    wizardContext,
   );
 
   const response = await fetch('/api/ai-analysis', {

@@ -12,6 +12,7 @@ import type {
   ExtraContextInput,
   WizardScenario,
   ExtractedVariantResult,
+  WizardNarrativeContext,
 } from './types';
 import { usePriceComparisonStore } from '../store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
@@ -41,6 +42,9 @@ interface WizardState {
   // Scenario
   scenario: WizardScenario;
 
+  // Narrative context for progressive AI enrichment (not persisted)
+  wizardNarrativeContext: WizardNarrativeContext | null;
+
   // Actions
   setStep: (step: 0 | 1 | 2) => void;
   setConversationNotes: (notes: string) => void;
@@ -55,6 +59,7 @@ interface WizardState {
   setStreamingText: (text: string) => void;
   appendStreamingText: (text: string) => void;
   setScenario: (s: WizardScenario) => void;
+  setWizardNarrativeContext: (ctx: WizardNarrativeContext | null) => void;
   collapse: () => void;
   expand: () => void;
   resetWizard: () => void;
@@ -91,6 +96,8 @@ export const useWizardStore = create<WizardState>()(
 
       scenario: 'deels-concurrent',
 
+      wizardNarrativeContext: null,
+
       // Actions
       setStep: (step) => set({ currentStep: step }),
 
@@ -126,6 +133,8 @@ export const useWizardStore = create<WizardState>()(
         set((state) => ({ streamingText: state.streamingText + text })),
 
       setScenario: (s) => set({ scenario: s }),
+
+      setWizardNarrativeContext: (ctx) => set({ wizardNarrativeContext: ctx }),
 
       collapse: () => set({ isCollapsed: true }),
 

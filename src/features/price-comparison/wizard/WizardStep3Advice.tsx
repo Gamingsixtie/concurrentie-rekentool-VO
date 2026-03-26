@@ -193,6 +193,15 @@ export function WizardStep3Advice() {
       const parsed = parseAdviceFromText(fullText);
       setAiAdvice(parsed);
 
+      // Store narrative context for progressive enrichment by AnalysisPanel
+      useWizardStore.getState().setWizardNarrativeContext({
+        samenvatting: parsed.samenvatting,
+        matchingUitleg: parsed.matchingUitleg,
+        aanbevolenCitoBundel: parsed.aanbevolenCitoBundel,
+        adviezen: parsed.adviezen,
+        dmuStrategie: parsed.dmuStrategie,
+      });
+
       // Initialize adjustedSelections from variantSelections
       setAdjustedSelections([...variantSelections]);
     } catch (err) {

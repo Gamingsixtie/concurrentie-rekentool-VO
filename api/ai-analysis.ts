@@ -63,6 +63,13 @@ SCHOOLPLAN (indien beschikbaar):
 - Gebruik citaten uit het schoolplan om de koppeling te onderbouwen.
 - Benoem waar concurrenten tekortschieten op deze thema's (competitorVulnerabilities).
 
+EERDERE AI-ADVIES CONTEXT (indien beschikbaar):
+Als wizardAdviceContext is meegegeven, bouw dan voort op het eerder gegenereerde vergelijkingsadvies:
+- Verwijs naar de aanbevolen bundel en leg uit waarom de diepgaande analyse dit bevestigt of nuanceert
+- Verdiep de adviespunten die in het vergelijkingsadvies zijn gegeven
+- Vermijd herhaling van dezelfde argumenten — voeg nieuwe inzichten toe
+- Het geheel moet lezen als één samenhangend rapport, niet als twee losse analyses
+
 REGELS:
 - schoolplanKoppeling is een lege array als er geen schoolplandata is meegegeven
 - Maximaal 5-8 gespreksargumenten, gerangschikt van sterkst naar zwakst
@@ -248,6 +255,12 @@ interface AnalysisRequest {
     description: string;
     benefit: string;
   }>;
+  wizardAdviceContext?: {
+    samenvatting: string;
+    matchingUitleg: string;
+    aanbevolenCitoBundel: string;
+    adviesTitels: string[];
+  } | null;
 }
 
 function buildUserMessage(body: AnalysisRequest): string {
@@ -375,6 +388,18 @@ ${body.schoolplanData.opportunities.map((opp) => {
     }).join('\n')}`);
   } else {
     parts.push('\nSCHOOLPLAN: Niet beschikbaar. Laat schoolplanKoppeling leeg.');
+  }
+
+  // Wizard advice context for progressive enrichment
+  if (body.wizardAdviceContext) {
+    const ctx = body.wizardAdviceContext;
+    parts.push(`\nEERDERE AI-ADVIES CONTEXT (hierop voortbouwen):
+- Samenvatting: ${ctx.samenvatting}
+- Bundel-advies: ${ctx.aanbevolenCitoBundel}
+- Matching-redenatie: ${ctx.matchingUitleg || 'n.v.t.'}
+- Kernpunten: ${(ctx.adviesTitels || []).join('; ')}
+
+INSTRUCTIE: Bouw voort op het vergelijkingsadvies hierboven. Vermijd herhaling van dezelfde argumenten. Verdiep de punten. Het geheel moet lezen als één samenhangend rapport.`);
   }
 
   return parts.join('\n');

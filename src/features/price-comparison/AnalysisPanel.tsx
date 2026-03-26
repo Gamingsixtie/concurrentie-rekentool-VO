@@ -4,6 +4,7 @@ import { usePriceComparisonStore } from './store';
 import { getTotalStudents } from '../../engine/price-comparison';
 import { generateAnalysis, type AnalysisResult, type ConcurrentDetail, type PrijsAnalyseItem } from '../../lib/ai-analysis';
 import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
+import { useWizardStore } from './wizard/wizard-store';
 import type { CurrentVsProposedResult } from '../../engine/current-vs-proposed';
 import type { MigrationResult } from '../../engine/migration';
 
@@ -107,6 +108,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
 
   const { data: schoolplanData } = useSchoolplanAnalysis(schoolId ?? '');
+  const wizardNarrativeContext = useWizardStore((s) => s.wizardNarrativeContext);
 
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -133,6 +135,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
         currentVsProposedResult,
         schoolplanData,
         migrationResult,
+        wizardNarrativeContext,
       );
       setAnalysis(analysisResult);
     } catch (err) {
@@ -140,7 +143,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
     } finally {
       setLoading(false);
     }
-  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult]);
+  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext]);
 
   if (!result || selectedModules.length === 0 || totalStudents === 0) {
     return null;

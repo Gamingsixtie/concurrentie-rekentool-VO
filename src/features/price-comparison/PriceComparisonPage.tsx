@@ -14,9 +14,8 @@ import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { DiaBundleSelector } from './DiaBundleSelector';
-import { ComparisonWizard } from './wizard/ComparisonWizard';
-import { AnalysisPanel } from './AnalysisPanel';
 import { SchoolplanBanner } from './SchoolplanBanner';
+import { AiAdviesSection } from './ai-advies/AiAdviesSection';
 import { ZachteKantPanel } from './ZachteKantPanel';
 
 interface PriceComparisonPageProps {
@@ -228,6 +227,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   const initialize = usePriceComparisonStore((s) => s.initialize);
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
+  const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
 
   const [chartHighlight] = useState<string | null>(null);
 
@@ -332,13 +332,8 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         <ComparisonChart result={result} onBarClick={handleBarClick} />
       </div>
 
-      {/* AI Vergelijkingswizard */}
-      <div className="mb-8">
-        <ComparisonWizard />
-      </div>
-
-      {/* AI Concurrentieanalyse */}
-      <AnalysisPanel mode="comparison" />
+      {/* AI Advies — samenhangend verhaal (schoolplan → wizard → analyse) */}
+      <AiAdviesSection schoolId={activeSchoolId ?? undefined} />
 
       {/* Tabel met detail-panels */}
       <div className="mb-8">
