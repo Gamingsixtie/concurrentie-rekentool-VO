@@ -64,6 +64,10 @@ interface WizardState {
   expand: () => void;
   resetWizard: () => void;
 
+  // Auto-trigger analysis after wizard apply
+  shouldAutoTriggerAnalysis: boolean;
+  clearAutoTrigger: () => void;
+
   // D-24: Explicit apply to table
   applyToTable: () => void;
 }
@@ -97,6 +101,8 @@ export const useWizardStore = create<WizardState>()(
       scenario: 'deels-concurrent',
 
       wizardNarrativeContext: null,
+
+      shouldAutoTriggerAnalysis: false,
 
       // Actions
       setStep: (step) => set({ currentStep: step }),
@@ -135,6 +141,8 @@ export const useWizardStore = create<WizardState>()(
       setScenario: (s) => set({ scenario: s }),
 
       setWizardNarrativeContext: (ctx) => set({ wizardNarrativeContext: ctx }),
+
+      clearAutoTrigger: () => set({ shouldAutoTriggerAnalysis: false }),
 
       collapse: () => set({ isCollapsed: true }),
 
@@ -215,10 +223,11 @@ export const useWizardStore = create<WizardState>()(
           schoolStore.setScenario('C');
         }
 
-        // Mark wizard as completed and collapsed
+        // Mark wizard as completed and collapsed, trigger analysis
         set({
           isCollapsed: true,
           hasCompletedOnce: true,
+          shouldAutoTriggerAnalysis: true,
         });
       },
     }),

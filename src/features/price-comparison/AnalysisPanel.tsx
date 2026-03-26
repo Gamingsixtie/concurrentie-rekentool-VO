@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { usePriceComparisonStore } from './store';
 import { getTotalStudents } from '../../engine/price-comparison';
@@ -109,6 +109,8 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
 
   const { data: schoolplanData } = useSchoolplanAnalysis(schoolId ?? '');
   const wizardNarrativeContext = useWizardStore((s) => s.wizardNarrativeContext);
+  const shouldAutoTriggerAnalysis = useWizardStore((s) => s.shouldAutoTriggerAnalysis);
+  const clearAutoTrigger = useWizardStore((s) => s.clearAutoTrigger);
 
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -144,6 +146,14 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
       setLoading(false);
     }
   }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext]);
+
+  // Auto-trigger after wizard applies to table
+  useEffect(() => {
+    if (shouldAutoTriggerAnalysis && result && !loading) {
+      clearAutoTrigger();
+      handleGenerate();
+    }
+  }, [shouldAutoTriggerAnalysis, result, loading, clearAutoTrigger, handleGenerate]);
 
   if (!result || selectedModules.length === 0 || totalStudents === 0) {
     return null;
