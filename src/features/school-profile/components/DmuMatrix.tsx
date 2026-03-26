@@ -140,6 +140,9 @@ export default function DmuMatrix({
               <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ minWidth: 120 }}>
                 Naam
               </th>
+              <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ minWidth: 100 }}>
+                Functie
+              </th>
               <th className="text-left text-[14px] font-semibold text-neutral-700 px-4 py-3" style={{ width: 48 }}>
                 Nr.
               </th>
@@ -172,6 +175,9 @@ export default function DmuMatrix({
                 <tr key={contact.id} className="border-t border-neutral-100">
                   <td className="px-4 py-3 text-[14px] text-neutral-700">
                     {contact.name}
+                  </td>
+                  <td className="px-4 py-3 text-[14px] text-neutral-500">
+                    {contact.jobTitle || <span className="text-neutral-300">--</span>}
                   </td>
                   <td className="px-4 py-3 text-[14px] text-neutral-700">
                     {order ? formatOrdinal(order) : <span className="text-neutral-400">--</span>}
@@ -235,7 +241,7 @@ export default function DmuMatrix({
 
           return (
             <div key={contact.id} className="bg-white border border-neutral-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1">
                 <span className="text-[14px] font-semibold text-neutral-900">
                   {contact.name}
                 </span>
@@ -246,6 +252,9 @@ export default function DmuMatrix({
                   </span>
                 )}
               </div>
+              {contact.jobTitle && (
+                <p className="text-[13px] text-neutral-500 mb-2">{contact.jobTitle}</p>
+              )}
               <div className="space-y-2 text-[14px]">
                 <div className="flex items-center justify-between">
                   <span className="text-neutral-500">Bevoegdheid</span>

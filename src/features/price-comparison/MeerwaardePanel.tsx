@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { usePriceComparisonStore } from './store';
-import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { MODULE_DIFFERENTIATORS } from '@/data/differentiators';
 import { MODULE_CATALOG } from '@/models/modules';
 import { PROVIDER_LABELS } from '@/engine/price-comparison';
@@ -133,79 +132,6 @@ function DifferentiatorsSection() {
   );
 }
 
-// ─── Schoolplan koppeling ───────────────────────────────────────────────────
-
-function SchoolplanKoppelingSection({
-  schoolId,
-}: {
-  schoolId: string;
-}) {
-  const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
-  const { data: analysis } = useSchoolplanAnalysis(schoolId);
-
-  if (!analysis || analysis.analysis_status !== 'complete') return null;
-
-  // Filter opportunities to selected modules
-  const relevantOpportunities = analysis.opportunities.filter((opp) =>
-    selectedModules.includes(opp.moduleId),
-  );
-
-  if (relevantOpportunities.length === 0) return null;
-
-  return (
-    <div>
-      <h3 className="text-sm font-semibold text-neutral-900 mb-3">
-        Koppeling met schoolplan
-      </h3>
-      <div className="space-y-2">
-        {relevantOpportunities.map((opp, i) => (
-          <div
-            key={i}
-            className="rounded-lg border border-purple-200 bg-purple-50/50 p-4"
-          >
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-sm font-semibold text-purple-800">
-                {opp.theme}
-              </span>
-              <span className="text-xs bg-purple-100 text-purple-600 font-medium px-2 py-0.5 rounded-full">
-                {opp.citoProduct}
-              </span>
-            </div>
-            <p className="text-sm text-neutral-700 leading-relaxed">
-              {opp.explanation}
-            </p>
-            {opp.quote && (
-              <blockquote className="mt-2 pl-3 border-l-2 border-purple-300 text-xs text-purple-700 italic">
-                &ldquo;{opp.quote}&rdquo;
-              </blockquote>
-            )}
-            {opp.conversationTip && (
-              <div className="mt-2 flex items-start gap-1.5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-purple-500 flex-shrink-0 mt-0.5"
-                  aria-hidden="true"
-                >
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                <span className="text-xs text-purple-600">
-                  {opp.conversationTip}
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Tijdwinst sectie (interactief) ─────────────────────────────────────────
 
 function ComparisonTimeSavings() {
@@ -293,9 +219,7 @@ function ComparisonTimeSavings() {
 
 // ─── Main panel ─────────────────────────────────────────────────────────────
 
-export function ZachteKantPanel() {
-  const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
-
+export function MeerwaardePanel() {
   return (
     <div className="bg-white rounded-xl border border-neutral-200 p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -321,7 +245,7 @@ export function ZachteKantPanel() {
             Meerwaarde — meer dan alleen prijs
           </h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Kwalitatieve voordelen, schoolplan-koppeling en tijdwinst
+            Kwalitatieve voordelen en tijdwinst
           </p>
         </div>
       </div>
@@ -330,12 +254,7 @@ export function ZachteKantPanel() {
         {/* 1. Cito voordelen per module */}
         <DifferentiatorsSection />
 
-        {/* 2. Schoolplan koppeling (if available) */}
-        {activeSchoolId && (
-          <SchoolplanKoppelingSection schoolId={activeSchoolId} />
-        )}
-
-        {/* 3. Invulbare tijdwinst */}
+        {/* 2. Invulbare tijdwinst */}
         <div>
           <h3 className="text-sm font-semibold text-neutral-900 mb-3">
             Tijdwinst Cito-platform

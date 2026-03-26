@@ -24,7 +24,6 @@ export default function ProductsTab() {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const moduleSetups = useSchoolProfileStore((s) => s.moduleSetups);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
-  const scenario = useSchoolProfileStore((s) => s.scenario);
   const setModuleSetups = useSchoolProfileStore((s) => s.setModuleSetups);
   const productPricesDirty = usePriceComparisonStore((s) => s.productPricesDirty);
   const markProductPricesDirty = usePriceComparisonStore((s) => s.markProductPricesDirty);
@@ -96,16 +95,9 @@ export default function ProductsTab() {
     // Recalculate with new prices
     usePriceComparisonStore.getState().initialize();
 
-    // Navigate to appropriate result page
-    const hasCurrentSituation = state.moduleSetups.some((s) => s.currentProvider !== 'geen');
-    if (scenario === 'B') {
-      navigate({ to: '/scholen/$slug/migratie', params: { slug } });
-    } else if (hasCurrentSituation) {
-      navigate({ to: '/scholen/$slug/huidig-vs-cito', params: { slug } });
-    } else {
-      navigate({ to: '/scholen/$slug/vergelijking', params: { slug } });
-    }
-  }, [scenario, slug, navigate, queryClient]);
+    // Navigate to Vergelijking tab — ComparisonTab handles scenario routing internally
+    navigate({ to: '/scholen/$slug/vergelijking', params: { slug } });
+  }, [slug, navigate, queryClient]);
 
   // Fetch school-specific prices from school_prices table
   const { data: schoolPrices = [] } = useSchoolPrices(activeSchoolId ?? '');

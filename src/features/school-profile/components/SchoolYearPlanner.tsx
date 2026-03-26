@@ -163,6 +163,7 @@ function DetailPanel({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[15px] font-semibold text-neutral-900">{contact.name}</span>
+              {contact.jobTitle && <span className="text-[13px] text-neutral-500">{contact.jobTitle}</span>}
               <DMUBadge position={contact.dmuPosition} />
               <EngagementBadge status={contact.engagementStatus} size="sm" />
             </div>

@@ -58,6 +58,11 @@ export default function ContactCard({
             )}
           </div>
 
+          {/* Job title */}
+          {contact.jobTitle && (
+            <p className="text-[14px] text-neutral-500 mt-0.5">{contact.jobTitle}</p>
+          )}
+
           {/* DMU + Authority */}
           <div className="flex items-center gap-2 mt-1">
             <DMUBadge position={contact.dmuPosition} />

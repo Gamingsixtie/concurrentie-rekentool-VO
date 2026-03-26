@@ -16,7 +16,7 @@ import { CitoBundleSelector } from './CitoBundleSelector';
 import { DiaBundleSelector } from './DiaBundleSelector';
 import { SchoolplanBanner } from './SchoolplanBanner';
 import { AiAdviesSection } from './ai-advies/AiAdviesSection';
-import { ZachteKantPanel } from './ZachteKantPanel';
+import { MeerwaardePanel } from './MeerwaardePanel';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -342,7 +342,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
 
       {/* Zachte kant: voordelen, schoolplan-koppeling, tijdwinst */}
       <div className="mb-8">
-        <ZachteKantPanel />
+        <MeerwaardePanel />
       </div>
 
       {/* Disclaimer + bronvermelding */}
