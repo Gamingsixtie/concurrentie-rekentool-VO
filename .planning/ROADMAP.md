@@ -433,17 +433,19 @@ Plans:
 ### Phase 21: DMU-Export Upgrade
 **Goal**: Het export-tabblad wordt uitgebreid met intelligente, DMU-gerichte rapporten. Op basis van generieke aannames per DMU-rol (coördinator, MT/directie, finance) worden de relevante verschillen en voordelen getoond. De rapporten bevatten geëxtraheerde tekst uit het schoolplan en Cito-bronmateriaal, zodat elk rapport inhoudelijk onderbouwd is voor de specifieke beslisser.
 **Depends on**: Phase 20 (waarde-tab verwijderd), Phase 14 (schoolplan-analyse)
-**Requirements**: TBD
+**Requirements**: SC-1, SC-2, SC-3, SC-4, SC-5
 **Success Criteria** (what must be TRUE):
   1. Gebruiker kan per DMU-rol (coördinator, MT/directie, finance) een rapport genereren op basis van generieke aannames over wat die rol belangrijk vindt
   2. Rapporten tonen de relevante verschillen per rapporttype — coördinator ziet tijdwinst en dagelijks gebruik, MT ziet strategische waarde, finance ziet euro's en meerjarenprojectie
   3. Geëxtraheerde tekst uit het schoolplan (indien beschikbaar) wordt automatisch verwerkt in het rapport als onderbouwing
   4. Cito-bronmateriaal en productinformatie wordt gebruikt om de voordelen inhoudelijk te onderbouwen — niet alleen cijfers maar ook context
   5. Rapporten zijn exporteerbaar als PDF met Cito-huisstijl en zijn direct bruikbaar in klantgesprekken
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 21-01-PLAN.md — Data foundation: dmu-tag-filter utility, dmu-assumptions data, cito-product-info data, export types uitbreiding
+- [ ] 21-02-PLAN.md — PDF componenten: CoverPage, IntroSection, ProductInfoSection, SchoolplanSection DMU-filtering, ReportDocument wiring
+- [ ] 21-03-PLAN.md — UI layer: AssumptionsEditor, ExportConfigPanel uitbreiding, ExportTab state wiring, ExportPreview uitbreiding
 
 ### Phase 22: Architectuur, Testen & Productie-readiness
 **Goal**: Complete architectuurreview en uitgebreide testsuite (unit, integratie, end-to-end) zodat het prototype productiegereed is. Alle engines, views, flows en koppelingen worden systematisch getest volgens gangbare development-methodieken. Dit is de afsluitende kwaliteitsfase die het prototype klaar maakt voor dagelijks gebruik door het team.
