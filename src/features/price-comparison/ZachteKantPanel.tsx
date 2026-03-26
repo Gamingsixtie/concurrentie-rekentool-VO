@@ -218,11 +218,29 @@ function ComparisonTimeSavings() {
   const migrationTimeSavingOverrides = usePriceComparisonStore(
     (s) => s.migrationTimeSavingOverrides,
   );
+  const customTimeSavingTasks = usePriceComparisonStore(
+    (s) => s.customTimeSavingTasks,
+  );
+  const hiddenTimeSavingTaskIds = usePriceComparisonStore(
+    (s) => s.hiddenTimeSavingTaskIds,
+  );
   const setMigrationHourlyRate = usePriceComparisonStore(
     (s) => s.setMigrationHourlyRate,
   );
   const setMigrationTimeSavingOverride = usePriceComparisonStore(
     (s) => s.setMigrationTimeSavingOverride,
+  );
+  const addCustomTimeSavingTask = usePriceComparisonStore(
+    (s) => s.addCustomTimeSavingTask,
+  );
+  const removeCustomTimeSavingTask = usePriceComparisonStore(
+    (s) => s.removeCustomTimeSavingTask,
+  );
+  const updateCustomTimeSavingTask = usePriceComparisonStore(
+    (s) => s.updateCustomTimeSavingTask,
+  );
+  const toggleHiddenTimeSavingTask = usePriceComparisonStore(
+    (s) => s.toggleHiddenTimeSavingTask,
   );
 
   const migrationResult = useMemo(
@@ -258,8 +276,14 @@ function ComparisonTimeSavings() {
       totalHours={migrationResult.totalTimeSavingsHours}
       totalValue={migrationResult.totalTimeSavingsValue}
       hourlyRate={migrationHourlyRate}
+      hiddenTaskIds={hiddenTimeSavingTaskIds}
+      customTasks={customTimeSavingTasks}
       onHoursChange={handleHoursChange}
       onHourlyRateChange={handleHourlyRateChange}
+      onAddCustomTask={addCustomTimeSavingTask}
+      onRemoveCustomTask={removeCustomTimeSavingTask}
+      onUpdateCustomTask={updateCustomTimeSavingTask}
+      onToggleHidden={toggleHiddenTimeSavingTask}
     />
   );
 }
