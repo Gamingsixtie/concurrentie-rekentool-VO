@@ -437,11 +437,11 @@ export function WizardStep3Advice() {
         </div>
       )}
 
-      {/* "Pas tabel aan" CTA */}
+      {/* "Pas tabel aan" CTA — enabled as soon as variant selections exist */}
       <button
         type="button"
         onClick={handleApplyToTable}
-        disabled={!aiAdvice}
+        disabled={activeSelections.length === 0 || isGeneratingAdvice}
         className="inline-flex items-center justify-center gap-2 bg-cito-accent text-white min-h-[44px] w-full rounded-lg font-semibold text-base hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       >
         Pas tabel aan

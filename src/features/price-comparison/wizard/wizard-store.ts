@@ -208,14 +208,24 @@ export const useWizardStore = create<WizardState>()(
         }
         // undefined = no DIA selections, engine uses default behavior
 
-        // Apply all wizard config atomically — single set() call avoids
-        // React 18 batching issues where intermediate states cause stale renders.
-        usePriceComparisonStore.getState().applyWizardConfig({
-          competitorModuleIds,
-          forceDiaPackageId,
-          citoBundleType: state.aiAdvice?.aanbevolenCitoBundel || undefined,
-          visibleProviders: providers,
-        });
+        try {
+          // Apply all wizard config atomically — single set() call avoids
+          // React 18 batching issues where intermediate states cause stale renders.
+          usePriceComparisonStore.getState().applyWizardConfig({
+            competitorModuleIds,
+            forceDiaPackageId,
+            citoBundleType: state.aiAdvice?.aanbevolenCitoBundel || undefined,
+            visibleProviders: providers,
+          });
+        } catch (err) {
+          // Fallback: re-initialize comparison store if applyWizardConfig fails
+          console.error('[wizard] applyWizardConfig failed, falling back to initialize:', err);
+          try {
+            usePriceComparisonStore.getState().initialize();
+          } catch {
+            // Ensure wizard always collapses even if both paths fail
+          }
+        }
 
         // Scenario C: write scenario to school profile store
         if (state.scenario === 'alles-oud-cito-concurrent') {

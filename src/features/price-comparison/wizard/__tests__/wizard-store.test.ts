@@ -2,19 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useWizardStore } from '../wizard-store';
 import type { ModuleVariantSelection } from '../types';
 
-// Mock the comparison store
-const mockSetVisibleProviders = vi.fn();
-const mockSetCitoBundleType = vi.fn();
+// Mock the comparison store with current applyWizardConfig API
+const mockApplyWizardConfig = vi.fn();
 const mockInitialize = vi.fn();
-const mockSetVariantConfig = vi.fn();
 
 vi.mock('../../store', () => ({
   usePriceComparisonStore: {
     getState: () => ({
-      setVisibleProviders: mockSetVisibleProviders,
-      setCitoBundleType: mockSetCitoBundleType,
+      applyWizardConfig: mockApplyWizardConfig,
       initialize: mockInitialize,
-      setVariantConfig: mockSetVariantConfig,
+    }),
+  },
+}));
+
+// Mock school profile store for scenario C tests
+vi.mock('@/features/school-profile/store', () => ({
+  useSchoolProfileStore: {
+    getState: () => ({
+      setScenario: vi.fn(),
     }),
   },
 }));
@@ -36,6 +41,8 @@ describe('useWizardStore', () => {
       isGeneratingAdvice: false,
       streamingText: '',
       scenario: 'deels-concurrent',
+      shouldAutoTriggerAnalysis: false,
+      wizardNarrativeContext: null,
     });
     vi.clearAllMocks();
   });
@@ -79,7 +86,7 @@ describe('useWizardStore', () => {
     expect(updated[1].confidence).toBe('high');
   });
 
-  it('applyToTable calls setVisibleProviders and setCitoBundleType on comparison store', () => {
+  it('applyToTable calls applyWizardConfig with correct providers and bundle', () => {
     useWizardStore.setState({
       variantSelections: [
         { moduleId: 'rekenwiskunde', provider: 'dia', variantId: 'pakket-ne', confidence: 'high' },
@@ -96,10 +103,15 @@ describe('useWizardStore', () => {
 
     useWizardStore.getState().applyToTable();
 
-    expect(mockSetVisibleProviders).toHaveBeenCalledWith(['cito', 'dia', 'jij']);
-    expect(mockSetCitoBundleType).toHaveBeenCalledWith('basis');
-    // initialize should NOT be called directly because setCitoBundleType triggers it
-    expect(mockInitialize).not.toHaveBeenCalled();
+    expect(mockApplyWizardConfig).toHaveBeenCalledWith({
+      competitorModuleIds: {
+        dia: ['rekenwiskunde'],
+        jij: ['engels'],
+      },
+      forceDiaPackageId: 'pakket-ne',
+      citoBundleType: 'basis',
+      visibleProviders: ['cito', 'dia', 'jij'],
+    });
   });
 
   it('applyToTable sets isCollapsed true and hasCompletedOnce true', () => {
@@ -115,9 +127,10 @@ describe('useWizardStore', () => {
 
     expect(useWizardStore.getState().isCollapsed).toBe(true);
     expect(useWizardStore.getState().hasCompletedOnce).toBe(true);
+    expect(useWizardStore.getState().shouldAutoTriggerAnalysis).toBe(true);
   });
 
-  it('applyToTable calls initialize when no AI bundle recommendation', () => {
+  it('applyToTable passes undefined citoBundleType when no AI advice', () => {
     useWizardStore.setState({
       variantSelections: [
         { moduleId: 'rekenwiskunde', provider: 'dia', variantId: null, confidence: 'unknown' },
@@ -128,7 +141,30 @@ describe('useWizardStore', () => {
 
     useWizardStore.getState().applyToTable();
 
-    expect(mockSetCitoBundleType).not.toHaveBeenCalled();
+    expect(mockApplyWizardConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ citoBundleType: undefined }),
+    );
+  });
+
+  it('applyToTable still collapses when applyWizardConfig throws', () => {
+    mockApplyWizardConfig.mockImplementation(() => {
+      throw new Error('calculation failed');
+    });
+
+    useWizardStore.setState({
+      variantSelections: [
+        { moduleId: 'rekenwiskunde', provider: 'dia', variantId: null, confidence: 'unknown' },
+      ],
+      adjustedSelections: [],
+      aiAdvice: null,
+    });
+
+    useWizardStore.getState().applyToTable();
+
+    // Should still collapse even after error
+    expect(useWizardStore.getState().isCollapsed).toBe(true);
+    expect(useWizardStore.getState().hasCompletedOnce).toBe(true);
+    // Fallback: initialize should be called
     expect(mockInitialize).toHaveBeenCalled();
   });
 
@@ -171,7 +207,11 @@ describe('useWizardStore', () => {
 
     useWizardStore.getState().applyToTable();
 
-    // Should use adjustedSelections (jij) instead of variantSelections (dia)
-    expect(mockSetVisibleProviders).toHaveBeenCalledWith(['cito', 'jij']);
+    expect(mockApplyWizardConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        visibleProviders: ['cito', 'jij'],
+        competitorModuleIds: { jij: ['rekenwiskunde'] },
+      }),
+    );
   });
 });
