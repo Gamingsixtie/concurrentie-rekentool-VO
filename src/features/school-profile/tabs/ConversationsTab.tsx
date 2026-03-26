@@ -16,6 +16,7 @@ export default function ConversationsTab() {
   const [conversationFormOpen, setConversationFormOpen] = useState(false);
   const [editingConversation, setEditingConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [actionError, setActionError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { slug } = useParams({ strict: false }) as { slug?: string };
 
@@ -73,10 +74,18 @@ export default function ConversationsTab() {
     const title = conv
       ? `Vervolg: ${conv.content.slice(0, 50)}${conv.content.length > 50 ? '...' : ''}`
       : 'Nieuwe actie';
-    createActionMutation.mutate({
-      schoolId: activeSchoolId,
-      data: { title, conversationId: conversationId ?? null },
-    });
+    setActionError(null);
+    createActionMutation.mutate(
+      {
+        schoolId: activeSchoolId,
+        data: { title, conversationId: conversationId ?? null },
+      },
+      {
+        onError: (err) => {
+          setActionError(err instanceof Error ? err.message : 'Actie aanmaken mislukt');
+        },
+      },
+    );
   };
 
   const handleDeleteConversation = (conversationId: string) => {
@@ -154,6 +163,12 @@ export default function ConversationsTab() {
             {actions.length}
           </span>
         </h2>
+
+        {actionError && (
+          <div className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+            {actionError}
+          </div>
+        )}
 
         <ActionKanban
           actions={actions}

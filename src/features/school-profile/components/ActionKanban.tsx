@@ -89,6 +89,7 @@ export default function ActionKanban({
 }: ActionKanbanProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [addingTitle, setAddingTitle] = useState('');
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const updateActionMutation = useUpdateAction();
   const createActionMutation = useCreateAction();
@@ -147,11 +148,15 @@ export default function ActionKanban({
 
   const handleAddAction = () => {
     if (!addingTitle.trim()) return;
+    setMutationError(null);
     createActionMutation.mutate(
       { schoolId, data: { title: addingTitle.trim() } },
       {
         onSuccess: () => {
           setAddingTitle('');
+        },
+        onError: (err) => {
+          setMutationError(err instanceof Error ? err.message : 'Actie aanmaken mislukt');
         },
       },
     );
@@ -170,6 +175,11 @@ export default function ActionKanban({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      {mutationError && (
+        <div className="mb-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {mutationError}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {COLUMNS.map(col => {
           const columnActions = actions.filter(a => a.status === col.status);
@@ -209,17 +219,27 @@ export default function ActionKanban({
 
                 {/* Always-visible inline input in todo column (D-09) */}
                 {col.status === 'todo' && (
-                  <input
-                    type="text"
-                    value={addingTitle}
-                    onChange={e => setAddingTitle(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') handleAddAction();
-                      if (e.key === 'Escape') setAddingTitle('');
-                    }}
-                    placeholder="Nieuwe actie..."
-                    className="h-[36px] w-full border border-neutral-200 rounded-lg px-2 text-[14px] text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary mt-1"
-                  />
+                  <div className="flex gap-1.5 mt-1">
+                    <input
+                      type="text"
+                      value={addingTitle}
+                      onChange={e => setAddingTitle(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleAddAction();
+                        if (e.key === 'Escape') setAddingTitle('');
+                      }}
+                      placeholder="Nieuwe actie..."
+                      className="h-[36px] flex-1 border border-neutral-200 rounded-lg px-2 text-[14px] text-neutral-700 focus:outline-none focus:ring-2 focus:ring-cito-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddAction}
+                      disabled={!addingTitle.trim() || createActionMutation.isPending}
+                      className="h-[36px] px-3 text-[14px] font-semibold bg-cito-accent text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                    >
+                      Toevoegen
+                    </button>
+                  </div>
                 )}
               </DroppableColumn>
             </div>
