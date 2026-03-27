@@ -47,14 +47,13 @@ Exceptions: none
 
 ## Typography
 
-Continued from prior phases. No changes.
+Continued from prior phases. Two weights only: 400 (regular) for body and labels, 600 (semibold) for headings and display.
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 14px | 400 (regular) | 1.5 |
-| Label | 14px | 500 (medium) | 1.4 |
+| Body / Label | 14px | 400 (regular) | 1.5 |
 | Heading | 20px | 600 (semibold) | 1.2 |
-| Display | 28px | 700 (bold) | 1.2 |
+| Display | 28px | 600 (semibold) | 1.2 |
 
 ---
 
@@ -93,7 +92,7 @@ Displayed when a React component tree crashes in production. Replaces the white 
 | Primary button | "Pagina vernieuwen" — calls `window.location.reload()` |
 | Secondary link | "Terug naar overzicht" — navigates to `/` |
 | Button style | Primary: `#003082` bg, white text, rounded-md, px-16 py-8. Hover: `#1a4a9e` |
-| Spacing | Icon to heading: 16px. Heading to body: 8px. Body to button: 24px. Button to link: 12px |
+| Spacing | Icon to heading: 16px. Heading to body: 8px. Body to button: 24px. Button to link: 16px |
 
 ---
 
