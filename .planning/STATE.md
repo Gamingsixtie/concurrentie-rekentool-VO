@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Phase complete — ready for verification
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-27T15:47:00.553Z"
+stopped_at: Completed Wave 1 (22-01, 22-02)
+last_updated: "2026-03-27T15:48:00.000Z"
 progress:
   total_phases: 22
   completed_phases: 16
@@ -137,6 +137,7 @@ Recent decisions affecting current work:
 - [Phase 21]: Text fallback for Cito logo on cover page; IntroSection renders first assumption introText; ProductInfoSection before disclaimer; generiek skips DMU filtering
 - [Phase 22]: Coverage thresholds at baseline (25/17/22/26) -- raise after coverage expansion in plans 03/04
 - [Phase 22]: 44 todo-only tests deleted -- critical paths already covered by 604 real tests
+- [Phase 22]: Sentry replay maskAllText: false for internal tool; source map upload conditional on SENTRY_AUTH_TOKEN; CSP allows sentry.io + supabase.co + anthropic.com
 
 ### Roadmap Evolution
 
@@ -158,6 +159,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-27T15:47:00.543Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-03-27T15:48:00.000Z
+Stopped at: Completed Wave 1 (22-01, 22-02)
 Resume file: None

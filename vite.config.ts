@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
 import { devApiPlugin } from './vite-api-plugin';
 
 export default defineConfig(({ mode }) => {
@@ -60,8 +61,14 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
+      ...(process.env.SENTRY_AUTH_TOKEN ? [sentryVitePlugin({
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+      })] : []),
     ],
     resolve: { alias: { '@': '/src' } },
+    build: { sourcemap: true },
     server: { port: 3000 },
   };
 });

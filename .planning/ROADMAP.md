@@ -462,7 +462,7 @@ Plans:
 
 Plans:
 - [x] 22-01-PLAN.md — Test environment fix: worktree exclusion, coverage config, fix failing tests, triage 158 todos
-- [ ] 22-02-PLAN.md — CI pipeline (GitHub Actions) + Sentry error tracking + security headers
+- [x] 22-02-PLAN.md — CI pipeline (GitHub Actions) + Sentry error tracking + security headers
 - [ ] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
 - [ ] 22-04-PLAN.md — Component tests (React Testing Library) voor wizard, forms, modals, navigation
 - [ ] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
