@@ -244,7 +244,7 @@ function parseAnalysisResponse(
 export async function POST(request: Request): Promise<Response> {
   try {
     const admin = getSupabaseAdmin();
-    const skipAuth = process.env.SKIP_AUTH === 'true' && process.env.VERCEL_ENV !== 'production';
+    const skipAuth = process.env.SKIP_AUTH === 'true';
 
     if (!skipAuth) {
       const authHeader = request.headers.get('Authorization');
