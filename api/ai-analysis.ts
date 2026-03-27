@@ -432,63 +432,75 @@ export async function POST(request: Request): Promise<Response> {
 
     const userMessage = buildUserMessage(body);
 
-    // Retry with exponential backoff for transient errors (529 overloaded, 429 rate limit)
-    const MAX_RETRIES = 3;
-    let lastError: unknown = null;
+    // Model cascade: try Sonnet first, fall back to Haiku if overloaded
+    const MODELS = ['claude-sonnet-4-6', 'claude-haiku-4-5-20251001'] as const;
 
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      if (attempt > 0) {
-        const delay = Math.pow(2, attempt) * 1000; // 2s, 4s
-        console.log(`[ai-analysis] Retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
-        await new Promise((r) => setTimeout(r, delay));
+    for (const model of MODELS) {
+      const MAX_RETRIES = model === MODELS[0] ? 2 : 3;
+      let lastError: unknown = null;
+
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+          const delay = Math.pow(2, attempt) * 1000;
+          console.log(`[ai-analysis] ${model} retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
+          await new Promise((r) => setTimeout(r, delay));
+        }
+
+        try {
+          const message = await getAnthropic().messages.create({
+            model,
+            max_tokens: 2048,
+            system: SYSTEM_PROMPT,
+            tools: [ANALYSIS_TOOL],
+            tool_choice: { type: 'tool', name: 'analyse_result' },
+            messages: [{ role: 'user', content: userMessage }],
+          });
+
+          const toolBlock = message.content.find(
+            (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+          );
+
+          if (!toolBlock) {
+            return new Response('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.', { status: 500 });
+          }
+
+          return new Response(JSON.stringify(toolBlock.input), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        } catch (err) {
+          lastError = err;
+          const errMsg = String(err);
+          const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
+            errMsg.includes('429') || errMsg.includes('rate') ||
+            errMsg.includes('500') || errMsg.includes('503');
+
+          if (isRetryable && attempt < MAX_RETRIES - 1) {
+            console.warn(`[ai-analysis] ${model} attempt ${attempt + 1} failed, retrying...`, errMsg);
+            continue;
+          }
+
+          // If retryable and we have a fallback model, try that
+          if (isRetryable && model !== MODELS[MODELS.length - 1]) {
+            console.warn(`[ai-analysis] ${model} overloaded, falling back to next model...`);
+            break;
+          }
+
+          break;
+        }
       }
 
-      try {
-        // Use tool_use for guaranteed structured output — no JSON parsing needed
-        const message = await getAnthropic().messages.create({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT,
-          tools: [ANALYSIS_TOOL],
-          tool_choice: { type: 'tool', name: 'analyse_result' },
-          messages: [{ role: 'user', content: userMessage }],
-        });
-
-        // Extract tool input from the response
-        const toolBlock = message.content.find(
-          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+      // If last model also failed, return error
+      if (model === MODELS[MODELS.length - 1]) {
+        console.error('[ai-analysis] All models failed:', lastError);
+        return new Response(
+          'AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw.',
+          { status: 503 },
         );
-
-        if (!toolBlock) {
-          return new Response('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.', { status: 500 });
-        }
-
-        return new Response(JSON.stringify(toolBlock.input), {
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } catch (err) {
-        lastError = err;
-        // Check if this is a retryable error (overloaded, rate limit)
-        const errMsg = String(err);
-        const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
-          errMsg.includes('429') || errMsg.includes('rate') ||
-          errMsg.includes('500') || errMsg.includes('503');
-
-        if (isRetryable && attempt < MAX_RETRIES - 1) {
-          console.warn(`[ai-analysis] Transient error on attempt ${attempt + 1}, retrying...`, errMsg);
-          continue;
-        }
-
-        // Non-retryable or final attempt — fall through to error response
-        break;
       }
     }
 
-    console.error('[ai-analysis] All attempts failed:', lastError);
-    return new Response(
-      'AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw.',
-      { status: 503 },
-    );
+    // Should not reach here, but just in case
+    return new Response('AI-analyse mislukt.', { status: 500 });
   } catch (err) {
     console.error('[ai-analysis] Error:', err);
     return new Response('Er is een fout opgetreden bij de AI-analyse. Probeer het opnieuw.', { status: 500 });
