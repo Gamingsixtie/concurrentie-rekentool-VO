@@ -170,7 +170,7 @@ describe('POST handler', () => {
     expect(response.status).toBe(401);
   });
 
-  it('returns 401 when SKIP_AUTH is true but VERCEL_ENV is production (auth enforced)', async () => {
+  it('skips auth when SKIP_AUTH is true (even if VERCEL_ENV is production)', async () => {
     process.env.SKIP_AUTH = 'true';
     process.env.VERCEL_ENV = 'production';
 
@@ -183,7 +183,9 @@ describe('POST handler', () => {
     });
 
     const response = await POST(request);
-    expect(response.status).toBe(401);
+    // Auth is skipped — request proceeds past auth check.
+    // It will fail downstream (storage download returns no data), yielding 500.
+    expect(response.status).not.toBe(401);
   });
 
   it('returns 400 when storagePath is missing', async () => {

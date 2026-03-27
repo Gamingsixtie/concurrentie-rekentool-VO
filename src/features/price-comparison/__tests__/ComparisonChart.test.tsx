@@ -90,7 +90,7 @@ describe('ComparisonChart', () => {
       '.recharts-responsive-container',
     );
     expect(responsiveContainer).toBeInTheDocument();
-    expect(responsiveContainer).toHaveStyle({ height: '320px' });
+    expect(responsiveContainer).toHaveStyle({ height: '340px' });
   });
 
   it('handles modules where provider cost is null without crashing', () => {
