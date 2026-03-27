@@ -449,12 +449,19 @@ export async function POST(request: Request): Promise<Response> {
         try {
           const message = await getAnthropic().messages.create({
             model,
-            max_tokens: 2048,
+            max_tokens: 4096,
             system: SYSTEM_PROMPT,
             tools: [ANALYSIS_TOOL],
             tool_choice: { type: 'tool', name: 'analyse_result' },
             messages: [{ role: 'user', content: userMessage }],
           });
+
+          // Check for truncated output — treat as retryable
+          if (message.stop_reason === 'max_tokens') {
+            console.warn(`[ai-analysis] ${model} output truncated (max_tokens), retrying...`);
+            lastError = new Error('Output truncated');
+            continue;
+          }
 
           const toolBlock = message.content.find(
             (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
@@ -464,7 +471,15 @@ export async function POST(request: Request): Promise<Response> {
             return new Response('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.', { status: 500 });
           }
 
-          return new Response(JSON.stringify(toolBlock.input), {
+          // Server-side validation: ensure required fields are present and correct type
+          const input = toolBlock.input as Record<string, unknown>;
+          if (typeof input.samenvatting !== 'string' || !Array.isArray(input.gespreksargumenten)) {
+            console.warn(`[ai-analysis] ${model} returned incomplete tool output, keys:`, Object.keys(input));
+            lastError = new Error('Incomplete tool output');
+            continue;
+          }
+
+          return new Response(JSON.stringify(input), {
             headers: { 'Content-Type': 'application/json' },
           });
         } catch (err) {

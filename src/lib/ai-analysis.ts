@@ -303,17 +303,18 @@ export async function generateAnalysis(
       const data = await response.json();
       console.log('[ai-analysis] Step 5: response parsed, keys:', Object.keys(data));
 
-      if (typeof data.samenvatting !== 'string' || !Array.isArray(data.gespreksargumenten)) {
+      if (typeof data.samenvatting !== 'string') {
+        console.error('[ai-analysis] Missing samenvatting, received keys:', Object.keys(data));
         throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
       }
 
       return {
         samenvatting: data.samenvatting,
-        prijsanalyse: data.prijsanalyse ?? [],
-        citoSterkePunten: data.citoSterkePunten ?? [],
-        concurrentieVergelijking: data.concurrentieVergelijking ?? [],
-        schoolplanKoppeling: data.schoolplanKoppeling?.length > 0 ? data.schoolplanKoppeling : null,
-        gespreksargumenten: data.gespreksargumenten.slice(0, 8),
+        prijsanalyse: Array.isArray(data.prijsanalyse) ? data.prijsanalyse : [],
+        citoSterkePunten: Array.isArray(data.citoSterkePunten) ? data.citoSterkePunten : [],
+        concurrentieVergelijking: Array.isArray(data.concurrentieVergelijking) ? data.concurrentieVergelijking : [],
+        schoolplanKoppeling: Array.isArray(data.schoolplanKoppeling) && data.schoolplanKoppeling.length > 0 ? data.schoolplanKoppeling : null,
+        gespreksargumenten: Array.isArray(data.gespreksargumenten) ? data.gespreksargumenten.slice(0, 8) : [],
       };
     }
 
