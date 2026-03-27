@@ -278,33 +278,62 @@ export async function generateAnalysis(
   );
   console.log('[ai-analysis] Step 3: fetch /api/ai-analysis, payload keys:', Object.keys(payload));
 
-  const response = await fetch('/api/ai-analysis', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-  });
+  const MAX_RETRIES = 3;
+  let lastError: Error | null = null;
 
-  console.log('[ai-analysis] Step 4: response status:', response.status);
-  if (!response.ok) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      // Exponential backoff: 2s, 4s
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`[ai-analysis] Retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+
+    const response = await fetch('/api/ai-analysis', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    console.log('[ai-analysis] Step 4: response status:', response.status);
+
+    if (response.ok) {
+      lastError = null;
+      // Fall through to parsing below
+      const data = await response.json();
+      console.log('[ai-analysis] Step 5: response parsed, keys:', Object.keys(data));
+
+      if (typeof data.samenvatting !== 'string' || !Array.isArray(data.gespreksargumenten)) {
+        throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
+      }
+
+      return {
+        samenvatting: data.samenvatting,
+        prijsanalyse: data.prijsanalyse ?? [],
+        citoSterkePunten: data.citoSterkePunten ?? [],
+        concurrentieVergelijking: data.concurrentieVergelijking ?? [],
+        schoolplanKoppeling: data.schoolplanKoppeling?.length > 0 ? data.schoolplanKoppeling : null,
+        gespreksargumenten: data.gespreksargumenten.slice(0, 8),
+      };
+    }
+
     const text = await response.text();
+
+    // Retry on transient errors (429 rate limit, 529 overloaded, 5xx server errors)
+    if (response.status === 429 || response.status === 529 || response.status >= 500) {
+      console.warn(`[ai-analysis] Transient error ${response.status}, will retry...`);
+      lastError = new Error(`${response.status}: ${text}`);
+      continue;
+    }
+
+    // Non-retryable error
     console.error('[ai-analysis] Server error:', text);
     throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
   }
 
-  const data = await response.json();
-  console.log('[ai-analysis] Step 5: response parsed, keys:', Object.keys(data));
-
-  // Validate essential fields
-  if (typeof data.samenvatting !== 'string' || !Array.isArray(data.gespreksargumenten)) {
-    throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
-  }
-
-  return {
-    samenvatting: data.samenvatting,
-    prijsanalyse: data.prijsanalyse ?? [],
-    citoSterkePunten: data.citoSterkePunten ?? [],
-    concurrentieVergelijking: data.concurrentieVergelijking ?? [],
-    schoolplanKoppeling: data.schoolplanKoppeling?.length > 0 ? data.schoolplanKoppeling : null,
-    gespreksargumenten: data.gespreksargumenten.slice(0, 8),
-  };
+  throw new Error(
+    lastError?.message
+      ? `AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw. (${lastError.message})`
+      : 'AI-analyse genereren mislukt na meerdere pogingen.',
+  );
 }
