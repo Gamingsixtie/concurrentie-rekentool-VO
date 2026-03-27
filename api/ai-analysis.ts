@@ -432,8 +432,9 @@ export async function POST(request: Request): Promise<Response> {
 
     const userMessage = buildUserMessage(body);
 
-    // Model cascade: try Sonnet first, fall back to Haiku if overloaded
-    const MODELS = ['claude-sonnet-4-6', 'claude-haiku-4-5-20251001'] as const;
+    // Model cascade: Haiku first (fast, fits within Vercel Hobby 60s timeout),
+    // fall back to Sonnet only if Haiku fails (requires Pro plan for longer duration)
+    const MODELS = ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'] as const;
 
     for (const model of MODELS) {
       const MAX_RETRIES = model === MODELS[0] ? 2 : 3;
