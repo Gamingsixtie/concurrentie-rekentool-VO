@@ -450,7 +450,7 @@ Plans:
 ### Phase 22: Architectuur, Testen & Productie-readiness
 **Goal**: Complete architectuurreview en uitgebreide testsuite (unit, integratie, end-to-end) zodat het prototype productiegereed is. Alle engines, views, flows en koppelingen worden systematisch getest volgens gangbare development-methodieken. Dit is de afsluitende kwaliteitsfase die het prototype klaar maakt voor dagelijks gebruik door het team.
 **Depends on**: Phase 21 (alle features compleet)
-**Requirements**: TBD
+**Requirements**: PROD-01, PROD-02, PROD-03, PROD-04, PROD-05, PROD-06
 **Success Criteria** (what must be TRUE):
   1. Alle engines hebben volledige unit tests met edge cases en foutscenario's — testcoverage >80%
   2. Integratietests verifiëren de koppelingen tussen modules: wizard → store → engine → UI → export
@@ -458,10 +458,15 @@ Plans:
   4. Architectuurreview bevestigt correcte scheiding van concerns, geen security-issues, en performante queries
   5. Alle bekende bugs en technische schuld uit eerdere fases zijn opgelost
   6. App is stabiel, performant en productiegereed voor dagelijks gebruik door het team
-**Plans:** 0 plans
+**Plans:** 6 plans
 
 Plans:
-- [ ] TBD
+- [ ] 22-01-PLAN.md — Test environment fix: worktree exclusion, coverage config, fix failing tests, triage 158 todos
+- [ ] 22-02-PLAN.md — CI pipeline (GitHub Actions) + Sentry error tracking + security headers
+- [ ] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
+- [ ] 22-04-PLAN.md — Component tests (React Testing Library) voor wizard, forms, modals, navigation
+- [ ] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
+- [ ] 22-06-PLAN.md — Security audit, performance profiling, coverage thresholds, productie-readiness checkpoint
 
 ## Backlog
 
