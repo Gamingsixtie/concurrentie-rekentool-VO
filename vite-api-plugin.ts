@@ -530,6 +530,7 @@ export function devApiPlugin(apiKey: string): Plugin {
       });
 
       // POST /api/ai-analysis — non-streaming, tool_use structured output
+      // Model cascade with retry + validation (mirrors api/ai-analysis.ts)
       server.middlewares.use('/api/ai-analysis', async (req, res, next) => {
         if (req.method !== 'POST') return next();
 
@@ -545,27 +546,92 @@ export function devApiPlugin(apiKey: string): Plugin {
           const userMessage = buildAnalysisUserMessage(body);
           console.log('[ai-analysis] User message length:', userMessage.length, 'chars');
 
-          const message = await anthropic.messages.create({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 4096,
-            system: ANALYSIS_SYSTEM_PROMPT,
-            tools: [ANALYSIS_TOOL],
-            tool_choice: { type: 'tool', name: 'analyse_result' },
-            messages: [{ role: 'user', content: userMessage }],
-          });
+          // Model cascade: try Sonnet first, fall back to Haiku if overloaded
+          const MODELS = ['claude-sonnet-4-6', 'claude-haiku-4-5-20251001'] as const;
 
-          const toolBlock = message.content.find(
-            (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
-          );
+          for (const model of MODELS) {
+            const MAX_RETRIES = model === MODELS[0] ? 2 : 3;
+            let lastError: unknown = null;
 
-          if (!toolBlock) {
-            res.statusCode = 500;
-            res.end('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.');
-            return;
+            for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+              if (attempt > 0) {
+                const delay = Math.pow(2, attempt) * 1000;
+                console.log(`[ai-analysis] ${model} retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
+                await new Promise((r) => setTimeout(r, delay));
+              }
+
+              try {
+                const message = await anthropic.messages.create({
+                  model,
+                  max_tokens: 4096,
+                  system: ANALYSIS_SYSTEM_PROMPT,
+                  tools: [ANALYSIS_TOOL],
+                  tool_choice: { type: 'tool', name: 'analyse_result' },
+                  messages: [{ role: 'user', content: userMessage }],
+                });
+
+                // Check for truncated output — treat as retryable
+                if (message.stop_reason === 'max_tokens') {
+                  console.warn(`[ai-analysis] ${model} output truncated (max_tokens), retrying...`);
+                  lastError = new Error('Output truncated');
+                  continue;
+                }
+
+                const toolBlock = message.content.find(
+                  (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
+                );
+
+                if (!toolBlock) {
+                  console.warn(`[ai-analysis] ${model} no tool_use block found`);
+                  lastError = new Error('No tool block');
+                  continue;
+                }
+
+                // Server-side validation: ensure required fields are present
+                const input = toolBlock.input as Record<string, unknown>;
+                if (typeof input.samenvatting !== 'string' || !Array.isArray(input.gespreksargumenten)) {
+                  console.warn(`[ai-analysis] ${model} returned incomplete tool output, keys:`, Object.keys(input));
+                  lastError = new Error('Incomplete tool output');
+                  continue;
+                }
+
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(input));
+                return;
+              } catch (err) {
+                lastError = err;
+                const errMsg = String(err);
+                const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
+                  errMsg.includes('429') || errMsg.includes('rate') ||
+                  errMsg.includes('500') || errMsg.includes('503');
+
+                if (isRetryable && attempt < MAX_RETRIES - 1) {
+                  console.warn(`[ai-analysis] ${model} attempt ${attempt + 1} failed, retrying...`, errMsg);
+                  continue;
+                }
+
+                // If retryable and we have a fallback model, try that
+                if (isRetryable && model !== MODELS[MODELS.length - 1]) {
+                  console.warn(`[ai-analysis] ${model} overloaded, falling back to next model...`);
+                  break;
+                }
+
+                break;
+              }
+            }
+
+            // If last model also failed, return error
+            if (model === MODELS[MODELS.length - 1]) {
+              console.error('[ai-analysis] All models failed:', lastError);
+              res.statusCode = 503;
+              res.end('AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw.');
+              return;
+            }
           }
 
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(toolBlock.input));
+          // Should not reach here
+          res.statusCode = 500;
+          res.end('AI-analyse mislukt.');
         } catch (err) {
           console.error('[ai-analysis] Error:', err);
           res.statusCode = 500;
