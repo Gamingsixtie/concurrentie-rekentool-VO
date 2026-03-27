@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to execute
-stopped_at: Phase 22 context gathered
-last_updated: "2026-03-27T09:04:17.927Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-03-27T15:42:01.462Z"
 progress:
   total_phases: 22
   completed_phases: 16
-  total_plans: 59
-  completed_plans: 54
+  total_plans: 65
+  completed_plans: 55
 ---
 
 # Project State
@@ -135,6 +135,7 @@ Recent decisions affecting current work:
 - [Phase 19]: Always-visible inline input replaces toggle-based add form in kanban
 - [Phase 21]: Keyword stem betrouwba for Dutch inflection matching in DMU tag filter
 - [Phase 21]: Text fallback for Cito logo on cover page; IntroSection renders first assumption introText; ProductInfoSection before disclaimer; generiek skips DMU filtering
+- [Phase 22]: Sentry replay maskAllText: false for internal tool; source map upload conditional on SENTRY_AUTH_TOKEN; CSP allows sentry.io + supabase.co + anthropic.com
 
 ### Roadmap Evolution
 
@@ -156,6 +157,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-27T09:04:17.919Z
-Stopped at: Phase 22 context gathered
-Resume file: .planning/phases/22-architectuur-testen-productie-readiness/22-CONTEXT.md
+Last session: 2026-03-27T15:41:56.768Z
+Stopped at: Completed 22-02-PLAN.md
+Resume file: None
