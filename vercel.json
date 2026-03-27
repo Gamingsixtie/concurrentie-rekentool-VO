@@ -7,6 +7,15 @@
     }
   ],
   "functions": {
+    "api/ai-analysis.ts": {
+      "maxDuration": 120
+    },
+    "api/ai-advice.ts": {
+      "maxDuration": 120
+    },
+    "api/ai-wizard-advice.ts": {
+      "maxDuration": 120
+    },
     "api/*": {
       "maxDuration": 60
     }
