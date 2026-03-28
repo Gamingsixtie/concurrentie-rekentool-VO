@@ -35,6 +35,17 @@ describe('usePriceComparisonStore', () => {
         draftOverrides: [],
         appliedOverrides: [],
         hasPendingChanges: false,
+        isInternalMode: true,
+        contractPeriod: 'annual',
+        citoBundleType: 'individual',
+        visibleProviders: ['cito'],
+        migrationHourlyRate: null,
+        migrationTimeSavingOverrides: {},
+        customTimeSavingTasks: [],
+        hiddenTimeSavingTaskIds: [],
+        competitorModuleIds: null,
+        forceDiaPackageId: undefined,
+        productPricesDirty: false,
       });
     });
   });
@@ -177,5 +188,163 @@ describe('usePriceComparisonStore', () => {
     const state = usePriceComparisonStore.getState();
     expect(state.draftOverrides).toEqual([]);
     expect(state.hasPendingChanges).toBe(true);
+  });
+
+  // ─── Visible providers ────────────────────────────────────────────────
+
+  it('setVisibleProviders always includes cito', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setVisibleProviders(['dia', 'jij']);
+    });
+
+    const state = usePriceComparisonStore.getState();
+    expect(state.visibleProviders).toContain('cito');
+    expect(state.visibleProviders).toContain('dia');
+    expect(state.visibleProviders).toContain('jij');
+  });
+
+  it('setVisibleProviders does not duplicate cito if already present', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setVisibleProviders(['cito', 'dia']);
+    });
+
+    const state = usePriceComparisonStore.getState();
+    expect(state.visibleProviders.filter(p => p === 'cito')).toHaveLength(1);
+  });
+
+  it('toggleProvider adds a new provider', () => {
+    act(() => {
+      usePriceComparisonStore.setState({ visibleProviders: ['cito', 'dia'] });
+    });
+    act(() => {
+      usePriceComparisonStore.getState().toggleProvider('jij');
+    });
+
+    expect(usePriceComparisonStore.getState().visibleProviders).toContain('jij');
+  });
+
+  it('toggleProvider removes an existing provider (but not below 2)', () => {
+    act(() => {
+      usePriceComparisonStore.setState({ visibleProviders: ['cito', 'dia', 'jij'] });
+    });
+    act(() => {
+      usePriceComparisonStore.getState().toggleProvider('jij');
+    });
+
+    expect(usePriceComparisonStore.getState().visibleProviders).not.toContain('jij');
+  });
+
+  it('toggleProvider cannot toggle off cito', () => {
+    act(() => {
+      usePriceComparisonStore.setState({ visibleProviders: ['cito', 'dia'] });
+    });
+    act(() => {
+      usePriceComparisonStore.getState().toggleProvider('cito');
+    });
+
+    expect(usePriceComparisonStore.getState().visibleProviders).toContain('cito');
+  });
+
+  it('toggleProvider does not remove last non-cito provider', () => {
+    act(() => {
+      usePriceComparisonStore.setState({ visibleProviders: ['cito', 'dia'] });
+    });
+    act(() => {
+      usePriceComparisonStore.getState().toggleProvider('dia');
+    });
+
+    // Should still have 2 providers (cannot go below 2)
+    expect(usePriceComparisonStore.getState().visibleProviders).toHaveLength(2);
+  });
+
+  // ─── Mode toggles ────────────────────────────────────────────────────
+
+  it('setInternalMode switches mode', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setInternalMode(false);
+    });
+
+    expect(usePriceComparisonStore.getState().isInternalMode).toBe(false);
+  });
+
+  it('default mode is internal (true)', () => {
+    expect(usePriceComparisonStore.getState().isInternalMode).toBe(true);
+  });
+
+  // ─── Migration actions ────────────────────────────────────────────────
+
+  it('setMigrationHourlyRate updates rate', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setMigrationHourlyRate(65);
+    });
+
+    expect(usePriceComparisonStore.getState().migrationHourlyRate).toBe(65);
+  });
+
+  it('setMigrationTimeSavingOverride adds an override by taskId', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setMigrationTimeSavingOverride('task-1', 10);
+    });
+
+    expect(usePriceComparisonStore.getState().migrationTimeSavingOverrides['task-1']).toBe(10);
+  });
+
+  it('addCustomTimeSavingTask appends to list', () => {
+    const task = { id: 'custom-1', label: 'Custom task', hoursPerYear: 5, category: 'test' };
+    act(() => {
+      usePriceComparisonStore.getState().addCustomTimeSavingTask(task as any);
+    });
+
+    expect(usePriceComparisonStore.getState().customTimeSavingTasks).toHaveLength(1);
+    expect(usePriceComparisonStore.getState().customTimeSavingTasks[0].id).toBe('custom-1');
+  });
+
+  it('removeCustomTimeSavingTask removes by id', () => {
+    const task = { id: 'custom-1', label: 'Custom task', hoursPerYear: 5, category: 'test' };
+    act(() => {
+      usePriceComparisonStore.getState().addCustomTimeSavingTask(task as any);
+    });
+    act(() => {
+      usePriceComparisonStore.getState().removeCustomTimeSavingTask('custom-1');
+    });
+
+    expect(usePriceComparisonStore.getState().customTimeSavingTasks).toHaveLength(0);
+  });
+
+  it('toggleHiddenTimeSavingTask toggles visibility', () => {
+    act(() => {
+      usePriceComparisonStore.getState().toggleHiddenTimeSavingTask('task-1');
+    });
+    expect(usePriceComparisonStore.getState().hiddenTimeSavingTaskIds).toContain('task-1');
+
+    act(() => {
+      usePriceComparisonStore.getState().toggleHiddenTimeSavingTask('task-1');
+    });
+    expect(usePriceComparisonStore.getState().hiddenTimeSavingTaskIds).not.toContain('task-1');
+  });
+
+  // ─── markProductPricesDirty ───────────────────────────────────────────
+
+  it('markProductPricesDirty sets flag to true', () => {
+    act(() => {
+      usePriceComparisonStore.getState().markProductPricesDirty();
+    });
+
+    expect(usePriceComparisonStore.getState().productPricesDirty).toBe(true);
+  });
+
+  // ─── Variant config ──────────────────────────────────────────────────
+
+  it('setVariantConfig stores competitor module mapping', () => {
+    act(() => {
+      usePriceComparisonStore.getState().setVariantConfig(
+        { dia: ['rekenwiskunde'], jij: ['nederlands'] },
+        'dia-pakket-1',
+      );
+    });
+
+    const state = usePriceComparisonStore.getState();
+    expect(state.competitorModuleIds).toEqual({ dia: ['rekenwiskunde'], jij: ['nederlands'] });
+    expect(state.forceDiaPackageId).toBe('dia-pakket-1');
   });
 });
