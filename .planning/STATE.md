@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Executing Phase 21
-stopped_at: Completed 17-04-PLAN.md (Phase 17 complete)
-last_updated: "2026-03-28T20:31:30.632Z"
+status: Executing Phase 22
+stopped_at: Phase 23 context gathered
+last_updated: "2026-03-28T20:58:45.479Z"
 progress:
-  total_phases: 22
+  total_phases: 23
   completed_phases: 17
   total_plans: 65
   completed_plans: 57
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 21 — dmu-export-upgrade
+**Current focus:** Phase 22 — architectuur-testen-productie-readiness
 
 ## Current Position
 
-Phase: 21 (dmu-export-upgrade) — EXECUTING
-Plan: 1 of 3
+Phase: 22 (architectuur-testen-productie-readiness) — EXECUTING
+Plan: 1 of 6
 
 ## Performance Metrics
 
@@ -143,6 +143,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 16 added: AI Wizard Verbetering & Prijsvergelijking Harmonisatie — eerlijke concurrentievergelijking via verbeterde wizard met concurrent-selectie, AI-advies en tabblad-synchronisatie
+- Phase 23 added: AI Concurrentieanalyse Streaming Fix — 504 timeouts en JSON parse errors op Vercel oplossen met robuuste streaming
 
 ### Pending Todos
 
@@ -160,6 +161,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T20:13:12.445Z
-Stopped at: Completed 17-04-PLAN.md (Phase 17 complete)
-Resume file: None
+Last session: 2026-03-28T20:58:45.472Z
+Stopped at: Phase 23 context gathered
+Resume file: .planning/phases/23-ai-concurrentieanalyse-streaming-fix/23-CONTEXT.md
