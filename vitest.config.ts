@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
-    exclude: ['**/node_modules/**', '**/.claude/worktrees/**'],
+    exclude: ['**/node_modules/**', '**/.claude/worktrees/**', '**/e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov'],
@@ -21,10 +21,10 @@ export default defineConfig({
         'src/vite-env.d.ts',
       ],
       thresholds: {
-        statements: 25,
-        branches: 17,
-        functions: 22,
-        lines: 26,
+        statements: 27,
+        branches: 18,
+        functions: 25,
+        lines: 27,
       },
     },
   },
