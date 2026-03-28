@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// E2E tests run with VITE_SKIP_AUTH=true (no Supabase dependency).
+// Full CRUD flows (school creation, wizard completion, export generation)
+// require a Supabase test environment — currently only routing, auth bypass,
+// and dialog UI are covered. Add Supabase test env to CI for full coverage.
+//
 // Use port 4173 for E2E to avoid conflicts with dev server on 3000
 const E2E_PORT = 4173;
 const E2E_BASE_URL = `http://localhost:${E2E_PORT}`;
