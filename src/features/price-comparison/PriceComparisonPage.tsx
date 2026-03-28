@@ -2,11 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
-import type { ComparisonResult, ProviderKey } from '../../engine/price-comparison';
+import type { ComparisonResult } from '../../engine/price-comparison';
 import { getCitoBundle } from '../../data/providers/cito';
-import { MODULE_DIFFERENTIATORS } from '../../data/differentiators';
-import { MODULE_CATALOG } from '../../models/modules';
-import { PROVIDER_CONFIGS } from '../../data/providers';
 import { formatCurrency } from '../../lib/format';
 import { ComparisonChart } from './ComparisonChart';
 import { ComparisonTable } from './ComparisonTable';
@@ -14,9 +11,10 @@ import { DisclaimerFooter } from '../../components/ui/DisclaimerFooter';
 import { PeriodToggle } from './PeriodToggle';
 import { CitoBundleSelector } from './CitoBundleSelector';
 import { DiaBundleSelector } from './DiaBundleSelector';
-import { SchoolplanBanner } from './SchoolplanBanner';
 import { AiAdviesSection } from './ai-advies/AiAdviesSection';
 import { MeerwaardePanel } from './MeerwaardePanel';
+import { SectionBand } from './components/SectionBand';
+import { ProviderToolbar } from './components/ProviderToolbar';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -32,19 +30,14 @@ function ComparisonSummary({ result }: { result: ComparisonResult }) {
   const bundleLabel = citoBundleType === 'individual' ? 'Per module' : citoBundleType === 'basis' ? 'Basis' : 'Plus';
   const periodLabel = contractPeriod === 'annual' ? 'per jaar' : contractPeriod === 'three-year' ? '3-jarig contract' : '3-jarig + DUO';
 
-  // Collect unique Cito differentiators across all selected modules
-  const citoAdvantages = result.modules
-    .flatMap((mod) => MODULE_DIFFERENTIATORS.find((d) => d.moduleId === mod.moduleId)?.cito ?? [])
-    .filter((item, i, arr) => arr.indexOf(item) === i);
-
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-10">
+    <div>
       <h2 className="text-[15px] font-semibold text-cito-primary mb-5">
         Samenvatting vergelijking
       </h2>
 
       {/* Totalen per aanbieder */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Cito — baseline */}
         {(() => {
           const bundle = getCitoBundle(citoBundleType);
@@ -113,109 +106,6 @@ function ComparisonSummary({ result }: { result: ComparisonResult }) {
           )}
         </div>
       </div>
-
-      {/* Cito voordelen */}
-      {citoAdvantages.length > 0 && (
-        <div className="border-t border-neutral-100 pt-5">
-          <h3 className="text-sm font-semibold text-cito-primary mb-3">
-            Unieke Cito voordelen voor deze moduleselectie
-          </h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {citoAdvantages.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-neutral-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-cito-primary flex-shrink-0 mt-0.5"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Provider kleuren ────────────────────────────────────────────────────────
-
-const PROVIDER_COLORS: Record<ProviderKey, string> = {
-  cito: 'bg-[#003082]',
-  dia: 'bg-[#FF6600]',
-  jij: 'bg-[#22C55E]',
-  saqi: 'bg-[#8B5CF6]',
-};
-
-// ─── Provider selector (checkbox rij) ────────────────────────────────────────
-
-function ProviderSelector() {
-  const { visibleProviders, toggleProvider } = usePriceComparisonStore();
-  const allProviders: ProviderKey[] = ['cito', 'dia', 'jij', 'saqi'];
-
-  return (
-    <div className="flex flex-wrap gap-3 mb-4">
-      <span className="text-sm font-medium text-neutral-600 mr-1">Vergelijk:</span>
-      {allProviders.map(p => {
-        const moduleCount = MODULE_CATALOG.filter(m => m.availableFrom.includes(p)).length;
-        return (
-          <label key={p} className="flex items-center gap-1.5 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={visibleProviders.includes(p)}
-              onChange={() => toggleProvider(p)}
-              disabled={p === 'cito'}
-              className="accent-[#003082]"
-            />
-            <span className={`w-2.5 h-2.5 rounded-full ${PROVIDER_COLORS[p]}`} />
-            <span>{PROVIDER_LABELS[p]}</span>
-            <span className="text-neutral-400 text-xs">({moduleCount})</span>
-          </label>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Prijsmodel kaarten (inklapbaar per aanbieder) ───────────────────────────
-
-const PRICING_STRATEGY_DESCRIPTIONS: Record<string, string> = {
-  'platform+module': 'Platform + module-prijzen per leerling. Bundels (Basis, Plus) bieden korting bij meerdere modules. Meerjarencontracten verlagen de prijs verder.',
-  'package-bundle': 'Pakketprijzen per leerling. Modules zijn gebundeld in vaste pakketten — het goedkoopste kwalificerende pakket wordt automatisch geselecteerd.',
-  'tiered-license': 'Staffellicentie op basis van schoolgrootte. Eenmalige licentie + kosten per afname. Grotere scholen betalen meer licentie maar minder per leerling.',
-  'flat': 'Vaste prijs per leerling, onafhankelijk van schoolgrootte of combinatie met andere modules.',
-};
-
-function PricingModelCards() {
-  const visibleProviders = usePriceComparisonStore(s => s.visibleProviders);
-
-  return (
-    <div className="mb-6 space-y-2">
-      {visibleProviders.map(provider => {
-        const config = PROVIDER_CONFIGS[provider];
-        const description = PRICING_STRATEGY_DESCRIPTIONS[config.pricingStrategy.type] ?? config.pricingStrategy.type;
-        return (
-          <details key={provider} className="border border-neutral-200 rounded-lg overflow-hidden">
-            <summary className="px-4 py-3 text-sm font-medium cursor-pointer hover:bg-neutral-50 flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${PROVIDER_COLORS[provider]}`} />
-              {PROVIDER_LABELS[provider]} — Prijsmodel
-            </summary>
-            <div className="px-4 pb-3 text-sm text-neutral-600">
-              {description}
-            </div>
-          </details>
-        );
-      })}
     </div>
   );
 }
@@ -270,7 +160,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
     </button>
   ) : null;
 
-  // Empty state
+  // Empty state — uses its own container, not SectionBand
   if (selectedModules.length === 0 || result === null) {
     return (
       <div className="max-w-[960px] mx-auto px-4 sm:px-8 py-16">
@@ -294,66 +184,99 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   }
 
   return (
-    <div className="max-w-[960px] mx-auto px-4 sm:px-8 py-12">
-      {BackButton}
+    <div>
+      {/* 1. AI Advies Hero */}
+      <SectionBand bg="bg-neutral-50">
+        <AiAdviesSection schoolId={activeSchoolId ?? undefined} />
+      </SectionBand>
 
-      {/* Schoolplan suggestie/samenvatting */}
-      <SchoolplanBanner />
+      {/* 2. Bundel/Periode bediening (D-02) */}
+      <SectionBand bg="bg-white">
+        {BackButton}
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold leading-[1.2] text-cito-primary">
+            Prijsvergelijking
+          </h1>
+          <p className="mt-2 text-sm text-neutral-500">
+            Vergelijk de kosten van Cito, DIA en JIJ per module op basis van publicatieprijzen
+            {totalStudents > 0 && ` \u00b7 ${totalStudents} leerlingen`}.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-start gap-6">
+          <span title="Een bundel combineert meerdere modules met volumekorting">
+            <CitoBundleSelector />
+          </span>
+          <DiaBundleSelector />
+          <span title="Langere contractperiode geeft korting op de jaarprijs">
+            <PeriodToggle />
+          </span>
+        </div>
+      </SectionBand>
 
-      {/* Paginatitel */}
-      <div className="mb-8">
-        <h1 className="text-[28px] font-semibold leading-[1.2] text-cito-primary">
-          Prijsvergelijking
-        </h1>
-        <p className="mt-2 text-base text-neutral-500">
-          Vergelijk de kosten van Cito, DIA en JIJ per module op basis van publicatieprijzen
-          {totalStudents > 0 && ` · ${totalStudents} leerlingen`}.
-        </p>
-      </div>
+      {/* 3. Totaal-kaarten */}
+      <SectionBand bg="bg-neutral-50">
+        <ComparisonSummary result={result} />
+      </SectionBand>
 
-      {/* Bundel + Contractperiode keuze */}
-      <div className="flex flex-wrap items-start gap-6 mb-8">
-        <CitoBundleSelector />
-        <DiaBundleSelector />
-        <PeriodToggle />
-      </div>
+      {/* 4. Provider Toolbar + 5. Tabel (D-04: tabel voor grafiek) */}
+      <SectionBand bg="bg-white">
+        <ProviderToolbar />
+        <div className="mt-6">
+          <ComparisonTable result={result} onBarHighlight={chartHighlight} />
+        </div>
+      </SectionBand>
 
-      {/* Samenvatting: totalen + Cito-voordelen */}
-      <ComparisonSummary result={result} />
+      {/* 6. Chart (collapsed by default per D-10) */}
+      <SectionBand bg="bg-neutral-50">
+        <details className="group">
+          <summary className="cursor-pointer list-none flex items-center justify-between py-3">
+            <h2 className="text-base font-semibold text-cito-primary">Staafgrafiek vergelijking</h2>
+            <svg
+              className="w-4 h-4 text-neutral-400 transition-transform duration-200 group-open:rotate-180"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="pb-2">
+            <ComparisonChart result={result} onBarClick={handleBarClick} />
+          </div>
+        </details>
+      </SectionBand>
 
-      {/* Provider selectie */}
-      <ProviderSelector />
+      {/* 7. MeerwaardePanel (collapsed by default per D-11) */}
+      <SectionBand bg="bg-white">
+        <details className="group">
+          <summary className="cursor-pointer list-none flex items-center justify-between py-3">
+            <h2 className="text-base font-semibold text-cito-primary">Meerwaarde en tijdwinst</h2>
+            <svg
+              className="w-4 h-4 text-neutral-400 transition-transform duration-200 group-open:rotate-180"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div className="pb-2">
+            <MeerwaardePanel />
+          </div>
+        </details>
+      </SectionBand>
 
-      {/* Prijsmodel uitleg per aanbieder */}
-      <PricingModelCards />
-
-      {/* Grafiek */}
-      <div className="mb-10">
-        <ComparisonChart result={result} onBarClick={handleBarClick} />
-      </div>
-
-      {/* AI Advies — samenhangend verhaal (schoolplan → wizard → analyse) */}
-      <AiAdviesSection schoolId={activeSchoolId ?? undefined} />
-
-      {/* Tabel met detail-panels */}
-      <div className="mb-8">
-        <ComparisonTable result={result} onBarHighlight={chartHighlight} />
-      </div>
-
-      {/* Zachte kant: voordelen, schoolplan-koppeling, tijdwinst */}
-      <div className="mb-8">
-        <MeerwaardePanel />
-      </div>
-
-      {/* Disclaimer + bronvermelding */}
-      <DisclaimerFooter
-        showDisclaimer={true}
-        dataSources={[
-          { provider: 'Cito', label: 'Publicatieprijzen Cito VO 2025-2026' },
-          { provider: 'DIA', label: 'DIA Webshop (shop.dia.nl), geverifieerd maart 2026' },
-          { provider: 'JIJ! (Bureau ICE)', label: 'Deskresearch MediaTest juni 2024 (R-5043), in opdracht van Cito' },
-        ]}
-      />
+      {/* 8. Disclaimer */}
+      <SectionBand bg="bg-neutral-50">
+        <DisclaimerFooter
+          showDisclaimer={true}
+          dataSources={[
+            { provider: 'Cito', label: 'Publicatieprijzen Cito VO 2025-2026' },
+            { provider: 'DIA', label: 'DIA Webshop (shop.dia.nl), geverifieerd maart 2026' },
+            { provider: 'JIJ! (Bureau ICE)', label: 'Deskresearch MediaTest juni 2024 (R-5043), in opdracht van Cito' },
+          ]}
+        />
+      </SectionBand>
     </div>
   );
 }
