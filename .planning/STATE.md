@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Phase complete — ready for verification
+status: Executing Phase 21
 stopped_at: Completed 17-04-PLAN.md (Phase 17 complete)
-last_updated: "2026-03-28T20:13:12.461Z"
+last_updated: "2026-03-28T20:31:30.632Z"
 progress:
   total_phases: 22
   completed_phases: 17
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 17 — huidig-cito-platform-vs-concurrent-prijsvergelijking
+**Current focus:** Phase 21 — dmu-export-upgrade
 
 ## Current Position
 
-Phase: 17 (huidig-cito-platform-vs-concurrent-prijsvergelijking) — EXECUTING
-Plan: 4 of 4
+Phase: 21 (dmu-export-upgrade) — EXECUTING
+Plan: 1 of 3
 
 ## Performance Metrics
 

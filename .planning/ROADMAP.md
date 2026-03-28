@@ -339,7 +339,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 15. DMU Klantreis Registratie | v2.0 | 3/3 | Complete    | 2026-03-23 |
 | 15.1 Framework-analyse & Samenhang | v2.0 | 1/1 | Complete | 2026-03-23 |
 | 16. AI Wizard & Prijsvergelijking Harmonisatie | v2.0 | 3/3 | Complete    | 2026-03-25 |
-| 17. Huidig Cito vs. Concurrent | v2.0 | 4/4 | Complete   | 2026-03-28 |
+| 17. Huidig Cito vs. Concurrent | v2.0 | 4/4 | Complete    | 2026-03-28 |
 | 18. Contactbeheer Upgrade & Klantreis-inzicht | v2.0 | 0/0 | Not Started | — |
 | 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/3 | Complete    | 2026-03-25 |
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
