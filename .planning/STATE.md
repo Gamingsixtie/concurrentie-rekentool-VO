@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Executing Phase 21
-stopped_at: Completed 17-04-PLAN.md (Phase 17 complete)
-last_updated: "2026-03-28T20:31:30.632Z"
+status: Ready to execute
+stopped_at: Completed 22-04-PLAN.md
+last_updated: "2026-03-28T22:25:42.957Z"
 progress:
   total_phases: 22
   completed_phases: 17
   total_plans: 65
-  completed_plans: 57
+  completed_plans: 58
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 21 (dmu-export-upgrade) — EXECUTING
-Plan: 1 of 3
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -139,6 +139,7 @@ Recent decisions affecting current work:
 - [Phase 22]: 44 todo-only tests deleted -- critical paths already covered by 604 real tests
 - [Phase 22]: Sentry replay maskAllText: false for internal tool; source map upload conditional on SENTRY_AUTH_TOKEN; CSP allows sentry.io + supabase.co + anthropic.com
 - [Phase 17]: No code changes needed for 17-04 -- all functionality already implemented in plan 17-03
+- [Phase 22]: TanStack Router test wrapper: components using Link must be rendered inside createRootRoute.component, not as RouterProvider children
 
 ### Roadmap Evolution
 
@@ -160,6 +161,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T20:13:12.445Z
-Stopped at: Completed 17-04-PLAN.md (Phase 17 complete)
+Last session: 2026-03-28T22:25:42.949Z
+Stopped at: Completed 22-04-PLAN.md
 Resume file: None
