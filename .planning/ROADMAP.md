@@ -77,7 +77,7 @@ Plans:
 - [x] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging (completed 2026-03-25)
 - [ ] **Phase 20: Waarde-tab Veilig Verwijderen** - Het Waarde-tabblad volledig verwijderen uit de app zonder dat andere tabs, routes, stores of exports kapot gaan — alle afhankelijkheden opruimen en de app stabiel houden
 - [ ] **Phase 21: DMU-Export Upgrade** - Export-tab met DMU-gerichte rapporten (coördinator, MT/directie, finance) op basis van generieke aannames, met geëxtraheerde tekst uit schoolplan en Cito-bronnen
-- [ ] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
+- [x] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is (completed 2026-03-28)
  (completed 2026-03-25)
 
 ## Phase Details
@@ -344,7 +344,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/3 | Complete    | 2026-03-25 |
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
-| 22. Architectuur, Testen & Productie-readiness | v2.0 | 3/6 | In Progress|  |
+| 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete   | 2026-03-28 |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -458,15 +458,15 @@ Plans:
   4. Architectuurreview bevestigt correcte scheiding van concerns, geen security-issues, en performante queries
   5. Alle bekende bugs en technische schuld uit eerdere fases zijn opgelost
   6. App is stabiel, performant en productiegereed voor dagelijks gebruik door het team
-**Plans:** 3/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 22-01-PLAN.md — Test environment fix: worktree exclusion, coverage config, fix failing tests, triage 158 todos
 - [x] 22-02-PLAN.md — CI pipeline (GitHub Actions) + Sentry error tracking + security headers
-- [ ] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
+- [x] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
 - [x] 22-04-PLAN.md — Component tests (React Testing Library) voor wizard, forms, modals, navigation
-- [ ] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
-- [ ] 22-06-PLAN.md — Security audit, performance profiling, coverage thresholds, productie-readiness checkpoint
+- [x] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
+- [x] 22-06-PLAN.md — Security audit, performance profiling, coverage thresholds, productie-readiness checkpoint
 
 ## Backlog
 

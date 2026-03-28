@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Phase 24 context gathered
-last_updated: "2026-03-28T22:41:28.038Z"
+stopped_at: Completed 22-06-PLAN.md
+last_updated: "2026-03-28T22:56:14.803Z"
 progress:
   total_phases: 22
-  completed_phases: 17
+  completed_phases: 18
   total_plans: 65
-  completed_plans: 60
+  completed_plans: 61
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 21 (dmu-export-upgrade) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -140,6 +140,9 @@ Recent decisions affecting current work:
 - [Phase 22]: Sentry replay maskAllText: false for internal tool; source map upload conditional on SENTRY_AUTH_TOKEN; CSP allows sentry.io + supabase.co + anthropic.com
 - [Phase 17]: No code changes needed for 17-04 -- all functionality already implemented in plan 17-03
 - [Phase 22]: TanStack Router test wrapper: components using Link must be rendered inside createRootRoute.component, not as RouterProvider children
+- [Phase 22]: Coverage thresholds at baseline 27/18/25/27 -- raise after further test expansion
+- [Phase 22]: xlsx HIGH vulnerability accepted -- internal tool, no untrusted file uploads
+- [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 
 ### Roadmap Evolution
 
@@ -161,6 +164,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T22:41:28.031Z
-Stopped at: Phase 24 context gathered
-Resume file: .planning/phases/24-ux-audit-vergelijkingsoverzicht-stakeholder-ready/24-CONTEXT.md
+Last session: 2026-03-28T22:56:14.794Z
+Stopped at: Completed 22-06-PLAN.md
+Resume file: None
