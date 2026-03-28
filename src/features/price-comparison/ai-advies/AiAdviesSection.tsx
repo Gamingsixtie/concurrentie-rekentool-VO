@@ -105,10 +105,30 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
             </>
           ) : (
             <>
-              <p className="text-sm text-neutral-500 mb-4">
+              <p className="text-sm text-neutral-500 mb-3">
                 Start de analyse om een advies op maat te ontvangen
               </p>
-              <ComparisonWizard />
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-cito-accent hover:underline"
+              >
+                Open AI Advies
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
             </>
           )}
         </div>
