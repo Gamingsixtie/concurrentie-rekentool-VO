@@ -245,6 +245,68 @@ export function buildAnalysisPayload(
   };
 }
 
+// ─── SSE stream parser ──────────────────────────────────────────────────────
+
+/**
+ * Reads an SSE stream from the server and collects Anthropic tool_use
+ * input_json_delta fragments into a complete JSON object.
+ */
+async function parseAnalysisStream(response: Response): Promise<Record<string, unknown>> {
+  if (!response.body) {
+    throw new Error('Geen streaming response ontvangen.');
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  const inputJsonParts: string[] = [];
+  let streamError: string | null = null;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // Process complete SSE lines
+    let newlineIdx: number;
+    while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+      const line = buffer.slice(0, newlineIdx).trim();
+      buffer = buffer.slice(newlineIdx + 1);
+
+      if (!line || !line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') continue;
+
+      try {
+        const event = JSON.parse(data);
+
+        // Collect tool_use input JSON fragments
+        if (event.type === 'content_block_delta' && event.delta?.type === 'input_json_delta') {
+          inputJsonParts.push(event.delta.partial_json);
+        }
+
+        // Capture stream errors forwarded by the server
+        if (event.type === 'error') {
+          streamError = event.error?.message || 'Stream error';
+        }
+      } catch {
+        // Skip unparseable SSE lines
+      }
+    }
+  }
+
+  if (streamError) {
+    throw new Error(`AI-analyse fout: ${streamError}`);
+  }
+
+  if (inputJsonParts.length === 0) {
+    throw new Error('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.');
+  }
+
+  return JSON.parse(inputJsonParts.join(''));
+}
+
 // ─── Main analysis function ─────────────────────────────────────────────────
 
 export async function generateAnalysis(
@@ -276,65 +338,37 @@ export async function generateAnalysis(
     migrationResult,
     wizardContext,
   );
-  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis, payload keys:', Object.keys(payload));
+  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis (streaming)...');
 
-  const MAX_RETRIES = 3;
-  let lastError: Error | null = null;
+  const response = await fetch('/api/ai-analysis', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      // Exponential backoff: 2s, 4s
-      const delay = Math.pow(2, attempt) * 1000;
-      console.log(`[ai-analysis] Retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
-      await new Promise((r) => setTimeout(r, delay));
-    }
+  console.log('[ai-analysis] Step 4: response status:', response.status);
 
-    const response = await fetch('/api/ai-analysis', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
-
-    console.log('[ai-analysis] Step 4: response status:', response.status);
-
-    if (response.ok) {
-      lastError = null;
-      // Fall through to parsing below
-      const data = await response.json();
-      console.log('[ai-analysis] Step 5: response parsed, keys:', Object.keys(data));
-
-      if (typeof data.samenvatting !== 'string') {
-        console.error('[ai-analysis] Missing samenvatting, received keys:', Object.keys(data));
-        throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
-      }
-
-      return {
-        samenvatting: data.samenvatting,
-        prijsanalyse: Array.isArray(data.prijsanalyse) ? data.prijsanalyse : [],
-        citoSterkePunten: Array.isArray(data.citoSterkePunten) ? data.citoSterkePunten : [],
-        concurrentieVergelijking: Array.isArray(data.concurrentieVergelijking) ? data.concurrentieVergelijking : [],
-        schoolplanKoppeling: Array.isArray(data.schoolplanKoppeling) && data.schoolplanKoppeling.length > 0 ? data.schoolplanKoppeling : null,
-        gespreksargumenten: Array.isArray(data.gespreksargumenten) ? data.gespreksargumenten.slice(0, 8) : [],
-      };
-    }
-
+  if (!response.ok) {
     const text = await response.text();
-
-    // Retry on transient errors (429 rate limit, 529 overloaded, 5xx server errors)
-    if (response.status === 429 || response.status === 529 || response.status >= 500) {
-      console.warn(`[ai-analysis] Transient error ${response.status}, will retry...`);
-      lastError = new Error(`${response.status}: ${text}`);
-      continue;
-    }
-
-    // Non-retryable error
     console.error('[ai-analysis] Server error:', text);
     throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
   }
 
-  throw new Error(
-    lastError?.message
-      ? `AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw. (${lastError.message})`
-      : 'AI-analyse genereren mislukt na meerdere pogingen.',
-  );
+  // Parse SSE stream — collects tool_use input_json_delta fragments
+  const data = await parseAnalysisStream(response);
+  console.log('[ai-analysis] Step 5: stream complete, keys:', Object.keys(data));
+
+  if (typeof data.samenvatting !== 'string') {
+    console.error('[ai-analysis] Missing samenvatting, received keys:', Object.keys(data));
+    throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
+  }
+
+  return {
+    samenvatting: data.samenvatting as string,
+    prijsanalyse: Array.isArray(data.prijsanalyse) ? data.prijsanalyse : [],
+    citoSterkePunten: Array.isArray(data.citoSterkePunten) ? data.citoSterkePunten : [],
+    concurrentieVergelijking: Array.isArray(data.concurrentieVergelijking) ? data.concurrentieVergelijking : [],
+    schoolplanKoppeling: Array.isArray(data.schoolplanKoppeling) && (data.schoolplanKoppeling as unknown[]).length > 0 ? data.schoolplanKoppeling as AnalysisResult['schoolplanKoppeling'] : null,
+    gespreksargumenten: Array.isArray(data.gespreksargumenten) ? (data.gespreksargumenten as string[]).slice(0, 8) : [],
+  };
 }

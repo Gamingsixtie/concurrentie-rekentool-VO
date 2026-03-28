@@ -432,82 +432,62 @@ export async function POST(request: Request): Promise<Response> {
 
     const userMessage = buildUserMessage(body);
 
-    // Model cascade: Haiku first (fast, fits within Vercel Hobby 60s timeout),
-    // fall back to Sonnet only if Haiku fails (requires Pro plan for longer duration)
+    // Streaming response prevents Vercel 504 gateway timeouts.
+    // Data flows continuously so the connection stays alive within maxDuration.
+    // Model cascade: try Haiku first (fast), fall back to Sonnet if unavailable.
     const MODELS = ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'] as const;
+    const encoder = new TextEncoder();
 
     for (const model of MODELS) {
-      const MAX_RETRIES = model === MODELS[0] ? 2 : 3;
-      let lastError: unknown = null;
+      try {
+        console.log(`[ai-analysis] Starting streaming with ${model}...`);
 
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        if (attempt > 0) {
-          const delay = Math.pow(2, attempt) * 1000;
-          console.log(`[ai-analysis] ${model} retry ${attempt}/${MAX_RETRIES - 1} after ${delay}ms...`);
-          await new Promise((r) => setTimeout(r, delay));
+        const stream = await getAnthropic().messages.create({
+          model,
+          max_tokens: 4096,
+          system: SYSTEM_PROMPT,
+          tools: [ANALYSIS_TOOL],
+          tool_choice: { type: 'tool', name: 'analyse_result' },
+          messages: [{ role: 'user', content: userMessage }],
+          stream: true,
+        });
+
+        const readable = new ReadableStream({
+          async start(controller) {
+            try {
+              for await (const event of stream) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+              }
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              controller.close();
+            } catch (streamErr) {
+              console.error(`[ai-analysis] Stream error (${model}):`, streamErr);
+              const errEvent = { type: 'error', error: { message: String(streamErr) } };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(errEvent)}\n\n`));
+              controller.close();
+            }
+          },
+        });
+
+        return new Response(readable, {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+          },
+        });
+      } catch (err) {
+        // Stream creation failed (e.g. model overloaded) — try next model
+        const errMsg = String(err);
+        const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
+          errMsg.includes('429') || errMsg.includes('rate');
+
+        if (isRetryable && model !== MODELS[MODELS.length - 1]) {
+          console.warn(`[ai-analysis] ${model} unavailable, trying next model...`);
+          continue;
         }
 
-        try {
-          const message = await getAnthropic().messages.create({
-            model,
-            max_tokens: 4096,
-            system: SYSTEM_PROMPT,
-            tools: [ANALYSIS_TOOL],
-            tool_choice: { type: 'tool', name: 'analyse_result' },
-            messages: [{ role: 'user', content: userMessage }],
-          });
-
-          // Check for truncated output — treat as retryable
-          if (message.stop_reason === 'max_tokens') {
-            console.warn(`[ai-analysis] ${model} output truncated (max_tokens), retrying...`);
-            lastError = new Error('Output truncated');
-            continue;
-          }
-
-          const toolBlock = message.content.find(
-            (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
-          );
-
-          if (!toolBlock) {
-            return new Response('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.', { status: 500 });
-          }
-
-          // Server-side validation: ensure required fields are present and correct type
-          const input = toolBlock.input as Record<string, unknown>;
-          if (typeof input.samenvatting !== 'string' || !Array.isArray(input.gespreksargumenten)) {
-            console.warn(`[ai-analysis] ${model} returned incomplete tool output, keys:`, Object.keys(input));
-            lastError = new Error('Incomplete tool output');
-            continue;
-          }
-
-          return new Response(JSON.stringify(input), {
-            headers: { 'Content-Type': 'application/json' },
-          });
-        } catch (err) {
-          lastError = err;
-          const errMsg = String(err);
-          const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
-            errMsg.includes('429') || errMsg.includes('rate') ||
-            errMsg.includes('500') || errMsg.includes('503');
-
-          if (isRetryable && attempt < MAX_RETRIES - 1) {
-            console.warn(`[ai-analysis] ${model} attempt ${attempt + 1} failed, retrying...`, errMsg);
-            continue;
-          }
-
-          // If retryable and we have a fallback model, try that
-          if (isRetryable && model !== MODELS[MODELS.length - 1]) {
-            console.warn(`[ai-analysis] ${model} overloaded, falling back to next model...`);
-            break;
-          }
-
-          break;
-        }
-      }
-
-      // If last model also failed, return error
-      if (model === MODELS[MODELS.length - 1]) {
-        console.error('[ai-analysis] All models failed:', lastError);
+        console.error(`[ai-analysis] ${model} failed:`, errMsg);
         return new Response(
           'AI-service is tijdelijk overbelast. Probeer het over een minuut opnieuw.',
           { status: 503 },
@@ -515,7 +495,6 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    // Should not reach here, but just in case
     return new Response('AI-analyse mislukt.', { status: 500 });
   } catch (err) {
     console.error('[ai-analysis] Error:', err);
