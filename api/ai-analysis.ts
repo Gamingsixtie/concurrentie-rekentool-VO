@@ -452,41 +452,42 @@ export async function POST(request: Request): Promise<Response> {
           stream: true,
         });
 
-        // Stream keepalive spaces while Anthropic processes, then send
-        // the complete JSON result. No SSE — just raw bytes + JSON.
-        // Spaces keep the Vercel gateway alive (first byte arrives fast).
+        // Forward JSON fragments directly as they arrive from Anthropic.
+        // Before JSON starts: send spaces as keepalive (prevents 504).
+        // Once input_json_delta events arrive: forward raw fragments.
+        // Client does response.text().trim() + JSON.parse() — no assembly.
+        let jsonStarted = false;
+
         const readable = new ReadableStream({
           async start(controller) {
             try {
-              let inputJson = '';
-
               for await (const event of stream) {
-                // Space byte keeps Vercel connection alive
-                controller.enqueue(encoder.encode(' '));
-
                 if (
                   event.type === 'content_block_delta' &&
                   event.delta.type === 'input_json_delta'
                 ) {
-                  inputJson += event.delta.partial_json;
+                  jsonStarted = true;
+                  controller.enqueue(encoder.encode(event.delta.partial_json));
+                } else if (!jsonStarted) {
+                  // Keepalive space before JSON content starts
+                  controller.enqueue(encoder.encode(' '));
                 }
               }
 
-              // Stream complete — send assembled result as JSON
-              if (!inputJson) {
+              if (!jsonStarted) {
+                // No tool output received — send error JSON
                 controller.enqueue(encoder.encode(JSON.stringify({
                   error: 'AI-analyse kon geen resultaat genereren.',
                 })));
-              } else {
-                const result = JSON.parse(inputJson);
-                controller.enqueue(encoder.encode(JSON.stringify(result)));
               }
               controller.close();
             } catch (streamErr) {
               console.error(`[ai-analysis] Stream error (${model}):`, streamErr);
-              controller.enqueue(encoder.encode(JSON.stringify({
-                error: String(streamErr),
-              })));
+              if (!jsonStarted) {
+                controller.enqueue(encoder.encode(JSON.stringify({
+                  error: String(streamErr),
+                })));
+              }
               controller.close();
             }
           },
