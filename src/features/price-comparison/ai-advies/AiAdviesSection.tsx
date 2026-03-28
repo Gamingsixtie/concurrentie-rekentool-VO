@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import { useWizardStore } from '../wizard/wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
-import { SchoolplanBanner } from '../SchoolplanBanner';
 import { SchoolplanContextCard } from './SchoolplanContextCard';
 import { ComparisonWizard } from '../wizard/ComparisonWizard';
 import { AnalysisPanel } from '../AnalysisPanel';
@@ -41,9 +40,6 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
 
   return (
     <div>
-      {/* SchoolplanBanner — always visible at top of hero */}
-      <SchoolplanBanner />
-
       {/* Section header */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-shrink-0 w-9 h-9 bg-cito-primary/10 rounded-lg flex items-center justify-center">
