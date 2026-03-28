@@ -1,8 +1,7 @@
 /**
  * AI Advies hero section — collapsible with progressive disclosure.
- * Collapsed (default): shows 2-3 line samenvatting or wizard CTA.
+ * Collapsed (default): shows 2-3 line samenvatting or "Open AI Advies" CTA.
  * Expanded: full AI analysis flow with SchoolplanContextCard, ComparisonWizard, AnalysisPanel.
- * SchoolplanBanner is always visible at the top of the hero.
  */
 
 import { useState, useEffect } from 'react';
