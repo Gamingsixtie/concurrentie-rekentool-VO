@@ -1,16 +1,19 @@
 /**
- * Unified AI advice section that combines three progressive steps into one cohesive story:
- * 1. Schoolplan context (read-only summary)
- * 2. AI vergelijkingsadvies (wizard)
- * 3. AI concurrentieanalyse (enriched with wizard output)
+ * AI Advies hero section — collapsible with progressive disclosure.
+ * Collapsed (default): shows 2-3 line samenvatting or wizard CTA.
+ * Expanded: full AI analysis flow with SchoolplanContextCard, ComparisonWizard, AnalysisPanel.
+ * SchoolplanBanner is always visible at the top of the hero.
  */
 
+import { useState, useEffect } from 'react';
 import { useWizardStore } from '../wizard/wizard-store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
+import { SchoolplanBanner } from '../SchoolplanBanner';
 import { SchoolplanContextCard } from './SchoolplanContextCard';
 import { ComparisonWizard } from '../wizard/ComparisonWizard';
 import { AnalysisPanel } from '../AnalysisPanel';
 import { NarrativeConnector } from './NarrativeConnector';
+import type { AnalysisResult } from '@/lib/ai-analysis';
 
 interface AiAdviesSectionProps {
   schoolId?: string;
@@ -20,13 +23,29 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const hasCompletedWizard = useWizardStore((s) => s.hasCompletedOnce);
   const wizardNarrativeContext = useWizardStore((s) => s.wizardNarrativeContext);
+  const shouldAutoTriggerAnalysis = useWizardStore((s) => s.shouldAutoTriggerAnalysis);
+
+  const [expanded, setExpanded] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<Pick<AnalysisResult, 'samenvatting'> | null>(null);
+
+  // Auto-expand when wizard triggers analysis so user sees it generating
+  useEffect(() => {
+    if (shouldAutoTriggerAnalysis) {
+      setExpanded(true);
+    }
+  }, [shouldAutoTriggerAnalysis]);
 
   if (selectedModules.length === 0) return null;
 
+  const hasSummary = !!analysisResult?.samenvatting;
+
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-10">
+    <div>
+      {/* SchoolplanBanner — always visible at top of hero */}
+      <SchoolplanBanner />
+
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="flex-shrink-0 w-9 h-9 bg-cito-primary/10 rounded-lg flex items-center justify-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,58 +65,131 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
         </div>
         <div>
           <h2 className="text-[15px] font-semibold text-cito-primary">
-            AI Advies — samenhangend verhaal
+            AI Advies
           </h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Drie stappen die voortbouwen op elkaar: schoolplan → vergelijkingsadvies → diepgaande analyse
+            Schoolplan-context, vergelijkingsadvies en concurrentieanalyse
           </p>
         </div>
       </div>
 
-      {/* Complete banner */}
-      {hasCompletedWizard && wizardNarrativeContext && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-5">
-          <div className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-green-600" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <span className="text-sm font-medium text-green-800">
-              Vergelijkingsadvies afgerond — de concurrentieanalyse hieronder bouwt hier automatisch op voort
-            </span>
-          </div>
+      {/* Collapsed state */}
+      {!expanded && (
+        <div>
+          {hasSummary ? (
+            <>
+              <p className="text-sm text-neutral-700 leading-relaxed">
+                {analysisResult.samenvatting}
+              </p>
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-cito-accent hover:underline"
+              >
+                Lees volledig advies
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-neutral-500 mb-4">
+                Start de analyse om een advies op maat te ontvangen
+              </p>
+              <ComparisonWizard />
+            </>
+          )}
         </div>
       )}
 
-      <div className="space-y-1">
-        {/* Step 1: Schoolplan context */}
-        <SchoolplanContextCard />
-
-        <NarrativeConnector text="Schoolplan-inzichten verrijken het vergelijkingsadvies" />
-
-        {/* Step 2: Comparison wizard */}
+      {/* Expanded state */}
+      {expanded && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-cito-primary text-white">
-              2
-            </span>
-            <h3 className="text-sm font-semibold text-neutral-700">Vergelijkingsadvies</h3>
-          </div>
-          <ComparisonWizard />
-        </div>
+          {/* Complete banner */}
+          {hasCompletedWizard && wizardNarrativeContext && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-5">
+              <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-green-600" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span className="text-sm font-medium text-green-800">
+                  Vergelijkingsadvies afgerond — de concurrentieanalyse hieronder bouwt hier automatisch op voort
+                </span>
+              </div>
+            </div>
+          )}
 
-        <NarrativeConnector text="Het vergelijkingsadvies vormt de basis voor de diepgaande analyse" />
+          <div className="space-y-1">
+            {/* Step 1: Schoolplan context */}
+            <SchoolplanContextCard />
 
-        {/* Step 3: Enriched analysis */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-indigo-600 text-white">
-              3
-            </span>
-            <h3 className="text-sm font-semibold text-neutral-700">Diepgaande concurrentieanalyse</h3>
+            <NarrativeConnector text="Schoolplan-inzichten verrijken het vergelijkingsadvies" />
+
+            {/* Step 2: Comparison wizard */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-cito-primary text-white">
+                  2
+                </span>
+                <h3 className="text-sm font-semibold text-neutral-700">Vergelijkingsadvies</h3>
+              </div>
+              <ComparisonWizard />
+            </div>
+
+            <NarrativeConnector text="Het vergelijkingsadvies vormt de basis voor de diepgaande analyse" />
+
+            {/* Step 3: Enriched analysis */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-indigo-600 text-white">
+                  3
+                </span>
+                <h3 className="text-sm font-semibold text-neutral-700">Diepgaande concurrentieanalyse</h3>
+              </div>
+              <AnalysisPanel
+                mode="comparison"
+                schoolId={schoolId}
+                onAnalysisComplete={(result) => setAnalysisResult({ samenvatting: result.samenvatting })}
+              />
+            </div>
           </div>
-          <AnalysisPanel mode="comparison" schoolId={schoolId} />
+
+          {/* Collapse button */}
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="inline-flex items-center gap-1.5 mt-3 text-sm font-semibold text-cito-accent hover:underline"
+          >
+            Samenvatting tonen
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="6 15 12 9 18 15" />
+            </svg>
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

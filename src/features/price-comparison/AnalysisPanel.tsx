@@ -97,9 +97,10 @@ interface AnalysisPanelProps {
   schoolId?: string;
   currentVsProposedResult?: CurrentVsProposedResult | null;
   migrationResult?: MigrationResult | null;
+  onAnalysisComplete?: (result: AnalysisResult) => void;
 }
 
-export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrationResult }: AnalysisPanelProps) {
+export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrationResult, onAnalysisComplete }: AnalysisPanelProps) {
   const result = usePriceComparisonStore((s) => s.result);
   const diaPackageResult = usePriceComparisonStore((s) => s.diaPackageResult);
   const levels = useSchoolProfileStore((s) => s.levels);
@@ -163,6 +164,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
         { deepAnalysis: deep, onProgress: handleProgress },
       );
       setAnalysis(analysisResult);
+      onAnalysisComplete?.(analysisResult);
     } catch (err) {
       console.error('[AnalysisPanel] Error:', err);
       if (err instanceof AnalysisError) {
@@ -179,7 +181,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
       setProgress(null);
       setProgressAttempt(null);
     }
-  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext, handleProgress]);
+  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext, handleProgress, onAnalysisComplete]);
 
   // Auto-trigger after wizard applies to table
   useEffect(() => {
