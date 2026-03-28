@@ -261,6 +261,7 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
   let buffer = '';
   const inputJsonParts: string[] = [];
   let streamError: string | null = null;
+  let streamComplete = false;
 
   for (;;) {
     const { done, value } = await reader.read();
@@ -276,7 +277,10 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
 
       if (!line || !line.startsWith('data: ')) continue;
       const data = line.slice(6);
-      if (data === '[DONE]') continue;
+      if (data === '[DONE]') {
+        streamComplete = true;
+        continue;
+      }
 
       try {
         const event = JSON.parse(data);
@@ -284,6 +288,11 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
         // Collect tool_use input JSON fragments
         if (event.type === 'content_block_delta' && event.delta?.type === 'input_json_delta') {
           inputJsonParts.push(event.delta.partial_json);
+        }
+
+        // Track stream completion via Anthropic's own signal
+        if (event.type === 'message_stop') {
+          streamComplete = true;
         }
 
         // Capture stream errors forwarded by the server
@@ -302,6 +311,12 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
 
   if (inputJsonParts.length === 0) {
     throw new Error('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.');
+  }
+
+  if (!streamComplete) {
+    const assembled = inputJsonParts.join('');
+    console.warn(`[ai-analysis] Stream afgekapt! Verzameld ${inputJsonParts.length} fragments, ${assembled.length} chars`);
+    throw new Error('AI-analyse stream afgebroken. Probeer het opnieuw.');
   }
 
   return JSON.parse(inputJsonParts.join(''));
@@ -338,37 +353,61 @@ export async function generateAnalysis(
     migrationResult,
     wizardContext,
   );
-  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis (streaming)...');
+  // Retry once on truncated streams (Vercel may kill the function mid-stream)
+  const MAX_ATTEMPTS = 2;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      console.log(`[ai-analysis] Retry ${attempt}/${MAX_ATTEMPTS - 1} after stream failure...`);
+      await new Promise((r) => setTimeout(r, 2000));
+    }
 
-  const response = await fetch('/api/ai-analysis', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-  });
+    console.log('[ai-analysis] Step 3: fetch /api/ai-analysis (streaming)...');
 
-  console.log('[ai-analysis] Step 4: response status:', response.status);
+    const response = await fetch('/api/ai-analysis', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.error('[ai-analysis] Server error:', text);
-    throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
+    console.log('[ai-analysis] Step 4: response status:', response.status);
+
+    if (!response.ok) {
+      const text = await response.text();
+      // Retry on transient server errors
+      if (attempt < MAX_ATTEMPTS - 1 && response.status >= 500) {
+        console.warn(`[ai-analysis] Server error ${response.status}, will retry...`);
+        continue;
+      }
+      console.error('[ai-analysis] Server error:', text);
+      throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
+    }
+
+    try {
+      const data = await parseAnalysisStream(response);
+      console.log('[ai-analysis] Step 5: stream complete, keys:', Object.keys(data));
+
+      if (typeof data.samenvatting !== 'string') {
+        console.error('[ai-analysis] Missing samenvatting, received keys:', Object.keys(data));
+        throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
+      }
+
+      return {
+        samenvatting: data.samenvatting as string,
+        prijsanalyse: Array.isArray(data.prijsanalyse) ? data.prijsanalyse : [],
+        citoSterkePunten: Array.isArray(data.citoSterkePunten) ? data.citoSterkePunten : [],
+        concurrentieVergelijking: Array.isArray(data.concurrentieVergelijking) ? data.concurrentieVergelijking : [],
+        schoolplanKoppeling: Array.isArray(data.schoolplanKoppeling) && (data.schoolplanKoppeling as unknown[]).length > 0 ? data.schoolplanKoppeling as AnalysisResult['schoolplanKoppeling'] : null,
+        gespreksargumenten: Array.isArray(data.gespreksargumenten) ? (data.gespreksargumenten as string[]).slice(0, 8) : [],
+      };
+    } catch (parseErr) {
+      // Retry on truncated/incomplete streams
+      if (attempt < MAX_ATTEMPTS - 1 && parseErr instanceof Error && parseErr.message.includes('afgebroken')) {
+        console.warn('[ai-analysis] Stream truncated, will retry...');
+        continue;
+      }
+      throw parseErr;
+    }
   }
 
-  // Parse SSE stream — collects tool_use input_json_delta fragments
-  const data = await parseAnalysisStream(response);
-  console.log('[ai-analysis] Step 5: stream complete, keys:', Object.keys(data));
-
-  if (typeof data.samenvatting !== 'string') {
-    console.error('[ai-analysis] Missing samenvatting, received keys:', Object.keys(data));
-    throw new Error('AI-analyse heeft een onverwacht formaat. Probeer het opnieuw.');
-  }
-
-  return {
-    samenvatting: data.samenvatting as string,
-    prijsanalyse: Array.isArray(data.prijsanalyse) ? data.prijsanalyse : [],
-    citoSterkePunten: Array.isArray(data.citoSterkePunten) ? data.citoSterkePunten : [],
-    concurrentieVergelijking: Array.isArray(data.concurrentieVergelijking) ? data.concurrentieVergelijking : [],
-    schoolplanKoppeling: Array.isArray(data.schoolplanKoppeling) && (data.schoolplanKoppeling as unknown[]).length > 0 ? data.schoolplanKoppeling as AnalysisResult['schoolplanKoppeling'] : null,
-    gespreksargumenten: Array.isArray(data.gespreksargumenten) ? (data.gespreksargumenten as string[]).slice(0, 8) : [],
-  };
+  throw new Error('AI-analyse genereren mislukt na meerdere pogingen.');
 }
