@@ -49,6 +49,29 @@ export interface AnalysisResult {
   gespreksargumenten: string[];
 }
 
+// ─── Progress & error types ─────────────────────────────────────────────────
+
+export type AnalysisProgress = 'connecting' | 'generating' | 'processing' | 'retrying';
+export type ProgressCallback = (state: AnalysisProgress, attempt?: number, maxAttempts?: number) => void;
+
+export type AnalysisErrorType = 'timeout' | 'server' | 'parse' | 'auth' | 'unknown';
+
+export class AnalysisError extends Error {
+  readonly type: AnalysisErrorType;
+  readonly retryable: boolean;
+
+  constructor(
+    message: string,
+    type: AnalysisErrorType,
+    retryable: boolean,
+  ) {
+    super(message);
+    this.name = 'AnalysisError';
+    this.type = type;
+    this.retryable = retryable;
+  }
+}
+
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
@@ -245,6 +268,64 @@ export function buildAnalysisPayload(
   };
 }
 
+// ─── Fetch with retry ───────────────────────────────────────────────────────
+
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  onProgress?: ProgressCallback,
+  maxRetries = 2,
+): Promise<Response> {
+  const maxAttempts = maxRetries + 1;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      onProgress?.('connecting', attempt, maxAttempts);
+      const response = await fetch(url, options);
+      onProgress?.('generating', attempt, maxAttempts);
+
+      if (response.ok) return response;
+
+      // Don't retry 400/401/403
+      if (response.status < 500 && response.status !== 408 && response.status !== 429) {
+        const text = await response.text();
+        if (response.status === 401) {
+          throw new AnalysisError(text || 'Niet geautoriseerd. Log opnieuw in.', 'auth', false);
+        }
+        throw new AnalysisError(text || 'Serverfout.', 'server', false);
+      }
+
+      // Retryable server errors
+      if (attempt < maxAttempts) {
+        onProgress?.('retrying', attempt + 1, maxAttempts);
+        await new Promise(r => setTimeout(r, attempt === 1 ? 1000 : 3000));
+        continue;
+      }
+
+      const text = await response.text();
+      if (response.status === 504 || response.status === 408) {
+        throw new AnalysisError(
+          'De analyse duurde te lang. Dit kan komen door een complex schoolprofiel. Probeer het opnieuw -- bij herhaalde timeouts, neem contact op met support.',
+          'timeout', true
+        );
+      }
+      throw new AnalysisError(text || 'Serverfout. Probeer het later opnieuw.', 'server', true);
+    } catch (err) {
+      if (err instanceof AnalysisError) throw err;
+      // Network error
+      if (attempt < maxAttempts) {
+        onProgress?.('retrying', attempt + 1, maxAttempts);
+        await new Promise(r => setTimeout(r, attempt === 1 ? 1000 : 3000));
+        continue;
+      }
+      throw new AnalysisError(
+        'Geen verbinding met de server. Controleer je internetverbinding.',
+        'timeout', true
+      );
+    }
+  }
+  throw new AnalysisError('Alle pogingen mislukt.', 'unknown', true);
+}
+
 // ─── Main analysis function ─────────────────────────────────────────────────
 
 export async function generateAnalysis(
@@ -259,6 +340,7 @@ export async function generateAnalysis(
   schoolplanData?: SchoolplanAnalysisRow | null,
   migrationResult?: MigrationResult | null,
   wizardContext?: WizardNarrativeContext | null,
+  options?: { deepAnalysis?: boolean; onProgress?: ProgressCallback },
 ): Promise<AnalysisResult> {
   console.log('[ai-analysis] Step 1: getAuthHeaders...');
   const headers = await getAuthHeaders();
@@ -276,33 +358,43 @@ export async function generateAnalysis(
     migrationResult,
     wizardContext,
   );
-  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis (streaming)...');
+  console.log('[ai-analysis] Step 3: fetch /api/ai-analysis (with retry)...');
 
-  const response = await fetch('/api/ai-analysis', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(payload),
-  });
+  const response = await fetchWithRetry(
+    '/api/ai-analysis',
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ ...payload, deepAnalysis: options?.deepAnalysis }),
+    },
+    options?.onProgress,
+  );
 
   console.log('[ai-analysis] Step 4: response status:', response.status);
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.error('[ai-analysis] Server error:', text);
-    throw new Error(text || 'AI-analyse genereren mislukt. Probeer het opnieuw.');
-  }
-
   // Server streams keepalive spaces followed by the JSON result.
   // response.text() waits for the full body, then we trim and parse.
+  options?.onProgress?.('processing');
   const raw = await response.text();
   const text = raw.trim();
   console.log('[ai-analysis] Step 5: response received, length:', text.length);
 
-  const data = JSON.parse(text) as Record<string, unknown>;
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new AnalysisError(
+      'Het AI-resultaat kon niet worden verwerkt. Probeer het opnieuw.',
+      'parse', true
+    );
+  }
 
   // Check for server-side error
   if (data.error && !data.samenvatting) {
-    throw new Error(typeof data.error === 'string' ? data.error : 'AI-analyse mislukt.');
+    throw new AnalysisError(
+      typeof data.error === 'string' ? data.error : 'AI-analyse mislukt.',
+      'server', true
+    );
   }
 
   if (typeof data.samenvatting !== 'string') {
