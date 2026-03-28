@@ -72,12 +72,14 @@ Plans:
  (completed 2026-03-23)
 - [x] **Phase 15.1: Framework-analyse & Samenhang** (INSERTED) - Diepgaande analyse van het complete framework: correctheid engines, koppelingen, AI-inzet, logische stappen en verbeterpunten (completed 2026-03-23)
 - [x] **Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie** - Eerlijke concurrentievergelijking via verbeterde AI wizard (concurrent-selectie â AI-advies â tabblad-synchronisatie) met correcte variant-matching voor DIA/JIJ (completed 2026-03-25)
-- [x] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren (completed 2026-03-28)
+- [x] **Phase 17: Huidig Cito-platform vs. Concurrent Prijsvergelijking** - Scholen op het huidige Cito-platform kunnen vergelijken met DIA/JIJ zonder aanname van migratie naar nieuw platform â extra wizard-scenario voor bestaande Cito-klanten die concurrentie evalueren
+ (completed 2026-03-28)
 - [ ] **Phase 18: Contactbeheer Upgrade & Klantreis-inzicht** - DMU-posities handmatig toewijzen (eenmalig, geldt overal), klantreis-tijdlijn per school met contactvolgorde en blokkades, en totaaloverzicht in school-dashboard
 - [x] **Phase 19: Gesprekken-tab & Acties Upgrade** - Gesprekken vastleggen zonder AI (dat doet de wizard al), spraaknotities, contactpersoon-koppeling per gesprek, en verfijnd actie-tabblad met inline invoer en verwijder-bevestiging (completed 2026-03-25)
 - [ ] **Phase 20: Waarde-tab Veilig Verwijderen** - Het Waarde-tabblad volledig verwijderen uit de app zonder dat andere tabs, routes, stores of exports kapot gaan — alle afhankelijkheden opruimen en de app stabiel houden
 - [ ] **Phase 21: DMU-Export Upgrade** - Export-tab met DMU-gerichte rapporten (coördinator, MT/directie, finance) op basis van generieke aannames, met geëxtraheerde tekst uit schoolplan en Cito-bronnen
-- [x] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is (completed 2026-03-28)
+- [x] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
+ (completed 2026-03-28)
  (completed 2026-03-25)
 
 ## Phase Details
@@ -345,6 +347,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete   | 2026-03-28 |
+| 24. UX-audit Vergelijkingsoverzicht | v2.0 | 0/2 | Not Started | — |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -467,6 +470,23 @@ Plans:
 - [x] 22-04-PLAN.md — Component tests (React Testing Library) voor wizard, forms, modals, navigation
 - [x] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
 - [x] 22-06-PLAN.md — Security audit, performance profiling, coverage thresholds, productie-readiness checkpoint
+
+### Phase 24: UX-audit Vergelijkingsoverzicht — Stakeholder-ready
+**Goal**: Het volledige vergelijkingsoverzicht (PriceComparisonPage) UX-technisch doorlichten en optimaliseren: doublures elimineren, informatie-architectuur herstructureren, progressive disclosure toepassen, en visueel stakeholder-ready maken. Geen nieuwe features — alleen herstructurering van bestaande secties.
+**Depends on**: Phase 22 (productiegereed), Phase 16 (AI Wizard)
+**Requirements**: D-01 through D-17 (from discuss-phase)
+**Success Criteria** (what must be TRUE):
+  1. Secties staan in de juiste volgorde: AI hero -> bediening -> totalen -> toolbar+tabel -> grafiek -> meerwaarde -> disclaimer
+  2. Differentiators-lijst verwijderd uit ComparisonSummary en MeerwaardePanel (data verhuist naar AI-advies context)
+  3. AI-advies hero standaard ingeklapt met 2-3 regels samenvatting, uitklapbaar tot volledig advies
+  4. ProviderSelector en PricingModelCards samengevoegd tot compacte toolbar met info-popovers
+  5. Grafiek en MeerwaardePanel standaard ingeklapt (progressive disclosure)
+  6. Visuele scheiding via afwisselende kleurzones (bg-neutral-50/bg-white)
+**Plans:** 2 plans
+
+Plans:
+- [ ] 24-01-PLAN.md — SectionBand + ProviderToolbar extractie, ComparisonSummary/MeerwaardePanel cleanup, pagina-herstructurering met kleurzones
+- [ ] 24-02-PLAN.md — AI hero collapse/expand met SchoolplanBanner integratie, visuele checkpoint
 
 ## Backlog
 
