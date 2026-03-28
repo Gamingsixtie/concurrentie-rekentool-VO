@@ -248,8 +248,9 @@ export function buildAnalysisPayload(
 // ─── SSE stream parser ──────────────────────────────────────────────────────
 
 /**
- * Reads an SSE stream from the server and collects Anthropic tool_use
- * input_json_delta fragments into a complete JSON object.
+ * Reads an SSE stream where the server assembles the final result.
+ * Keepalive pings (SSE comments) keep the connection alive.
+ * The last `data:` line before `[DONE]` contains the complete JSON result.
  */
 async function parseAnalysisStream(response: Response): Promise<Record<string, unknown>> {
   if (!response.body) {
@@ -259,9 +260,7 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
-  const inputJsonParts: string[] = [];
-  let streamError: string | null = null;
-  let streamComplete = false;
+  let result: Record<string, unknown> | null = null;
 
   for (;;) {
     const { done, value } = await reader.read();
@@ -269,57 +268,39 @@ async function parseAnalysisStream(response: Response): Promise<Record<string, u
 
     buffer += decoder.decode(value, { stream: true });
 
-    // Process complete SSE lines
     let newlineIdx: number;
     while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
       const line = buffer.slice(0, newlineIdx).trim();
       buffer = buffer.slice(newlineIdx + 1);
 
-      if (!line || !line.startsWith('data: ')) continue;
+      // Skip empty lines and SSE comments (keepalive pings)
+      if (!line || line.startsWith(':')) continue;
+      if (!line.startsWith('data: ')) continue;
+
       const data = line.slice(6);
-      if (data === '[DONE]') {
-        streamComplete = true;
-        continue;
-      }
+      if (data === '[DONE]') continue;
 
       try {
-        const event = JSON.parse(data);
+        const parsed = JSON.parse(data);
 
-        // Collect tool_use input JSON fragments
-        if (event.type === 'content_block_delta' && event.delta?.type === 'input_json_delta') {
-          inputJsonParts.push(event.delta.partial_json);
+        // Check for server-side error
+        if (parsed.error && !parsed.samenvatting) {
+          throw new Error(typeof parsed.error === 'string' ? parsed.error : parsed.error.message || 'Stream error');
         }
 
-        // Track stream completion via Anthropic's own signal
-        if (event.type === 'message_stop') {
-          streamComplete = true;
-        }
-
-        // Capture stream errors forwarded by the server
-        if (event.type === 'error') {
-          streamError = event.error?.message || 'Stream error';
-        }
-      } catch {
-        // Skip unparseable SSE lines
+        result = parsed;
+      } catch (err) {
+        if (err instanceof SyntaxError) continue; // Skip unparseable lines
+        throw err; // Re-throw application errors
       }
     }
   }
 
-  if (streamError) {
-    throw new Error(`AI-analyse fout: ${streamError}`);
-  }
-
-  if (inputJsonParts.length === 0) {
+  if (!result) {
     throw new Error('AI-analyse kon geen resultaat genereren. Probeer het opnieuw.');
   }
 
-  if (!streamComplete) {
-    const assembled = inputJsonParts.join('');
-    console.warn(`[ai-analysis] Stream afgekapt! Verzameld ${inputJsonParts.length} fragments, ${assembled.length} chars`);
-    throw new Error('AI-analyse stream afgebroken. Probeer het opnieuw.');
-  }
-
-  return JSON.parse(inputJsonParts.join(''));
+  return result;
 }
 
 // ─── Main analysis function ─────────────────────────────────────────────────
