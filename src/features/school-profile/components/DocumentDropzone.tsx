@@ -8,10 +8,16 @@ interface DocumentDropzoneProps {
 
 const ACCEPTED_EXTENSIONS = new Set(['pdf', 'xlsx', 'xls', 'docx', 'csv', 'txt']);
 const ACCEPT_ATTRIBUTE = '.pdf,.xlsx,.xls,.docx,.csv,.txt';
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 function isValidFileType(file: File): boolean {
   const ext = file.name.split('.').pop()?.toLowerCase();
   return !!ext && ACCEPTED_EXTENSIONS.has(ext);
+}
+
+function isValidFileSize(file: File): boolean {
+  return file.size <= MAX_FILE_SIZE_BYTES;
 }
 
 /**
@@ -33,6 +39,12 @@ export default function DocumentDropzone({
       if (!isValidFileType(file)) {
         setValidationError(
           'Niet-ondersteund bestandsformaat. Upload een PDF, Excel, Word of CSV bestand.',
+        );
+        return;
+      }
+      if (!isValidFileSize(file)) {
+        setValidationError(
+          `Bestand is te groot (max ${MAX_FILE_SIZE_MB} MB). Kies een kleiner bestand.`,
         );
         return;
       }
