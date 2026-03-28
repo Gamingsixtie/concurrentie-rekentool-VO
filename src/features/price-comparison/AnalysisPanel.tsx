@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { usePriceComparisonStore } from './store';
 import { getTotalStudents } from '../../engine/price-comparison';
-import { generateAnalysis, type AnalysisResult, type ConcurrentDetail, type PrijsAnalyseItem } from '../../lib/ai-analysis';
+import { generateAnalysis, type AnalysisResult, type ConcurrentDetail, type PrijsAnalyseItem, type AnalysisProgress, AnalysisError } from '../../lib/ai-analysis';
 import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
 import { useWizardStore } from './wizard/wizard-store';
 import type { CurrentVsProposedResult } from '../../engine/current-vs-proposed';
@@ -115,14 +115,36 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<'timeout' | 'server' | 'parse' | 'auth' | 'unknown' | null>(null);
+  const [errorRetryable, setErrorRetryable] = useState(false);
+  const [progress, setProgress] = useState<AnalysisProgress | null>(null);
+  const [progressAttempt, setProgressAttempt] = useState<{ current: number; max: number } | null>(null);
 
   const totalStudents = getTotalStudents(studentCounts);
 
-  const handleGenerate = useCallback(async () => {
+  const PROGRESS_LABELS: Record<AnalysisProgress, string> = {
+    connecting: 'Verbinding maken...',
+    generating: 'Analyse genereren...',
+    processing: 'Resultaat verwerken...',
+    retrying: 'Opnieuw proberen...',
+  };
+
+  const handleProgress = useCallback((state: AnalysisProgress, attempt?: number, maxAttempts?: number) => {
+    setProgress(state);
+    if (attempt !== undefined && maxAttempts !== undefined) {
+      setProgressAttempt({ current: attempt, max: maxAttempts });
+    }
+  }, []);
+
+  const handleGenerate = useCallback(async (deep = false) => {
     if (!result) return;
 
     setLoading(true);
     setError(null);
+    setErrorType(null);
+    setErrorRetryable(false);
+    setProgress('connecting');
+    setProgressAttempt(null);
     setAnalysis(null);
 
     try {
@@ -138,21 +160,32 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
         schoolplanData,
         migrationResult,
         wizardNarrativeContext,
+        { deepAnalysis: deep, onProgress: handleProgress },
       );
       setAnalysis(analysisResult);
     } catch (err) {
       console.error('[AnalysisPanel] Error:', err);
-      setError(err instanceof Error ? err.message : 'Er ging iets mis bij het genereren van de analyse.');
+      if (err instanceof AnalysisError) {
+        setError(err.message);
+        setErrorType(err.type);
+        setErrorRetryable(err.retryable);
+      } else {
+        setError(err instanceof Error ? err.message : 'Er ging iets mis bij het genereren van de analyse.');
+        setErrorType('unknown');
+        setErrorRetryable(true);
+      }
     } finally {
       setLoading(false);
+      setProgress(null);
+      setProgressAttempt(null);
     }
-  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext]);
+  }, [result, mode, levels, studentCounts, selectedModules, moduleSetups, diaPackageResult, currentVsProposedResult, schoolplanData, migrationResult, wizardNarrativeContext, handleProgress]);
 
   // Auto-trigger after wizard applies to table
   useEffect(() => {
     if (shouldAutoTriggerAnalysis && result && !loading) {
       clearAutoTrigger();
-      handleGenerate();
+      handleGenerate(false);
     }
   }, [shouldAutoTriggerAnalysis, result, loading, clearAutoTrigger, handleGenerate]);
 
@@ -194,38 +227,69 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={loading}
-          className="inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? (
-            <>
-              <svg
-                className="animate-spin h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Analyseren...
-            </>
-          ) : analysis ? (
-            'Opnieuw analyseren'
-          ) : (
-            'AI Analyse'
-          )}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleGenerate(false)}
+            disabled={loading}
+            className="inline-flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <>
+                <svg
+                  className="animate-spin h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Analyseren...
+              </>
+            ) : analysis ? (
+              'Opnieuw analyseren'
+            ) : (
+              'Analyse genereren'
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleGenerate(true)}
+            disabled={loading}
+            className="inline-flex items-center gap-2 border border-indigo-600 text-indigo-600 text-sm font-semibold py-2 px-4 rounded-lg hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Diepgaande analyse met Claude Opus -- voor key accounts"
+          >
+            {loading ? '...' : 'Diepgaand'}
+          </button>
+        </div>
       </div>
 
       {/* Error state */}
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-          {error}
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3" data-error-type={errorType}>
+          <p className="text-sm text-red-800">{error}</p>
+          {errorRetryable && (
+            <button
+              type="button"
+              onClick={() => handleGenerate(false)}
+              className="mt-2 text-sm font-medium text-red-700 hover:text-red-900 underline"
+            >
+              Opnieuw proberen
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Progress indicator */}
+      {loading && progress && (
+        <div className="flex items-center gap-3 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 mb-4">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <span className="text-sm text-blue-800">
+            {PROGRESS_LABELS[progress]}
+            {progress === 'retrying' && progressAttempt && ` (poging ${progressAttempt.current}/${progressAttempt.max})`}
+          </span>
         </div>
       )}
 
