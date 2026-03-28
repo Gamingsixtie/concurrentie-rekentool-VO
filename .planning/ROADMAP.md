@@ -494,5 +494,5 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 23-01-PLAN.md -- Server-side JSON assembly, model cascade, config updates, health check
+- [x] 23-01-PLAN.md -- Server-side JSON assembly, model cascade, config updates, health check
 - [ ] 23-02-PLAN.md -- Client retry logic, progress indicator, dual buttons, error UI, production verification
