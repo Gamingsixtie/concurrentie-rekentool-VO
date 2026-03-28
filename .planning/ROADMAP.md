@@ -347,7 +347,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete    | 2026-03-28 |
-| 24. UX-audit Vergelijkingsoverzicht | v2.0 | 1/2 | In Progress|  |
+| 24. UX-audit Vergelijkingsoverzicht | v2.0 | 2/2 | Complete   | 2026-03-28 |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -482,11 +482,11 @@ Plans:
   4. ProviderSelector en PricingModelCards samengevoegd tot compacte toolbar met info-popovers
   5. Grafiek en MeerwaardePanel standaard ingeklapt (progressive disclosure)
   6. Visuele scheiding via afwisselende kleurzones (bg-neutral-50/bg-white)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 24-01-PLAN.md — SectionBand + ProviderToolbar extractie, ComparisonSummary/MeerwaardePanel cleanup, pagina-herstructurering met kleurzones
-- [ ] 24-02-PLAN.md — AI hero collapse/expand met SchoolplanBanner integratie, visuele checkpoint
+- [x] 24-02-PLAN.md — AI hero collapse/expand met SchoolplanBanner integratie, visuele checkpoint
 
 ## Backlog
 
