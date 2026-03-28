@@ -4,7 +4,7 @@ milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: In progress
 stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-03-28T23:10:11.634Z"
+last_updated: "2026-03-28T23:18:51.375Z"
 progress:
   total_phases: 23
   completed_phases: 18
@@ -19,7 +19,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 21 — dmu-export-upgrade
+**Current focus:** Phase 24 — ux-audit-vergelijkingsoverzicht-stakeholder-ready
 
 ## Current Position
 
