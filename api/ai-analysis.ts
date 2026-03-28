@@ -452,16 +452,17 @@ export async function POST(request: Request): Promise<Response> {
           stream: true,
         });
 
-        // Assemble the tool_use result server-side to avoid client-side
-        // SSE parsing issues. Send keepalive pings to prevent Vercel 504.
+        // Stream keepalive spaces while Anthropic processes, then send
+        // the complete JSON result. No SSE — just raw bytes + JSON.
+        // Spaces keep the Vercel gateway alive (first byte arrives fast).
         const readable = new ReadableStream({
           async start(controller) {
             try {
               let inputJson = '';
 
               for await (const event of stream) {
-                // Each event = keepalive ping that keeps the connection alive
-                controller.enqueue(encoder.encode(': ping\n\n'));
+                // Space byte keeps Vercel connection alive
+                controller.enqueue(encoder.encode(' '));
 
                 if (
                   event.type === 'content_block_delta' &&
@@ -471,21 +472,21 @@ export async function POST(request: Request): Promise<Response> {
                 }
               }
 
-              // Stream complete — validate and send assembled result
+              // Stream complete — send assembled result as JSON
               if (!inputJson) {
-                const errEvent = { error: 'AI-analyse kon geen resultaat genereren.' };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(errEvent)}\n\n`));
+                controller.enqueue(encoder.encode(JSON.stringify({
+                  error: 'AI-analyse kon geen resultaat genereren.',
+                })));
               } else {
                 const result = JSON.parse(inputJson);
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(result)}\n\n`));
+                controller.enqueue(encoder.encode(JSON.stringify(result)));
               }
-              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
               controller.close();
             } catch (streamErr) {
               console.error(`[ai-analysis] Stream error (${model}):`, streamErr);
-              const errEvent = { error: String(streamErr) };
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(errEvent)}\n\n`));
-              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              controller.enqueue(encoder.encode(JSON.stringify({
+                error: String(streamErr),
+              })));
               controller.close();
             }
           },
@@ -493,8 +494,7 @@ export async function POST(request: Request): Promise<Response> {
 
         return new Response(readable, {
           headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json',
             'X-Accel-Buffering': 'no',
           },
         });
