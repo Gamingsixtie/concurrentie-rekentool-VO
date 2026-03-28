@@ -6,26 +6,41 @@
 
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import { useSchoolplanAnalysis } from '@/hooks/useSchoolplanAnalysis';
+import { useParams, Link } from '@tanstack/react-router';
 
 export function SchoolplanContextCard() {
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
+  const { slug } = useParams({ strict: false }) as { slug?: string };
   const { data: analysis } = useSchoolplanAnalysis(activeSchoolId ?? '');
 
   const isComplete = analysis?.analysis_status === 'complete';
   const hasOpportunities = isComplete && analysis.opportunities.length > 0;
 
-  // No schoolplan — muted placeholder
+  // No schoolplan — encourage upload
   if (!hasOpportunities) {
     return (
-      <div className="rounded-lg border border-dashed border-neutral-200 bg-neutral-50/50 p-4">
+      <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
         <div className="flex items-center gap-2 mb-1">
-          <StepBadge step={1} muted />
-          <h3 className="text-sm font-semibold text-neutral-400">Schoolplan context</h3>
+          <StepBadge step={1} />
+          <h3 className="text-sm font-semibold text-purple-800">Tip: doe eerst de schoolplananalyse</h3>
         </div>
-        <p className="text-xs text-neutral-400 pl-7">
-          Geen schoolplan beschikbaar — deze stap kan worden overgeslagen.
-          De AI-analyse werkt ook zonder schoolplan.
+        <p className="text-xs text-purple-700 pl-7 leading-relaxed">
+          Upload het schoolplan om automatisch Cito-kansen te identificeren. Dit verrijkt de
+          vergelijking met argumenten vanuit de schoolvisie. De analyse werkt ook zonder, maar is
+          sterker met schoolplan-context.
         </p>
+        {slug && (
+          <Link
+            to="/scholen/$slug/schoolplan"
+            params={{ slug }}
+            className="inline-flex items-center gap-1.5 mt-2 ml-7 text-xs font-semibold text-purple-700 hover:text-purple-900 underline decoration-dashed underline-offset-2"
+          >
+            Schoolplan uploaden
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+        )}
       </div>
     );
   }
