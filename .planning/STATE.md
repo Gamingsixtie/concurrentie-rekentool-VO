@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Completed 22-03-PLAN.md
-last_updated: "2026-03-28T22:20:46.774Z"
+status: Ready to execute
+stopped_at: Completed 22-04-PLAN.md
+last_updated: "2026-03-28T22:25:42.957Z"
 progress:
-  total_phases: 23
-  completed_phases: 18
-  total_plans: 67
-  completed_plans: 61
+  total_phases: 22
+  completed_phases: 17
+  total_plans: 65
+  completed_plans: 58
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 23 — ai-concurrentieanalyse-streaming-fix
+**Current focus:** Phase 21 — dmu-export-upgrade
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 21 (dmu-export-upgrade) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -139,18 +139,11 @@ Recent decisions affecting current work:
 - [Phase 22]: 44 todo-only tests deleted -- critical paths already covered by 604 real tests
 - [Phase 22]: Sentry replay maskAllText: false for internal tool; source map upload conditional on SENTRY_AUTH_TOKEN; CSP allows sentry.io + supabase.co + anthropic.com
 - [Phase 17]: No code changes needed for 17-04 -- all functionality already implemented in plan 17-03
-- [Phase 23]: Server-side JSON assembly replaces fragment forwarding; Sonnet primary, Haiku fallback; Opus via deepAnalysis flag
-- [Phase 23]: AnalysisError class with explicit property assignments instead of parameter properties (erasableSyntaxOnly TS constraint)
-- [Phase 23]: fetchWithRetry pattern: max 2 retries, 1s then 3s backoff, typed error classification for AI analysis
-- [Phase 22]: Port 4173 with strictPort for E2E isolation from dev server on 3000
-- [Phase 22]: VITE_SKIP_AUTH env var (not SKIP_AUTH) for Playwright auth bypass
-- [Phase 22]: E2E tests cover routing/auth/UI -- full CRUD requires Supabase test backend
-- [Phase 22]: Hook tests mock at db/operations or supabase/client level -- follows existing codebase pattern
+- [Phase 22]: TanStack Router test wrapper: components using Link must be rendered inside createRootRoute.component, not as RouterProvider children
 
 ### Roadmap Evolution
 
 - Phase 16 added: AI Wizard Verbetering & Prijsvergelijking Harmonisatie — eerlijke concurrentievergelijking via verbeterde wizard met concurrent-selectie, AI-advies en tabblad-synchronisatie
-- Phase 23 added: AI Concurrentieanalyse Streaming Fix — 504 timeouts en JSON parse errors op Vercel oplossen met robuuste streaming
 
 ### Pending Todos
 
@@ -168,6 +161,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T22:20:46.767Z
-Stopped at: Completed 22-03-PLAN.md
+Last session: 2026-03-28T22:25:42.949Z
+Stopped at: Completed 22-04-PLAN.md
 Resume file: None
