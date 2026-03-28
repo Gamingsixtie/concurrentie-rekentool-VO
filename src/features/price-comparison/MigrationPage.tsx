@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useParams } from '@tanstack/react-router';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { calculateMigration } from '../../engine/migration';
@@ -85,6 +86,7 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const levels = useSchoolProfileStore((s) => s.levels);
+  const { slug } = useParams({ strict: false }) as { slug?: string };
 
   useEffect(() => {
     initialize();
@@ -294,7 +296,7 @@ export function MigrationPage({ onBack }: MigrationPageProps) {
       </div>
 
       {/* AI Migration Analysis */}
-      <AnalysisPanel mode="migration" migrationResult={result} />
+      <AnalysisPanel mode="migration" schoolId={slug} migrationResult={result} />
 
       <DisclaimerFooter showDisclaimer={true} />
     </div>
