@@ -24,13 +24,16 @@
   ],
   "functions": {
     "api/ai-analysis.ts": {
-      "maxDuration": 120
+      "maxDuration": 300
+    },
+    "api/ai-analysis/health.ts": {
+      "maxDuration": 10
     },
     "api/ai-advice.ts": {
-      "maxDuration": 120
+      "maxDuration": 300
     },
     "api/ai-wizard-advice.ts": {
-      "maxDuration": 120
+      "maxDuration": 300
     },
     "api/*": {
       "maxDuration": 60

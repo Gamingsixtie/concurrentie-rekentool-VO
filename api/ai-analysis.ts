@@ -151,6 +151,7 @@ const ANALYSIS_TOOL: Anthropic.Tool = {
 
 interface AnalysisRequest {
   mode: 'comparison' | 'current-vs-proposed' | 'migration';
+  deepAnalysis?: boolean;
   comparisonData: {
     modules: Array<{
       moduleId: string;
@@ -432,19 +433,24 @@ export async function POST(request: Request): Promise<Response> {
 
     const userMessage = buildUserMessage(body);
 
-    // Streaming response prevents Vercel 504 gateway timeouts.
-    // Data flows continuously so the connection stays alive within maxDuration.
-    // Model cascade: try Haiku first (fast), fall back to Sonnet if unavailable.
-    const MODELS = ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'] as const;
+    // Server-side JSON assembly: collect all fragments, validate, send complete JSON.
+    // Keepalive spaces prevent Vercel 504 gateway timeouts during long AI responses.
+    // Model cascade: try Sonnet first (quality), fall back to Haiku if unavailable.
+    const MODELS = ['claude-sonnet-4-6', 'claude-haiku-4-5-20251001'] as const;
+    const DEEP_MODELS = ['claude-opus-4-6', 'claude-sonnet-4-6'] as const;
+    const models = body.deepAnalysis ? DEEP_MODELS : MODELS;
     const encoder = new TextEncoder();
 
-    for (const model of MODELS) {
+    console.log(`[ai-analysis] mode=${body.deepAnalysis ? 'deep' : 'standard'} models=[${models.join(',')}]`);
+
+    for (const model of models) {
       try {
-        console.log(`[ai-analysis] Starting streaming with ${model}...`);
+        const startTime = Date.now();
+        console.log(`[ai-analysis] [${model}] [start] Starting server-side assembly...`);
 
         const stream = await getAnthropic().messages.create({
           model,
-          max_tokens: 4096,
+          max_tokens: 16384,
           system: SYSTEM_PROMPT,
           tools: [ANALYSIS_TOOL],
           tool_choice: { type: 'tool', name: 'analyse_result' },
@@ -452,42 +458,49 @@ export async function POST(request: Request): Promise<Response> {
           stream: true,
         });
 
-        // Forward JSON fragments directly as they arrive from Anthropic.
-        // Before JSON starts: send spaces as keepalive (prevents 504).
-        // Once input_json_delta events arrive: forward raw fragments.
-        // Client does response.text().trim() + JSON.parse() — no assembly.
-        let jsonStarted = false;
+        // Collect all JSON fragments server-side, then validate and send complete JSON.
+        // Keepalive spaces every 5s prevent 504 timeouts while waiting for AI response.
+        const jsonParts: string[] = [];
 
         const readable = new ReadableStream({
           async start(controller) {
+            const keepalive = setInterval(() => {
+              controller.enqueue(encoder.encode(' '));
+            }, 5000);
+
             try {
               for await (const event of stream) {
                 if (
                   event.type === 'content_block_delta' &&
                   event.delta.type === 'input_json_delta'
                 ) {
-                  jsonStarted = true;
-                  controller.enqueue(encoder.encode(event.delta.partial_json));
-                } else if (!jsonStarted) {
-                  // Keepalive space before JSON content starts
-                  controller.enqueue(encoder.encode(' '));
+                  jsonParts.push(event.delta.partial_json);
                 }
               }
 
-              if (!jsonStarted) {
+              clearInterval(keepalive);
+
+              if (jsonParts.length === 0) {
                 // No tool output received — send error JSON
+                console.warn(`[ai-analysis] [${model}] [empty] [${Date.now() - startTime}ms] No JSON parts received`);
                 controller.enqueue(encoder.encode(JSON.stringify({
                   error: 'AI-analyse kon geen resultaat genereren.',
                 })));
+              } else {
+                // Assemble and validate server-side before sending
+                const assembled = jsonParts.join('');
+                const parsed = JSON.parse(assembled);
+                controller.enqueue(encoder.encode(JSON.stringify(parsed)));
+                console.log(`[ai-analysis] [${model}] [complete] [${Date.now() - startTime}ms] chars=${assembled.length}`);
               }
+
               controller.close();
             } catch (streamErr) {
-              console.error(`[ai-analysis] Stream error (${model}):`, streamErr);
-              if (!jsonStarted) {
-                controller.enqueue(encoder.encode(JSON.stringify({
-                  error: String(streamErr),
-                })));
-              }
+              clearInterval(keepalive);
+              console.error(`[ai-analysis] [${model}] [error] [${Date.now() - startTime}ms]`, streamErr);
+              controller.enqueue(encoder.encode(JSON.stringify({
+                error: String(streamErr),
+              })));
               controller.close();
             }
           },
@@ -505,7 +518,7 @@ export async function POST(request: Request): Promise<Response> {
         const isRetryable = errMsg.includes('529') || errMsg.includes('overloaded') ||
           errMsg.includes('429') || errMsg.includes('rate');
 
-        if (isRetryable && model !== MODELS[MODELS.length - 1]) {
+        if (isRetryable && model !== models[models.length - 1]) {
           console.warn(`[ai-analysis] ${model} unavailable, trying next model...`);
           continue;
         }
