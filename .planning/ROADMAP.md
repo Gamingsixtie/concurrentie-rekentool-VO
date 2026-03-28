@@ -345,7 +345,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 19. Gesprekken-tab & Acties Upgrade | v2.0 | 0/3 | Complete    | 2026-03-25 |
 | 20. Vergelijking & Waarde Optimalisatie | v2.0 | 0/0 | Not Started | — |
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
-| 22. Architectuur, Testen & Productie-readiness | v2.0 | 1/6 | In Progress|  |
+| 22. Architectuur, Testen & Productie-readiness | v2.0 | 4/6 | In Progress|  |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -459,14 +459,14 @@ Plans:
   4. Architectuurreview bevestigt correcte scheiding van concerns, geen security-issues, en performante queries
   5. Alle bekende bugs en technische schuld uit eerdere fases zijn opgelost
   6. App is stabiel, performant en productiegereed voor dagelijks gebruik door het team
-**Plans:** 1/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 - [x] 22-01-PLAN.md — Test environment fix: worktree exclusion, coverage config, fix failing tests, triage 158 todos
 - [x] 22-02-PLAN.md — CI pipeline (GitHub Actions) + Sentry error tracking + security headers
-- [ ] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
+- [x] 22-03-PLAN.md — Unit tests voor hooks, stores en utils
 - [ ] 22-04-PLAN.md — Component tests (React Testing Library) voor wizard, forms, modals, navigation
-- [ ] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
+- [x] 22-05-PLAN.md — Playwright E2E setup + tests voor alle gebruikersflows
 - [ ] 22-06-PLAN.md — Security audit, performance profiling, coverage thresholds, productie-readiness checkpoint
 
 ## Backlog
@@ -496,3 +496,13 @@ Plans:
 Plans:
 - [x] 23-01-PLAN.md -- Server-side JSON assembly, model cascade, config updates, health check
 - [x] 23-02-PLAN.md -- Client retry logic, progress indicator, dual buttons, error UI, production verification
+
+### Phase 1000: UX-audit vergelijkingsoverzicht — stakeholder-ready prototype
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 1000 to break down)

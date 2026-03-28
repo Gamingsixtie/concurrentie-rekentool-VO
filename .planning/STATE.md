@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to plan
-stopped_at: Completed 23-02-PLAN.md (awaiting human verification checkpoint)
-last_updated: "2026-03-28T22:14:41.704Z"
+stopped_at: Completed 22-03-PLAN.md
+last_updated: "2026-03-28T22:20:46.774Z"
 progress:
   total_phases: 23
   completed_phases: 18
   total_plans: 67
-  completed_plans: 59
+  completed_plans: 61
 ---
 
 # Project State
@@ -142,6 +142,10 @@ Recent decisions affecting current work:
 - [Phase 23]: Server-side JSON assembly replaces fragment forwarding; Sonnet primary, Haiku fallback; Opus via deepAnalysis flag
 - [Phase 23]: AnalysisError class with explicit property assignments instead of parameter properties (erasableSyntaxOnly TS constraint)
 - [Phase 23]: fetchWithRetry pattern: max 2 retries, 1s then 3s backoff, typed error classification for AI analysis
+- [Phase 22]: Port 4173 with strictPort for E2E isolation from dev server on 3000
+- [Phase 22]: VITE_SKIP_AUTH env var (not SKIP_AUTH) for Playwright auth bypass
+- [Phase 22]: E2E tests cover routing/auth/UI -- full CRUD requires Supabase test backend
+- [Phase 22]: Hook tests mock at db/operations or supabase/client level -- follows existing codebase pattern
 
 ### Roadmap Evolution
 
@@ -164,6 +168,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T21:27:43.944Z
-Stopped at: Completed 23-02-PLAN.md (awaiting human verification checkpoint)
+Last session: 2026-03-28T22:20:46.767Z
+Stopped at: Completed 22-03-PLAN.md
 Resume file: None
