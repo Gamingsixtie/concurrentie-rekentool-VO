@@ -47,11 +47,13 @@ Exceptions: `max-w-[960px]` content container width is the established page cons
 | Role | Size | Weight | Line Height | Tailwind Class |
 |------|------|--------|-------------|----------------|
 | Body | 14px | 400 (regular) | 1.5 | `text-sm` |
-| Label | 11px | 500 (medium) | 1.4 | `text-[11px] font-medium` |
-| Section heading | 15px | 600 (semibold) | 1.3 | `text-[15px] font-semibold` |
-| Page title | 20px | 700 (bold) | 1.2 | `text-xl font-bold` |
+| Label | 11px | 400 (regular) | 1.4 | `text-[11px]` |
+| Section heading | 16px | 600 (semibold) | 1.3 | `text-base font-semibold` |
+| Page title | 20px | 600 (semibold) | 1.2 | `text-xl font-semibold` |
 
-Source: Extracted from existing PriceComparisonPage component patterns. The codebase uses `text-sm` (14px) as body, `text-[15px] font-semibold` for section headings (ComparisonSummary, ModuleDetailPanel), and `text-[11px]`/`text-[10px]` for auxiliary labels.
+Weights used: **2** -- 400 (regular) for body text and labels, 600 (semibold) for section headings and page title. Weight contrast plus size difference provides sufficient visual hierarchy without additional weight steps.
+
+Source: Adapted from existing PriceComparisonPage component patterns. Body uses `text-sm` (14px). Section headings bumped from 15px to 16px (`text-base`) for clear size differentiation from body text (2px delta instead of 1px). Labels remain 11px for auxiliary metadata. Page title at 20px provides top-level hierarchy via size alone.
 
 ---
 
@@ -90,6 +92,8 @@ Alternating section backgrounds replace card-with-border approach:
 | 8. DisclaimerFooter | `bg-neutral-50` |
 
 Accent reserved for: section headings (`text-cito-primary`), Cito provider column highlighting, primary CTA buttons (`bg-cito-accent`), active toggle states.
+
+**Primary visual anchor:** AI Advies Hero (section 1) -- the first visible content on page load. This section establishes page context with the 2-3 line advice summary, giving stakeholders an immediate orientation point before scrolling into totals and detail data.
 
 ---
 
