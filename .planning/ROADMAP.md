@@ -79,6 +79,7 @@ Plans:
 - [ ] **Phase 21: DMU-Export Upgrade** - Export-tab met DMU-gerichte rapporten (coördinator, MT/directie, finance) op basis van generieke aannames, met geëxtraheerde tekst uit schoolplan en Cito-bronnen
 - [ ] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
  (completed 2026-03-25)
+- [ ] **Phase 23: AI Concurrentieanalyse Streaming Fix** - /api/ai-analysis endpoint geeft 504 timeouts en JSON parse errors op Vercel. Root cause identificeren (max_tokens truncatie of function timeout mid-write) en robuuste streaming-oplossing implementeren. Scope: api/ai-analysis.ts (server) + src/lib/ai-analysis.ts (client). Success: AI analyse werkt betrouwbaar op productie zonder 504 of JSON parse errors.
 
 ## Phase Details
 
@@ -481,3 +482,17 @@ Plans:
 
 Plans:
 - [x] 999.1-01-PLAN.md — SchoolNameDialog, SchoolCard wizard-routing, DashboardTab CTA banner, WizardPage context-header
+
+### Phase 23: AI Concurrentieanalyse Streaming Fix
+**Goal**: /api/ai-analysis endpoint betrouwbaar werkend op Vercel — geen 504 timeouts, geen JSON parse errors. Root cause identificeren en definitief oplossen.
+**Depends on**: Phase 22
+**Success Criteria** (what must be TRUE):
+  1. AI concurrentieanalyse genereert betrouwbaar een volledig resultaat op productie (toolvo.vercel.app) binnen Vercel functie-limieten
+  2. Geen 504 gateway timeouts — streaming houdt connectie open
+  3. Geen JSON parse errors — client ontvangt altijd valide JSON
+  4. Model cascade (Haiku → Sonnet) werkt correct bij overload
+**Plans**: 2 plans
+
+Plans:
+- [ ] 23-01-PLAN.md -- Server-side JSON assembly, model cascade, config updates, health check
+- [ ] 23-02-PLAN.md -- Client retry logic, progress indicator, dual buttons, error UI, production verification
