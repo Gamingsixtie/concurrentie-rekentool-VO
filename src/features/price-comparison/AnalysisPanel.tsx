@@ -112,8 +112,10 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
   const wizardNarrativeContext = useWizardStore((s) => s.wizardNarrativeContext);
   const shouldAutoTriggerAnalysis = useWizardStore((s) => s.shouldAutoTriggerAnalysis);
   const clearAutoTrigger = useWizardStore((s) => s.clearAutoTrigger);
+  const cachedAnalysisResult = useWizardStore((s) => s.cachedAnalysisResult);
+  const setCachedAnalysisResult = useWizardStore((s) => s.setCachedAnalysisResult);
 
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(cachedAnalysisResult);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorType, setErrorType] = useState<'timeout' | 'server' | 'parse' | 'auth' | 'unknown' | null>(null);
@@ -164,6 +166,7 @@ export function AnalysisPanel({ mode, schoolId, currentVsProposedResult, migrati
         { deepAnalysis: deep, onProgress: handleProgress },
       );
       setAnalysis(analysisResult);
+      setCachedAnalysisResult(analysisResult);
       onAnalysisComplete?.(analysisResult);
     } catch (err) {
       console.error('[AnalysisPanel] Error:', err);

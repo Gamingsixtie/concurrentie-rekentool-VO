@@ -11,7 +11,6 @@ import { SchoolplanContextCard } from './SchoolplanContextCard';
 import { ComparisonWizard } from '../wizard/ComparisonWizard';
 import { AnalysisPanel } from '../AnalysisPanel';
 import { NarrativeConnector } from './NarrativeConnector';
-import type { AnalysisResult } from '@/lib/ai-analysis';
 
 interface AiAdviesSectionProps {
   schoolId?: string;
@@ -22,9 +21,9 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
   const hasCompletedWizard = useWizardStore((s) => s.hasCompletedOnce);
   const wizardNarrativeContext = useWizardStore((s) => s.wizardNarrativeContext);
   const shouldAutoTriggerAnalysis = useWizardStore((s) => s.shouldAutoTriggerAnalysis);
+  const cachedSamenvatting = useWizardStore((s) => s.cachedAnalysisResult?.samenvatting ?? null);
 
   const [expanded, setExpanded] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<Pick<AnalysisResult, 'samenvatting'> | null>(null);
 
   // Auto-expand when wizard triggers analysis so user sees it generating
   useEffect(() => {
@@ -35,7 +34,7 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
 
   if (selectedModules.length === 0) return null;
 
-  const hasSummary = !!analysisResult?.samenvatting;
+  const hasSummary = !!cachedSamenvatting;
 
   return (
     <div>
@@ -74,7 +73,7 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
           {hasSummary ? (
             <>
               <p className="text-sm text-neutral-700 leading-relaxed">
-                {analysisResult.samenvatting}
+                {cachedSamenvatting}
               </p>
               <button
                 type="button"
@@ -176,7 +175,6 @@ export function AiAdviesSection({ schoolId }: AiAdviesSectionProps) {
               <AnalysisPanel
                 mode="comparison"
                 schoolId={schoolId}
-                onAnalysisComplete={(result) => setAnalysisResult({ samenvatting: result.samenvatting })}
               />
             </div>
           </div>

@@ -14,6 +14,7 @@ import type {
   ExtractedVariantResult,
   WizardNarrativeContext,
 } from './types';
+import type { AnalysisResult } from '@/lib/ai-analysis';
 import { usePriceComparisonStore } from '../store';
 import { useSchoolProfileStore } from '@/features/school-profile/store';
 import type { ProviderKey } from '@/engine/price-comparison';
@@ -64,6 +65,10 @@ interface WizardState {
   expand: () => void;
   resetWizard: () => void;
 
+  // Cached AI analysis result (persisted so it survives navigation/reload)
+  cachedAnalysisResult: AnalysisResult | null;
+  setCachedAnalysisResult: (result: AnalysisResult | null) => void;
+
   // Auto-trigger analysis after wizard apply
   shouldAutoTriggerAnalysis: boolean;
   clearAutoTrigger: () => void;
@@ -103,6 +108,9 @@ export const useWizardStore = create<WizardState>()(
       wizardNarrativeContext: null,
 
       shouldAutoTriggerAnalysis: false,
+
+      cachedAnalysisResult: null,
+      setCachedAnalysisResult: (result) => set({ cachedAnalysisResult: result }),
 
       // Actions
       setStep: (step) => set({ currentStep: step }),
@@ -250,6 +258,7 @@ export const useWizardStore = create<WizardState>()(
         hasCompletedOnce: state.hasCompletedOnce,
         isCollapsed: state.isCollapsed,
         scenario: state.scenario,
+        cachedAnalysisResult: state.cachedAnalysisResult,
       }),
     },
   ),
