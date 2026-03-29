@@ -4,7 +4,6 @@ import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
-import { PriceBadge } from '../../components/ui/PriceBadge';
 import { ModuleDetailPanel } from './ModuleDetailPanel';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
@@ -17,11 +16,27 @@ interface ComparisonTableProps {
   onBarHighlight?: string | null;
 }
 
+/** Subtle column background per provider — matches chart colors at low opacity */
+const PROVIDER_COL_BG: Record<ProviderKey, string> = {
+  cito: 'bg-[#003082]/[0.04]',
+  dia: 'bg-[#FF6600]/[0.04]',
+  jij: 'bg-[#22C55E]/[0.04]',
+  saqi: 'bg-[#8B5CF6]/[0.04]',
+};
+
+/** Header background per provider */
+const PROVIDER_HEADER_BG: Record<ProviderKey, string> = {
+  cito: 'bg-[#003082]',
+  dia: 'bg-[#FF6600]',
+  jij: 'bg-[#22C55E]',
+  saqi: 'bg-[#8B5CF6]',
+};
+
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
+    width="14"
+    height="14"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -35,14 +50,26 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   </svg>
 );
 
+/** Find the cheapest provider for a module (null = not available) */
+function getCheapestProvider(mod: ComparisonResult['modules'][number], providers: readonly ProviderKey[]): ProviderKey | null {
+  let cheapest: ProviderKey | null = null;
+  let lowestCost = Infinity;
+  for (const p of providers) {
+    const cost = mod.providers[p];
+    if (cost !== null && cost.totalCost < lowestCost) {
+      lowestCost = cost.totalCost;
+      cheapest = p;
+    }
+  }
+  return cheapest;
+}
+
 export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps) {
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
   const scenario = useSchoolProfileStore((s) => s.scenario);
 
   const getProviderLabel = (provider: ProviderKey) => {
-    if (provider === 'cito' && scenario === 'C') {
-      return 'Huidig Cito';
-    }
+    if (provider === 'cito' && scenario === 'C') return 'Huidig Cito';
     return PROVIDER_LABELS[provider];
   };
 
@@ -50,7 +77,6 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
     setExpandedModule((prev) => (prev === moduleId ? null : moduleId));
   };
 
-  // Group modules by category
   const categoryOrder: ModuleCategory[] = ['leerlingvolgsysteem', 'overige-instrumenten'];
   const groupedModules = categoryOrder
     .map((category) => ({
@@ -60,7 +86,6 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
     }))
     .filter((group) => group.modules.length > 0);
 
-  // Use visibleProviders from store, filtered to only those with data
   const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
   const activeProviders = visibleProviders.filter((provider) =>
     result.modules.some((m) => m.providers[provider] !== null),
@@ -68,14 +93,15 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
   const providerWidth = `${Math.floor(70 / activeProviders.length)}%`;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        {/* Header */}
+    <div>
+      <table className="w-full border-collapse text-sm">
+        {/* Header — each provider gets its own brand color */}
         <thead>
-          <tr className="bg-cito-primary text-white text-sm font-semibold">
-            <th className="w-[30%] text-left py-3 px-4">Module</th>
+          <tr>
+            <th className="w-[30%] text-left py-2 px-3 bg-neutral-100 text-neutral-600 text-xs font-semibold uppercase tracking-wide">
+              Module
+            </th>
             {activeProviders.map((provider) => {
-              // Find first module with data for this provider to get tier/package info
               const sampleCost = result.modules.find(m => m.providers[provider])?.providers[provider];
               const tierBadge = provider === 'jij' && sampleCost?.tierId
                 ? `Licentie ${sampleCost.tierId}`
@@ -84,15 +110,19 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
                 : null;
 
               return (
-                <th key={provider} style={{ width: providerWidth }} className="text-right py-3 px-4">
-                  <div className="text-right">{getProviderLabel(provider)}</div>
+                <th
+                  key={provider}
+                  style={{ width: providerWidth }}
+                  className={`text-right py-2 px-3 text-white text-xs font-semibold ${PROVIDER_HEADER_BG[provider]}`}
+                >
+                  <div>{getProviderLabel(provider)}</div>
                   {provider === 'cito' && scenario === 'C' && (
-                    <div className="text-[10px] font-normal opacity-80 text-right">(huidig platform)</div>
+                    <div className="text-[10px] font-normal opacity-80">(huidig platform)</div>
                   )}
                   {provider === 'cito' && <CitoBundleSelector compact />}
                   {provider === 'dia' && <DiaBundleSelector compact />}
                   {tierBadge && provider !== 'cito' && provider !== 'dia' && (
-                    <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
+                    <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[10px] font-medium bg-white/20 rounded-full">
                       {tierBadge}
                     </span>
                   )}
@@ -115,7 +145,6 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
             />
           ))}
 
-          {/* Totaalrij — compact, zonder verschilrij (staat al in samenvatting) */}
           <TotaalRow result={result} activeProviders={activeProviders} />
         </tbody>
       </table>
@@ -150,10 +179,10 @@ function CategoryGroup({
   return (
     <>
       {/* Category subheader */}
-      <tr className="bg-cito-bg">
+      <tr>
         <td
           colSpan={1 + activeProviders.length}
-          className="py-2 px-4 text-sm font-semibold text-neutral-700"
+          className="py-1.5 px-3 text-xs font-semibold text-neutral-500 uppercase tracking-wide bg-neutral-50 border-b border-neutral-200"
         >
           {label}
         </td>
@@ -163,8 +192,6 @@ function CategoryGroup({
         const isExpanded = expandedModule === mod.moduleId;
         const isHighlighted = onBarHighlight === mod.moduleId;
         const isBundled = bundleModuleIds.has(mod.moduleId);
-
-        // Check if this is the last bundled module in the list
         const isLastBundled = isBundled && !modules.slice(idx + 1).some((m) => bundleModuleIds.has(m.moduleId));
 
         return (
@@ -190,7 +217,6 @@ function CategoryGroup({
   );
 }
 
-/** Fragment wrapper — just passes children through. Needed for the key prop. */
 function BundleGroupWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
@@ -212,38 +238,35 @@ function BundelSubtotaalRow({
   const bundlePricePerStudent = bundle.contractPrices?.[contractPeriod] ?? bundle.pricePerStudent;
 
   return (
-    <tr className="bg-cito-primary/5 border-t border-cito-primary/10">
-      <td className="py-2 px-4 pl-10 text-sm font-semibold text-cito-primary">
+    <tr className="border-t border-cito-primary/10">
+      <td className="py-1.5 px-3 pl-8 text-xs font-semibold text-cito-primary bg-cito-primary/[0.03]">
         Subtotaal {bundleLabel} bundel
       </td>
       {activeProviders.map((provider) => {
-        // Sum the per-student prices for this provider across the bundle modules
         const perStudent = bundleModules.reduce((sum, m) => {
           const cost = m.providers[provider];
           return sum + (cost?.pricePerStudent ?? 0);
         }, 0);
-        const total = perStudent * totalStudents;
 
-        // For Cito: show the actual bundle price if available
         const isCito = provider === 'cito';
         const displayPerStudent = isCito && bundlePricePerStudent !== null
           ? bundlePricePerStudent
           : perStudent;
         const displayTotal = isCito && bundlePricePerStudent !== null
           ? bundlePricePerStudent * totalStudents
-          : total;
+          : perStudent * totalStudents;
 
         const hasAnyPrice = bundleModules.some((m) => m.providers[provider] !== null);
         if (!hasAnyPrice) {
-          return <td key={provider} className="py-2 px-4 text-sm text-neutral-400 text-right">—</td>;
+          return <td key={provider} className={`py-1.5 px-3 text-xs text-neutral-400 text-right ${PROVIDER_COL_BG[provider]}`}>—</td>;
         }
 
         return (
-          <td key={provider} className="py-2 px-4 text-right tabular-nums">
-            <span className="text-sm font-semibold text-neutral-800">
+          <td key={provider} className={`py-1.5 px-3 text-right tabular-nums ${PROVIDER_COL_BG[provider]}`}>
+            <span className="text-xs font-semibold text-neutral-700">
               {formatCurrency(displayTotal)}
             </span>
-            <span className="text-xs text-neutral-500 ml-1.5">
+            <span className="text-[11px] text-neutral-400 ml-1">
               ({formatCurrency(displayPerStudent)}/lln)
             </span>
           </td>
@@ -268,41 +291,45 @@ function ModuleRow({
   activeProviders: readonly ProviderKey[];
   isBundleGrouped?: boolean;
 }) {
+  const cheapest = getCheapestProvider(mod, activeProviders);
+
   return (
     <>
       <tr
         id={`module-row-${mod.moduleId}`}
-        className={`hover:bg-neutral-100 transition-colors duration-200 even:bg-neutral-50 ${
+        className={`border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150 cursor-pointer ${
           isHighlighted ? 'bg-neutral-100' : ''
         }`}
+        onClick={() => onToggle(mod.moduleId)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle(mod.moduleId);
+          }
+        }}
+        aria-expanded={isExpanded}
       >
-        {/* Module name cell */}
+        {/* Module name */}
         <td
-          className={`py-3 px-4 cursor-pointer select-none ${
+          className={`py-2 px-3 select-none ${
             isBundleGrouped ? 'border-l-2 border-l-cito-primary/30' : ''
           }`}
-          onClick={() => onToggle(mod.moduleId)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onToggle(mod.moduleId);
-            }
-          }}
-          aria-expanded={isExpanded}
         >
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 text-sm text-neutral-800">
             <ChevronIcon expanded={isExpanded} />
             {mod.moduleName}
           </span>
         </td>
 
-        {/* Provider cells */}
+        {/* Price per provider */}
         {activeProviders.map((provider) => (
           <ProviderCell
             key={provider}
             cost={mod.providers[provider]}
+            provider={provider}
+            isCheapest={provider === cheapest && activeProviders.length > 1}
           />
         ))}
       </tr>
@@ -311,7 +338,7 @@ function ModuleRow({
       {isExpanded && (
         <tr>
           <td colSpan={1 + activeProviders.length} className="p-0">
-            <div className="border-l-[3px] border-l-cito-primary bg-white p-6 overflow-hidden transition-all duration-200 ease-out">
+            <div className="border-l-[3px] border-l-cito-primary bg-white p-6">
               <ModuleDetailPanel moduleId={mod.moduleId} />
             </div>
           </td>
@@ -332,16 +359,30 @@ function TotaalRow({ result, activeProviders }: { result: ComparisonResult; acti
     ? diaPackageResult!.savings * totalStudents
     : 0;
 
+  // Find cheapest total
+  let cheapestTotal: ProviderKey | null = null;
+  let lowestTotal = Infinity;
+  for (const p of activeProviders) {
+    if (result.totals[p] < lowestTotal) {
+      lowestTotal = result.totals[p];
+      cheapestTotal = p;
+    }
+  }
+
   return (
-    <tr className="bg-neutral-50 font-semibold text-base">
-      <td className="py-3 px-4">Totaal</td>
+    <tr className="border-t-2 border-neutral-300 font-semibold">
+      <td className="py-2.5 px-3 text-sm bg-neutral-100">Totaal</td>
       {activeProviders.map((provider) => (
-        <td key={provider} className="py-3 px-4 text-right tabular-nums">
-          <span>{formatCurrency(result.totals[provider])}</span>
+        <td
+          key={provider}
+          className={`py-2.5 px-3 text-right tabular-nums ${PROVIDER_COL_BG[provider]} ${
+            provider === cheapestTotal && activeProviders.length > 1 ? 'text-green-700' : 'text-neutral-900'
+          }`}
+        >
+          <span className="text-sm">{formatCurrency(result.totals[provider])}</span>
           {provider === 'dia' && hasPackageDiscount && (
-            <div className="text-xs font-normal text-green-700 mt-0.5">
-              Pakketkorting ({diaPackageResult!.selectedPackage!.name}): besparing{' '}
-              {formatCurrency(savingsEuros)}
+            <div className="text-[11px] font-normal text-green-600 mt-0.5">
+              Pakketkorting: {formatCurrency(savingsEuros)} besparing
             </div>
           )}
         </td>
@@ -350,66 +391,31 @@ function TotaalRow({ result, activeProviders }: { result: ComparisonResult; acti
   );
 }
 
-function NoteIcon({ note }: { note: string }) {
-  return (
-    <span
-      className="inline-flex items-center cursor-help"
-      title={note}
-      aria-label={note}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="text-amber-500"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="16" x2="12" y2="12" />
-        <line x1="12" y1="8" x2="12.01" y2="8" />
-      </svg>
-    </span>
-  );
-}
-
 function ProviderCell({
   cost,
+  provider,
+  isCheapest,
 }: {
   cost: ComparisonResult['modules'][number]['providers'][ProviderKey];
+  provider: ProviderKey;
+  isCheapest: boolean;
 }) {
   if (cost === null) {
     return (
-      <td className="py-3 px-4 text-right">
-        <span className="inline-flex items-center bg-cito-accent/10 text-cito-accent rounded-full px-2 py-0.5 text-sm font-semibold">
-          Niet beschikbaar
-        </span>
+      <td className={`py-2 px-3 text-right ${PROVIDER_COL_BG[provider]}`}>
+        <span className="text-xs text-neutral-400">n.v.t.</span>
       </td>
     );
   }
 
   return (
-    <td className="py-3 px-4 text-right tabular-nums">
-      <div className="flex items-center justify-end gap-2">
-        <span className="text-base font-semibold">
-          {formatCurrency(cost.totalCost)}
-        </span>
-        {cost.isPackagePrice && (
-          <span className="inline-flex items-center bg-cito-primary/10 text-cito-primary rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide">
-            Bundel
-          </span>
-        )}
-        <PriceBadge record={cost.priceRecord} />
-        {cost.priceRecord.note && <NoteIcon note={cost.priceRecord.note} />}
-      </div>
-      <div className="text-sm text-neutral-500 text-right">
-        per leerling: {formatCurrency(cost.pricePerStudent)}
-      </div>
+    <td className={`py-2 px-3 text-right tabular-nums ${PROVIDER_COL_BG[provider]}`}>
+      <span className={`text-sm font-semibold ${isCheapest ? 'text-green-700' : 'text-neutral-800'}`}>
+        {formatCurrency(cost.totalCost)}
+      </span>
+      {cost.isPackagePrice && (
+        <span className="ml-1 text-[10px] text-cito-primary font-medium">bundel</span>
+      )}
     </td>
   );
 }
