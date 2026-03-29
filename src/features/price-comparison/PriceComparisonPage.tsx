@@ -218,32 +218,23 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
         <ComparisonSummary result={result} />
       </SectionBand>
 
-      {/* 4. Provider Toolbar + 5. Tabel (D-04: tabel voor grafiek) */}
+      {/* 4. Provider Toolbar + Grafiek (visueel overzicht eerst) */}
       <SectionBand bg="bg-white">
         <ProviderToolbar />
         <div className="mt-6">
-          <ComparisonTable result={result} onBarHighlight={chartHighlight} />
+          <ComparisonChart result={result} onBarClick={handleBarClick} />
         </div>
       </SectionBand>
 
-      {/* 6. Chart (collapsed by default per D-10) */}
+      {/* 5. Detail-tabel (drill-down per module) */}
       <SectionBand bg="bg-neutral-50">
-        <details className="group">
-          <summary className="cursor-pointer list-none flex items-center justify-between py-3">
-            <h2 className="text-base font-semibold text-cito-primary">Staafgrafiek vergelijking</h2>
-            <svg
-              className="w-4 h-4 text-neutral-400 transition-transform duration-200 group-open:rotate-180"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </summary>
-          <div className="pb-2">
-            <ComparisonChart result={result} onBarClick={handleBarClick} />
-          </div>
-        </details>
+        <div className="mb-4">
+          <h2 className="text-[15px] font-semibold text-cito-primary">Detail per module</h2>
+          <p className="text-sm text-neutral-500 mt-1">
+            Klik op een module voor prijsopbouw, productdetails en differentiators.
+          </p>
+        </div>
+        <ComparisonTable result={result} onBarHighlight={chartHighlight} />
       </SectionBand>
 
       {/* 7. MeerwaardePanel (collapsed by default per D-11) */}

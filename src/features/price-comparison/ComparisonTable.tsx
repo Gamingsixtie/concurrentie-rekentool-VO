@@ -67,13 +67,6 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
   );
   const providerWidth = `${Math.floor(70 / activeProviders.length)}%`;
 
-  const getDifference = (provider: ProviderKey): number | null => {
-    if (provider === 'dia') return result.differences.citoVsDia;
-    if (provider === 'jij') return result.differences.citoVsJij;
-    if (provider === 'saqi') return result.differences.citoVsSaqi;
-    return null;
-  };
-
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -122,24 +115,8 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
             />
           ))}
 
-          {/* Totaalrij */}
+          {/* Totaalrij — compact, zonder verschilrij (staat al in samenvatting) */}
           <TotaalRow result={result} activeProviders={activeProviders} />
-
-          {/* Verschil row */}
-          <tr className="text-sm text-neutral-700">
-            <td className="py-2 px-4"></td>
-            {activeProviders.map((provider) => {
-              if (provider === 'cito') return <td key={provider} className="py-2 px-4 text-right"></td>;
-              const diff = getDifference(provider);
-              return (
-                <td key={provider} className="py-2 px-4 text-right tabular-nums">
-                  {diff !== null
-                    ? `Verschil: ${formatCurrency(Math.abs(diff))}`
-                    : 'n.v.t.'}
-                </td>
-              );
-            })}
-          </tr>
         </tbody>
       </table>
     </div>
