@@ -15,5 +15,6 @@ describe('Route tree', () => {
     expect(paths).toContain('/scholen/$slug/vergelijking');
     expect(paths).toContain('/scholen/$slug/huidig-vs-cito');
     expect(paths).toContain('/scholen/$slug/migratie');
+    expect(paths).toContain('/review');
   });
 });

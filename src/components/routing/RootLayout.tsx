@@ -6,6 +6,7 @@ import { UserMenu } from '@/features/auth/UserMenu';
 import { CloudMigrationWizard } from '@/features/migration/CloudMigrationWizard';
 import { hasLocalData, isMigrationComplete } from '@/db/migrations';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import ReviewBadgeCounter from '@/components/ui/ReviewBadgeCounter';
 import { useOfflineQueue } from '@/lib/offline-queue';
 
 // Skip auth in development when VITE_SKIP_AUTH is set
@@ -18,7 +19,7 @@ const SKIP_AUTH = import.meta.env.VITE_SKIP_AUTH === 'true';
  * - Cloud migration wizard on first login with local data
  */
 export default function RootLayout() {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const routerState = useRouterState();
   const isLoginPage = routerState.location.pathname === '/login';
 
@@ -85,7 +86,19 @@ export default function RootLayout() {
       {/* Header with UserMenu */}
       <header className="bg-white border-b border-neutral-200 px-8 max-sm:px-4 h-12 flex items-center justify-between">
         <span className="text-sm font-medium text-cito-primary">Cito Rekentool</span>
-        <UserMenu />
+        <div className="flex items-center gap-4">
+          {/* Review link - manager only */}
+          {userProfile?.role === 'manager' && (
+            <a
+              href="/review"
+              className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-cito-primary transition-colors"
+            >
+              Review
+              <ReviewBadgeCounter />
+            </a>
+          )}
+          <UserMenu />
+        </div>
       </header>
 
       {/* Migration wizard gate */}
