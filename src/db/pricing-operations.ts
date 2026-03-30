@@ -15,19 +15,10 @@ import type {
   PriceProposal,
   PriceAuditEntry,
 } from './pricing-types';
+import type { PriceSource, AuditEntityType, AuditAction } from '@/lib/supabase/types';
+import type { Json } from '@/lib/supabase/types';
 
-// --- Auth helpers (inline pattern, same as document-parser.ts) ---
-
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    throw new Error('Niet ingelogd — sessie verlopen');
-  }
-  return {
-    Authorization: `Bearer ${session.access_token}`,
-    apikey: session.access_token,
-  };
-}
+// --- Auth helpers (inline getAuthHeaders pattern, same as document-parser.ts) ---
 
 async function getCurrentUserId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -68,7 +59,7 @@ export async function updatePublicationPrice(
   id: string,
   data: {
     amount_per_student: number;
-    source: string;
+    source: PriceSource;
     source_label: string;
     note?: string;
   },
@@ -88,7 +79,10 @@ export async function updatePublicationPrice(
   const { error: updateError } = await supabase
     .from('publication_prices')
     .update({
-      ...data,
+      amount_per_student: data.amount_per_student,
+      source: data.source,
+      source_label: data.source_label,
+      note: data.note ?? null,
       updated_by: userId,
       updated_at: new Date().toISOString(),
       verified_at: new Date().toISOString(),
@@ -100,11 +94,11 @@ export async function updatePublicationPrice(
   // Audit log
   await supabase.from('price_audit_log').insert({
     team_id: (current as PublicationPrice).team_id,
-    entity_type: 'publication_price' as const,
+    entity_type: 'publication_price' as AuditEntityType,
     entity_id: id,
-    action: 'updated' as const,
-    old_value: current as Record<string, unknown>,
-    new_value: data as Record<string, unknown>,
+    action: 'updated' as AuditAction,
+    old_value: current as unknown as Json,
+    new_value: data as unknown as Json,
     user_id: userId,
   });
 }
@@ -148,7 +142,7 @@ export async function updatePricingConfig(
   const { error: updateError } = await supabase
     .from('pricing_configs')
     .update({
-      config_data: configData,
+      config_data: configData as unknown as Json,
       version: currentConfig.version + 1,
       updated_by: userId,
       updated_at: new Date().toISOString(),
@@ -160,11 +154,11 @@ export async function updatePricingConfig(
   // Audit log
   await supabase.from('price_audit_log').insert({
     team_id: currentConfig.team_id,
-    entity_type: 'pricing_config' as const,
+    entity_type: 'pricing_config' as AuditEntityType,
     entity_id: id,
-    action: 'updated' as const,
-    old_value: { config_data: currentConfig.config_data, version: currentConfig.version },
-    new_value: { config_data: configData, version: currentConfig.version + 1 },
+    action: 'updated' as AuditAction,
+    old_value: { config_data: currentConfig.config_data, version: currentConfig.version } as unknown as Json,
+    new_value: { config_data: configData, version: currentConfig.version + 1 } as unknown as Json,
     user_id: userId,
   });
 }
@@ -180,7 +174,7 @@ export async function fetchPriceProposals(
   let query = supabase.from('price_proposals').select('*');
 
   if (filters?.status) {
-    query = query.eq('status', filters.status);
+    query = query.eq('status', filters.status as PriceProposal['status']);
   }
   if (filters?.provider) {
     query = query.eq('provider', filters.provider);
@@ -202,7 +196,7 @@ export async function fetchOpenProposalCount(): Promise<number> {
   const { count, error } = await supabase
     .from('price_proposals')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'open');
+    .eq('status', 'open' as const);
 
   if (error) throw new Error(`Fout bij tellen voorstellen: ${error.message}`);
   return count ?? 0;
@@ -256,7 +250,7 @@ export async function approveProposal(proposalId: string): Promise<void> {
   const { error: updateError } = await supabase
     .from('price_proposals')
     .update({
-      status: 'approved',
+      status: 'approved' as const,
       reviewed_by: userId,
       reviewed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -274,7 +268,7 @@ export async function approveProposal(proposalId: string): Promise<void> {
         module_id: p.module_id,
         provider: p.provider,
         amount_per_student: p.proposed_price,
-        source: 'proposal',
+        source: 'proposal' as PriceSource,
         source_label: `Voorstel goedgekeurd: ${p.source}`,
         verified_at: new Date().toISOString(),
         is_active: true,
@@ -289,11 +283,11 @@ export async function approveProposal(proposalId: string): Promise<void> {
   // Audit log
   await supabase.from('price_audit_log').insert({
     team_id: p.team_id,
-    entity_type: 'price_proposal' as const,
+    entity_type: 'price_proposal' as AuditEntityType,
     entity_id: proposalId,
-    action: 'approved' as const,
-    old_value: { price: p.current_price },
-    new_value: { price: p.proposed_price },
+    action: 'approved' as AuditAction,
+    old_value: { price: p.current_price } as unknown as Json,
+    new_value: { price: p.proposed_price } as unknown as Json,
     proposal_id: proposalId,
     user_id: userId,
   });
@@ -326,7 +320,7 @@ export async function rejectProposal(
   const { error: updateError } = await supabase
     .from('price_proposals')
     .update({
-      status: 'rejected',
+      status: 'rejected' as const,
       rejection_reason: reason,
       reviewed_by: userId,
       reviewed_at: new Date().toISOString(),
@@ -339,10 +333,10 @@ export async function rejectProposal(
   // Audit log
   await supabase.from('price_audit_log').insert({
     team_id: p.team_id,
-    entity_type: 'price_proposal' as const,
+    entity_type: 'price_proposal' as AuditEntityType,
     entity_id: proposalId,
-    action: 'rejected' as const,
-    old_value: { price: p.current_price, proposed: p.proposed_price },
+    action: 'rejected' as AuditAction,
+    old_value: { price: p.current_price, proposed: p.proposed_price } as unknown as Json,
     new_value: null,
     reason,
     proposal_id: proposalId,
@@ -356,7 +350,7 @@ export async function rejectProposal(
  * Fetch audit log entries for a specific entity.
  */
 export async function fetchAuditLog(
-  entityType: string,
+  entityType: AuditEntityType,
   entityId: string,
 ): Promise<PriceAuditEntry[]> {
   const { data, error } = await supabase
