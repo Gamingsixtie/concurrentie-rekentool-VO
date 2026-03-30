@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to plan
-stopped_at: Completed 25-07-PLAN.md
-last_updated: "2026-03-30T21:35:07.602Z"
+stopped_at: Completed 25-08-PLAN.md (Task 3 checkpoint pending)
+last_updated: "2026-03-30T21:47:22.652Z"
 progress:
   total_phases: 23
   completed_phases: 19
@@ -144,8 +144,7 @@ Recent decisions affecting current work:
 - [Phase 22]: xlsx HIGH vulnerability accepted -- internal tool, no untrusted file uploads
 - [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 - [Phase 24]: Lifted analysis summary state via onAnalysisComplete callback prop instead of shared store
-- [Phase 25]: MODULE_CATALOG_REFERENCE as static array in API file -- avoids importing browser-targeted module catalog into serverless
-- [Phase 25]: AI normalization is additive -- manual entry preserved, AI provides alternative input per D-12
+- [Phase 25]: ops-competitor-intel routes to existing infrastructure (PriceProposalModal, document upload, admin editor) rather than building new UI
 
 ### Roadmap Evolution
 
@@ -167,6 +166,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T21:35:07.594Z
-Stopped at: Completed 25-07-PLAN.md
+Last session: 2026-03-30T21:47:22.645Z
+Stopped at: Completed 25-08-PLAN.md (Task 3 checkpoint pending)
 Resume file: None
