@@ -9,7 +9,10 @@ import { CURRENT_PROVIDER_LABELS, toPriceProvider } from '@/models/school';
 import type { PriceAdjustmentType } from '@/models/school';
 import { DEFAULT_PRICES } from '@/data/default-prices';
 import { formatCurrency } from '@/lib/format';
+import { getPriceStatus } from '@/models/pricing';
+import type { PriceRecord } from '@/models/pricing';
 import { PriceManager } from '../components/PriceManager';
+import { PriceProposalModal } from '@/features/review/PriceProposalModal';
 import DocumentDropzone from '../components/DocumentDropzone';
 import DocumentExtractionPreview from '../components/DocumentExtractionPreview';
 import { uploadAndExtract, type ExtractedDocumentPrice } from '@/lib/document-parser';
@@ -102,6 +105,14 @@ export default function ProductsTab() {
   // Fetch school-specific prices from school_prices table
   const { data: schoolPrices = [] } = useSchoolPrices(activeSchoolId ?? '');
   const createPrice = useCreateSchoolPrice();
+
+  // Price proposal modal state
+  const [proposalTarget, setProposalTarget] = useState<{
+    moduleId: string;
+    provider: string;
+    currentPrice: number;
+    moduleName: string;
+  } | null>(null);
 
   // Document upload state
   const [showDropzone, setShowDropzone] = useState(false);
@@ -381,6 +392,44 @@ export default function ProductsTab() {
                       })()}
                     </div>
                   )}
+                  {/* Staleness indicator and "Klopt niet?" link for publication prices */}
+                  {publicationPrice !== null && priceProvider && (() => {
+                    const priceRecord = DEFAULT_PRICES.find(
+                      (p: PriceRecord) => p.moduleId === moduleId && p.provider === priceProvider,
+                    );
+                    if (!priceRecord) return null;
+                    const status = getPriceStatus(priceRecord);
+                    return (
+                      <div className="flex items-center gap-2 mt-1">
+                        {status === 'stale' && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[11px] text-amber-600"
+                            title={`Prijs niet geverifieerd sinds ${priceRecord.verifiedAt.toLocaleDateString('nl-NL')}`}
+                          >
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                            </svg>
+                            Mogelijk verouderd
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProposalTarget({
+                              moduleId,
+                              provider: priceProvider,
+                              currentPrice: publicationPrice,
+                              moduleName,
+                            });
+                          }}
+                          className="text-xs text-blue-600 hover:underline cursor-pointer"
+                        >
+                          Klopt niet?
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -416,6 +465,16 @@ export default function ProductsTab() {
           </button>
         </div>
       )}
+
+      {/* Price proposal modal */}
+      <PriceProposalModal
+        isOpen={!!proposalTarget}
+        onClose={() => setProposalTarget(null)}
+        moduleId={proposalTarget?.moduleId ?? ''}
+        provider={proposalTarget?.provider ?? ''}
+        currentPrice={proposalTarget?.currentPrice ?? 0}
+        moduleName={proposalTarget?.moduleName ?? ''}
+      />
     </div>
   );
 }

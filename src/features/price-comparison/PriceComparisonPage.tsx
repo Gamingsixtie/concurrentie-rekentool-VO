@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
-import { PROVIDER_LABELS, getTotalStudents, calculateComparison } from '../../engine/price-comparison';
+import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison';
 import type { ComparisonResult } from '../../engine/price-comparison';
 import { getCitoBundle } from '../../data/providers/cito';
 import { formatCurrency } from '../../lib/format';
@@ -15,9 +15,8 @@ import { AiAdviesSection } from './ai-advies/AiAdviesSection';
 import { MeerwaardePanel } from './MeerwaardePanel';
 import { SectionBand } from './components/SectionBand';
 import { ProviderToolbar } from './components/ProviderToolbar';
-import { useDiscountPatterns } from '../../hooks/useDiscountPatterns';
-import { MarktKortingToggle } from './MarktKortingToggle';
-import { KortingsPatroonAlert } from './KortingsPatroonAlert';
+import { OfflinePriceBanner } from '../../components/ui/OfflinePriceBanner';
+import { usePricingDataStore } from '@/stores/pricing-data-store';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -121,35 +120,8 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
-  const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
 
   const [chartHighlight] = useState<string | null>(null);
-  const [useMarketPricing, setUseMarketPricing] = useState(false);
-
-  // Discount pattern detection
-  const { patterns, hasPatterns } = useDiscountPatterns();
-
-  // When market pricing is active, recalculate comparison with market price overrides
-  const citoBundleType = usePriceComparisonStore((s) => s.citoBundleType);
-  const competitorModuleIds = usePriceComparisonStore((s) => s.competitorModuleIds);
-  const forceDiaPackageId = usePriceComparisonStore((s) => s.forceDiaPackageId);
-
-  const marketResult = useMemo(() => {
-    if (!useMarketPricing || patterns.length === 0 || selectedModules.length === 0) return null;
-    const overrides = new Map<string, number>();
-    for (const pattern of patterns) {
-      overrides.set(`${pattern.moduleId}:${pattern.provider}`, pattern.marketPrice);
-    }
-    return calculateComparison(selectedModules, studentCounts, {
-      citoBundleType,
-      competitorModuleIds: competitorModuleIds ?? undefined,
-      forceDiaPackageId,
-      overridePrices: overrides,
-    });
-  }, [useMarketPricing, patterns, selectedModules, studentCounts, citoBundleType, competitorModuleIds, forceDiaPackageId]);
-
-  // Use market result when toggle is active, otherwise store result
-  const activeResult = useMarketPricing && marketResult ? marketResult : result;
 
   useEffect(() => {
     initialize();
@@ -191,7 +163,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   ) : null;
 
   // Empty state — uses its own container, not SectionBand
-  if (selectedModules.length === 0 || activeResult === null) {
+  if (selectedModules.length === 0 || result === null) {
     return (
       <div className="max-w-[960px] mx-auto px-4 sm:px-8 py-16">
         {BackButton}
@@ -213,8 +185,13 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
     );
   }
 
+  const isOffline = usePricingDataStore((s) => s.isOffline);
+
   return (
     <div>
+      {/* Offline price data banner */}
+      {isOffline && <OfflinePriceBanner />}
+
       {/* 1. AI Advies Hero */}
       <SectionBand bg="bg-neutral-50">
         <AiAdviesSection schoolId={activeSchoolId ?? undefined} />
@@ -240,31 +217,19 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
           <span title="Langere contractperiode geeft korting op de jaarprijs">
             <PeriodToggle />
           </span>
-          <MarktKortingToggle
-            patterns={patterns}
-            isEnabled={useMarketPricing}
-            onToggle={setUseMarketPricing}
-          />
         </div>
       </SectionBand>
 
-      {/* 2b. Discount pattern alerts (when market pricing active) */}
-      {useMarketPricing && hasPatterns && (
-        <SectionBand bg="bg-white">
-          <KortingsPatroonAlert patterns={patterns} visibleProviders={visibleProviders} />
-        </SectionBand>
-      )}
-
       {/* 3. Totaal-kaarten */}
       <SectionBand bg="bg-neutral-50">
-        <ComparisonSummary result={activeResult} />
+        <ComparisonSummary result={result} />
       </SectionBand>
 
       {/* 4. Provider Toolbar + Grafiek (visueel overzicht eerst) */}
       <SectionBand bg="bg-white">
         <ProviderToolbar />
         <div className="mt-6">
-          <ComparisonChart result={activeResult} onBarClick={handleBarClick} />
+          <ComparisonChart result={result} onBarClick={handleBarClick} />
         </div>
       </SectionBand>
 
@@ -276,7 +241,7 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
             Klik op een module voor prijsopbouw, productdetails en differentiators.
           </p>
         </div>
-        <ComparisonTable result={activeResult} onBarHighlight={chartHighlight} />
+        <ComparisonTable result={result} onBarHighlight={chartHighlight} />
       </SectionBand>
 
       {/* 7. MeerwaardePanel (collapsed by default per D-11) */}

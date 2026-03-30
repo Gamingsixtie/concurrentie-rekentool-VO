@@ -4,6 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { priceProposalSchema, type PriceProposalInput } from './schemas/proposal.schema';
 import { useCreateProposal } from '@/hooks/usePriceProposals';
 import { checkPriceDeviation } from '@/models/pricing';
+import { normalizePrice, type NormalizedPriceResult, type NormalizedPrice } from '@/lib/ai-price-normalization';
+import { formatCurrency } from '@/lib/format';
 
 const eurFormatter = new Intl.NumberFormat('nl-NL', {
   style: 'currency',
@@ -32,10 +34,17 @@ export function PriceProposalModal({
   const [pendingSubmit, setPendingSubmit] = useState<PriceProposalInput | null>(null);
   const [showToast, setShowToast] = useState(false);
 
+  // AI normalization state
+  const [freeformText, setFreeformText] = useState('');
+  const [isNormalizing, setIsNormalizing] = useState(false);
+  const [normalizedResult, setNormalizedResult] = useState<NormalizedPriceResult | null>(null);
+  const [normalizationError, setNormalizationError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PriceProposalInput>({
     resolver: zodResolver(priceProposalSchema),
@@ -48,6 +57,10 @@ export function PriceProposalModal({
       setShowDeviationWarning(false);
       setPendingSubmit(null);
       setShowToast(false);
+      setFreeformText('');
+      setIsNormalizing(false);
+      setNormalizedResult(null);
+      setNormalizationError(null);
     }
   }, [isOpen, reset]);
 
@@ -110,6 +123,41 @@ export function PriceProposalModal({
     setPendingSubmit(null);
   };
 
+  // AI normalization handler
+  const handleNormalize = async () => {
+    if (!freeformText.trim()) return;
+    setIsNormalizing(true);
+    setNormalizationError(null);
+    setNormalizedResult(null);
+
+    try {
+      const result = await normalizePrice(freeformText);
+      setNormalizedResult(result);
+
+      // Auto-fill if high confidence match for current module/provider
+      const matchingPrice = result.prices.find(
+        (p) => p.moduleId === moduleId && p.provider === provider,
+      );
+
+      if (matchingPrice && matchingPrice.confidence === 'high') {
+        setValue('proposed_price', matchingPrice.amountPerStudent);
+        setValue('source', `AI-normalisatie: "${freeformText.slice(0, 80)}${freeformText.length > 80 ? '...' : ''}"`);
+        setValue('explanation', `Genormaliseerd uit vrije tekst. Module: ${matchingPrice.moduleId}, Aanbieder: ${matchingPrice.provider}, Bedrag: ${formatCurrency(matchingPrice.amountPerStudent)}/lln/jr`);
+      }
+    } catch {
+      setNormalizationError('AI-normalisatie niet beschikbaar — voer de gegevens handmatig in');
+    } finally {
+      setIsNormalizing(false);
+    }
+  };
+
+  // Apply a normalized price to the form fields
+  const applyNormalizedPrice = (price: NormalizedPrice) => {
+    setValue('proposed_price', price.amountPerStudent);
+    setValue('source', `AI-normalisatie: "${freeformText.slice(0, 80)}${freeformText.length > 80 ? '...' : ''}"`);
+    setValue('explanation', `Genormaliseerd uit vrije tekst. Module: ${price.moduleId}, Aanbieder: ${price.provider}, Bedrag: ${formatCurrency(price.amountPerStudent)}/lln/jr`);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -119,7 +167,7 @@ export function PriceProposalModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white rounded-lg max-w-[480px] w-full mx-4 p-6">
+      <div className="bg-white rounded-lg max-w-[520px] w-full mx-4 p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[20px] font-semibold text-neutral-900">
             Prijsvoorstel indienen
@@ -144,6 +192,110 @@ export function PriceProposalModal({
             <span className="text-neutral-500">Huidige prijs:</span>
             <span className="font-semibold">{eurFormatter.format(currentPrice)}</span>
           </div>
+        </div>
+
+        {/* AI normalization section (D-12) */}
+        <div className="mb-4 border border-neutral-200 rounded-lg p-3 bg-neutral-50">
+          <label htmlFor="freeform-text" className="block text-[13px] font-semibold text-neutral-600 mb-1">
+            Vrije tekst invoer
+          </label>
+          <p className="text-[12px] text-neutral-400 mb-2">
+            Plak hier prijsinformatie uit e-mails, offertes of notities — AI herkent de juiste module en prijs.
+          </p>
+          <textarea
+            id="freeform-text"
+            rows={3}
+            value={freeformText}
+            onChange={(e) => setFreeformText(e.target.value)}
+            placeholder="Bijv. 'DIA rekenen kost 3,36 per leerling' of 'Engels JIJ 4,50/lln'"
+            className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-[14px] focus:outline-none focus:ring-2 focus:ring-cito-primary resize-y bg-white"
+          />
+          <div className="flex items-center gap-2 mt-2">
+            <button
+              type="button"
+              onClick={handleNormalize}
+              disabled={isNormalizing || !freeformText.trim()}
+              className="inline-flex items-center gap-2 px-3 h-[32px] text-[13px] font-semibold border border-neutral-300 rounded-lg hover:bg-neutral-100 transition-colors disabled:opacity-50"
+            >
+              {isNormalizing ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Analyseren...
+                </>
+              ) : (
+                'Normaliseer'
+              )}
+            </button>
+          </div>
+
+          {/* Normalization error */}
+          {normalizationError && (
+            <div className="mt-2 text-[13px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              {normalizationError}
+            </div>
+          )}
+
+          {/* Normalized results */}
+          {normalizedResult && normalizedResult.prices.length > 0 && (
+            <div className="mt-3 space-y-2">
+              <p className="text-[12px] font-semibold text-neutral-600">Herkende prijzen:</p>
+              {normalizedResult.prices.map((price, idx) => (
+                <div
+                  key={`${price.moduleId}-${price.provider}-${idx}`}
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg border text-[13px] ${
+                    price.confidence === 'high'
+                      ? 'bg-green-50 border-green-200'
+                      : price.confidence === 'medium'
+                        ? 'bg-amber-50 border-amber-200'
+                        : 'bg-neutral-50 border-neutral-200'
+                  }`}
+                >
+                  <div>
+                    <span className="font-semibold">{price.moduleId}</span>
+                    <span className="text-neutral-500 mx-1">|</span>
+                    <span className="uppercase text-neutral-600">{price.provider}</span>
+                    <span className="text-neutral-500 mx-1">|</span>
+                    <span className="font-semibold">{formatCurrency(price.amountPerStudent)}/lln/jr</span>
+                    {price.warning && (
+                      <span className="ml-2 text-amber-600 text-[11px]">({price.warning})</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${
+                      price.confidence === 'high'
+                        ? 'bg-green-200 text-green-700'
+                        : price.confidence === 'medium'
+                          ? 'bg-amber-200 text-amber-700'
+                          : 'bg-neutral-200 text-neutral-600'
+                    }`}>
+                      {price.confidence}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => applyNormalizedPrice(price)}
+                      className="text-[12px] text-cito-primary hover:underline font-semibold"
+                    >
+                      Overnemen
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {normalizedResult.unmatched.length > 0 && (
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  Niet herkend: {normalizedResult.unmatched.join(', ')}
+                </p>
+              )}
+            </div>
+          )}
+
+          {normalizedResult && normalizedResult.prices.length === 0 && (
+            <div className="mt-2 text-[13px] text-neutral-500">
+              Geen prijzen herkend in de tekst. Voer de gegevens handmatig in.
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
