@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to plan
-stopped_at: Completed 24-02-PLAN.md
-last_updated: "2026-03-28T23:57:12.167Z"
+stopped_at: Phase 25 context gathered
+last_updated: "2026-03-30T19:43:00.445Z"
 progress:
-  total_phases: 23
+  total_phases: 24
   completed_phases: 19
   total_plans: 67
   completed_plans: 63
@@ -165,6 +165,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:50:41.530Z
-Stopped at: Completed 24-02-PLAN.md
-Resume file: None
+Last session: 2026-03-30T19:43:00.432Z
+Stopped at: Phase 25 context gathered
+Resume file: .planning/phases/25-prijsintelligentie-stakeholder-feedback-loop/25-CONTEXT.md
