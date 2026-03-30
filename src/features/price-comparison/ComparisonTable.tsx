@@ -4,7 +4,10 @@ import { PROVIDER_LABELS, getTotalStudents } from '../../engine/price-comparison
 import { MODULE_CATEGORIES } from '../../models/modules';
 import type { ModuleCategory } from '../../models/modules';
 import { formatCurrency } from '../../lib/format';
+import { getPriceStatus } from '../../models/pricing';
+import { DEFAULT_PRICES } from '../../data/default-prices';
 import { ModuleDetailPanel } from './ModuleDetailPanel';
+import { PriceProposalModal } from '../review/PriceProposalModal';
 import { usePriceComparisonStore } from './store';
 import { useSchoolProfileStore } from '../school-profile/store';
 import { CitoBundleSelector } from './CitoBundleSelector';
@@ -66,6 +69,12 @@ function getCheapestProvider(mod: ComparisonResult['modules'][number], providers
 
 export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps) {
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
+  const [proposalTarget, setProposalTarget] = useState<{
+    moduleId: string;
+    provider: string;
+    currentPrice: number;
+    moduleName: string;
+  } | null>(null);
   const scenario = useSchoolProfileStore((s) => s.scenario);
 
   const getProviderLabel = (provider: ProviderKey) => {
@@ -142,12 +151,23 @@ export function ComparisonTable({ result, onBarHighlight }: ComparisonTableProps
               onBarHighlight={onBarHighlight}
               onToggle={toggleModule}
               activeProviders={activeProviders}
+              onProposalClick={setProposalTarget}
             />
           ))}
 
           <TotaalRow result={result} activeProviders={activeProviders} />
         </tbody>
       </table>
+
+      {/* Price proposal modal */}
+      <PriceProposalModal
+        isOpen={!!proposalTarget}
+        onClose={() => setProposalTarget(null)}
+        moduleId={proposalTarget?.moduleId ?? ''}
+        provider={proposalTarget?.provider ?? ''}
+        currentPrice={proposalTarget?.currentPrice ?? 0}
+        moduleName={proposalTarget?.moduleName ?? ''}
+      />
     </div>
   );
 }
@@ -166,6 +186,7 @@ function CategoryGroup({
   onBarHighlight,
   onToggle,
   activeProviders,
+  onProposalClick,
 }: {
   label: string;
   modules: ComparisonResult['modules'];
@@ -173,6 +194,7 @@ function CategoryGroup({
   onBarHighlight?: string | null;
   onToggle: (moduleId: string) => void;
   activeProviders: readonly ProviderKey[];
+  onProposalClick: (target: { moduleId: string; provider: string; currentPrice: number; moduleName: string }) => void;
 }) {
   const bundleModuleIds = getBundleModuleIds(modules);
 
@@ -203,6 +225,7 @@ function CategoryGroup({
               onToggle={onToggle}
               activeProviders={activeProviders}
               isBundleGrouped={isBundled}
+              onProposalClick={onProposalClick}
             />
             {isLastBundled && (
               <BundelSubtotaalRow
@@ -283,6 +306,7 @@ function ModuleRow({
   onToggle,
   activeProviders,
   isBundleGrouped = false,
+  onProposalClick,
 }: {
   mod: ComparisonResult['modules'][number];
   isExpanded: boolean;
@@ -290,6 +314,7 @@ function ModuleRow({
   onToggle: (moduleId: string) => void;
   activeProviders: readonly ProviderKey[];
   isBundleGrouped?: boolean;
+  onProposalClick: (target: { moduleId: string; provider: string; currentPrice: number; moduleName: string }) => void;
 }) {
   const cheapest = getCheapestProvider(mod, activeProviders);
 
@@ -330,6 +355,9 @@ function ModuleRow({
             cost={mod.providers[provider]}
             provider={provider}
             isCheapest={provider === cheapest && activeProviders.length > 1}
+            moduleId={mod.moduleId}
+            moduleName={mod.moduleName}
+            onProposalClick={onProposalClick}
           />
         ))}
       </tr>
@@ -395,10 +423,16 @@ function ProviderCell({
   cost,
   provider,
   isCheapest,
+  moduleId,
+  moduleName,
+  onProposalClick,
 }: {
   cost: ComparisonResult['modules'][number]['providers'][ProviderKey];
   provider: ProviderKey;
   isCheapest: boolean;
+  moduleId: string;
+  moduleName: string;
+  onProposalClick: (target: { moduleId: string; provider: string; currentPrice: number; moduleName: string }) => void;
 }) {
   if (cost === null) {
     return (
@@ -408,14 +442,51 @@ function ProviderCell({
     );
   }
 
+  // Check staleness of publication price
+  const priceRecord = DEFAULT_PRICES.find(
+    (p) => p.moduleId === moduleId && p.provider === provider,
+  );
+  const isStale = priceRecord ? getPriceStatus(priceRecord) === 'stale' : false;
+
   return (
     <td className={`py-2 px-3 text-right tabular-nums ${PROVIDER_COL_BG[provider]}`}>
-      <span className={`text-sm font-semibold ${isCheapest ? 'text-green-700' : 'text-neutral-800'}`}>
-        {formatCurrency(cost.totalCost)}
-      </span>
-      {cost.isPackagePrice && (
-        <span className="ml-1 text-[10px] text-cito-primary font-medium">bundel</span>
-      )}
+      <div className="flex flex-col items-end">
+        <span className={`text-sm font-semibold ${isCheapest ? 'text-green-700' : 'text-neutral-800'}`}>
+          {formatCurrency(cost.totalCost)}
+        </span>
+        {cost.isPackagePrice && (
+          <span className="text-[10px] text-cito-primary font-medium">bundel</span>
+        )}
+        <div className="flex items-center gap-1 mt-0.5">
+          {isStale && priceRecord && (
+            <span
+              className="text-[10px] text-amber-600"
+              title={`Prijs niet geverifieerd sinds ${priceRecord.verifiedAt.toLocaleDateString('nl-NL')}`}
+            >
+              <svg className="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+              </svg>
+            </span>
+          )}
+          {priceRecord && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onProposalClick({
+                  moduleId,
+                  provider,
+                  currentPrice: priceRecord.amountPerStudent,
+                  moduleName,
+                });
+              }}
+              className="text-[10px] text-blue-600 hover:underline cursor-pointer"
+            >
+              Klopt niet?
+            </button>
+          )}
+        </div>
+      </div>
     </td>
   );
 }

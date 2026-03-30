@@ -6,6 +6,7 @@ import type { CitoBundleType } from '../data/providers/cito';
 import type { Scenario } from '../models/school';
 import { MODULE_CATALOG } from '../models/modules';
 import { PROVIDER_CONFIGS } from '../data/providers/index';
+import type { ProviderConfig } from '../data/providers/index';
 import { createCalculator } from './calculators/index';
 import { getDiaVolumeDiscountPercent } from './dia-packages';
 import { getOldPlatformPrice } from '../data/cito-migration-prices';
@@ -59,6 +60,8 @@ export interface ComparisonOptions {
   competitorModuleIds?: Partial<Record<ProviderKey, string[]>>;
   /** Force a specific DIA package instead of auto-optimization (null = individual pricing only) */
   forceDiaPackageId?: string | null;
+  /** Injected provider configs from pricing data store (D-03). Falls back to static PROVIDER_CONFIGS when omitted. */
+  providerConfigs?: Record<string, ProviderConfig>;
 }
 
 /**
@@ -105,10 +108,13 @@ export function calculateComparison(
     }
   }
 
+  // Use injected configs or fall back to static (D-03)
+  const configs = (options.providerConfigs ?? PROVIDER_CONFIGS) as Record<ProviderKey, ProviderConfig>;
+
   // Create calculators for each provider
   const calculators = new Map<ProviderKey, ReturnType<typeof createCalculator>>();
   for (const providerKey of PROVIDERS) {
-    const config = PROVIDER_CONFIGS[providerKey];
+    const config = configs[providerKey];
     calculators.set(
       providerKey,
       createCalculator(config, {
@@ -165,7 +171,7 @@ export function calculateComparison(
 
       if (calcResult) {
         // Construct synthetic PriceRecord for backward compat
-        const config = PROVIDER_CONFIGS[providerKey];
+        const config = configs[providerKey];
         const defaultPriceRecord = config.defaultPrices.find(
           (p) => p.moduleId === moduleId,
         );
@@ -253,7 +259,7 @@ export function calculateComparison(
 
     if (packageId && coveredModuleIds.length > 0) {
       // Find the package from DIA config
-      const diaConfig = PROVIDER_CONFIGS.dia;
+      const diaConfig = configs.dia;
       const pkg = (diaConfig as import('../data/providers/dia').DiaProviderConfig).packages.find(
         (p) => p.id === packageId,
       );

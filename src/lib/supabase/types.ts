@@ -9,6 +9,11 @@ export type Json =
 export type UserRole = 'accountmanager' | 'manager' | 'viewer';
 export type ActionStatus = 'todo' | 'in-progress' | 'done';
 export type PriceType = 'publication' | 'agreed';
+export type PriceSource = 'seed' | 'manual' | 'proposal' | 'ai-lookup';
+export type ProposalStatus = 'open' | 'approved' | 'rejected';
+export type PricingConfigType = 'platform+module' | 'package-bundle' | 'tiered-license' | 'flat';
+export type AuditEntityType = 'publication_price' | 'pricing_config' | 'price_proposal';
+export type AuditAction = 'created' | 'updated' | 'approved' | 'rejected' | 'seeded';
 
 export interface Database {
   public: {
@@ -397,6 +402,198 @@ export interface Database {
           updated_by?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      publication_prices: {
+        Row: {
+          id: string;
+          team_id: string;
+          module_id: string;
+          provider: string;
+          amount_per_student: number;
+          source: PriceSource;
+          source_label: string;
+          verified_at: string;
+          is_active: boolean;
+          note: string | null;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          module_id: string;
+          provider: string;
+          amount_per_student: number;
+          source?: PriceSource;
+          source_label?: string;
+          verified_at?: string;
+          is_active?: boolean;
+          note?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          module_id?: string;
+          provider?: string;
+          amount_per_student?: number;
+          source?: PriceSource;
+          source_label?: string;
+          verified_at?: string;
+          is_active?: boolean;
+          note?: string | null;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      pricing_configs: {
+        Row: {
+          id: string;
+          team_id: string;
+          provider: string;
+          config_type: PricingConfigType;
+          config_data: Json;
+          version: number;
+          is_active: boolean;
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          provider: string;
+          config_type: PricingConfigType;
+          config_data: Json;
+          version?: number;
+          is_active?: boolean;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          provider?: string;
+          config_type?: PricingConfigType;
+          config_data?: Json;
+          version?: number;
+          is_active?: boolean;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      price_proposals: {
+        Row: {
+          id: string;
+          team_id: string;
+          module_id: string;
+          provider: string;
+          current_price: number;
+          proposed_price: number;
+          source: string;
+          explanation: string;
+          evidence_path: string | null;
+          status: ProposalStatus;
+          rejection_reason: string | null;
+          submitted_by: string;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          module_id: string;
+          provider: string;
+          current_price: number;
+          proposed_price: number;
+          source: string;
+          explanation: string;
+          evidence_path?: string | null;
+          status?: ProposalStatus;
+          rejection_reason?: string | null;
+          submitted_by: string;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          module_id?: string;
+          provider?: string;
+          current_price?: number;
+          proposed_price?: number;
+          source?: string;
+          explanation?: string;
+          evidence_path?: string | null;
+          status?: ProposalStatus;
+          rejection_reason?: string | null;
+          submitted_by?: string;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      price_audit_log: {
+        Row: {
+          id: string;
+          team_id: string;
+          entity_type: AuditEntityType;
+          entity_id: string;
+          action: AuditAction;
+          old_value: Json | null;
+          new_value: Json | null;
+          reason: string | null;
+          proposal_id: string | null;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          team_id: string;
+          entity_type: AuditEntityType;
+          entity_id: string;
+          action: AuditAction;
+          old_value?: Json | null;
+          new_value?: Json | null;
+          reason?: string | null;
+          proposal_id?: string | null;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          team_id?: string;
+          entity_type?: AuditEntityType;
+          entity_id?: string;
+          action?: AuditAction;
+          old_value?: Json | null;
+          new_value?: Json | null;
+          reason?: string | null;
+          proposal_id?: string | null;
+          user_id?: string;
+          created_at?: string;
         };
         Relationships: [];
       };

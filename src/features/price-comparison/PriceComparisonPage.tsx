@@ -15,6 +15,8 @@ import { AiAdviesSection } from './ai-advies/AiAdviesSection';
 import { MeerwaardePanel } from './MeerwaardePanel';
 import { SectionBand } from './components/SectionBand';
 import { ProviderToolbar } from './components/ProviderToolbar';
+import { OfflinePriceBanner } from '../../components/ui/OfflinePriceBanner';
+import { usePricingDataStore } from '@/stores/pricing-data-store';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -183,8 +185,13 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
     );
   }
 
+  const isOffline = usePricingDataStore((s) => s.isOffline);
+
   return (
     <div>
+      {/* Offline price data banner */}
+      {isOffline && <OfflinePriceBanner />}
+
       {/* 1. AI Advies Hero */}
       <SectionBand bg="bg-neutral-50">
         <AiAdviesSection schoolId={activeSchoolId ?? undefined} />
