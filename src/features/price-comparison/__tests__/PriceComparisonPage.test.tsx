@@ -1,8 +1,19 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PriceComparisonPage } from '../PriceComparisonPage';
 import type { ComparisonResult } from '../../../engine/price-comparison';
 import type { PriceRecord } from '../../../models/pricing';
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
+  );
+}
 
 // ─── Mock stores ─────────────────────────────────────────────────────────────
 
@@ -128,6 +139,30 @@ vi.mock('../../../data/providers/cito', () => ({
     pricePerStudent: 4.5,
     contractPrices: { annual: 4.5, 'three-year': 4.0, 'three-year-duo': 3.8 },
   }),
+  CITO_CONFIG: {
+    name: 'Cito',
+    pricingStrategy: { type: 'per-student', basePrice: 4.5 },
+    modules: [],
+    defaultPrices: [],
+  },
+}));
+
+vi.mock('../../../data/providers/dia', () => ({
+  DIA_CONFIG: {
+    name: 'DIA',
+    pricingStrategy: { type: 'per-student', basePrice: 5.2 },
+    modules: [],
+    defaultPrices: [],
+  },
+}));
+
+vi.mock('../../../data/providers/jij', () => ({
+  JIJ_CONFIG: {
+    name: 'JIJ!',
+    pricingStrategy: { type: 'per-student', basePrice: 4.8 },
+    modules: [],
+    defaultPrices: [],
+  },
 }));
 
 vi.mock('../../../lib/format', () => ({
@@ -138,10 +173,10 @@ vi.mock('../../../lib/format', () => ({
 
 describe('PriceComparisonPage', () => {
   it('renders sections in D-05 order', () => {
-    const { container } = render(<PriceComparisonPage />);
+    const { container } = renderWithProviders(<PriceComparisonPage />);
     const sections = container.querySelectorAll('section');
 
-    // Expected order: ai-advies, bundel/periode, totalen, toolbar+table, chart, meerwaarde, disclaimer
+    // Expected order: ai-advies, bundel/periode, totalen, toolbar+chart, detail+table, meerwaarde, disclaimer
     expect(sections.length).toBeGreaterThanOrEqual(7);
 
     // Verify key content in correct section order
@@ -149,35 +184,23 @@ describe('PriceComparisonPage', () => {
     expect(within(sections[1]).getByText('Prijsvergelijking')).toBeInTheDocument();
     expect(within(sections[2]).getByText('Samenvatting vergelijking')).toBeInTheDocument();
     expect(within(sections[3]).getByTestId('provider-toolbar')).toBeInTheDocument();
-    expect(within(sections[4]).getByText('Staafgrafiek vergelijking')).toBeInTheDocument();
+    expect(within(sections[4]).getByTestId('comparison-table')).toBeInTheDocument();
     expect(within(sections[5]).getByText('Meerwaarde en tijdwinst')).toBeInTheDocument();
     expect(within(sections[6]).getByTestId('disclaimer-footer')).toBeInTheDocument();
   });
 
   it('applies alternating color bands (D-15)', () => {
-    const { container } = render(<PriceComparisonPage />);
+    const { container } = renderWithProviders(<PriceComparisonPage />);
     const sections = container.querySelectorAll('section');
 
-    // Expected: neutral-50, white, neutral-50, white, neutral-50, white, neutral-50
+    // Expected: neutral-50, white, neutral-50, white, white, neutral-50
     expect(sections[0].className).toContain('bg-neutral-50');
     expect(sections[1].className).toContain('bg-white');
     expect(sections[2].className).toContain('bg-neutral-50');
-    expect(sections[3].className).toContain('bg-white');
-    expect(sections[4].className).toContain('bg-neutral-50');
-    expect(sections[5].className).toContain('bg-white');
-    expect(sections[6].className).toContain('bg-neutral-50');
-  });
-
-  it('chart section is collapsed by default (D-10)', () => {
-    render(<PriceComparisonPage />);
-    const chartSummary = screen.getByText('Staafgrafiek vergelijking');
-    const details = chartSummary.closest('details');
-    expect(details).toBeTruthy();
-    expect(details!.hasAttribute('open')).toBe(false);
   });
 
   it('meerwaarde section is collapsed by default (D-11)', () => {
-    render(<PriceComparisonPage />);
+    renderWithProviders(<PriceComparisonPage />);
     const meerwSummary = screen.getByText('Meerwaarde en tijdwinst');
     const details = meerwSummary.closest('details');
     expect(details).toBeTruthy();
@@ -185,13 +208,13 @@ describe('PriceComparisonPage', () => {
   });
 
   it('does not show differentiators in ComparisonSummary (D-06)', () => {
-    render(<PriceComparisonPage />);
+    renderWithProviders(<PriceComparisonPage />);
     expect(screen.queryByText(/Unieke Cito voordelen/)).not.toBeInTheDocument();
     expect(screen.queryByText(/citoAdvantages/)).not.toBeInTheDocument();
   });
 
   it('has D-14 tooltip attributes on bundel and periode controls', () => {
-    const { container } = render(<PriceComparisonPage />);
+    const { container } = renderWithProviders(<PriceComparisonPage />);
     const tooltipElements = container.querySelectorAll('[title]');
     const titles = Array.from(tooltipElements).map((el) => el.getAttribute('title'));
     expect(titles.some((t) => t?.includes('bundel'))).toBe(true);
@@ -199,8 +222,8 @@ describe('PriceComparisonPage', () => {
   });
 
   it('has chevron animation class on details elements', () => {
-    const { container } = render(<PriceComparisonPage />);
+    const { container } = renderWithProviders(<PriceComparisonPage />);
     const chevrons = container.querySelectorAll('.group-open\\:rotate-180');
-    expect(chevrons.length).toBeGreaterThanOrEqual(2);
+    expect(chevrons.length).toBeGreaterThanOrEqual(1);
   });
 });

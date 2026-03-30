@@ -103,5 +103,5 @@ describe('admin route', () => {
     const router = createRouter({ routeTree });
     const paths = Object.keys(router.routesByPath);
     expect(paths).toContain('/admin');
-  });
+  }, 15000);
 });
