@@ -1,7 +1,8 @@
 ---
 phase: 25
 slug: prijsintelligentie-stakeholder-feedback-loop
-status: draft
+status: approved
+reviewed_at: 2026-03-30
 shadcn_initialized: false
 preset: none
 created: 2026-03-30
