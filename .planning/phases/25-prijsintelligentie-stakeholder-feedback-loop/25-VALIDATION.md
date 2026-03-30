@@ -2,9 +2,10 @@
 phase: 25
 slug: prijsintelligentie-stakeholder-feedback-loop
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-30
+updated: 2026-03-30
 ---
 
 # Phase 25 — Validation Strategy
@@ -38,36 +39,41 @@ created: 2026-03-30
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 25-01-01 | 01 | 1 | SC-1 (DB tables) | integration | `npx vitest run src/db/__tests__/publication-prices.test.ts` | ❌ W0 | ⬜ pending |
-| 25-01-02 | 01 | 1 | SC-2 (provider function) | unit | `npx vitest run src/engine/__tests__/price-provider.test.ts` | ❌ W0 | ⬜ pending |
-| 25-02-01 | 02 | 1 | SC-2 (engine config injection) | unit | `npx vitest run src/engine/__tests__/calculators.test.ts` | ✅ | ⬜ pending |
-| 25-03-01 | 03 | 2 | SC-3 (flag price) | component | `npx vitest run src/features/pricing/__tests__/price-flag.test.tsx` | ❌ W0 | ⬜ pending |
-| 25-03-02 | 03 | 2 | SC-4 (review queue) | component | `npx vitest run src/features/pricing/__tests__/review-queue.test.tsx` | ❌ W0 | ⬜ pending |
-| 25-04-01 | 04 | 2 | SC-5 (auto recalc) | unit | `npx vitest run src/engine/__tests__/recalculation.test.ts` | ❌ W0 | ⬜ pending |
-| 25-04-02 | 04 | 2 | SC-6 (audit trail) | integration | `npx vitest run src/db/__tests__/audit-trail.test.ts` | ❌ W0 | ⬜ pending |
-| 25-05-01 | 05 | 3 | SC-7 (config editor) | component | `npx vitest run src/features/pricing/__tests__/config-editor.test.tsx` | ❌ W0 | ⬜ pending |
-| 25-06-01 | 06 | 3 | SC-8 (staleness) | unit | `npx vitest run src/engine/__tests__/staleness.test.ts` | ❌ W0 | ⬜ pending |
-| 25-06-02 | 06 | 3 | SC-10 (offline) | unit | `npx vitest run src/hooks/__tests__/offline-pricing.test.ts` | ❌ W0 | ⬜ pending |
-| 25-07-01 | 07 | 3 | SC-13 (discount patterns) | unit | `npx vitest run src/engine/__tests__/discount-patterns.test.ts` | ❌ W0 | ⬜ pending |
+| 25-01-00 | 01 | 1 | Wave 0 stubs | scaffold | `npx vitest run ...all 10 stub files...` | Created by Task 0 | ⬜ pending |
+| 25-01-02 | 01 | 1 | SC-1, SC-2 | unit | `npx vitest run src/db/__tests__/publication-prices.test.ts` | Created by Plan 01 Task 2 | ⬜ pending |
+| 25-02-01 | 02 | 2 | SC-2 (store) | unit | `npx vitest run src/stores/__tests__/pricing-data-store.test.ts` | ✅ (Plan 02 tdd) | ⬜ pending |
+| 25-02-02 | 02 | 2 | SC-2 (engine) | unit | `npx vitest run src/engine/__tests__/price-comparison-config-injection.test.ts` | ✅ (Plan 02 tdd) | ⬜ pending |
+| 25-03-01 | 03 | 2 | SC-3 (flag price) | component | `npx vitest run src/features/pricing/__tests__/price-flag.test.tsx` | W0 stub -> Plan 03 fills | ⬜ pending |
+| 25-03-02 | 03 | 2 | SC-3 (modal) | component | `npx vitest run src/features/pricing/__tests__/price-flag.test.tsx` | W0 stub -> Plan 03 fills | ⬜ pending |
+| 25-04-01 | 04 | 3 | SC-4 (review queue) | component | `npx vitest run src/features/pricing/__tests__/review-queue.test.tsx` | W0 stub -> Plan 04 fills | ⬜ pending |
+| 25-04-02 | 04 | 3 | SC-5 (auto recalc) | unit | `npx vitest run src/engine/__tests__/recalculation.test.ts` | W0 stub -> Plan 04 fills | ⬜ pending |
+| 25-04-03 | 04 | 3 | SC-6 (audit trail) | integration | `npx vitest run src/db/__tests__/audit-trail.test.ts` | W0 stub -> Plan 04 fills | ⬜ pending |
+| 25-05-01 | 05 | 3 | SC-13 (discount) | unit | `npx vitest run src/engine/__tests__/discount-patterns.test.ts` | W0 stub -> Plan 05 fills (tdd) | ⬜ pending |
+| 25-06-01 | 06 | 3 | SC-7 (config) | unit | `npx vitest run src/features/admin/__tests__/config-validation.test.ts` | ✅ (Plan 06 tdd) | ⬜ pending |
+| 25-06-02 | 06 | 3 | SC-7 (editor) | component | `npx vitest run src/features/pricing/__tests__/config-editor.test.tsx` | W0 stub -> Plan 06 fills | ⬜ pending |
+| 25-06-03 | 06 | 3 | SC-8 (staleness) | unit | `npx vitest run src/engine/__tests__/staleness.test.ts` | W0 stub -> Plan 06 fills | ⬜ pending |
+| 25-08-02 | 08 | 5 | SC-all | suite | `npm run build && npx vitest run` | All | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending · ✅ green · ❌ red · ⚠ flaky*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `src/db/__tests__/publication-prices.test.ts` — stubs for publication_prices CRUD
-- [ ] `src/engine/__tests__/price-provider.test.ts` — async provider function with fallback
-- [ ] `src/features/pricing/__tests__/price-flag.test.tsx` — price flagging UI
-- [ ] `src/features/pricing/__tests__/review-queue.test.tsx` — review queue component
-- [ ] `src/engine/__tests__/recalculation.test.ts` — auto-recalculation on approval
-- [ ] `src/db/__tests__/audit-trail.test.ts` — audit log entries
-- [ ] `src/features/pricing/__tests__/config-editor.test.tsx` — config editor UI
-- [ ] `src/engine/__tests__/staleness.test.ts` — staleness detection logic
-- [ ] `src/hooks/__tests__/offline-pricing.test.ts` — offline fallback behavior
-- [ ] `src/engine/__tests__/discount-patterns.test.ts` — discount pattern detection
+All created by Plan 01, Task 0:
 
-*Existing calculator tests in `src/engine/__tests__/` cover regression for engine changes.*
+- [x] `src/db/__tests__/publication-prices.test.ts` — stubs for publication_prices CRUD (filled by Plan 01 Task 2)
+- [x] `src/engine/__tests__/price-provider.test.ts` — async provider function with fallback
+- [x] `src/features/pricing/__tests__/price-flag.test.tsx` — price flagging UI (filled by Plan 03)
+- [x] `src/features/pricing/__tests__/review-queue.test.tsx` — review queue component (filled by Plan 04)
+- [x] `src/engine/__tests__/recalculation.test.ts` — auto-recalculation on approval (filled by Plan 04)
+- [x] `src/db/__tests__/audit-trail.test.ts` — audit log entries (filled by Plan 04)
+- [x] `src/features/pricing/__tests__/config-editor.test.tsx` — config editor UI (filled by Plan 06)
+- [x] `src/engine/__tests__/staleness.test.ts` — staleness detection logic (filled by Plan 06)
+- [x] `src/hooks/__tests__/offline-pricing.test.ts` — offline fallback behavior
+- [x] `src/engine/__tests__/discount-patterns.test.ts` — discount pattern detection (filled by Plan 05)
+
+*All Wave 0 stubs created by Plan 01 Task 0. Downstream plans fill in actual test implementations.*
 
 ---
 
@@ -83,11 +89,11 @@ created: 2026-03-30
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (Plan 01 Task 0)
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
