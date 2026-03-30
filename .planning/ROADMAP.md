@@ -350,7 +350,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete    | 2026-03-28 |
 | 24. UX-audit Vergelijkingsoverzicht | v2.0 | 2/2 | Complete    | 2026-03-28 |
-| 25. Prijsintelligentie & Stakeholder Feedback Loop | v2.0 | 1/8 | In Progress|  |
+| 25. Prijsintelligentie & Stakeholder Feedback Loop | v2.0 | 3/8 | In Progress|  |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -400,10 +400,10 @@ Plans:
 
 Plans:
 - [x] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
-- [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
+- [x] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
 - [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
 - [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
-- [ ] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
+- [x] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
 - [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
 - [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
 - [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
@@ -520,10 +520,10 @@ Plans:
   8. Staleness-detectie: systeem signaleert proactief wanneer prijzen van een provider langer dan 6 maanden niet geverifieerd zijn, per provider en per module
   9. `ops-competitor-intel` skill is gebouwd als single entry point voor alle concurrentie-informatie (handmatig, document-upload, AI-intake, periodieke check) en schrijft naar de review-queue
   10. Offline modus blijft werken: app valt terug op laatst gesyncte prijsdata uit localStorage/IndexedDB wanneer Supabase niet bereikbaar is
-**Plans:** 1/8 plans executed
+**Plans:** 3/8 plans executed
 
 Plans:
-- [ ] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
+- [x] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
 - [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
 - [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
 - [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route

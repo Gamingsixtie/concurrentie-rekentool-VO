@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to execute
-stopped_at: Completed 25-02-PLAN.md
-last_updated: "2026-03-30T21:05:00.890Z"
+stopped_at: Completed 25-05-PLAN.md
+last_updated: "2026-03-30T21:15:22.038Z"
 progress:
   total_phases: 24
   completed_phases: 19
   total_plans: 75
-  completed_plans: 64
+  completed_plans: 66
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 
 ## Performance Metrics
 
@@ -148,6 +148,8 @@ Recent decisions affecting current work:
 - [Phase 25]: Proposal approval directly upserts publication_prices via onConflict (D-08 direct activation)
 - [Phase 25]: providerConfigs as optional ComparisonOptions field preserves backward compatibility (D-03)
 - [Phase 25]: 3-layer fallback: Supabase DB -> localStorage cache -> static TS imports (D-04)
+- [Phase 25]: Inline recalculation via calculateComparison when market toggle active -- avoids store mutation
+- [Phase 25]: Only document and verified sources trusted for discount pattern detection (research pitfall 6)
 
 ### Roadmap Evolution
 
@@ -169,6 +171,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T21:05:00.881Z
-Stopped at: Completed 25-02-PLAN.md
+Last session: 2026-03-30T21:15:22.030Z
+Stopped at: Completed 25-05-PLAN.md
 Resume file: None
