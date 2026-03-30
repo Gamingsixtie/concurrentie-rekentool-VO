@@ -174,6 +174,82 @@ describe('PriceDiffDisplay component', () => {
   });
 });
 
+// --- PriceProposalModal tests ---
+
+// Mock checkPriceDeviation
+vi.mock('@/models/pricing', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/models/pricing')>();
+  return {
+    ...actual,
+    checkPriceDeviation: vi.fn().mockReturnValue({
+      hasDeviation: false,
+      publicationPrice: 5.80,
+      percentDiff: 0,
+    }),
+  };
+});
+
+import { checkPriceDeviation } from '@/models/pricing';
+import { PriceProposalModal } from '@/features/review/PriceProposalModal';
+
+const mockedCheckDeviation = vi.mocked(checkPriceDeviation);
+
+describe('PriceProposalModal component', () => {
+  const defaultProps = {
+    isOpen: true,
+    onClose: vi.fn(),
+    moduleId: 'rekenen',
+    provider: 'dia',
+    currentPrice: 5.80,
+    moduleName: 'Rekenen',
+  };
+
+  function renderModal(overrides = {}) {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <PriceProposalModal {...defaultProps} {...overrides} />
+      </QueryClientProvider>,
+    );
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedCheckDeviation.mockReturnValue({
+      hasDeviation: false,
+      publicationPrice: 5.80,
+      percentDiff: 0,
+    });
+  });
+
+  it('renders with pre-filled current price as read-only', () => {
+    renderModal();
+    // Should show current price formatted
+    expect(screen.getByText(/5,80/)).toBeTruthy();
+    // Should show module name and provider
+    expect(screen.getByText(/Rekenen/)).toBeTruthy();
+    // Should show CTA text
+    expect(screen.getByText('Voorstel indienen')).toBeTruthy();
+  });
+
+  it('renders form fields for source and explanation', () => {
+    renderModal();
+    // Should have source and explanation fields
+    expect(screen.getByLabelText(/Bron/)).toBeTruthy();
+    expect(screen.getByLabelText(/Toelichting/)).toBeTruthy();
+  });
+
+  it('does not render when isOpen is false', () => {
+    renderModal({ isOpen: false });
+    expect(screen.queryByText('Voorstel indienen')).toBeNull();
+  });
+});
+
 describe('ProposalBadge component', () => {
   it('renders correct label and color for "open" status', () => {
     const { container } = render(<ProposalBadge status="open" />);
