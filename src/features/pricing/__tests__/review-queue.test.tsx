@@ -34,7 +34,7 @@ vi.mock('@/stores/pricing-data-store', () => ({
   },
 }));
 
-// Mock react-query mutation
+// Mock react-query
 const mockInvalidateQueries = vi.fn();
 vi.mock('@tanstack/react-query', async () => {
   const actual = await vi.importActual('@tanstack/react-query');
@@ -42,6 +42,11 @@ vi.mock('@tanstack/react-query', async () => {
     ...actual,
     useQueryClient: () => ({
       invalidateQueries: mockInvalidateQueries,
+    }),
+    useQuery: ({ enabled }: { enabled?: boolean } = {}) => ({
+      data: enabled === false ? undefined : [],
+      isLoading: false,
+      error: null,
     }),
     useMutation: ({ mutationFn, onSuccess }: { mutationFn: (...args: unknown[]) => Promise<void>; onSuccess?: () => void }) => ({
       mutate: async (...args: unknown[]) => {
@@ -53,6 +58,7 @@ vi.mock('@tanstack/react-query', async () => {
         onSuccess?.();
       },
       isPending: false,
+      isSuccess: false,
     }),
   };
 });
@@ -117,12 +123,15 @@ describe('ReviewQueuePage', () => {
 
     render(<ReviewQueuePage />);
 
-    // Should show provider name
-    expect(screen.getByText('DIA')).toBeInTheDocument();
-    // Should show module name
+    // Should show provider name (in both filter bar and item)
+    expect(screen.getAllByText('DIA').length).toBeGreaterThanOrEqual(1);
+    // Should show module name in the review item
     expect(screen.getByText(/rekenen/i)).toBeInTheDocument();
-    // Should show ProposalBadge status
-    expect(screen.getByText('Open')).toBeInTheDocument();
+    // Should show ProposalBadge status (in both filter bar and item badge)
+    const openElements = screen.getAllByText('Open');
+    expect(openElements.length).toBeGreaterThanOrEqual(1);
+    // Should render a review queue item
+    expect(screen.getByTestId('review-queue-item')).toBeInTheDocument();
   });
 
   it('filter bar filters proposals by status and provider', async () => {
@@ -136,8 +145,10 @@ describe('ReviewQueuePage', () => {
     const user = userEvent.setup();
     render(<ReviewQueuePage />);
 
-    // Should show filter pills
-    const openFilter = screen.getByRole('button', { name: /open/i });
+    // Find filter pills by their container -- Status section has "Open" pill
+    const filterButtons = screen.getAllByRole('button', { name: /^Open$/i });
+    // The first "Open" button is the filter pill (in the filter bar)
+    const openFilter = filterButtons[0];
     expect(openFilter).toBeInTheDocument();
 
     await user.click(openFilter);
@@ -157,9 +168,10 @@ describe('ReviewQueuePage', () => {
     const user = userEvent.setup();
     render(<ReviewQueuePage />);
 
-    // Expand the proposal row first
-    const row = screen.getByText('DIA').closest('[data-testid="review-queue-item"]') ?? screen.getByText('DIA');
-    await user.click(row);
+    // Expand the proposal row first by clicking the item button
+    const reviewItem = screen.getByTestId('review-queue-item');
+    const expandButton = within(reviewItem).getByRole('button');
+    await user.click(expandButton);
 
     // Click approve
     const approveBtn = screen.getByRole('button', { name: /goedkeuren/i });
@@ -180,11 +192,12 @@ describe('ReviewQueuePage', () => {
     render(<ReviewQueuePage />);
 
     // Expand the proposal row
-    const row = screen.getByText('DIA').closest('[data-testid="review-queue-item"]') ?? screen.getByText('DIA');
-    await user.click(row);
+    const reviewItem = screen.getByTestId('review-queue-item');
+    const expandButton = within(reviewItem).getByRole('button');
+    await user.click(expandButton);
 
-    // Click reject to show reason input
-    const rejectBtn = screen.getByRole('button', { name: /afwijzen/i });
+    // Click reject to show reason input (Afwijzen button is the destructive one in expanded view)
+    const rejectBtn = screen.getByRole('button', { name: /^afwijzen$/i });
     await user.click(rejectBtn);
 
     // Should show textarea for reason
