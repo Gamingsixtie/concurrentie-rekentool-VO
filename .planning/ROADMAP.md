@@ -441,7 +441,7 @@ Plans:
 **Plans:** 8 plans
 
 Plans:
-- [ ] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
+- [x] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
 - [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
 - [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
 - [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
