@@ -138,13 +138,14 @@ describe('useCreateProposal hook', () => {
       explanation: 'Nieuwe prijs van DIA webshop',
     } as never);
 
-    // Verify the mutation was called
+    // Verify the mutation was called with the proposal data as first arg
     expect(mockedCreateProposal).toHaveBeenCalledWith(
       expect.objectContaining({
         module_id: 'rekenen',
         provider: 'dia',
         proposed_price: 6.20,
       }),
+      expect.anything(), // React Query passes mutation context as second arg
     );
   });
 });
