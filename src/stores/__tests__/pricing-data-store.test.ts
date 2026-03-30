@@ -22,10 +22,10 @@ vi.mock('@/data/default-prices', () => ({
 }));
 
 describe('usePricingDataStore', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     // Reset store state between tests
-    const { usePricingDataStore } = require('@/stores/pricing-data-store');
+    const { usePricingDataStore } = await import('@/stores/pricing-data-store');
     usePricingDataStore.setState({
       providerConfigs: {},
       publicationPrices: [],
