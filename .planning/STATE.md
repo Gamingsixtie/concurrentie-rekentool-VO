@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 ## Current Position
 
 Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 
 ## Performance Metrics
 
@@ -150,6 +150,8 @@ Recent decisions affecting current work:
 - [Phase 25]: 3-layer fallback: Supabase DB -> localStorage cache -> static TS imports (D-04)
 - [Phase 25]: Inline recalculation via calculateComparison when market toggle active -- avoids store mutation
 - [Phase 25]: Only document and verified sources trusted for discount pattern detection (research pitfall 6)
+- [Phase 25]: Review nav link in RootLayout header, not separate NavigationBar (consistent with existing architecture)
+- [Phase 25]: ROUTE_PATHS constant for non-school top-level routes (review is not under schoolRoute)
 
 ### Roadmap Evolution
 
