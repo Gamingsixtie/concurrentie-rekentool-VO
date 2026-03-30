@@ -81,6 +81,8 @@ Plans:
 - [x] **Phase 22: Architectuur, Testen & Productie-readiness** - Complete architectuurreview, end-to-end tests, integratietests en productie-hardening zodat het prototype volledig productiegereed is
  (completed 2026-03-28)
  (completed 2026-03-25)
+- [x] **Phase 24: UX-audit Vergelijkingsoverzicht** - Vergelijkingsoverzicht UX-technisch doorgelicht en geoptimaliseerd: doublures geëlimineerd, progressive disclosure, stakeholder-ready (completed 2026-03-28)
+- [ ] **Phase 25: Prijsintelligentie & Stakeholder Feedback Loop** - Database-driven prijsdata met stakeholder-feedbackworkflow: flaggen, corrigeren, valideren, audittrail, automatische herberekening en ops-competitor-intel skill
 
 ## Phase Details
 
@@ -348,6 +350,7 @@ Phases execute in custom order: 6 â 7 â 8 â 9 â 10 â 11
 | 21. DMU-Export Upgrade | v2.0 | 2/3 | In Progress|  |
 | 22. Architectuur, Testen & Productie-readiness | v2.0 | 6/6 | Complete    | 2026-03-28 |
 | 24. UX-audit Vergelijkingsoverzicht | v2.0 | 2/2 | Complete    | 2026-03-28 |
+| 25. Prijsintelligentie & Stakeholder Feedback Loop | v2.0 | 0/0 | Not Started | — |
 
 ### Phase 16: AI Wizard Verbetering & Prijsvergelijking Harmonisatie
 **Goal**: Eerlijke, correcte en consistente vergelijking tussen Cito en concurrenten (DIA/JIJ) ondanks hun verschillende varianten-structuren, via een verbeterde AI wizard met drie logische stappen
@@ -393,10 +396,17 @@ Plans:
   3. Klantreis-tijdlijn toont chronologisch: wie was het eerste contact, wie is daarna benaderd, met wie moet overlegd worden, en waar loopt het proces vast — inclusief blokkades en notities
   4. School-dashboard (totaaloverzicht) toont een samenvatting van de DMU-structuur en klantreis-status zodat de accountmanager in één oogopslag ziet hoe het salesproces ervoor staat
   5. DMU-posities en klantreis-data worden persistent opgeslagen en zijn beschikbaar voor alle views (contacten-tab, dashboard, exports)
-**Plans:** 0 plans
+**Plans:** 8 plans
 
 Plans:
-- [ ] TBD
+- [ ] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
+- [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
+- [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
+- [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
+- [ ] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
+- [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
+- [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
+- [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
 
 ### Phase 19: Gesprekken-tab & Acties Upgrade
 **Goal**: Het tabblad Gesprekken wordt vereenvoudigd en praktischer: AI-extractie wordt verwijderd (dat gebeurt al in de AI Wizard), notities kunnen ingesproken worden via spraak-naar-tekst, en per gesprek wordt de contactpersoon gekoppeld met status. Het tabblad Acties wordt verfijnd met directe inline invoer en een bevestigingsdialoog bij verwijderen.
@@ -428,10 +438,17 @@ Plans:
   5. `npm run build` slaagt zonder errors na verwijdering
   6. Alle bestaande tests slagen (`npx vitest run`) — geen regressies in overige functionaliteit
   7. Navigatie tussen overige tabs werkt correct — geen dode links of lege views
-**Plans:** 0 plans
+**Plans:** 8 plans
 
 Plans:
-- [ ] TBD
+- [ ] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
+- [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
+- [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
+- [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
+- [ ] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
+- [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
+- [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
+- [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
 
 ### Phase 21: DMU-Export Upgrade
 **Goal**: Het export-tabblad wordt uitgebreid met intelligente, DMU-gerichte rapporten. Op basis van generieke aannames per DMU-rol (coördinator, MT/directie, finance) worden de relevante verschillen en voordelen getoond. De rapporten bevatten geëxtraheerde tekst uit het schoolplan en Cito-bronmateriaal, zodat elk rapport inhoudelijk onderbouwd is voor de specifieke beslisser.
@@ -487,6 +504,33 @@ Plans:
 Plans:
 - [x] 24-01-PLAN.md — SectionBand + ProviderToolbar extractie, ComparisonSummary/MeerwaardePanel cleanup, pagina-herstructurering met kleurzones
 - [x] 24-02-PLAN.md — AI hero collapse/expand met SchoolplanBanner integratie, visuele checkpoint
+
+### Phase 25: Prijsintelligentie & Stakeholder Feedback Loop
+**Goal**: Concurrentie-informatie (prijzen, bundelstructuren, features) verplaatsen van hardcoded TypeScript-bestanden naar een database-driven systeem met stakeholder-feedbackworkflow — zodat accountmanagers en productspecialisten prijzen kunnen flaggen, corrigeren en valideren, en elke wijziging automatisch doorcijfert naar alle vergelijkingen en analyses.
+**Depends on**: Phase 22 (productie-readiness), Phase 10.1 (provider configs), Phase 9 (prijsbeheer infra)
+**Requirements**: PI-01, PI-02, PI-03, PI-04, PI-05, PI-06, PI-07, PI-08, PI-09, PI-10
+**Success Criteria** (what must be TRUE):
+  1. Publicatieprijzen en pricing-strategie configuraties (bundels, tiers, pakketten) staan in Supabase `publication_prices` + `pricing_configs` tabellen — huidige TS-bestanden dienen als seed en offline fallback
+  2. Engine calculators lezen prijsdata via een async provider-functie die Supabase-first werkt met fallback naar static data — bestaande pure-function architectuur blijft intact
+  3. Gebruiker kan in de Products-tab een publicatieprijs flaggen als "klopt niet" met toelichting en optioneel bewijs (document upload) — dit creëert een prijsvoorstel in een review-queue
+  4. Admin/productmanager ziet een review-queue van alle openstaande prijsvoorstellen, kan per voorstel goedkeuren of afwijzen met reden, en goedgekeurde wijzigingen worden direct actief
+  5. Bij goedkeuring van een prijswijziging worden alle bestaande schoolvergelijkingen die deze provider/module gebruiken automatisch herberekend — geen handmatige actie nodig
+  6. Elke prijswijziging heeft een volledig audittrail: wie, wanneer, oude waarde, nieuwe waarde, bron, reden — zichtbaar als prijsgeschiedenis per module/provider
+  7. Structuurwijzigingen (nieuw DIA-pakket, JIJ-tier aanpassing, Cito-bundel wijziging) kunnen door een admin worden doorgevoerd via een configuratie-editor — de engine past zich automatisch aan
+  8. Staleness-detectie: systeem signaleert proactief wanneer prijzen van een provider langer dan 6 maanden niet geverifieerd zijn, per provider en per module
+  9. `ops-competitor-intel` skill is gebouwd als single entry point voor alle concurrentie-informatie (handmatig, document-upload, AI-intake, periodieke check) en schrijft naar de review-queue
+  10. Offline modus blijft werken: app valt terug op laatst gesyncte prijsdata uit localStorage/IndexedDB wanneer Supabase niet bereikbaar is
+**Plans:** 8 plans
+
+Plans:
+- [ ] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
+- [ ] 25-02-PLAN.md — Pricing data store (Zustand + persist) + engine config injection + offline fallback
+- [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
+- [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
+- [ ] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
+- [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
+- [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
+- [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
 
 ## Backlog
 
