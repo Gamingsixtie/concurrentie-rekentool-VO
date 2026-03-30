@@ -14,6 +14,7 @@ import { getCitoBundle, getCitoFactorForBundle } from '../../data/cito-bundles';
 import { applyContractPeriodToResult } from '../../engine/cito-bundles';
 import { buildOverridePricesFromSetups } from '../../engine/build-override-prices';
 import { DEFAULT_PRICES } from '../../data/default-prices';
+import { usePricingDataStore } from '../../stores/pricing-data-store';
 
 export interface PriceOverride {
   moduleId: string;
@@ -201,6 +202,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
+      const pricingData = usePricingDataStore.getState();
 
       // Build override prices from Products tab edits
       const setupOverrides = buildOverridePricesFromSetups(moduleSetups, DEFAULT_PRICES);
@@ -211,6 +213,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         competitorModuleIds: state.competitorModuleIds ?? undefined,
         forceDiaPackageId: state.forceDiaPackageId,
         overridePrices: setupOverrides.size > 0 ? setupOverrides : undefined,
+        providerConfigs: pricingData.providerConfigs,
       });
 
       // Step 2: Contract period multipliers (post-processing, stays in store)
@@ -245,6 +248,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
+      const pricingData = usePricingDataStore.getState();
 
       // Determine effective bundle type
       const citoBundleType = config.citoBundleType ?? state.citoBundleType;
@@ -258,6 +262,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         competitorModuleIds: config.competitorModuleIds ?? undefined,
         forceDiaPackageId: config.forceDiaPackageId,
         overridePrices: setupOverrides.size > 0 ? setupOverrides : undefined,
+        providerConfigs: pricingData.providerConfigs,
       });
 
       const bundle = getCitoBundle(citoBundleType);
@@ -317,6 +322,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
       const { selectedModules, studentCounts, moduleSetups } =
         useSchoolProfileStore.getState();
       const state = get();
+      const pricingData = usePricingDataStore.getState();
 
       // Base: Products tab overrides
       const setupOverrides = buildOverridePricesFromSetups(moduleSetups, DEFAULT_PRICES);
@@ -338,6 +344,7 @@ export const usePriceComparisonStore = create<PriceComparisonState>()(
         overridePrices,
         competitorModuleIds: state.competitorModuleIds ?? undefined,
         forceDiaPackageId: state.forceDiaPackageId,
+        providerConfigs: pricingData.providerConfigs,
       });
 
       // Step 2: Contract period
