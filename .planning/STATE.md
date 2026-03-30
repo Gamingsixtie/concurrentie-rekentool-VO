@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Phase 25 context gathered
-last_updated: "2026-03-30T19:43:00.445Z"
+status: Ready to execute
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-03-30T20:55:38.045Z"
 progress:
   total_phases: 24
   completed_phases: 19
-  total_plans: 67
-  completed_plans: 63
+  total_plans: 75
+  completed_plans: 64
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 24 — ux-audit-vergelijkingsoverzicht-stakeholder-ready
+**Current focus:** Phase 25 — prijsintelligentie-stakeholder-feedback-loop
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
+Plan: 2 of 8
 
 ## Performance Metrics
 
@@ -144,6 +144,8 @@ Recent decisions affecting current work:
 - [Phase 22]: xlsx HIGH vulnerability accepted -- internal tool, no untrusted file uploads
 - [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 - [Phase 24]: Lifted analysis summary state via onAnalysisComplete callback prop instead of shared store
+- [Phase 25]: Pricing operations use typed AuditEntityType/AuditAction from Supabase types for strict DB typing
+- [Phase 25]: Proposal approval directly upserts publication_prices via onConflict (D-08 direct activation)
 
 ### Roadmap Evolution
 
@@ -165,6 +167,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T19:43:00.432Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-prijsintelligentie-stakeholder-feedback-loop/25-CONTEXT.md
+Last session: 2026-03-30T20:55:38.038Z
+Stopped at: Completed 25-01-PLAN.md
+Resume file: None
