@@ -19,6 +19,7 @@ import SchoolplanTab from '@/features/school-profile/tabs/SchoolplanTab';
 import ExportTab from '@/features/export/ExportTab';
 import { LoginPage } from '@/features/auth/LoginPage';
 import ReviewQueuePage from '@/features/review/ReviewQueuePage';
+import { AdminConfigEditor } from '@/features/admin/AdminConfigEditor';
 
 // Root layout (with UserMenu header and migration gate)
 export const rootRoute = createRootRoute({
@@ -142,6 +143,13 @@ export const reviewRoute = createRoute({
   component: ReviewQueuePage,
 });
 
+// Admin config editor (manager-only)
+export const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: AdminConfigEditor,
+});
+
 // Centralised route paths — import these instead of hardcoding strings
 export const SCHOOL_TAB_ROUTES = {
   overzicht: '/scholen/$slug',
@@ -164,6 +172,7 @@ export const routeTree = rootRoute.addChildren([
   indexRoute,
   scholenRoute,
   reviewRoute,
+  adminRoute,
   schoolRoute.addChildren([
     schoolDashboardRoute,
     wizardStepRoute,

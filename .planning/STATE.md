@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to execute
-stopped_at: Completed 25-05-PLAN.md
-last_updated: "2026-03-30T21:15:22.038Z"
+status: Ready to plan
+stopped_at: Completed 25-06-PLAN.md
+last_updated: "2026-03-30T21:17:40.080Z"
 progress:
-  total_phases: 24
+  total_phases: 23
   completed_phases: 19
-  total_plans: 75
-  completed_plans: 66
+  total_plans: 67
+  completed_plans: 63
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 25 — prijsintelligentie-stakeholder-feedback-loop
+**Current focus:** Phase 24 — ux-audit-vergelijkingsoverzicht-stakeholder-ready
 
 ## Current Position
 
-Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
-Plan: 5 of 8
+Phase: 999.1
+Plan: Not started
 
 ## Performance Metrics
 
@@ -144,14 +144,7 @@ Recent decisions affecting current work:
 - [Phase 22]: xlsx HIGH vulnerability accepted -- internal tool, no untrusted file uploads
 - [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 - [Phase 24]: Lifted analysis summary state via onAnalysisComplete callback prop instead of shared store
-- [Phase 25]: Pricing operations use typed AuditEntityType/AuditAction from Supabase types for strict DB typing
-- [Phase 25]: Proposal approval directly upserts publication_prices via onConflict (D-08 direct activation)
-- [Phase 25]: providerConfigs as optional ComparisonOptions field preserves backward compatibility (D-03)
-- [Phase 25]: 3-layer fallback: Supabase DB -> localStorage cache -> static TS imports (D-04)
-- [Phase 25]: Inline recalculation via calculateComparison when market toggle active -- avoids store mutation
-- [Phase 25]: Only document and verified sources trusted for discount pattern detection (research pitfall 6)
-- [Phase 25]: Review nav link in RootLayout header, not separate NavigationBar (consistent with existing architecture)
-- [Phase 25]: ROUTE_PATHS constant for non-school top-level routes (review is not under schoolRoute)
+- [Phase 25]: Zod schemas match actual provider-specific types (JijLicenseTier, DiaPackage, CitoBundle) rather than simplified plan interfaces
 
 ### Roadmap Evolution
 
@@ -173,6 +166,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T21:15:22.030Z
-Stopped at: Completed 25-05-PLAN.md
+Last session: 2026-03-30T21:17:34.473Z
+Stopped at: Completed 25-06-PLAN.md
 Resume file: None
