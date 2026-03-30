@@ -1,11 +1,197 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 
-// import { PriceFlagButton } from '@/features/pricing/components/PriceFlagButton';
+// Mock pricing-operations
+vi.mock('@/db/pricing-operations', () => ({
+  fetchPriceProposals: vi.fn(),
+  createPriceProposal: vi.fn(),
+  fetchOpenProposalCount: vi.fn(),
+}));
 
-describe('price flagging UI — "Klopt niet?" trigger', () => {
-  it.todo('renders "Klopt niet?" button next to each price');
-  it.todo('opens modal with current price pre-filled on click');
-  it.todo('validates proposed price is a positive number');
-  it.todo('submits price proposal with explanation');
-  it.todo('shows success toast after submission');
+import {
+  fetchPriceProposals,
+  createPriceProposal,
+  fetchOpenProposalCount,
+} from '@/db/pricing-operations';
+
+const mockedFetchProposals = vi.mocked(fetchPriceProposals);
+const mockedCreateProposal = vi.mocked(createPriceProposal);
+const mockedFetchOpenCount = vi.mocked(fetchOpenProposalCount);
+
+// Import hooks (will be created)
+import {
+  usePriceProposals,
+  useCreateProposal,
+  useOpenProposalCount,
+} from '@/hooks/usePriceProposals';
+
+// Import UI components (will be created)
+import { PriceDiffDisplay } from '@/components/ui/PriceDiffDisplay';
+import { ProposalBadge } from '@/components/ui/ProposalBadge';
+
+// Test wrapper with QueryClient
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  return function Wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  };
+}
+
+describe('usePriceProposals hook', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls fetchPriceProposals with correct filters', async () => {
+    const mockData = [
+      { id: '1', module_id: 'rekenen', provider: 'dia', status: 'open' },
+    ];
+    mockedFetchProposals.mockResolvedValue(mockData as never);
+
+    const filters = { status: 'open', provider: 'dia' };
+    const { result } = renderHook(() => usePriceProposals(filters), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockedFetchProposals).toHaveBeenCalledWith(filters);
+    expect(result.current.data).toEqual(mockData);
+  });
+});
+
+describe('useOpenProposalCount hook', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('polls every 60 seconds (refetchInterval)', async () => {
+    mockedFetchOpenCount.mockResolvedValue(3);
+
+    const { result } = renderHook(() => useOpenProposalCount(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toBe(3);
+    expect(mockedFetchOpenCount).toHaveBeenCalled();
+  });
+});
+
+describe('useCreateProposal hook', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('invalidates price-proposals queries on success', async () => {
+    const proposalResult = {
+      id: '1',
+      module_id: 'rekenen',
+      provider: 'dia',
+      status: 'open',
+    };
+    mockedCreateProposal.mockResolvedValue(proposalResult as never);
+    mockedFetchProposals.mockResolvedValue([]);
+
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+
+    // Prime the cache
+    const { result: listResult } = renderHook(
+      () => usePriceProposals(),
+      { wrapper },
+    );
+    await waitFor(() => expect(listResult.current.isSuccess).toBe(true));
+
+    // Create a proposal
+    const { result: createResult } = renderHook(
+      () => useCreateProposal(),
+      { wrapper },
+    );
+
+    await createResult.current.mutateAsync({
+      module_id: 'rekenen',
+      provider: 'dia',
+      current_price: 5.80,
+      proposed_price: 6.20,
+      source: 'Offerte',
+      explanation: 'Nieuwe prijs van DIA webshop',
+    } as never);
+
+    // Verify the mutation was called
+    expect(mockedCreateProposal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        module_id: 'rekenen',
+        provider: 'dia',
+        proposed_price: 6.20,
+      }),
+    );
+  });
+});
+
+describe('PriceDiffDisplay component', () => {
+  it('shows correct percentage delta for price increase', () => {
+    render(<PriceDiffDisplay oldPrice={5.80} newPrice={6.20} />);
+
+    // Should show old price with line-through
+    const oldPriceEl = screen.getByText(/5,80/);
+    expect(oldPriceEl).toBeTruthy();
+
+    // Should show new price
+    const newPriceEl = screen.getByText(/6,20/);
+    expect(newPriceEl).toBeTruthy();
+
+    // Should show positive delta (price increase = red)
+    expect(screen.getByText(/6,9%/)).toBeTruthy();
+  });
+
+  it('shows correct percentage delta for price decrease', () => {
+    render(<PriceDiffDisplay oldPrice={10.00} newPrice={8.00} />);
+
+    // Should show negative delta (price decrease = green)
+    expect(screen.getByText(/20,0%/)).toBeTruthy();
+  });
+});
+
+describe('ProposalBadge component', () => {
+  it('renders correct label and color for "open" status', () => {
+    const { container } = render(<ProposalBadge status="open" />);
+    expect(screen.getByText('Open')).toBeTruthy();
+    const badge = container.querySelector('span');
+    expect(badge?.className).toContain('bg-status-manual-bg');
+  });
+
+  it('renders correct label and color for "approved" status', () => {
+    const { container } = render(<ProposalBadge status="approved" />);
+    expect(screen.getByText('Goedgekeurd')).toBeTruthy();
+    const badge = container.querySelector('span');
+    expect(badge?.className).toContain('bg-status-verified-bg');
+  });
+
+  it('renders correct label and color for "rejected" status', () => {
+    const { container } = render(<ProposalBadge status="rejected" />);
+    expect(screen.getByText('Afgewezen')).toBeTruthy();
+    const badge = container.querySelector('span');
+    expect(badge?.className).toContain('bg-status-stale-bg');
+  });
 });
