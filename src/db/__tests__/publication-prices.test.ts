@@ -1,40 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { PublicationPrice, PriceProposal } from '../pricing-types';
 
-// Mock supabase client
-const mockSelect = vi.fn();
-const mockInsert = vi.fn();
-const mockUpdate = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
+// --- Supabase mock setup ---
+// vi.mock factory is hoisted, so we use a simple mock that we configure per test.
 
-const mockFrom = vi.fn(() => ({
-  select: mockSelect,
-  insert: mockInsert,
-  update: mockUpdate,
-}));
-
-// Chain returns for select
-mockSelect.mockReturnValue({ eq: mockEq });
-mockEq.mockReturnValue({ eq: mockEq, single: mockSingle, data: [], error: null });
-
-// Chain returns for insert
-mockInsert.mockReturnValue({ select: vi.fn().mockReturnValue({ single: mockSingle }) });
-
-// Chain returns for update
-mockUpdate.mockReturnValue({ eq: mockEq });
-
+const mockFrom = vi.fn();
 const mockGetUser = vi.fn();
+const mockGetSession = vi.fn();
 
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
     from: (...args: unknown[]) => mockFrom(...args),
     auth: {
       getUser: () => mockGetUser(),
+      getSession: () => mockGetSession(),
     },
   },
 }));
 
-// Import after mocks
 import {
   fetchPublicationPrices,
   createPriceProposal,
@@ -42,13 +25,16 @@ import {
   rejectProposal,
   fetchOpenProposalCount,
 } from '../pricing-operations';
-import type { PublicationPrice, PriceProposal } from '../pricing-types';
 
 describe('publication-prices CRUD', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
     mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123' } },
+    });
+    mockGetSession.mockResolvedValue({
+      data: { session: { access_token: 'test-token' } },
     });
   });
 
@@ -72,12 +58,15 @@ describe('publication-prices CRUD', () => {
       },
     ];
 
-    mockEq.mockResolvedValueOnce({ data: mockPrices, error: null });
+    const eqMock = vi.fn().mockResolvedValue({ data: mockPrices, error: null });
+    const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+    mockFrom.mockReturnValue({ select: selectMock });
 
     const result = await fetchPublicationPrices();
     expect(result).toEqual(mockPrices);
     expect(mockFrom).toHaveBeenCalledWith('publication_prices');
-    expect(mockSelect).toHaveBeenCalledWith('*');
+    expect(selectMock).toHaveBeenCalledWith('*');
+    expect(eqMock).toHaveBeenCalledWith('is_active', true);
   });
 
   it('createPriceProposal creates proposal with status open and correct submitted_by', async () => {
@@ -104,23 +93,35 @@ describe('publication-prices CRUD', () => {
       updated_at: '2026-01-01T00:00:00Z',
     };
 
-    const selectSingle = vi.fn().mockResolvedValueOnce({ data: mockResult, error: null });
-    const selectFn = vi.fn().mockReturnValue({ single: selectSingle });
-    mockInsert.mockReturnValueOnce({ select: selectFn });
+    // getTeamId: from('users').select('team_id').eq('id', userId).single()
+    const userSingleMock = vi.fn().mockResolvedValue({ data: { team_id: 'team-1' }, error: null });
+    const userEqMock = vi.fn().mockReturnValue({ single: userSingleMock });
+    const userSelectMock = vi.fn().mockReturnValue({ eq: userEqMock });
+
+    // from('price_proposals').insert().select().single()
+    const singleMock = vi.fn().mockResolvedValue({ data: mockResult, error: null });
+    const propSelectMock = vi.fn().mockReturnValue({ single: singleMock });
+    const insertMock = vi.fn().mockReturnValue({ select: propSelectMock });
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'users') return { select: userSelectMock };
+      if (table === 'price_proposals') return { insert: insertMock };
+      return {};
+    });
 
     const result = await createPriceProposal(proposalData);
     expect(result).toEqual(mockResult);
     expect(mockFrom).toHaveBeenCalledWith('price_proposals');
-    expect(mockInsert).toHaveBeenCalledWith(
+    expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        ...proposalData,
         submitted_by: 'user-123',
+        team_id: 'team-1',
+        module_id: 'rekenwiskunde',
       }),
     );
   });
 
   it('approveProposal updates proposal status to approved and upserts publication_prices', async () => {
-    // First call: fetch proposal
     const proposal: PriceProposal = {
       id: 'prop-1',
       team_id: 'team-1',
@@ -140,22 +141,36 @@ describe('publication-prices CRUD', () => {
       updated_at: '2026-01-01T00:00:00Z',
     };
 
-    mockSingle.mockResolvedValueOnce({ data: proposal, error: null });
-    // Update proposal
-    mockEq.mockResolvedValueOnce({ data: null, error: null });
-    // Upsert publication price
-    mockEq.mockResolvedValueOnce({ data: null, error: null });
-    // Insert audit log
-    mockInsert.mockReturnValueOnce({ error: null });
+    const calledTables: string[] = [];
+
+    mockFrom.mockImplementation((table: string) => {
+      calledTables.push(table);
+      if (table === 'price_proposals') {
+        // Need both select (for fetch) and update (for status change)
+        const singleMock = vi.fn().mockResolvedValue({ data: proposal, error: null });
+        const eqForSelect = vi.fn().mockReturnValue({ single: singleMock });
+        const selectMock = vi.fn().mockReturnValue({ eq: eqForSelect });
+        const eqForUpdate = vi.fn().mockResolvedValue({ data: null, error: null });
+        const updateMock = vi.fn().mockReturnValue({ eq: eqForUpdate });
+        return { select: selectMock, update: updateMock };
+      }
+      if (table === 'publication_prices') {
+        return { upsert: vi.fn().mockResolvedValue({ error: null }) };
+      }
+      if (table === 'price_audit_log') {
+        return { insert: vi.fn().mockResolvedValue({ error: null }) };
+      }
+      return {};
+    });
 
     await approveProposal('prop-1');
 
-    // Should have called from with price_proposals, publication_prices, and price_audit_log
-    expect(mockFrom).toHaveBeenCalledWith('price_proposals');
+    expect(calledTables).toContain('price_proposals');
+    expect(calledTables).toContain('publication_prices');
+    expect(calledTables).toContain('price_audit_log');
   });
 
   it('rejectProposal requires a reason string and updates status to rejected', async () => {
-    // Fetch proposal
     const proposal: PriceProposal = {
       id: 'prop-2',
       team_id: 'team-1',
@@ -175,22 +190,42 @@ describe('publication-prices CRUD', () => {
       updated_at: '2026-01-01T00:00:00Z',
     };
 
-    mockSingle.mockResolvedValueOnce({ data: proposal, error: null });
-    // Update proposal
-    mockEq.mockResolvedValueOnce({ data: null, error: null });
-    // Insert audit log
-    mockInsert.mockReturnValueOnce({ error: null });
+    const calledTables: string[] = [];
+
+    mockFrom.mockImplementation((table: string) => {
+      calledTables.push(table);
+      if (table === 'price_proposals') {
+        const singleMock = vi.fn().mockResolvedValue({ data: proposal, error: null });
+        const eqForSelect = vi.fn().mockReturnValue({ single: singleMock });
+        const selectMock = vi.fn().mockReturnValue({ eq: eqForSelect });
+        const eqForUpdate = vi.fn().mockResolvedValue({ data: null, error: null });
+        const updateMock = vi.fn().mockReturnValue({ eq: eqForUpdate });
+        return { select: selectMock, update: updateMock };
+      }
+      if (table === 'price_audit_log') {
+        return { insert: vi.fn().mockResolvedValue({ error: null }) };
+      }
+      return {};
+    });
 
     await rejectProposal('prop-2', 'Bron niet betrouwbaar');
 
-    expect(mockFrom).toHaveBeenCalledWith('price_proposals');
+    expect(calledTables).toContain('price_proposals');
+    expect(calledTables).toContain('price_audit_log');
+
+    // Verify empty reason throws
+    await expect(rejectProposal('prop-2', '')).rejects.toThrow('Reden voor afwijzing is verplicht');
   });
 
   it('fetchOpenProposalCount returns count of open proposals for team', async () => {
-    const mockCount = vi.fn().mockResolvedValueOnce({ count: 3, error: null });
-    mockSelect.mockReturnValueOnce({ eq: vi.fn().mockReturnValue({ eq: mockCount }) });
+    const eqMock = vi.fn().mockResolvedValue({ count: 3, error: null });
+    const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+    mockFrom.mockReturnValue({ select: selectMock });
 
     const count = await fetchOpenProposalCount();
     expect(count).toBe(3);
+    expect(mockFrom).toHaveBeenCalledWith('price_proposals');
+    expect(selectMock).toHaveBeenCalledWith('*', { count: 'exact', head: true });
+    expect(eqMock).toHaveBeenCalledWith('status', 'open');
   });
 });
