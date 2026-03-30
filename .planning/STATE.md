@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
 status: Ready to plan
-stopped_at: Phase 25 context gathered
-last_updated: "2026-03-30T19:43:00.445Z"
+stopped_at: Completed 25-06-PLAN.md
+last_updated: "2026-03-30T21:17:40.080Z"
 progress:
-  total_phases: 24
+  total_phases: 23
   completed_phases: 19
   total_plans: 67
   completed_plans: 63
@@ -144,6 +144,7 @@ Recent decisions affecting current work:
 - [Phase 22]: xlsx HIGH vulnerability accepted -- internal tool, no untrusted file uploads
 - [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 - [Phase 24]: Lifted analysis summary state via onAnalysisComplete callback prop instead of shared store
+- [Phase 25]: Zod schemas match actual provider-specific types (JijLicenseTier, DiaPackage, CitoBundle) rather than simplified plan interfaces
 
 ### Roadmap Evolution
 
@@ -165,6 +166,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T19:43:00.432Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-prijsintelligentie-stakeholder-feedback-loop/25-CONTEXT.md
+Last session: 2026-03-30T21:17:34.473Z
+Stopped at: Completed 25-06-PLAN.md
+Resume file: None
