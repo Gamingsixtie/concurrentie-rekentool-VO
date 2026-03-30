@@ -18,6 +18,7 @@ import ConversationsTab from '@/features/school-profile/tabs/ConversationsTab';
 import SchoolplanTab from '@/features/school-profile/tabs/SchoolplanTab';
 import ExportTab from '@/features/export/ExportTab';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { AdminConfigEditor } from '@/features/admin/AdminConfigEditor';
 
 // Root layout (with UserMenu header and migration gate)
 export const rootRoute = createRootRoute({
@@ -134,6 +135,13 @@ export const exportRoute = createRoute({
   component: ExportTab,
 });
 
+// Admin config editor (manager-only)
+export const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin',
+  component: AdminConfigEditor,
+});
+
 // Centralised route paths — import these instead of hardcoding strings
 export const SCHOOL_TAB_ROUTES = {
   overzicht: '/scholen/$slug',
@@ -151,6 +159,7 @@ export const routeTree = rootRoute.addChildren([
   loginRoute,
   indexRoute,
   scholenRoute,
+  adminRoute,
   schoolRoute.addChildren([
     schoolDashboardRoute,
     wizardStepRoute,
