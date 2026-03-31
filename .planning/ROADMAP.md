@@ -536,12 +536,12 @@ Plans:
 - [ ] 25-03-PLAN.md — Price proposal submission: hooks, modal, ProposalBadge, PriceDiffDisplay
 - [ ] 25-04-PLAN.md — Review queue page, approve/reject workflow, navigation badge, /review route
 - [ ] 25-05-PLAN.md — Discount pattern detection engine + market pricing toggle + alerts
-- [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
+- [x] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
 - [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
-- [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
-- [ ] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
-- [ ] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
-- [ ] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
+- [x] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
+- [x] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
+- [x] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
+- [x] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
 - [ ] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
 
 ## Backlog
