@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Sales Intelligence Platform
-status: Ready to plan
-stopped_at: Completed 25-08-PLAN.md (Task 3 checkpoint pending)
-last_updated: "2026-03-30T21:47:22.652Z"
+status: Ready to execute
+stopped_at: Completed 25-11-PLAN.md
+last_updated: "2026-03-31T13:31:07.540Z"
 progress:
-  total_phases: 23
+  total_phases: 24
   completed_phases: 19
-  total_plans: 67
-  completed_plans: 63
+  total_plans: 79
+  completed_plans: 70
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Accountmanagers hebben tijdens elk schoolgesprek direct een onderbouwd, eerlijk en op de DMU afgestemd overzicht dat zowel financieel als in tijdsbesparing concreet maakt waarom Cito de beste keuze is.
-**Current focus:** Phase 24 — ux-audit-vergelijkingsoverzicht-stakeholder-ready
+**Current focus:** Phase 25 — prijsintelligentie-stakeholder-feedback-loop
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 25 (prijsintelligentie-stakeholder-feedback-loop) — EXECUTING
+Plan: 3 of 12
 
 ## Performance Metrics
 
@@ -145,6 +145,8 @@ Recent decisions affecting current work:
 - [Phase 22]: 10MB client-side file size limit on DocumentDropzone for defense-in-depth
 - [Phase 24]: Lifted analysis summary state via onAnalysisComplete callback prop instead of shared store
 - [Phase 25]: ops-competitor-intel routes to existing infrastructure (PriceProposalModal, document upload, admin editor) rather than building new UI
+- [Phase 25]: getState() call pattern for loadFromSupabase consistent with existing store access (no re-renders)
+- [Phase 25]: useMarketPricing as local useState rather than store state -- view-layer toggle only
 
 ### Roadmap Evolution
 
@@ -166,6 +168,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-30T21:47:22.645Z
-Stopped at: Completed 25-08-PLAN.md (Task 3 checkpoint pending)
+Last session: 2026-03-31T13:31:07.521Z
+Stopped at: Completed 25-11-PLAN.md
 Resume file: None
