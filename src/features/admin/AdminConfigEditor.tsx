@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { PROVIDER_CONFIGS } from '@/data/providers/index';
+import { updatePricingConfig } from '@/db/pricing-operations';
+import { usePricingDataStore } from '@/stores/pricing-data-store';
+import { usePricingConfigs } from '@/hooks/usePricingConfigs';
 import type { PricingStrategy } from '@/models/pricing';
 import { ProviderConfigForm } from './ProviderConfigForm';
 
@@ -21,6 +25,8 @@ const PROVIDER_TABS = [
 export function AdminConfigEditor() {
   const { userProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('cito');
+  const queryClient = useQueryClient();
+  const { data: dbConfigs } = usePricingConfigs();
 
   // Manager-only access check
   if (userProfile?.role !== 'manager') {
@@ -37,14 +43,26 @@ export function AdminConfigEditor() {
   }
 
   const activeConfig = PROVIDER_CONFIGS[activeTab as keyof typeof PROVIDER_CONFIGS];
+  // Find matching DB config to get its ID for updates
+  const activeDbConfig = dbConfigs?.find(
+    (c) => c.provider === activeTab && c.is_active,
+  );
 
   const handleSave = async (newConfig: PricingStrategy) => {
-    // In a full implementation, this would call updatePricingConfig
-    // and reload the pricing data store. For now, log the save action.
-    console.log(`[AdminConfigEditor] Saving config for ${activeTab}:`, newConfig);
+    if (!activeDbConfig) {
+      // No DB config exists yet for this provider — cannot save
+      // This can happen if seed migration hasn't run
+      console.warn(`[AdminConfigEditor] No DB config found for ${activeTab} — seed migration may not have run`);
+      return;
+    }
 
-    // TODO (Plan 25-01 dependency): call updatePricingConfig(config.id, newConfigData)
-    // TODO (Plan 25-02 dependency): call usePricingDataStore.getState().loadFromSupabase()
+    await updatePricingConfig(activeDbConfig.id, newConfig as unknown as Record<string, unknown>);
+
+    // Reload pricing data store so engine uses updated config
+    await usePricingDataStore.getState().loadFromSupabase();
+
+    // Invalidate React Query cache so UI reflects changes
+    queryClient.invalidateQueries({ queryKey: ['pricing-configs'] });
   };
 
   return (
