@@ -49,6 +49,9 @@ export interface PriceProposal {
   source: string;
   explanation: string;
   evidence_path: string | null;
+  scope: 'global' | 'school';
+  school_id: string | null;
+  school_name: string | null;
   status: 'open' | 'approved' | 'rejected';
   rejection_reason: string | null;
   submitted_by: string;

@@ -82,9 +82,21 @@ export default function ReviewQueueItem({ proposal }: ReviewQueueItemProps) {
           {providerLabel}
         </span>
 
+        {/* Scope pill */}
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+          proposal.scope === 'school'
+            ? 'bg-blue-100 text-blue-700'
+            : 'bg-purple-100 text-purple-700'
+        }`}>
+          {proposal.scope === 'school' ? 'School' : 'Globaal'}
+        </span>
+
         {/* Module name */}
         <span className="text-sm font-medium text-neutral-900 flex-1">
           {proposal.module_id}
+          {proposal.scope === 'school' && proposal.school_name && (
+            <span className="text-xs text-neutral-500 ml-1.5">({proposal.school_name})</span>
+          )}
         </span>
 
         {/* Price diff */}

@@ -19,6 +19,8 @@ interface PriceProposalModalProps {
   provider: string;
   currentPrice: number;
   moduleName: string;
+  schoolId?: string;
+  schoolName?: string;
 }
 
 export function PriceProposalModal({
@@ -28,6 +30,8 @@ export function PriceProposalModal({
   provider,
   currentPrice,
   moduleName,
+  schoolId,
+  schoolName,
 }: PriceProposalModalProps) {
   const createProposal = useCreateProposal();
   const [showDeviationWarning, setShowDeviationWarning] = useState(false);
@@ -53,7 +57,7 @@ export function PriceProposalModal({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      reset({ proposed_price: undefined as unknown as number, source: '', explanation: '' });
+      reset({ proposed_price: undefined as unknown as number, source: '', explanation: '', scope: schoolId ? 'school' : 'global' });
       setShowDeviationWarning(false);
       setPendingSubmit(null);
       setShowToast(false);
@@ -88,6 +92,9 @@ export function PriceProposalModal({
         proposed_price: data.proposed_price,
         source: data.source,
         explanation: data.explanation,
+        scope: data.scope,
+        school_id: data.scope === 'school' ? (schoolId ?? null) : null,
+        school_name: data.scope === 'school' ? (schoolName ?? null) : null,
       });
       setShowToast(true);
       setTimeout(() => {
@@ -192,6 +199,52 @@ export function PriceProposalModal({
             <span className="text-neutral-500">Huidige prijs:</span>
             <span className="font-semibold">{eurFormatter.format(currentPrice)}</span>
           </div>
+        </div>
+
+        {/* Scope selector */}
+        <div className="mb-4">
+          <label className="block text-[14px] font-semibold text-neutral-700 mb-2">
+            Bereik
+          </label>
+          <div className="flex gap-2">
+            <label
+              className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
+                !errors.scope ? 'border-neutral-200' : 'border-red-400'
+              }`}
+            >
+              <input
+                type="radio"
+                value="global"
+                className="accent-[#003082]"
+                {...register('scope')}
+              />
+              <div>
+                <span className="text-[14px] font-semibold text-neutral-900">Alle scholen</span>
+                <p className="text-[12px] text-neutral-500">Nieuwe prijslijst — geldt overal</p>
+              </div>
+            </label>
+            <label
+              className={`flex-1 flex items-center gap-2 rounded-lg border px-3 py-2.5 cursor-pointer transition-colors ${
+                !errors.scope ? 'border-neutral-200' : 'border-red-400'
+              }`}
+            >
+              <input
+                type="radio"
+                value="school"
+                className="accent-[#003082]"
+                {...register('scope')}
+              />
+              <div>
+                <span className="text-[14px] font-semibold text-neutral-900">Alleen deze school</span>
+                <p className="text-[12px] text-neutral-500">
+                  {schoolName ? `Korting voor ${schoolName}` : 'Specifieke korting of afspraak'}
+                </p>
+              </div>
+            </label>
+          </div>
+          {errors.scope && (
+            <p className="text-[14px] text-red-600 mt-1">{errors.scope.message}</p>
+          )}
         </div>
 
         {/* AI normalization section (D-12) */}

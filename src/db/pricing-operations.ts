@@ -259,26 +259,29 @@ export async function approveProposal(proposalId: string): Promise<void> {
 
   if (updateError) throw new Error(`Fout bij goedkeuren voorstel: ${updateError.message}`);
 
-  // Upsert publication price with proposed amount
-  const { error: upsertError } = await supabase
-    .from('publication_prices')
-    .upsert(
-      {
-        team_id: p.team_id,
-        module_id: p.module_id,
-        provider: p.provider,
-        amount_per_student: p.proposed_price,
-        source: 'proposal' as PriceSource,
-        source_label: `Voorstel goedgekeurd: ${p.source}`,
-        verified_at: new Date().toISOString(),
-        is_active: true,
-        updated_by: userId,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'team_id,module_id,provider' },
-    );
+  // Global scope: upsert publication price (affects all schools)
+  // School scope: price stored on the proposal itself — no global price change
+  if (p.scope !== 'school') {
+    const { error: upsertError } = await supabase
+      .from('publication_prices')
+      .upsert(
+        {
+          team_id: p.team_id,
+          module_id: p.module_id,
+          provider: p.provider,
+          amount_per_student: p.proposed_price,
+          source: 'proposal' as PriceSource,
+          source_label: `Voorstel goedgekeurd: ${p.source}`,
+          verified_at: new Date().toISOString(),
+          is_active: true,
+          updated_by: userId,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'team_id,module_id,provider' },
+      );
 
-  if (upsertError) throw new Error(`Fout bij bijwerken publicatieprijs: ${upsertError.message}`);
+    if (upsertError) throw new Error(`Fout bij bijwerken publicatieprijs: ${upsertError.message}`);
+  }
 
   // Audit log
   await supabase.from('price_audit_log').insert({
