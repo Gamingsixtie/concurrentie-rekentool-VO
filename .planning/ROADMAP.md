@@ -407,6 +407,10 @@ Plans:
 - [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
 - [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
 - [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
+- [ ] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
+- [ ] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
+- [ ] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
+- [ ] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
 
 ### Phase 19: Gesprekken-tab & Acties Upgrade
 **Goal**: Het tabblad Gesprekken wordt vereenvoudigd en praktischer: AI-extractie wordt verwijderd (dat gebeurt al in de AI Wizard), notities kunnen ingesproken worden via spraak-naar-tekst, en per gesprek wordt de contactpersoon gekoppeld met status. Het tabblad Acties wordt verfijnd met directe inline invoer en een bevestigingsdialoog bij verwijderen.
@@ -449,6 +453,10 @@ Plans:
 - [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
 - [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
 - [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
+- [ ] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
+- [ ] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
+- [ ] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
+- [ ] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
 
 ### Phase 21: DMU-Export Upgrade
 **Goal**: Het export-tabblad wordt uitgebreid met intelligente, DMU-gerichte rapporten. Op basis van generieke aannames per DMU-rol (coördinator, MT/directie, finance) worden de relevante verschillen en voordelen getoond. De rapporten bevatten geëxtraheerde tekst uit het schoolplan en Cito-bronmateriaal, zodat elk rapport inhoudelijk onderbouwd is voor de specifieke beslisser.
@@ -520,7 +528,7 @@ Plans:
   8. Staleness-detectie: systeem signaleert proactief wanneer prijzen van een provider langer dan 6 maanden niet geverifieerd zijn, per provider en per module
   9. `ops-competitor-intel` skill is gebouwd als single entry point voor alle concurrentie-informatie (handmatig, document-upload, AI-intake, periodieke check) en schrijft naar de review-queue
   10. Offline modus blijft werken: app valt terug op laatst gesyncte prijsdata uit localStorage/IndexedDB wanneer Supabase niet bereikbaar is
-**Plans:** 3/8 plans executed
+**Plans:** 12 plans (8 original + 4 gap closure)
 
 Plans:
 - [x] 25-01-PLAN.md — DB schema (publication_prices, pricing_configs, price_proposals, audit_log) + seed + CRUD
@@ -531,6 +539,10 @@ Plans:
 - [ ] 25-06-PLAN.md — Admin pricing config editor met per-provider forms en validatie
 - [ ] 25-07-PLAN.md — UI integration: Klopt niet triggers, staleness indicators, AI normalization endpoint
 - [ ] 25-08-PLAN.md — ops-competitor-intel skill, Supabase types update, final verification
+- [ ] 25-09-PLAN.md — [GAP] Wire loadFromSupabase at app startup (RootLayout useEffect)
+- [ ] 25-10-PLAN.md — [GAP] Wire AdminConfigEditor handleSave to Supabase persistence
+- [ ] 25-11-PLAN.md — [GAP] Wire orphaned discount pattern UI into PriceComparisonPage
+- [ ] 25-12-PLAN.md — [GAP] Fill todo-only test stubs for offline pricing and price provider
 
 ## Backlog
 
