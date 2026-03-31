@@ -101,7 +101,7 @@ export default function RootLayout() {
         <span className="text-sm font-medium text-cito-primary">Cito Rekentool</span>
         <div className="flex items-center gap-4">
           {/* Review link - manager only */}
-          {userProfile?.role === 'manager' && (
+          {(userProfile?.role === 'manager' || userProfile?.role === 'accountmanager') && (
             <a
               href="/review"
               className="flex items-center gap-1.5 text-sm text-neutral-600 hover:text-cito-primary transition-colors"
