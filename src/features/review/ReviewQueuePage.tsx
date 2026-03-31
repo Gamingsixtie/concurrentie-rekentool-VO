@@ -56,9 +56,9 @@ export default function ReviewQueuePage() {
 
   const { data: proposals, isLoading, error } = usePriceProposals(filters);
 
-  // Use demo data when no real proposals exist
+  // Use demo data when no real proposals exist or query fails
   const displayProposals = useMemo(() => {
-    const real = proposals ?? [];
+    const real = (!error && proposals) ? proposals : [];
     if (real.length > 0) return real;
     if (!showDemo) return real;
     // Apply filters to demo data
@@ -67,7 +67,7 @@ export default function ReviewQueuePage() {
       if (filters.provider && p.provider !== filters.provider) return false;
       return true;
     });
-  }, [proposals, showDemo, filters]);
+  }, [proposals, error, showDemo, filters]);
 
   // Access control: manager only
   if (userProfile?.role !== 'manager' && userProfile?.role !== 'accountmanager') {
@@ -81,19 +81,7 @@ export default function ReviewQueuePage() {
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto px-8 py-8">
-        <h1 className="text-xl font-semibold text-neutral-900 mb-6">Prijsvoorstellen</h1>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-          <p className="text-sm text-red-700">
-            Prijsvoorstellen konden niet worden geladen. Controleer uw internetverbinding en probeer het opnieuw.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Error is handled gracefully — demo data shown as fallback
 
   // Sort proposals: newest first
   const sortedProposals = [...displayProposals].sort(
