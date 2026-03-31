@@ -12,7 +12,7 @@ export default function ReviewQueuePage() {
   const { data: proposals, isLoading, error } = usePriceProposals(filters);
 
   // Access control: manager only
-  if (userProfile?.role !== 'manager') {
+  if (userProfile?.role !== 'manager' && userProfile?.role !== 'accountmanager') {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <h2 className="text-lg font-semibold text-neutral-900 mb-2">Geen toegang</h2>
