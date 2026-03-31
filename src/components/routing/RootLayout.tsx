@@ -8,6 +8,7 @@ import { hasLocalData, isMigrationComplete } from '@/db/migrations';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import ReviewBadgeCounter from '@/components/ui/ReviewBadgeCounter';
 import { useOfflineQueue } from '@/lib/offline-queue';
+import { usePricingDataStore } from '@/stores/pricing-data-store';
 
 // Skip auth in development when VITE_SKIP_AUTH is set
 const SKIP_AUTH = import.meta.env.VITE_SKIP_AUTH === 'true';
@@ -58,6 +59,18 @@ export default function RootLayout() {
         setNeedsMigration(false);
       }
     })();
+  }, [user, loading]);
+
+  // Load pricing data from Supabase after auth confirms (per D-03, Gap 1 fix)
+  useEffect(() => {
+    if (SKIP_AUTH) {
+      // In dev mode, load immediately (no auth gate)
+      usePricingDataStore.getState().loadFromSupabase();
+      return;
+    }
+    if (!user || loading) return;
+    // User is authenticated — load pricing data from Supabase
+    usePricingDataStore.getState().loadFromSupabase();
   }, [user, loading]);
 
   // Login page is not protected
