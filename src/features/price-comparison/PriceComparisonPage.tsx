@@ -17,6 +17,9 @@ import { SectionBand } from './components/SectionBand';
 import { ProviderToolbar } from './components/ProviderToolbar';
 import { OfflinePriceBanner } from '../../components/ui/OfflinePriceBanner';
 import { usePricingDataStore } from '@/stores/pricing-data-store';
+import { MarktKortingToggle } from './MarktKortingToggle';
+import { KortingsPatroonAlert } from './KortingsPatroonAlert';
+import { useDiscountPatterns } from '@/hooks/useDiscountPatterns';
 
 interface PriceComparisonPageProps {
   onBack?: () => void;
@@ -120,8 +123,11 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
   const selectedModules = useSchoolProfileStore((s) => s.selectedModules);
   const studentCounts = useSchoolProfileStore((s) => s.studentCounts);
   const activeSchoolId = useSchoolProfileStore((s) => s.activeSchoolId);
+  const visibleProviders = usePriceComparisonStore((s) => s.visibleProviders);
+  const { patterns } = useDiscountPatterns();
 
   const [chartHighlight] = useState<string | null>(null);
+  const [useMarketPricing, setUseMarketPricing] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -217,8 +223,23 @@ export function PriceComparisonPage({ onBack }: PriceComparisonPageProps) {
           <span title="Langere contractperiode geeft korting op de jaarprijs">
             <PeriodToggle />
           </span>
+          <MarktKortingToggle
+            patterns={patterns}
+            isEnabled={useMarketPricing}
+            onToggle={setUseMarketPricing}
+          />
         </div>
       </SectionBand>
+
+      {/* Discount pattern alerts (D-13, D-14) */}
+      {patterns.length > 0 && useMarketPricing && (
+        <SectionBand bg="bg-white">
+          <KortingsPatroonAlert
+            patterns={patterns}
+            visibleProviders={visibleProviders}
+          />
+        </SectionBand>
+      )}
 
       {/* 3. Totaal-kaarten */}
       <SectionBand bg="bg-neutral-50">
